@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DivPulse — App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',sans-serif;background:#0B0F14;color:#fff;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+
+/* ── LOGIN ── */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 30% 20%,#0a1e14 0%,#0B0F14 60%)}
+.lbox{width:380px;padding:40px;background:#111820;border:1px solid #1C2636;border-radius:20px}
+.l-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center}
+.l-logo svg{width:40px;height:40px;border-radius:11px}
+.l-wm{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.l-wm .g{color:#22C55E}
+.l-title{font-size:20px;font-weight:800;text-align:center;margin-bottom:4px;letter-spacing:-.3px}
+.l-sub{font-size:13px;color:#4A5568;text-align:center;margin-bottom:28px}
+.l-label{font-size:12px;font-weight:600;color:#4A5568;margin-bottom:6px;display:block}
+.l-input{width:100%;background:#0B0F14;border:1px solid #1C2636;border-radius:10px;padding:12px 14px;font-size:14px;color:#fff;outline:none;font-family:'Inter',sans-serif;margin-bottom:14px;transition:border-color .15s}
+.l-input:focus{border-color:#22C55E}
+.l-btn{width:100%;background:#22C55E;color:#0B0F14;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-top:4px;margin-bottom:16px;transition:opacity .15s}
+.l-btn:hover{opacity:.9}
+.l-demo{text-align:center;font-size:12px;color:#3a4555}
+.l-demo span{color:#22C55E;cursor:pointer;font-weight:600}
+.l-divider{display:flex;align-items:center;gap:10px;margin:16px 0}
+.l-divider::before,.l-divider::after{content:'';flex:1;height:1px;background:#1C2636}
+.l-divider span{font-size:11px;color:#2a3040}
+
+/* ── APP LAYOUT ── */
+#app{display:none;height:100vh;overflow:hidden}
+.app-wrap{display:flex;height:100%}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;background:#0d1117;border-right:1px solid #1C2636;display:flex;flex-direction:column;flex-shrink:0;height:100vh;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:0}
+.sb-logo{display:flex;align-items:center;gap:9px;padding:18px 16px 14px;border-bottom:1px solid #1C2636;flex-shrink:0}
+.sb-logo svg{width:32px;height:32px;border-radius:8px}
+.sb-wm{font-size:17px;font-weight:800;letter-spacing:-.3px}
+.sb-wm .g{color:#22C55E}
+.sb-nav{padding:10px 8px;flex:1}
+.sb-section{font-size:9px;font-weight:700;color:#2a3040;text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 5px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:#4A5568;transition:all .12s;margin-bottom:1px}
+.sb-item:hover{background:#111820;color:#ccc}
+.sb-item.on{background:#0a1c11;color:#22C55E;font-weight:600}
+.sb-item .sb-ico{width:16px;height:16px;opacity:.6;flex-shrink:0}
+.sb-item.on .sb-ico{opacity:1}
+.sb-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px}
+.sb-badge.pro{background:#0a1c11;color:#22C55E;border:.5px solid rgba(34,197,94,.3)}
+.sb-badge.new{background:#1a1500;color:#f59e0b}
+.sb-bottom{padding:12px 8px;border-top:1px solid #1C2636;flex-shrink:0}
+.sb-plan{background:#0a1c11;border:1px solid rgba(34,197,94,.2);border-radius:9px;padding:10px 12px;margin-bottom:8px}
+.sb-plan-lbl{font-size:9px;color:#4A5568;font-weight:500;margin-bottom:2px}
+.sb-plan-name{font-size:12px;font-weight:700;color:#22C55E}
+.sb-upgrade{width:100%;background:#22C55E;color:#0B0F14;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;background:#0d1117;border-bottom:1px solid #1C2636;display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
+.tb-search{flex:1;max-width:360px;background:#111820;border:1px solid #1C2636;border-radius:8px;padding:8px 14px;font-size:13px;color:#4A5568;display:flex;align-items:center;gap:8px;cursor:text}
+.tb-search svg{width:14px;height:14px;opacity:.4}
+.tb-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.tb-bell{width:34px;height:34px;border-radius:8px;background:#111820;border:1px solid #1C2636;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.tb-bell-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:#22C55E;border-radius:50%;border:1.5px solid #0d1117}
+.tb-av{width:34px;height:34px;border-radius:50%;background:#0f2a1a;border:1.5px solid #22533a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#22C55E;cursor:pointer}
+.tb-cur{display:flex;gap:1px;background:#111820;border:1px solid #1C2636;border-radius:7px;overflow:hidden}
+.tb-c{padding:5px 8px;font-size:10px;font-weight:700;color:#4A5568;cursor:pointer}
+.tb-c.on{background:#22C55E;color:#0B0F14}
+
+/* ── MAIN CONTENT ── */
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.content{flex:1;overflow-y:auto;padding:24px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:#1C2636;border-radius:2px}
+.panel{display:none}
+.panel.on{display:block}
+
+/* ── SHARED COMPONENTS ── */
+.page-title{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:4px}
+.page-sub{font-size:13px;color:#4A5568;margin-bottom:24px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:#111820;border:1px solid #1C2636;border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}
+.stat-lbl{font-size:11px;color:#4A5568;font-weight:500;margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-.6px;line-height:1;margin-bottom:4px}
+.stat-sub{font-size:12px;color:#4A5568}
+.stat-sub .gn{color:#22C55E}
+.stat-sub .rd{color:#f87171}
+.stat-wave{position:absolute;bottom:0;left:0;right:0;height:32px;opacity:.4}
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:13px;font-weight:700;color:#ccc;letter-spacing:-.1px}
+.section-action{font-size:12px;color:#22C55E;cursor:pointer;font-weight:600}
+.card{background:#111820;border:1px solid #1C2636;border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.btn-green{background:#22C55E;color:#0B0F14;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-ghost{background:transparent;color:#4A5568;border:1px solid #1C2636;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #1C2636;background:#111820;color:#4A5568;transition:all .12s}
+.chip:hover{border-color:#22C55E;color:#ddd}
+.chip.on{border-color:#22C55E;background:#0a1c11;color:#22C55E}
+.tag-green{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:#0a1c11;color:#22C55E;border:.5px solid rgba(34,197,94,.3)}
+.tag-amber{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:#1a1500;color:#f59e0b;border:.5px solid rgba(245,158,11,.2)}
+.divider{height:1px;background:#1C2636;margin:16px 0}
+.gn{color:#22C55E}.rd{color:#f87171}.am{color:#f59e0b}
+
+/* ── HOLDINGS TABLE ── */
+.holdings-table{width:100%;border-collapse:collapse}
+.holdings-table th{font-size:11px;font-weight:600;color:#3a4555;text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;text-align:left;border-bottom:1px solid #1C2636}
+.holdings-table td{padding:12px 12px;border-bottom:.5px solid #0d1117;font-size:13px}
+.holdings-table tr:hover td{background:#0d1117}
+.h-ticker{font-weight:700;font-size:14px}
+.h-name{font-size:11px;color:#4A5568;margin-top:1px}
+.h-broker{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;background:#1C2636;color:#555;margin-top:2px}
+
+/* ── DIVIDEND BARS ── */
+.bar-wrap{display:flex;align-items:flex-end;gap:4px;height:80px;padding:0 4px}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1}
+.bar-fill{border-radius:4px 4px 0 0;width:100%;min-height:4px;background:#22C55E;transition:height .3s}
+.bar-lbl{font-size:9px;color:#3a4555;margin-top:4px}
+
+/* ── CALENDAR ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-hd{font-size:10px;font-weight:600;color:#3a4555;text-align:center;padding:6px 0}
+.cal-day{background:#111820;border:.5px solid #1C2636;border-radius:5px;padding:4px;min-height:60px;cursor:pointer}
+.cal-day:hover{border-color:#22C55E}
+.cal-day.pay{border-color:rgba(34,197,94,.4);background:#0a1c11}
+.cal-day.tod{border-color:#22C55E;border-width:2px}
+.cal-day.emp{background:transparent;border-color:transparent;cursor:default}
+.cal-dn{font-size:10px;font-weight:600;color:#3a4555;margin-bottom:3px}
+.cal-day.tod .cal-dn{color:#22C55E;font-weight:800}
+.cal-ev{border-radius:3px;padding:2px 4px;font-size:9px;margin-bottom:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ev-pay{background:#0f4a2a;color:#22C55E}
+.ev-ex{background:#2a1500;color:#f59e0b}
+.ev-er{background:#0a1221;color:#60a5fa}
+.ev-fed{background:#1a0a2a;color:#a78bfa}
+
+/* ── DONUT ── */
+.donut-wrap{display:flex;gap:24px;align-items:center}
+.legend-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:.5px solid #0d1117}
+.legend-row:last-child{border-bottom:none}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* ── NOTIFICATION PHONES ── */
+.tmpl-row{display:flex;gap:12px;margin-bottom:16px}
+.tmpl-ph{flex:1;cursor:pointer;text-align:center}
+.tmpl-frame{background:#1C1C1E;border-radius:20px;border:2px solid #2a2a3a;padding:10px 8px 14px;transition:border-color .15s,box-shadow .15s;height:150px;display:flex;flex-direction:column;justify-content:center}
+.tmpl-ph.sel .tmpl-frame{border-color:#22C55E;box-shadow:0 0 0 2px rgba(34,197,94,.15)}
+.tmpl-screen{background:#0b0f1a;border-radius:13px;padding:8px;overflow:hidden}
+.tmpl-notif{background:#182338;border-radius:9px;padding:7px 9px;border:.5px solid rgba(255,255,255,.06)}
+.tmpl-hd{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.tmpl-ico{width:13px;height:13px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.tmpl-ico svg{width:100%;height:100%;display:block}
+.tmpl-ap{font-size:9px;color:rgba(255,255,255,.38);flex:1}
+.tmpl-tm{font-size:8px;color:rgba(255,255,255,.22)}
+.tmpl-ti{font-size:10px;font-weight:600;color:#fff;margin-bottom:2px}
+.tmpl-am{font-size:14px;font-weight:800;color:#4ade80;letter-spacing:-.3px}
+.tmpl-cf{font-size:7px;color:rgba(255,255,255,.28);margin-top:2px}
+.tmpl-ds{font-size:8px;color:rgba(255,255,255,.4);margin-top:2px;line-height:1.4}
+.tmpl-lbl{font-size:11px;font-weight:600;color:#4A5568;margin-top:8px}
+.tmpl-ph.sel .tmpl-lbl{color:#22C55E}
+
+
+/* ── AX DROPDOWN ── */
+.ax-wrap{position:relative}
+.ax-dd{position:absolute;right:0;top:38px;width:200px;background:#0d1117;border:.5px solid #1C2636;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.7);z-index:500;display:none;overflow:hidden}
+.ax-dd.open{display:block}
+.ax-u{padding:12px 14px;border-bottom:.5px solid #1C2636;display:flex;align-items:center;gap:9px}
+.ax-u-av{width:28px;height:28px;border-radius:50%;background:#0f2a1a;border:.5px solid #22533a;display:flex;align-items:center;justify-content:center;font-size:9px;color:#22C55E;font-weight:800;flex-shrink:0}
+.ax-u-nm{font-size:12px;font-weight:700;color:#ddd}
+.ax-u-pl{font-size:10px;color:#22C55E;margin-top:1px;font-weight:500}
+.ax-qs{padding:8px 14px;border-bottom:.5px solid #1C2636;background:#0a1218}
+.ax-qs-l{font-size:9px;color:#4A5568;margin-bottom:2px;font-weight:500}
+.ax-qs-v{font-size:13px;font-weight:700;color:#22C55E;letter-spacing:-.2px}
+.ax-sl{font-size:9px;font-weight:700;color:#3a4555;text-transform:uppercase;letter-spacing:.08em;padding:8px 14px 3px}
+.ax-cr{display:flex;gap:4px;padding:3px 14px 8px}
+.ax-cr .co,.ax-cr .lo{border-radius:6px;border:.5px solid #1C2636;background:#111820;padding:4px 8px;font-size:10px;font-weight:700;color:#4A5568;cursor:pointer}
+.ax-cr .co.on,.ax-cr .lo.on{background:#22C55E;color:#0B0F14;border-color:#22C55E}
+.ax-dv{height:.5px;background:#1C2636}
+.ax-it{padding:9px 14px;font-size:12px;color:#4A5568;cursor:pointer;display:flex;align-items:center;gap:7px}
+.ax-it:hover{background:#111820;color:#ddd}
+/* ── FULL PHONE TEMPLATE SELECTOR ── */
+.ftp-wrap{display:flex;gap:14px;margin-bottom:20px}
+.ftp{flex:1;cursor:pointer;text-align:center}
+.ftp-phone{background:#1C1C1E;border-radius:40px;border:1.5px solid #2a2a3a;position:relative;height:440px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.ftp.sel .ftp-phone{border-color:#22C55E;box-shadow:0 0 0 2px rgba(34,197,94,.18)}
+.ftp-bl{position:absolute;left:-2px;top:86px;width:2px;height:22px;background:#3a3a3c;border-radius:2px 0 0 2px}
+.ftp-bl2{position:absolute;left:-2px;top:114px;width:2px;height:22px;background:#3a3a3c;border-radius:2px 0 0 2px}
+.ftp-br{position:absolute;right:-2px;top:100px;width:2px;height:36px;background:#3a3a3c;border-radius:0 2px 2px 0}
+.ftp-scr{position:absolute;inset:8px;border-radius:33px;background:linear-gradient(160deg,#0a1628 0%,#000c1a 55%);overflow:hidden}
+.ftp-pill{width:62px;height:18px;background:#000;border-radius:9px;margin:8px auto 0;position:relative;z-index:2}
+.ftp-sb{display:flex;justify-content:space-between;align-items:center;padding:2px 12px;position:relative;z-index:2}
+.ftp-st{font-size:11px;font-weight:600;color:#fff}
+.ftp-bat{width:14px;height:7px;border:1px solid rgba(255,255,255,.4);border-radius:2px;display:flex;align-items:center;padding:1px;margin-left:2px}
+.ftp-bf{width:70%;height:100%;background:#22C55E;border-radius:1px}
+.ftp-lt{text-align:center;margin-top:7px;position:relative;z-index:2}
+.ftp-lb{font-size:44px;font-weight:200;color:#fff;letter-spacing:-2px;line-height:1}
+.ftp-ld{font-size:9px;color:rgba(255,255,255,.6);margin-top:1px}
+.ftp-ns{padding:0 8px;margin-top:9px;position:relative;z-index:2;display:flex;flex-direction:column;gap:4px}
+.ftp-nc{background:#182338;border-radius:10px;padding:7px 9px;border:.5px solid rgba(255,255,255,.07)}
+.ftp-nh{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.ftp-ni{width:13px;height:13px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.ftp-ni svg{width:100%;height:100%;display:block}
+.ftp-na{font-size:9px;color:rgba(255,255,255,.4);flex:1;font-weight:500}
+.ftp-nt{font-size:8px;color:rgba(255,255,255,.25)}
+.ftp-ti{font-size:10px;font-weight:700;color:#fff;margin-bottom:2px;line-height:1.2}
+.ftp-am{font-size:17px;font-weight:800;color:#4ade80;letter-spacing:-.5px;line-height:1}
+.ftp-cf{font-size:8px;color:rgba(255,255,255,.3);margin-top:2px}
+.ftp-ds{font-size:8px;color:rgba(255,255,255,.4);line-height:1.5;margin-top:2px}
+.ftp-hb{width:62px;height:3px;background:rgba(255,255,255,.27);border-radius:2px;position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
+.ftp-lbl{font-size:12px;font-weight:700;color:#4A5568;margin-top:10px}
+.ftp.sel .ftp-lbl{color:#22C55E}
+.ftp-rec{font-size:10px;color:#22C55E;font-weight:600;margin-top:3px}
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-220px;z-index:200;transition:left .25s}
+  .sidebar.open{left:0}
+  .content{padding:16px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ SPARK SVG SYMBOLS ══ -->
+<svg style="display:none">
+  <symbol id="spark" viewBox="0 0 100 100">
+    <rect width="100" height="100" rx="22" fill="#0B0F14"/>
+    <path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/>
+  </symbol>
+</svg>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen">
+  <div class="lbox">
+    <div class="l-logo">
+      <svg width="40" height="40" viewBox="0 0 100 100"><use href="#spark"/></svg>
+      <div class="l-wm">Div<span class="g">Pulse</span></div>
+    </div>
+    <div class="l-title">Welcome back</div>
+    <div class="l-sub">Your dividend income, always on time.</div>
+    <label class="l-label">Email</label>
+    <input class="l-input" type="email" placeholder="you@email.com" value="alex@example.com">
+    <label class="l-label">Password</label>
+    <input class="l-input" type="password" placeholder="••••••••" value="••••••••">
+    <button class="l-btn" onclick="enterApp()">Sign in</button>
+    <div class="l-demo">Exploring? <span onclick="enterApp()">Enter demo →</span></div>
+    <div class="l-divider"><span>or</span></div>
+    <button class="l-btn" style="background:#111820;color:#ddd;border:1px solid #1C2636;margin-top:0" onclick="enterApp()">
+      Continue with Google
+    </button>
+    <div style="text-align:center;font-size:12px;color:#2a3040;margin-top:14px">Don't have an account? <span style="color:#22C55E;cursor:pointer">Sign up free</span></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="app-wrap">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sb-logo">
+        <svg width="32" height="32" viewBox="0 0 100 100"><use href="#spark"/></svg>
+        <div class="sb-wm">Div<span class="g">Pulse</span></div>
+      </div>
+      <div class="sb-nav">
+        <div class="sb-section">Main</div>
+        <div class="sb-item on" onclick="goTo('home',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          For You
+        </div>
+        <div class="sb-item" onclick="goTo('holdings',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Holdings
+        </div>
+        <div class="sb-item" onclick="goTo('dividends',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Dividends
+        </div>
+        <div class="sb-item" onclick="goTo('calendar',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Calendar
+        </div>
+        <div class="sb-section">Explore</div>
+        <div class="sb-item" onclick="goTo('collections',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          Collections
+        </div>
+        <div class="sb-item" onclick="goTo('diversification',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          Diversification
+        </div>
+        <div class="sb-item" onclick="goTo('watchlist',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Watchlist
+          <span class="sb-badge new">NEW</span>
+        </div>
+        <div class="sb-item" onclick="goTo('goals',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          Goals
+        </div>
+        <div class="sb-section">Account</div>
+        <div class="sb-item" onclick="goTo('notifications',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          Notifications
+          <span class="sb-badge pro">PRO</span>
+        </div>
+        <div class="sb-item" onclick="goTo('settings',this)">
+          <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </div>
+      </div>
+      <div class="sb-bottom">
+        <div class="sb-plan">
+          <div class="sb-plan-lbl">Current plan</div>
+          <div class="sb-plan-name">Free · 5 holdings</div>
+        </div>
+        <button class="sb-upgrade" onclick="goTo('settings',document.querySelector('.sb-item:last-of-type'))">🚀 Upgrade to Pro</button>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main-area">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="tb-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span style="font-size:13px">Search tickers, holdings...</span>
+        </div>
+        <div class="tb-right">
+          <div class="tb-bell">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <div class="tb-bell-dot"></div>
+          </div>
+          <div class="ax-wrap">
+            <div class="tb-av" onclick="toggleAxApp()">AX</div>
+            <div class="ax-dd" id="axDDApp">
+              <div class="ax-u">
+                <div class="ax-u-av">AX</div>
+                <div><div class="ax-u-nm">Alex</div><div class="ax-u-pl">Free plan · Upgrade</div></div>
+              </div>
+              <div class="ax-qs">
+                <div class="ax-qs-l">Today's income</div>
+                <div class="ax-qs-v">+$61.20 · 2 dividends</div>
+              </div>
+              <div class="ax-sl">Currency</div>
+              <div class="ax-cr">
+                <div class="co on" onclick="setAppCur('USD',this)">USD</div>
+                <div class="co"    onclick="setAppCur('BRL',this)">BRL</div>
+                <div class="co"    onclick="setAppCur('MXN',this)">MXN</div>
+              </div>
+              <div class="ax-dv"></div>
+              <div class="ax-sl">Language</div>
+              <div class="ax-cr">
+                <div class="lo on" onclick="setAppLng('EN',this)">EN</div>
+                <div class="lo"    onclick="setAppLng('PT',this)">PT</div>
+                <div class="lo"    onclick="setAppLng('ES',this)">ES</div>
+              </div>
+              <div class="ax-dv"></div>
+              <div class="ax-it" onclick="goTo('notifications',null);toggleAxApp()">🔔 Notifications</div>
+              <div class="ax-it" onclick="goTo('settings',null);toggleAxApp()">⚙️ Settings</div>
+              <div class="ax-it" onclick="goTo('settings',null);toggleAxApp()" style="color:#22C55E;font-weight:600">🚀 Upgrade to Pro</div>
+              <div class="ax-dv"></div>
+              <div class="ax-it" onclick="document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex'" style="color:#f87171">↩ Sign out</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT PANELS -->
+      <div class="content">
+
+        <!-- ── FOR YOU ── -->
+        <div class="panel on" id="panel-home">
+          <div class="page-title" id="greet">Good morning, Alex 👋</div>
+          <div class="page-sub">Thursday, July 3, 2026 · <span class="gn">2 dividends received today</span></div>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-lbl">Portfolio value</div>
+              <div class="stat-val" id="pfv">$84,230</div>
+              <div class="stat-sub"><span class="gn">+$3,041 · +3.74% YTD</span></div>
+              <svg class="stat-wave" viewBox="0 0 300 32" preserveAspectRatio="none"><polyline points="0,28 75,22 150,16 225,10 300,4" fill="none" stroke="#22C55E" stroke-width="2"/></svg>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Annual dividend income</div>
+              <div class="stat-val" id="adi">$5,220</div>
+              <div class="stat-sub"><span class="gn">+$412 this month</span> · 5.84% yield</div>
+              <svg class="stat-wave" viewBox="0 0 300 32" preserveAspectRatio="none"><polyline points="0,28 75,20 150,14 225,8 300,4" fill="none" stroke="#f59e0b" stroke-width="2"/></svg>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Today's income</div>
+              <div class="stat-val gn" id="tdi">+$79.64</div>
+              <div class="stat-sub">JEPI $61.20 · O $18.44</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Income per day</div>
+              <div class="stat-val">$14.30</div>
+              <div class="stat-sub">$435/month · $5,220/year</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div>
+              <div class="section-hd"><span class="section-title">Today's payments</span><span class="section-action">See history</span></div>
+              <div class="card" style="padding:0;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid #0d1117">
+                  <div style="width:36px;height:36px;background:#0a1c11;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#22C55E">JEPI</div>
+                  <div style="flex:1"><div style="font-size:14px;font-weight:700">+$61.20</div><div style="font-size:11px;color:#4A5568">JPMorgan Equity Premium · Fidelity</div></div>
+                  <span class="tag-green">Confirmed ✓</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+                  <div style="width:36px;height:36px;background:#0a1c11;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#22C55E">O</div>
+                  <div style="flex:1"><div style="font-size:14px;font-weight:700">+$18.44</div><div style="font-size:11px;color:#4A5568">Realty Income Corp · Schwab</div></div>
+                  <span class="tag-green">Confirmed ✓</span>
+                </div>
+              </div>
+              <div class="section-hd" style="margin-top:20px"><span class="section-title">Next payment</span></div>
+              <div class="card" style="padding:14px 16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:36px;height:36px;background:#1a1500;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#f59e0b">ADC</div>
+                  <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#f59e0b">$14.82 expected</div><div style="font-size:11px;color:#4A5568">Agree Realty Corp · IBKR · Jul 7</div></div>
+                  <span class="tag-amber">In 4 days</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="section-hd"><span class="section-title">Push notifications</span><span class="section-action" onclick="goTo('notifications',document.querySelectorAll('.sb-item')[8])">Configure</span></div>
+              <div class="card" style="background:#0a1c11;border-color:rgba(34,197,94,.25)">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                  <div style="font-size:20px">🔔</div>
+                  <div><div style="font-size:13px;font-weight:700;color:#22C55E">Notifications active</div><div style="font-size:11px;color:#4A5568;margin-top:1px">✦ Premium template · Telegram connected</div></div>
+                </div>
+                <div style="background:#182338;border-radius:10px;padding:10px 12px">
+                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                    <svg width="12" height="12" viewBox="0 0 100 100"><use href="#spark"/></svg>
+                    <span style="font-size:10px;color:rgba(255,255,255,.4);flex:1">DivPulse</span>
+                    <span style="font-size:9px;color:rgba(255,255,255,.25)">now</span>
+                  </div>
+                  <div style="font-size:11px;font-weight:600;color:#fff;margin-bottom:4px">Dividend received · JEPI</div>
+                  <div style="font-size:16px;font-weight:800;color:#4ade80;letter-spacing:-.4px">+$61.20</div>
+                  <div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:3px">Fidelity · Payment confirmed ✓</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── HOLDINGS ── -->
+        <div class="panel" id="panel-holdings">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+            <div>
+              <div class="page-title" id="htot">$84,230.00</div>
+              <div style="font-size:13px;color:#4A5568">Total portfolio · <span class="gn">+$3,041 · +3.74% YTD</span></div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <div class="chip on">1D</div><div class="chip">1W</div><div class="chip">1M</div><div class="chip">3M</div><div class="chip">YTD</div><div class="chip">1Y</div><div class="chip">Max</div>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #1C2636">
+              <div style="font-size:13px;font-weight:700">Holdings <span style="color:#4A5568;font-weight:400">(17)</span></div>
+              <button class="btn-green" style="padding:7px 14px;font-size:12px">+ Add holding</button>
+            </div>
+            <table class="holdings-table">
+              <thead><tr>
+                <th>Asset</th><th>Broker</th><th>Shares</th><th>Price</th><th>Value</th><th>Change</th><th>Yield</th><th>Annual income</th>
+              </tr></thead>
+              <tbody>
+                <tr><td><div class="h-ticker">SCHD</div><div class="h-name">Schwab US Dividend ETF</div></td><td><span class="h-broker">Fidelity</span></td><td>340</td><td>$82.65</td><td style="font-weight:600">$28,101</td><td class="gn">+1.2%</td><td>3.52%</td><td class="gn">$988</td></tr>
+                <tr><td><div class="h-ticker">JEPI</div><div class="h-name">JPMorgan Equity Premium</div></td><td><span class="h-broker">Fidelity</span></td><td>210</td><td>$55.71</td><td style="font-weight:600">$11,697</td><td class="rd">-0.8%</td><td>7.21%</td><td class="gn">$843</td></tr>
+                <tr><td><div class="h-ticker">XYLD</div><div class="h-name">Global X Covered Call ETF</div></td><td><span class="h-broker">Schwab</span></td><td>175</td><td>$48.70</td><td style="font-weight:600">$8,522</td><td class="gn">+0.4%</td><td>10.31%</td><td class="gn">$879</td></tr>
+                <tr><td><div class="h-ticker">VOO</div><div class="h-name">Vanguard S&P 500 ETF</div></td><td><span class="h-broker">Schwab</span></td><td>16</td><td>$412.40</td><td style="font-weight:600">$6,598</td><td class="gn">+0.3%</td><td>1.40%</td><td class="gn">$92</td></tr>
+                <tr><td><div class="h-ticker">O</div><div class="h-name">Realty Income Corp</div></td><td><span class="h-broker">XP Investimentos</span></td><td>88</td><td>$54.58</td><td style="font-weight:600">$4,803</td><td class="rd">-0.3%</td><td>5.50%</td><td class="gn">$264</td></tr>
+                <tr><td><div class="h-ticker">ADC</div><div class="h-name">Agree Realty Corp</div></td><td><span class="h-broker">IBKR</span></td><td>60</td><td>$75.20</td><td style="font-weight:600">$4,512</td><td class="gn">+0.6%</td><td>4.40%</td><td class="gn">$198</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── DIVIDENDS ── -->
+        <div class="panel" id="panel-dividends">
+          <div class="page-title">Dividends</div>
+          <div class="page-sub">Your passive income dashboard</div>
+          <div class="card" style="margin-bottom:16px">
+            <div style="font-size:11px;color:#4A5568;margin-bottom:4px;font-weight:500">Annual dividend income</div>
+            <div style="font-size:32px;font-weight:800;letter-spacing:-.8px;color:#fff;margin-bottom:14px" id="ann">$5,220</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1C2636;border-radius:10px;overflow:hidden;margin-bottom:16px">
+              <div style="background:#0d1117;padding:12px;text-align:center"><div style="font-size:10px;color:#4A5568;margin-bottom:4px;font-weight:500">Per day</div><div style="font-size:18px;font-weight:800;color:#22C55E">$14.30</div></div>
+              <div style="background:#0d1117;padding:12px;text-align:center"><div style="font-size:10px;color:#4A5568;margin-bottom:4px;font-weight:500">Per month</div><div style="font-size:18px;font-weight:800;color:#22C55E">$435</div></div>
+              <div style="background:#0d1117;padding:12px;text-align:center"><div style="font-size:10px;color:#4A5568;margin-bottom:4px;font-weight:500">Per year</div><div style="font-size:18px;font-weight:800;color:#22C55E">$5,220</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div style="background:#0d1117;border:.5px solid #1C2636;border-radius:9px;padding:12px;cursor:help">
+                <div style="font-size:10px;color:#4A5568;margin-bottom:3px;font-weight:500">Current Yield <span style="font-size:9px;font-style:italic">ⓘ</span></div>
+                <div style="font-size:22px;font-weight:800;letter-spacing:-.4px">5.84%</div>
+                <div style="font-size:10px;color:#3a4555;margin-top:2px">dividends ÷ current value</div>
+              </div>
+              <div style="background:#0d1117;border:.5px solid #1C2636;border-radius:9px;padding:12px;cursor:help">
+                <div style="font-size:10px;color:#4A5568;margin-bottom:3px;font-weight:500">Yield on Cost <span style="font-size:9px;font-style:italic">ⓘ</span></div>
+                <div style="font-size:22px;font-weight:800;letter-spacing:-.4px">6.71%</div>
+                <div style="font-size:10px;color:#3a4555;margin-top:2px">dividends ÷ cost paid</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px">
+            <div class="card">
+              <div class="section-hd"><span class="section-title">Monthly income 2026</span></div>
+              <div class="bar-wrap" id="bars2" style="height:120px"></div>
+              <div style="display:flex" id="barLbls2"></div>
+            </div>
+            <div class="card">
+              <div class="section-hd"><span class="section-title">Top earners</span></div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:700">XYLD</div><div style="font-size:11px;color:#4A5568">10.31%</div></div><div style="font-size:14px;font-weight:700;color:#22C55E">$879/yr</div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:700">JEPI</div><div style="font-size:11px;color:#4A5568">7.21%</div></div><div style="font-size:14px;font-weight:700;color:#22C55E">$843/yr</div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:700">SCHD</div><div style="font-size:11px;color:#4A5568">3.52%</div></div><div style="font-size:14px;font-weight:700;color:#22C55E">$988/yr</div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:700">O</div><div style="font-size:11px;color:#4A5568">5.50%</div></div><div style="font-size:14px;font-weight:700;color:#22C55E">$264/yr</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CALENDAR ── -->
+        <div class="panel" id="panel-calendar">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div><div class="page-title">July 2026</div><div style="font-size:13px;color:#4A5568">4 dividend payments · 2 ex-dates</div></div>
+            <div style="display:flex;gap:6px"><div class="chip on">Calendar</div><div class="chip">Events</div></div>
+          </div>
+          <div class="card" style="padding:16px">
+            <div class="cal-grid">
+              <div class="cal-hd">Mon</div><div class="cal-hd">Tue</div><div class="cal-hd">Wed</div><div class="cal-hd">Thu</div><div class="cal-hd">Fri</div><div class="cal-hd">Sat</div><div class="cal-hd">Sun</div>
+              <div class="cal-day emp"></div><div class="cal-day emp"></div>
+              <div class="cal-day"><div class="cal-dn">1</div><div class="cal-ev ev-ex">ADC ex-date</div></div>
+              <div class="cal-day pay"><div class="cal-dn">2</div><div class="cal-ev ev-pay">JEPI $61.20</div></div>
+              <div class="cal-day tod"><div class="cal-dn">3</div></div>
+              <div class="cal-day"><div class="cal-dn">4</div></div><div class="cal-day"><div class="cal-dn">5</div></div>
+              <div class="cal-day"><div class="cal-dn">6</div></div>
+              <div class="cal-day pay"><div class="cal-dn">7</div><div class="cal-ev ev-pay">ADC $14.82</div></div>
+              <div class="cal-day"><div class="cal-dn">8</div></div>
+              <div class="cal-day"><div class="cal-dn">9</div><div class="cal-ev ev-ex">SCHD ex</div></div>
+              <div class="cal-day pay"><div class="cal-dn">10</div><div class="cal-ev ev-pay">XYLD $45</div></div>
+              <div class="cal-day" style="border-color:#1a2a4a;background:#0a1221"><div class="cal-dn">11</div><div class="cal-ev ev-er">JPM ER</div></div>
+              <div class="cal-day"><div class="cal-dn">12</div></div>
+              <div class="cal-day"><div class="cal-dn">13</div></div><div class="cal-day"><div class="cal-dn">14</div></div><div class="cal-day"><div class="cal-dn">15</div></div><div class="cal-day"><div class="cal-dn">16</div></div>
+              <div class="cal-day pay"><div class="cal-dn">17</div><div class="cal-ev ev-pay">JEPI $61.20</div></div>
+              <div class="cal-day"><div class="cal-dn">18</div></div><div class="cal-day"><div class="cal-dn">19</div></div><div class="cal-day"><div class="cal-dn">20</div></div>
+              <div class="cal-day pay"><div class="cal-dn">21</div><div class="cal-ev ev-pay">O $18.44</div></div>
+              <div class="cal-day"><div class="cal-dn">22</div></div><div class="cal-day"><div class="cal-dn">23</div></div>
+              <div class="cal-day"><div class="cal-dn">24</div><div class="cal-ev ev-ex">JEPI ex</div></div>
+              <div class="cal-day" style="border-color:#2a1a4a;background:#1a0a2a"><div class="cal-dn">25</div><div class="cal-ev ev-fed">Fed</div></div>
+              <div class="cal-day"><div class="cal-dn">26</div></div><div class="cal-day"><div class="cal-dn">27</div></div>
+              <div class="cal-day pay"><div class="cal-dn">28</div><div class="cal-ev ev-pay">SCHD $88</div></div>
+              <div class="cal-day"><div class="cal-dn">29</div></div><div class="cal-day"><div class="cal-dn">30</div></div>
+              <div class="cal-day pay"><div class="cal-dn">31</div><div class="cal-ev ev-pay">VOO $21</div></div>
+              <div class="cal-day emp"></div><div class="cal-day emp"></div>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap">
+              <span style="font-size:11px;color:#4A5568">🟩 Payment</span>
+              <span style="font-size:11px;color:#4A5568">🟧 Ex-date</span>
+              <span style="font-size:11px;color:#4A5568">🟦 Earnings</span>
+              <span style="font-size:11px;color:#4A5568">🟪 Macro</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── COLLECTIONS ── -->
+        <div class="panel" id="panel-collections">
+          <div class="page-title">Collections</div>
+          <div class="page-sub">Auto-populated by category — tap any to explore</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+            <div class="chip on">Dividends</div><div class="chip">REITs</div><div class="chip">High Yield</div><div class="chip">Covered Calls</div><div class="chip">BDCs</div><div class="chip">YieldMax</div><div class="chip">BR in the US</div><div class="chip">Technology</div><div class="chip">Top AI</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+            <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+              <div style="font-size:13px;font-weight:700;flex:1">SCHD<div style="font-size:11px;color:#4A5568;font-weight:400">Schwab US Dividend ETF</div></div>
+              <div style="text-align:right"><div style="font-size:12px;color:#f59e0b;font-weight:600">3.52%</div><div style="font-size:13px;font-weight:700">$82.65</div></div>
+              <button class="btn-green" style="padding:6px 12px;font-size:11px" onclick="showAppToast('✓ SCHD added to portfolio!')">+ Add</button>
+            </div>
+            <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+              <div style="font-size:13px;font-weight:700;flex:1">VYM<div style="font-size:11px;color:#4A5568;font-weight:400">Vanguard High Dividend Yield</div></div>
+              <div style="text-align:right"><div style="font-size:12px;color:#f59e0b;font-weight:600">2.90%</div><div style="font-size:13px;font-weight:700">$124.30</div></div>
+              <button class="btn-green" style="padding:6px 12px;font-size:11px" onclick="showAppToast('✓ VYM added to portfolio!')">+ Add</button>
+            </div>
+            <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+              <div style="font-size:13px;font-weight:700;flex:1">O<div style="font-size:11px;color:#4A5568;font-weight:400">Realty Income Corp</div></div>
+              <div style="text-align:right"><div style="font-size:12px;color:#f59e0b;font-weight:600">5.50%</div><div style="font-size:13px;font-weight:700">$54.58</div></div>
+              <button class="btn-ghost" style="padding:6px 12px;font-size:11px;color:#22C55E;border-color:rgba(34,197,94,.3)" onclick="showAppToast('O is already in your portfolio ✓')">In portfolio</button>
+            </div>
+            <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+              <div style="font-size:13px;font-weight:700;flex:1">JNJ<div style="font-size:11px;color:#4A5568;font-weight:400">Johnson & Johnson</div></div>
+              <div style="text-align:right"><div style="font-size:12px;color:#f59e0b;font-weight:600">3.10%</div><div style="font-size:13px;font-weight:700">$159.20</div></div>
+              <button class="btn-green" style="padding:6px 12px;font-size:11px" onclick="showAppToast('✓ JNJ added to portfolio!')">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── DIVERSIFICATION ── -->
+        <div class="panel" id="panel-diversification">
+          <div class="page-title">Diversification</div>
+          <div class="page-sub">Portfolio breakdown by 4 dimensions</div>
+          <div style="display:flex;gap:8px;margin-bottom:20px">
+            <div class="chip on" onclick="switchDv('class',this)">Asset class</div>
+            <div class="chip" onclick="switchDv('sector',this)">Sector</div>
+            <div class="chip" onclick="switchDv('broker',this)">Broker</div>
+            <div class="chip" onclick="switchDv('geo',this)">Country</div>
+          </div>
+          <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start">
+            <div class="card">
+              <canvas id="dvChart" width="260" height="260"></canvas>
+            </div>
+            <div>
+              <div class="card" style="margin-bottom:14px">
+                <div style="font-size:12px;font-weight:600;color:#3a4555;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Breakdown</div>
+                <div id="dvList"></div>
+              </div>
+              <div class="card" style="background:#0a1c11;border-color:rgba(34,197,94,.2)">
+                <div style="font-size:11px;color:#4A5568;margin-bottom:6px;font-weight:500">🤖 AI Insight</div>
+                <div style="font-size:13px;color:#ccc;line-height:1.6" id="dvAI">Your portfolio is <span style="color:#22C55E;font-weight:600">overweight in ETFs (61%)</span>. Adding individual stocks like <strong>O, ADC, STAG</strong> could improve diversification while maintaining a strong yield profile.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── WATCHLIST ── -->
+        <div class="panel" id="panel-watchlist">
+          <div class="page-title">Watchlist</div>
+          <div class="page-sub">Track assets before adding to your portfolio</div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <div style="padding:14px 20px;border-bottom:1px solid #1C2636;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px;font-weight:700">8 assets watched</span>
+              <button class="btn-green" style="padding:7px 14px;font-size:12px">+ Add to watchlist</button>
+            </div>
+            <table class="holdings-table">
+              <thead><tr><th>Asset</th><th>Price</th><th>Change</th><th>Yield</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td><div class="h-ticker">NVDA</div><div class="h-name">NVIDIA Corporation</div></td><td>$124.92</td><td class="gn">+2.1%</td><td>0.03%</td><td><button class="btn-green" style="padding:5px 10px;font-size:11px">+ Portfolio</button></td></tr>
+                <tr><td><div class="h-ticker">MSFT</div><div class="h-name">Microsoft Corporation</div></td><td>$430.15</td><td class="rd">-0.4%</td><td>0.80%</td><td><button class="btn-green" style="padding:5px 10px;font-size:11px">+ Portfolio</button></td></tr>
+                <tr><td><div class="h-ticker">ARCC</div><div class="h-name">Ares Capital Corporation</div></td><td>$21.80</td><td class="gn">+0.9%</td><td>9.20%</td><td><button class="btn-green" style="padding:5px 10px;font-size:11px">+ Portfolio</button></td></tr>
+                <tr><td><div class="h-ticker">MAIN</div><div class="h-name">Main Street Capital</div></td><td>$55.40</td><td class="gn">+0.3%</td><td>5.80%</td><td><button class="btn-green" style="padding:5px 10px;font-size:11px">+ Portfolio</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── GOALS ── -->
+        <div class="panel" id="panel-goals">
+          <div class="page-title">Goals &amp; Financial Planning</div>
+          <div class="page-sub">Track your passive income, emergency reserve and path to financial freedom</div>
+          <div style="display:flex;gap:8px;margin-bottom:20px">
+            <div class="chip on app-gl-chip" onclick="appGlTab('income',this)">📈 Passive Income</div>
+            <div class="chip app-gl-chip" onclick="appGlTab('reserve',this)">🛡️ Emergency Reserve</div>
+            <div class="chip app-gl-chip" onclick="appGlTab('freedom',this)">🏝️ Financial Freedom</div>
+          </div>
+
+          <!-- INCOME -->
+          <div id="agl-income" class="agl-panel">
+            <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+              <div class="stat-card" style="border-color:rgba(34,197,94,.3)">
+                <div class="stat-lbl">Monthly income goal</div>
+                <div class="stat-val">$1,000</div>
+                <div style="margin-top:10px;background:#1C2636;border-radius:8px;height:6px;overflow:hidden"><div style="width:43.5%;height:100%;background:#22C55E;border-radius:8px"></div></div>
+                <div class="stat-sub" style="margin-top:6px">$435 of $1,000 · <span class="gn">43.5%</span></div>
+              </div>
+              <div class="stat-card"><div class="stat-lbl">Time to goal</div><div class="stat-val">~4.2 yrs</div><div class="stat-sub">At current growth rate</div></div>
+              <div class="stat-card"><div class="stat-lbl">Capital needed</div><div class="stat-val">~$96,000</div><div class="stat-sub">At 5.84% avg yield</div></div>
+            </div>
+            <div class="card" style="background:#0a1c11;border-color:rgba(34,197,94,.2)">
+              <div style="font-size:14px;font-weight:700;color:#22C55E;margin-bottom:6px">🎯 You're 43.5% of the way there</div>
+              <div style="font-size:13px;color:#4A5568;line-height:1.7">Adding <strong style="color:#ddd">$500/month</strong> and reinvesting dividends, you could reach <strong style="color:#ddd">$1,000/month</strong> in passive income by <strong style="color:#22C55E">2030</strong>. Recommended: SCHD + JEPI + O.</div>
+            </div>
+          </div>
+
+          <!-- RESERVE -->
+          <div id="agl-reserve" class="agl-panel" style="display:none">
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+              <div class="chip agl-mth" onclick="appGlMonths(3,this,10500,14200)">3 months</div>
+              <div class="chip on agl-mth" onclick="appGlMonths(6,this,21000,14200)">6 months</div>
+              <div class="chip agl-mth" onclick="appGlMonths(12,this,42000,14200)">12 months</div>
+            </div>
+            <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+              <div class="stat-card"><div class="stat-lbl">Monthly expenses</div><div class="stat-val">$3,500</div></div>
+              <div class="stat-card" style="border-color:rgba(34,197,94,.3)"><div class="stat-lbl">Target (6 months)</div><div class="stat-val gn" id="agl-rmeta">$21,000</div></div>
+              <div class="stat-card"><div class="stat-lbl">Current reserve</div><div class="stat-val gn">$14,200</div></div>
+              <div class="stat-card"><div class="stat-lbl">Current protection</div><div class="stat-val">~4.1 mo</div></div>
+            </div>
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span style="color:#4A5568">$14,200 of <span id="agl-rmeta2">$21,000</span></span><span class="gn" style="font-weight:700" id="agl-rpct">67.6%</span></div>
+              <div style="background:#1C2636;border-radius:8px;height:8px;overflow:hidden;margin-bottom:16px"><div id="agl-rfill" style="width:67.6%;height:100%;background:#22C55E;border-radius:8px"></div></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid #1C2636"><span style="color:#4A5568">Still needed</span><span style="color:#f59e0b;font-weight:700" id="agl-rfalta">$6,800</span></div>
+              <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:#4A5568">Status</span><span class="gn" style="font-weight:600">✅ Partially formed</span></div>
+            </div>
+            <div class="card" style="background:#0a1c11;border-color:rgba(34,197,94,.2)">
+              <div style="font-size:11px;color:#22C55E;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">🤖 AI Advisor</div>
+              <div style="font-size:13px;color:#4A5568;line-height:1.7">Reserve dividends from the next <strong style="color:#ddd">11 months</strong> before reinvesting to complete your <strong style="color:#22C55E">6-month</strong> emergency reserve. You're already 67% there.</div>
+            </div>
+          </div>
+
+          <!-- FREEDOM -->
+          <div id="agl-freedom" class="agl-panel" style="display:none">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:#0a1221;border:1px solid rgba(96,165,250,.3);display:inline-flex;margin-bottom:20px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#60a5fa"></div>
+              <span style="font-size:13px;font-weight:600;color:#60a5fa">Phase 2 of 4 — Building passive income</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+              <div class="card" style="padding:0;overflow:hidden">
+                <div style="padding:14px 16px;border-bottom:.5px solid #1C2636;display:flex;align-items:center;gap:12px"><span style="font-size:20px">✅</span><div><div style="font-size:13px;font-weight:700">Emergency reserve</div><div style="font-size:11px;color:#4A5568;margin-top:2px">$14,200 of $21,000 · 67%</div></div><span class="tag-amber" style="margin-left:auto">In progress</span></div>
+                <div style="padding:14px 16px;border-bottom:.5px solid #1C2636;display:flex;align-items:center;gap:12px"><span style="font-size:20px">📈</span><div><div style="font-size:13px;font-weight:700">Passive income $1,000/mo</div><div style="font-size:11px;color:#4A5568;margin-top:2px">$435/mo current · 43%</div></div><span class="tag-amber" style="margin-left:auto">In progress</span></div>
+                <div style="padding:14px 16px;border-bottom:.5px solid #1C2636;display:flex;align-items:center;gap:12px;opacity:.5"><span style="font-size:20px">🏠</span><div><div style="font-size:13px;font-weight:700">Dividends cover 50%</div><div style="font-size:11px;color:#4A5568;margin-top:2px">Need $21,000/year</div></div><span style="font-size:11px;color:#3a4555;margin-left:auto">Future</span></div>
+                <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;opacity:.4"><span style="font-size:20px">🏝️</span><div><div style="font-size:13px;font-weight:700">Full financial freedom</div><div style="font-size:11px;color:#4A5568;margin-top:2px">Dividends = 100% of living costs</div></div><span style="font-size:11px;color:#3a4555;margin-left:auto">Future</span></div>
+              </div>
+              <div>
+                <div class="card" style="margin-bottom:14px">
+                  <div style="font-size:12px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Wealth Projection</div>
+                  <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid #1C2636"><span style="color:#4A5568;font-size:13px">Current portfolio</span><span style="font-weight:700">$84,230</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid #1C2636"><span style="color:#4A5568;font-size:13px">Portfolio needed for freedom</span><span style="font-weight:700">~$719,000</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid #1C2636"><span style="color:#4A5568;font-size:13px">With $500/month added</span><span class="gn" style="font-weight:700">2037 (11 yrs)</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:#4A5568;font-size:13px">With $1,000/month added</span><span class="gn" style="font-weight:700">2032 (6 yrs)</span></div>
+                </div>
+                <div class="card" style="background:#0a1c11;border-color:rgba(34,197,94,.2)">
+                  <div style="font-size:11px;color:#22C55E;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">🤖 AI Advisor</div>
+                  <div style="font-size:13px;color:#4A5568;line-height:1.7">At <strong style="color:#ddd">5.84%</strong> yield, you need <strong style="color:#22C55E">$719k</strong> to be financially free. Increasing monthly investment to <strong style="color:#ddd">$1,000/mo</strong> gets you there by <strong style="color:#22C55E">2032</strong>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── NOTIFICATIONS ── -->
+        <div class="panel" id="panel-notifications">
+          <div class="page-title">Notifications</div>
+          <div class="page-sub">Personalize how and when you receive dividend alerts</div>
+          <div class="card" style="margin-bottom:16px">
+                      <div style="font-size:14px;font-weight:700;margin-bottom:4px">Notification template</div>
+          <div style="font-size:13px;color:#4A5568;margin-bottom:20px">Choose how alerts appear on your lock screen. Click a phone to select.</div>
+          <div class="ftp-wrap">
+            <div class="ftp" id="afp-c" onclick="selFtpApp('c',this)">
+              <div class="ftp-phone"><div class="ftp-bl"></div><div class="ftp-bl2"></div><div class="ftp-br"></div>
+              <div class="ftp-scr">
+                <div class="ftp-pill"></div>
+                <div class="ftp-sb"><span class="ftp-st">9:41</span><div style="display:flex;gap:2px;align-items:flex-end"><span style="width:2.5px;height:3px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:5px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:7px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:9px;background:#fff;border-radius:1px;display:block"></span><div class="ftp-bat" style="margin-left:3px"><div class="ftp-bf"></div></div></div></div>
+                <div class="ftp-lt"><div class="ftp-lb">9:41</div><div class="ftp-ld">Thursday, July 3</div></div>
+                <div class="ftp-ns"><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">now</span></div><div class="ftp-ti">Dividend received · JEPI</div><div class="ftp-am">+$61.20</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">3m ago</span></div><div class="ftp-ti">Dividend received · SCHD</div><div class="ftp-am">+$85.34</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">yesterday</span></div><div class="ftp-ti">Dividend received · O</div><div class="ftp-am">+$18.44</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">2d ago</span></div><div class="ftp-ti">Dividend received · ADC</div><div class="ftp-am">+$14.82</div></div></div>
+                <div class="ftp-hb"></div>
+              </div></div>
+              <div class="ftp-lbl">Compact</div>
+            </div>
+            <div class="ftp" id="afp-d" onclick="selFtpApp('d',this)">
+              <div class="ftp-phone"><div class="ftp-bl"></div><div class="ftp-bl2"></div><div class="ftp-br"></div>
+              <div class="ftp-scr">
+                <div class="ftp-pill"></div>
+                <div class="ftp-sb"><span class="ftp-st">9:41</span><div style="display:flex;gap:2px;align-items:flex-end"><span style="width:2.5px;height:3px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:5px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:7px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:9px;background:#fff;border-radius:1px;display:block"></span><div class="ftp-bat" style="margin-left:3px"><div class="ftp-bf"></div></div></div></div>
+                <div class="ftp-lt"><div class="ftp-lb">9:41</div><div class="ftp-ld">Thursday, July 3</div></div>
+                <div class="ftp-ns"><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">now</span></div><div class="ftp-ti">Dividend received · JEPI</div><div class="ftp-ds">Received <span style="color:#4ade80;font-weight:700">+$61.20</span> · Now in your account.</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">3m ago</span></div><div class="ftp-ti">Dividend received · SCHD</div><div class="ftp-ds">Received <span style="color:#4ade80;font-weight:700">+$85.34</span> · Now in your account.</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">yesterday</span></div><div class="ftp-ti">Dividend received · O</div><div class="ftp-ds">Received <span style="color:#4ade80;font-weight:700">+$18.44</span> · Now in your account.</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">2d ago</span></div><div class="ftp-ti">Dividend received · ADC</div><div class="ftp-ds">Received <span style="color:#4ade80;font-weight:700">+$14.82</span> · Now in your account.</div></div></div>
+                <div class="ftp-hb"></div>
+              </div></div>
+              <div class="ftp-lbl">Descriptive</div>
+            </div>
+            <div class="ftp sel" id="afp-p" onclick="selFtpApp('p',this)">
+              <div class="ftp-phone"><div class="ftp-bl"></div><div class="ftp-bl2"></div><div class="ftp-br"></div>
+              <div class="ftp-scr">
+                <div class="ftp-pill"></div>
+                <div class="ftp-sb"><span class="ftp-st">9:41</span><div style="display:flex;gap:2px;align-items:flex-end"><span style="width:2.5px;height:3px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:5px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:7px;background:#fff;border-radius:1px;display:block"></span><span style="width:2.5px;height:9px;background:#fff;border-radius:1px;display:block"></span><div class="ftp-bat" style="margin-left:3px"><div class="ftp-bf"></div></div></div></div>
+                <div class="ftp-lt"><div class="ftp-lb">9:41</div><div class="ftp-ld">Thursday, July 3</div></div>
+                <div class="ftp-ns"><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">now</span></div><div class="ftp-ti">Dividend received · JEPI</div><div class="ftp-am">+$61.20</div><div class="ftp-cf">Fidelity · Payment confirmed ✓</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">3m ago</span></div><div class="ftp-ti">Dividend received · SCHD</div><div class="ftp-am">+$85.34</div><div class="ftp-cf">Fidelity · Payment confirmed ✓</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">yesterday</span></div><div class="ftp-ti">Dividend received · O</div><div class="ftp-am">+$18.44</div><div class="ftp-cf">Schwab · Payment confirmed ✓</div></div><div class="ftp-nc"><div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">2d ago</span></div><div class="ftp-ti">Dividend received · ADC</div><div class="ftp-am">+$14.82</div><div class="ftp-cf">IBKR · Payment confirmed ✓</div></div></div>
+                <div class="ftp-hb"></div>
+              </div></div>
+              <div class="ftp-lbl">✦ Premium</div>
+              <div class="ftp-rec">Recommended</div>
+            </div>
+          </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div class="card">
+              <div class="card">
+                <div style="font-size:14px;font-weight:700;margin-bottom:14px">Channels</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid #1C2636">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">🔔</span><div><div style="font-size:13px;font-weight:600">Push notification</div><div style="font-size:11px;color:#4A5568">Lock screen · Always free</div></div></div>
+                  <div style="width:36px;height:20px;background:#22C55E;border-radius:10px;position:relative;cursor:pointer"><div style="width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;right:3px"></div></div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">✈️</span><div><div style="font-size:13px;font-weight:600">Telegram <span class="tag-green" style="font-size:10px">PRO</span></div><div style="font-size:11px;color:#4A5568">@DivPulseBot · connected</div></div></div>
+                  <div style="width:36px;height:20px;background:#22C55E;border-radius:10px;position:relative;cursor:pointer"><div style="width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;right:3px"></div></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card" style="background:#0a1c11;border-color:rgba(34,197,94,.25)">
+                <div style="font-size:13px;font-weight:700;color:#22C55E;margin-bottom:4px">Live preview</div>
+                <div style="font-size:12px;color:#4A5568;margin-bottom:12px">How it looks on your lock screen</div>
+                <div style="background:#1c1c1e;border-radius:14px;padding:14px 16px">
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
+                    <svg width="16" height="16" viewBox="0 0 100 100"><use href="#spark"/></svg>
+                    <span style="font-size:11px;color:rgba(255,255,255,.4);flex:1;font-weight:500">DivPulse</span>
+                    <span style="font-size:10px;color:rgba(255,255,255,.25)">now</span>
+                  </div>
+                  <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:8px">Dividend received · JEPI</div>
+                  <div style="font-size:26px;font-weight:800;color:#4ade80;letter-spacing:-.6px;margin-bottom:8px">+$61.20</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,.35)">Fidelity · Payment confirmed ✓</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SETTINGS ── -->
+        <div class="panel" id="panel-settings">
+          <div class="page-title">Settings</div>
+          <div class="page-sub">Manage your account, plan and preferences</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div class="card">
+                <div style="font-size:14px;font-weight:700;margin-bottom:14px">Profile</div>
+                <label class="l-label">Name</label>
+                <input class="l-input" value="Alex" style="margin-bottom:10px">
+                <label class="l-label">Email</label>
+                <input class="l-input" value="alex@example.com" style="margin-bottom:10px">
+                <button class="btn-green">Save changes</button>
+              </div>
+              <div class="card">
+                <div style="font-size:14px;font-weight:700;margin-bottom:4px">Display preferences</div>
+                <div style="font-size:12px;color:#4A5568;margin-bottom:14px">Currency and language</div>
+                <div style="margin-bottom:12px">
+                  <div class="stat-lbl">Currency</div>
+                  <div style="display:flex;gap:6px;margin-top:6px"><div class="chip on">USD</div><div class="chip">BRL</div><div class="chip">MXN</div></div>
+                </div>
+                <div>
+                  <div class="stat-lbl">Language</div>
+                  <div style="display:flex;gap:6px;margin-top:6px"><div class="chip on">English</div><div class="chip">Português</div><div class="chip">Español</div></div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card" style="background:#0a1c11;border-color:rgba(34,197,94,.25)">
+                <div style="font-size:14px;font-weight:700;color:#22C55E;margin-bottom:4px">Current plan: Free</div>
+                <div style="font-size:12px;color:#4A5568;margin-bottom:16px">5 of 5 holdings used · Upgrade for unlimited</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+                  <div style="background:#111820;border:1px solid #1C2636;border-radius:10px;padding:14px">
+                    <div style="font-size:14px;font-weight:800;color:#22C55E;margin-bottom:2px">Pro</div>
+                    <div style="font-size:22px;font-weight:800;margin-bottom:2px">$59<span style="font-size:12px;color:#4A5568;font-weight:400">/yr</span></div>
+                    <div style="font-size:11px;color:#4A5568;line-height:1.6">Unlimited · AI · Telegram</div>
+                    <button class="btn-green" style="width:100%;margin-top:10px;padding:8px;font-size:12px">Upgrade</button>
+                  </div>
+                  <div style="background:#111820;border:1px solid #f59e0b;border-radius:10px;padding:14px">
+                    <div style="font-size:14px;font-weight:800;color:#f59e0b;margin-bottom:2px">Pro+</div>
+                    <div style="font-size:22px;font-weight:800;margin-bottom:2px">$119<span style="font-size:12px;color:#4A5568;font-weight:400">/yr</span></div>
+                    <div style="font-size:11px;color:#4A5568;line-height:1.6">AI unlimited · Auto-sync</div>
+                    <button class="btn-green" style="width:100%;margin-top:10px;padding:8px;font-size:12px">Upgrade</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div style="font-size:14px;font-weight:700;margin-bottom:14px">Danger zone</div>
+                <button class="btn-ghost" style="margin-right:8px">Export data</button>
+                <button class="btn-ghost" style="color:#f87171;border-color:#f87171">Delete account</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end .content -->
+    </div><!-- end .main-area -->
+  </div><!-- end .app-wrap -->
+</div><!-- end #app -->
+
+<script>
+// ── LOGIN ──
+function enterApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  initApp();
+}
+
+// ── NAVIGATION ──
+function goTo(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('on'));
+  const panel = document.getElementById('panel-'+id);
+  if(panel) panel.classList.add('on');
+  if(el) el.classList.add('on');
+  if(id==='dividends') initBars2();
+  if(id==='diversification') initDv('class');
+}
+
+// ── AX DROPDOWN ──
+function toggleAxApp(){
+  const dd=document.getElementById('axDDApp');
+  if(dd)dd.classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.ax-wrap')){
+    const dd=document.getElementById('axDDApp');
+    if(dd)dd.classList.remove('open');
+  }
+});
+
+// ── LANGUAGE ──
+const appLang={
+  EN:{greeting:{m:'Good morning',a:'Good afternoon',e:'Good evening'},sub:'Thursday, July 3, 2026',divTitle:'Dividend received'},
+  PT:{greeting:{m:'Bom dia',a:'Boa tarde',e:'Boa noite'},sub:'Quinta-feira, 3 de julho de 2026',divTitle:'Dividendo recebido'},
+  ES:{greeting:{m:'Buenos días',a:'Buenas tardes',e:'Buenas noches'},sub:'Jueves, 3 de julio de 2026',divTitle:'Dividendo recibido'}
+};
+let appCur='USD', appLngKey='EN';
+
+function setAppLng(l,el){
+  appLngKey=l;
+  document.querySelectorAll('.ax-cr .lo').forEach(x=>x.classList.remove('on'));
+  if(el)el.classList.add('on');
+  const h=new Date().getHours();
+  const g=appLang[l]||appLang.EN;
+  const t=g.greeting;
+  const gEl=document.getElementById('greet');
+  if(gEl) gEl.textContent=(h<12?t.m:h<18?t.a:t.e)+', Alex 👋';
+  const sEl=document.querySelector('#panel-home .page-sub');
+  if(sEl) sEl.innerHTML=g.sub+' · <span class="gn">2 '+
+    (l==='PT'?'dividendos recebidos hoje':l==='ES'?'dividendos recibidos hoy':'dividends received today')+'</span>';
+}
+
+function setAppCur(c,el){
+  appCur=c;
+  document.querySelectorAll('.ax-cr .co').forEach(x=>x.classList.remove('on'));
+  if(el)el.classList.add('on');
+  setTbCur(c,el); // reuse existing currency logic
+}
+
+// ── CURRENCY ──
+const rates={USD:1,BRL:5.52,MXN:17.1};
+const syms={USD:'$',BRL:'R$',MXN:'$'};
+let cur='USD';
+function setTbCur(c,el){
+  cur=c;
+  const fmt=(v)=>{const r=v*rates[c];const s=syms[c];return r>=1000?s+(r/1000).toFixed(1)+'k':s+r.toFixed(2);};
+  const S=id=>document.getElementById(id);
+  if(S('pfv')) S('pfv').textContent=fmt(84230);
+  if(S('adi')) S('adi').textContent=fmt(5220);
+  if(S('tdi')) S('tdi').textContent='+'+fmt(79.64);
+  if(S('htot')) S('htot').textContent=fmt(84230);
+  if(S('ann')) S('ann').textContent=fmt(5220);
+}
+
+// ── GREETING ──
+function initApp(){
+  const h=new Date().getHours();
+  const g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+  const el=document.getElementById('greet');
+  if(el) el.textContent=g+', Alex 👋';
+  initChips();
+}
+
+// ── CHIP TOGGLE ──
+function initChips(){
+  document.querySelectorAll('.card .chip, .stat-grid + * .chip').forEach(c=>{
+    c.onclick=function(){
+      const sib=this.parentElement.querySelectorAll('.chip');
+      sib.forEach(x=>x.classList.remove('on'));
+      this.classList.add('on');
+    };
+  });
+}
+
+// ── DIVIDEND BARS ──
+function initBars2(){
+  const w=document.getElementById('bars2');
+  const l=document.getElementById('barLbls2');
+  if(!w||w.children.length>0) return;
+  const months=['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const vals=[312,330,358,372,388,400,412,435,451,438,445,479];
+  const mx=Math.max(...vals);
+  months.forEach((m,i)=>{
+    const h=Math.round(vals[i]/mx*100);
+    const projected=i>=7;
+    w.innerHTML+=`<div class="bar-col"><div class="bar-fill" style="height:${h}%;${projected?'background:#2a2a0a;border:.5px solid #f59e0b':''}"></div></div>`;
+    l.innerHTML+=`<span style="font-size:10px;color:#3a4555;flex:1;text-align:center">${m}</span>`;
+  });
+}
+
+// ── DIVERSIFICATION ──
+const dvDB={
+  class:{l:['ETFs','REITs','Stocks','Cash'],v:[61,18,17,4],c:['#f59e0b','#22C55E','#60a5fa','#4A5568'],ai:'Your portfolio is <strong style="color:#22C55E">overweight in ETFs (61%)</strong>. Adding individual stocks like <strong>O, ADC, STAG</strong> could improve diversification while maintaining yield.'},
+  sector:{l:['Real Estate','Tech','Finance','Energy','Consumer'],v:[32,24,20,14,10],c:['#22C55E','#60a5fa','#f59e0b','#f87171','#a78bfa'],ai:'<strong style="color:#22C55E">Real Estate at 32%</strong> is your top sector. Consider adding more Finance exposure for balance.'},
+  broker:{l:['Fidelity','Schwab','XP / Avenue','IBKR'],v:[40,34,20,6],c:['#f59e0b','#22C55E','#60a5fa','#a78bfa'],ai:'Fidelity and Schwab hold <strong>74% of your portfolio</strong>. Healthy broker diversification for a US-focused investor.'},
+  geo:{l:['USA','Brazil','International','Cash'],v:[78,10,8,4],c:['#60a5fa','#22C55E','#f59e0b','#4A5568'],ai:'<strong>78% US exposure</strong> is typical for dividend investors. Your 10% Brazil allocation reflects your profile well.'}
+};
+
+function switchDv(key,el){
+  document.querySelectorAll('.panel.on .chip').forEach(c=>c.classList.remove('on'));
+  if(el) el.classList.add('on');
+  initDv(key);
+}
+
+function initDv(key){
+  const d=dvDB[key];
+  const ai=document.getElementById('dvAI');
+  if(ai) ai.innerHTML=d.ai;
+  const list=document.getElementById('dvList');
+  if(list) list.innerHTML=d.l.map((l,i)=>`
+    <div class="legend-row">
+      <div class="legend-dot" style="background:${d.c[i]}"></div>
+      <div style="font-size:13px;flex:1">${l}</div>
+      <div style="text-align:right">
+        <div style="font-size:14px;font-weight:700">${d.v[i]}%</div>
+        <div style="font-size:11px;color:#4A5568">$${Math.round(84230*d.v[i]/100).toLocaleString()}</div>
+      </div>
+    </div>`).join('');
+  const cv=document.getElementById('dvChart');
+  if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const cx=130,cy=130,R=100,r=54;
+  ctx.clearRect(0,0,260,260);
+  const total=d.v.reduce((a,b)=>a+b,0);
+  let s=-Math.PI/2;
+  d.v.forEach((v,i)=>{
+    const sw=(v/total)*2*Math.PI;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,s,s+sw);ctx.closePath();
+    ctx.fillStyle=d.c[i];ctx.fill();
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(s),cy+R*Math.sin(s));
+    ctx.strokeStyle='#0B0F14';ctx.lineWidth=2;ctx.stroke();
+    s+=sw;
+  });
+  ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.fillStyle='#111820';ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 14px Inter,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('$84,230',cx,cy-7);
+  ctx.fillStyle='#4A5568';ctx.font='11px Inter,sans-serif';
+  ctx.fillText('portfolio',cx,cy+10);
+  s=-Math.PI/2;
+  d.v.forEach((v,i)=>{
+    const sw=(v/total)*2*Math.PI;const mid=s+sw/2;
+    if(v>=8){ctx.fillStyle=d.c[i];ctx.font='bold 12px Inter,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(v+'%',cx+(R+18)*Math.cos(mid),cy+(R+18)*Math.sin(mid));}
+    s+=sw;
+  });
+}
+
+// ── APP TOAST ──
+function showAppToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:#22C55E;color:#0B0F14;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:700;z-index:9999;opacity:0;transition:all .25s;white-space:nowrap;box-shadow:0 4px 20px rgba(34,197,94,.35)';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';});
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';setTimeout(()=>t.remove(),300);},2800);
+}
+
+// ── GOALS TABS ──
+function appGlTab(id,el){
+  document.querySelectorAll('.agl-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.app-gl-chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('agl-'+id).style.display='block';
+  el.classList.add('on');
+}
+function appGlMonths(m,el,meta,atual){
+  document.querySelectorAll('.agl-mth').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  const pct=Math.round(atual/meta*1000)/10;
+  const mF='$'+meta.toLocaleString();
+  const S=id=>document.getElementById(id);
+  if(S('agl-rmeta'))S('agl-rmeta').textContent=mF;
+  if(S('agl-rmeta2'))S('agl-rmeta2').textContent=mF;
+  if(S('agl-rpct'))S('agl-rpct').textContent=pct+'%';
+  if(S('agl-rfill'))S('agl-rfill').style.width=pct+'%';
+  if(S('agl-rfalta'))S('agl-rfalta').textContent='$'+(meta-atual).toLocaleString();
+}
+// ── NOTIFICATION TEMPLATE ──
+function selFtpApp(t,el){
+  ['c','d','p'].forEach(x=>{const e=document.getElementById('afp-'+x);if(e)e.classList.toggle('sel',x===t);});
+}
+function selTmpl(t,el){
+  document.querySelectorAll('.tmpl-ph').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+}
+</script>
+</body>
+</html>
