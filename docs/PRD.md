@@ -3,7 +3,7 @@
 **Version:** 1.0
 **Date:** July 2026
 **Client:** Welson
-**Developer:** Mohammad Shuja Uddin (Orvex Labs)
+**Developer:** Mohammad Shuja Uddin 
 
 ---
 

@@ -134,11 +134,10 @@ Plaid does not support Brazilian brokers or most international brokers. Two fall
 | **Service** | Telegram Bot API |
 | **Register at** | Not required — already configured |
 | **Cost** | Free |
-| **Bot token** | `TELEGRAM_BOT_TOKEN` — store in `.env.local` |
-| **Owner chat ID** | `TELEGRAM_OWNER_CHAT_ID` — store in `.env.local` |
+| **Bot token** | `TELEGRAM_BOT_TOKEN`  |
+| **Owner chat ID** | `TELEGRAM_OWNER_CHAT_ID`  |
 
-> [!CAUTION]
-> The bot token above is a live credential. Do not commit this file to a public repository. Store the token in an environment variable (`.env.local`) in production.
+
 
 ---
 
