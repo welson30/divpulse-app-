@@ -344,10 +344,11 @@ In short: the **foundation and design system are production-grade; the product i
 
 1. **Next.js version.** PRD §7 specifies Next.js 14; the actual scaffold is 16.2.10 (confirmed via `package.json`, and `AGENTS.md` explicitly warns this version has breaking API/convention changes from what most training data assumes). Keeping 16 — already invested, actively maintained.
 2. **AI Advisor provider — to be decided.** PRD §7 says Google Gemini Flash; `services.md` §9 says OpenAI. These aren't interchangeable (different SDKs, pricing models, and quality characteristics), but the choice doesn't change what the client sees, so it's an engineering decision to finalize before `/api/advisor/query` is written, not a client question.
+3. **Telegram delivery mechanism — resolved as per-user.** `services.md` only sets up a single owner chat ID; the PRD lists Telegram alerts as a per-subscriber Pro+ delivery channel alongside push and email. Confirmed user-facing: each subscriber links their own Telegram (deep link → `/start <code>` → webhook captures `chat_id`, per the linking flow in Section 9.4) rather than alerts routing through one shared/admin chat. This is the only mechanism that delivers real per-user alerts through the Bot API (a bot cannot message a user who hasn't first initiated contact), so it doesn't need to go to the client as an open choice.
 
 ### Needs client confirmation
 
-See the client-facing questions note for the two open scope questions (Telegram delivery mechanism, currency/locale switching) that do need Welson's input before implementation.
+See the client-facing questions note for the one open scope question (currency/locale switching) that does need Welson's input before implementation.
 
 ---
 
