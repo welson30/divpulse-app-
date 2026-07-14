@@ -16,6 +16,9 @@
 # next.js
 /.next/
 /out/
+# stray copy of Next.js's auto-generated route types (the real output lives
+# in the already-ignored /.next/types/ and /.next/dev/types/)
+/types/
 
 # production
 /build

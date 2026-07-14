@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
 // Self-hosted via next/font (build-time fetch + preload) in place of the
 // blocking Google Fonts @import used in Design-System/colors_and_type.css —
@@ -41,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${interTight.variable} ${inter.variable} ${jetbrainsMono.variable} h-full`}
+      className={cn("h-full", interTight.variable, inter.variable, jetbrainsMono.variable)}
     >
       <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>
