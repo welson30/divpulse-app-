@@ -1,26 +1,168 @@
 @import "tailwindcss";
+@import "./kit.css";
 
+/* ============================================================
+   DivPulse — Design Tokens
+   Canonical source: Design-System/colors_and_type.css and
+   Design-System/kit/tokens.css. Hex/px values are copied verbatim —
+   if this ever needs to change, update the Design-System package
+   first, then mirror the change here (see DESIGN.md §11).
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* backgrounds — layered depth, never flat black */
+  --bg-base: #0A0E0D;
+  --bg-surface: #121816;
+  --bg-elevated: #1A211E;
+  --bg-hover: #1E2724;
+
+  /* primary green — brand / growth / positive */
+  --green-300: #6EE7B7;
+  --green-500: #34D399;
+  --green-600: #10B981;
+  --green-900: #064E3B;
+
+  /* red — reserved exclusively for negative/loss data, never decorative */
+  --red-500: #F87171;
+  --red-900: #450A0A;
+
+  /* neutrals — text hierarchy */
+  --text-primary: #F5F7F6;
+  --text-secondary: #A8B3AF;
+  /* decorative/demonstrative only — fails WCAG AA (~4.1:1) for real text, see DESIGN.md §2 */
+  --text-tertiary: #6B7570;
+  --border-subtle: #242C29;
+
+  /* semantic accents — sparing, never competing with green */
+  --blue-info: #60A5FA;
+  --amber-warning: #FBBF24;
+
+  /* type families — variables set on <html> by next/font in layout.tsx */
+  --font-display: var(--font-inter-tight), Inter, system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  /* type scale */
+  --text-display-size: clamp(40px, 4vw, 48px);
+  --text-h1-size: 28px;
+  --text-h2-size: 20px;
+  --text-body-size: 15px;
+  --text-small-size: 13px;
+
+  /* spacing — 8px base unit, nothing arbitrary */
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-6: 48px;
+  --sp-8: 64px;
+
+  /* radii */
+  --radius-control: 10px; /* buttons, icon buttons */
+  --radius-card: 14px;    /* cards, panels, states */
+
+  /* ---- role tokens — semantic intent layer, see DESIGN.md §2 ---- */
+  --role-bg-canvas: var(--bg-base);
+  --role-bg-surface-1: var(--bg-surface);
+  --role-bg-surface-2: var(--bg-elevated);
+  --role-bg-hover: var(--bg-hover);
+
+  --role-cta-bg: var(--green-500);
+  --role-cta-bg-hover: var(--green-600);
+  --role-cta-fg: var(--bg-base); /* dark text on green — deliberate, see DESIGN.md §6 */
+  --role-cta-glow: rgba(52, 211, 153, 0.08);
+
+  --role-gain: var(--green-500);
+  --role-gain-tint: var(--green-900);
+  --role-loss: var(--red-500);
+  --role-loss-tint: var(--red-900);
+
+  --role-text-heading: var(--text-primary);
+  --role-text-body: var(--text-primary);
+  --role-text-label: var(--text-secondary); /* timestamps, captions, table headers — NOT text-tertiary */
+  --role-text-decorative: var(--text-tertiary);
+  --role-border: var(--border-subtle); /* structural/decorative dividers only — cards, table rows */
+  --role-border-interactive: var(--text-tertiary); /* buttons, inputs, icon buttons — border-subtle fails WCAG 1.4.11 here */
+
+  --role-info: var(--blue-info);
+  --role-warning: var(--amber-warning);
+  --role-focus-ring: var(--green-500);
 }
 
+/* ============================================================
+   Tailwind theme mapping
+   DivPulse is a closed-world palette (brand-spec.md §Color,
+   DESIGN.md §12 anti-patterns): reset Tailwind's default color
+   scale entirely so utilities like `bg-blue-500` or `text-red-400`
+   can't silently introduce an undocumented color. Only the tokens
+   above are exposed as utilities. Extending this list is a
+   brand-spec decision, not a CSS-only addition (see DESIGN.md §11).
+   ============================================================ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-canvas: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-surface-2: var(--bg-elevated);
+  --color-surface-hover: var(--bg-hover);
+
+  --color-green-300: var(--green-300);
+  --color-green-500: var(--green-500);
+  --color-green-600: var(--green-600);
+  --color-green-900: var(--green-900);
+
+  --color-red-500: var(--red-500);
+  --color-red-900: var(--red-900);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-interactive: var(--role-border-interactive);
+
+  --color-info: var(--blue-info);
+  --color-warning: var(--amber-warning);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+
+  --spacing-sp-1: var(--sp-1);
+  --spacing-sp-2: var(--sp-2);
+  --spacing-sp-3: var(--sp-3);
+  --spacing-sp-4: var(--sp-4);
+  --spacing-sp-6: var(--sp-6);
+  --spacing-sp-8: var(--sp-8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   Base styles
+   DivPulse ships dark-only by deliberate brand decision, not an
+   oversight — no prefers-color-scheme handling. See DESIGN.md §10;
+   do not add a light mode without the same evidence-gathering rigor
+   described there.
+   ============================================================ */
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--role-bg-canvas);
+  color: var(--role-text-body);
+  font-family: var(--font-body);
+  font-size: var(--text-body-size);
+  line-height: 1.6;
+}
+
+/* Every focusable element gets a visible :focus-visible treatment,
+   no exceptions — DESIGN.md §7 and §12. */
+:focus-visible {
+  outline: 2px solid var(--role-focus-ring);
+  outline-offset: 2px;
 }
