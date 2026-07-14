@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DivPulse — Brand assets preview</title>
+<link rel="stylesheet" href="../kit/tokens.css" />
+<link rel="stylesheet" href="../kit/components.css" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .logo-slot { width: 96px; height: 96px; border-radius: 16px; border: 1.5px dashed var(--border-subtle); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo-slot span { font: 600 10px/1 var(--font-mono); letter-spacing: 0.1em; color: var(--text-secondary); }
+  .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--sp-2); }
+  .icon-tile { border: 1px solid var(--border-subtle); border-radius: var(--radius-card); padding: var(--sp-3); display: flex; flex-direction: column; align-items: center; gap: 10px; background: var(--bg-surface); }
+  .icon-tile img { width: 22px; height: 22px; }
+  .icon-tile span { font-size: 11px; color: var(--text-secondary); text-align: center; }
+  .blocker-note { padding: var(--sp-3); border-radius: var(--radius-card); background: var(--bg-surface); border: 1px solid var(--amber-warning); font-size: 13px; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+  <div class="preview-container">
+    <a class="preview-back" href="index.html">← all previews</a>
+    <span class="preview-eyebrow">Preview · 6 of 7</span>
+    <h1>Brand assets</h1>
+    <p class="preview-lede">Icons below load the actual files preserved in <code>../build/icons/</code>. No logo/wordmark asset exists in source evidence — see the reserved slot and the open blocker note.</p>
+
+    <div class="preview-block">
+      <div class="preview-block-label">Logo — reserved slot (no mark supplied)</div>
+      <div class="logo-slot"><span>LOGO</span></div>
+      <p class="blocker-note" style="margin-top:var(--sp-2);">brand-spec.md: "Not supplied. Every layout reserves an empty, clearly labelled logo slot until one is provided — do not invent a mark." See <code>../assets/README.md</code> and <code>../context/provenance.md</code>.</p>
+    </div>
+
+    <div class="preview-block">
+      <div class="preview-block-label">Icons — loaded from build/icons/*.svg</div>
+      <div class="icon-grid">
+        <div class="icon-tile"><img src="../build/icons/growth.svg" alt="" /><span>Growth</span></div>
+        <div class="icon-tile"><img src="../build/icons/alerts.svg" alt="" /><span>Alerts</span></div>
+        <div class="icon-tile"><img src="../build/icons/diversification.svg" alt="" /><span>Diversification</span></div>
+        <div class="icon-tile"><img src="../build/icons/calendar.svg" alt="" /><span>Calendar</span></div>
+        <div class="icon-tile"><img src="../build/icons/holdings.svg" alt="" /><span>Holdings</span></div>
+        <div class="icon-tile"><img src="../build/icons/settings.svg" alt="" /><span>Settings</span></div>
+        <div class="icon-tile"><img src="../build/icons/state-empty.svg" alt="" /><span>Empty state</span></div>
+        <div class="icon-tile"><img src="../build/icons/state-error.svg" alt="" /><span>Error state</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

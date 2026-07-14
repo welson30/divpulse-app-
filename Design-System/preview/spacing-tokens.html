@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DivPulse — Spacing preview</title>
+<link rel="stylesheet" href="../kit/tokens.css" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .ruler { display: flex; align-items: flex-end; gap: var(--sp-2); height: 110px; padding-top: var(--sp-3); }
+  .ruler-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .ruler-bar { width: 28px; background: var(--green-900); border: 1px solid var(--green-900); border-top: 2px solid var(--green-500); border-radius: 2px 2px 0 0; }
+  .ruler-col span { font: 11px/1 var(--font-mono); color: var(--text-secondary); }
+  .token-table { width: 100%; border-collapse: collapse; margin-top: var(--sp-3); }
+  .token-table th { text-align: left; font: 12px/1 var(--font-mono); color: var(--text-secondary); padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle); }
+  .token-table td { padding: 8px 0; border-bottom: 1px solid var(--border-subtle); font-size: 13px; }
+  .token-table td.mono { font-family: var(--font-mono); color: var(--text-secondary); }
+</style>
+</head>
+<body>
+  <div class="preview-container">
+    <a class="preview-back" href="index.html">← all previews</a>
+    <span class="preview-eyebrow">Preview · 3 of 7</span>
+    <h1>Spacing</h1>
+    <p class="preview-lede">8px base unit, nothing arbitrary. Bars are sized directly from the live <code>--sp-*</code> custom properties in <code>../kit/tokens.css</code>.</p>
+
+    <div class="ruler">
+      <div class="ruler-col"><div class="ruler-bar" style="height:var(--sp-1);"></div><span>8 · sp-1</span></div>
+      <div class="ruler-col"><div class="ruler-bar" style="height:var(--sp-2);"></div><span>16 · sp-2</span></div>
+      <div class="ruler-col"><div class="ruler-bar" style="height:var(--sp-3);"></div><span>24 · sp-3</span></div>
+      <div class="ruler-col"><div class="ruler-bar" style="height:var(--sp-4);"></div><span>32 · sp-4</span></div>
+      <div class="ruler-col"><div class="ruler-bar" style="height:var(--sp-6);"></div><span>48 · sp-6</span></div>
+      <div class="ruler-col"><div class="ruler-bar" style="height:var(--sp-8);"></div><span>64 · sp-8</span></div>
+    </div>
+
+    <table class="token-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Typical use</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">--sp-1</td><td class="mono">8px</td><td>Icon/label gaps, tight inline spacing</td></tr>
+        <tr><td class="mono">--sp-2</td><td class="mono">16px</td><td>Card internal gaps, form field spacing</td></tr>
+        <tr><td class="mono">--sp-3</td><td class="mono">24px</td><td>Card padding, section sub-gaps</td></tr>
+        <tr><td class="mono">--sp-4</td><td class="mono">32px</td><td>Page gutters, container padding</td></tr>
+        <tr><td class="mono">--sp-6</td><td class="mono">48px</td><td>Section-to-section rhythm</td></tr>
+        <tr><td class="mono">--sp-8</td><td class="mono">64px</td><td>Top-level section padding</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

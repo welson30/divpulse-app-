@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DivPulse — Radius &amp; elevation preview</title>
+<link rel="stylesheet" href="../kit/tokens.css" />
+<link rel="stylesheet" href="../kit/components.css" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .radius-row { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+  .radius-tile { width: 120px; height: 80px; background: var(--bg-surface); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font: 12px/1 var(--font-mono); color: var(--text-secondary); }
+  .elev-stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); }
+  .elev-card { border-radius: var(--radius-card); padding: var(--sp-3); border: 1px solid var(--border-subtle); }
+  .elev-card b { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .elev-card span { font-size: 12px; color: var(--text-secondary); font-family: var(--font-mono); }
+  .glow-demo { margin-top: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+  .glow-demo .text-small { max-width: 42ch; }
+</style>
+</head>
+<body>
+  <div class="preview-container">
+    <a class="preview-back" href="index.html">← all previews</a>
+    <span class="preview-eyebrow">Preview · 4 of 7</span>
+    <h1>Radius &amp; elevation</h1>
+    <p class="preview-lede">Drop shadows are invisible on dark surfaces, so depth is layered lightness instead — base → surface → elevated, each defined by a 1px hairline border. Two radius tokens cover the whole system.</p>
+
+    <div class="preview-block">
+      <div class="preview-block-label">Radius tokens</div>
+      <div class="radius-row">
+        <div class="radius-tile" style="border-radius:var(--radius-control);">--radius-control<br/>10px</div>
+        <div class="radius-tile" style="border-radius:var(--radius-card);">--radius-card<br/>14px</div>
+      </div>
+    </div>
+
+    <div class="preview-block">
+      <div class="preview-block-label">Elevation — layered lightness, no shadows</div>
+      <div class="elev-stack">
+        <div class="elev-card" style="background:var(--bg-base);"><b>Base</b><span>#0A0E0D</span></div>
+        <div class="elev-card" style="background:var(--bg-surface);"><b>Surface</b><span>#121816</span></div>
+        <div class="elev-card" style="background:var(--bg-elevated);"><b>Elevated</b><span>#1A211E</span></div>
+      </div>
+    </div>
+
+    <div class="glow-demo">
+      <button class="btn btn-primary">Track a new position</button>
+      <span class="text-small">Faint green glow reserved for the primary CTA only — <code>0 0 24px rgba(52,211,153,.08)</code></span>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DivPulse — Design System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  /* backgrounds — layered depth */
+  --bg-base:#0A0E0D; --bg-surface:#121816; --bg-elevated:#1A211E; --bg-hover:#1E2724;
+  /* primary green */
+  --green-500:#34D399; --green-600:#10B981; --green-300:#6EE7B7; --green-900:#064E3B;
+  /* red — loss only */
+  --red-500:#F87171; --red-900:#450A0A;
+  /* neutrals */
+  --text-primary:#F5F7F6; --text-secondary:#A8B3AF; --text-tertiary:#6B7570; --border-subtle:#242C29;
+  /* semantic */
+  --blue-info:#60A5FA; --amber-warning:#FBBF24;
+  /* type */
+  --font-display:'Inter Tight',Inter,system-ui,sans-serif;
+  --font-body:Inter,system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono','IBM Plex Mono',ui-monospace,Menlo,monospace;
+  /* spacing */
+  --sp-1:8px; --sp-2:16px; --sp-3:24px; --sp-4:32px; --sp-6:48px; --sp-8:64px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; scroll-padding-top:88px;}
+body{
+  margin:0; background:var(--bg-base); color:var(--text-primary);
+  font:15px/1.6 var(--font-body); -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:var(--font-display); font-weight:600; margin:0; letter-spacing:-0.01em;}
+p{margin:0;}
+.container{max-width:1180px; margin:0 auto; padding:0 var(--sp-4);}
+.section{padding:var(--sp-8) 0; border-bottom:1px solid var(--border-subtle);}
+.section:last-of-type{border-bottom:none;}
+.eyebrow{
+  font:600 12px/1 var(--font-mono); letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--text-secondary); margin-bottom:var(--sp-2); display:block;
+}
+.section h2{font-size:28px; margin-bottom:var(--sp-1);}
+.section > .container > p.lede{color:var(--text-secondary); max-width:62ch; margin-bottom:var(--sp-4); font-size:15px;}
+.mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+
+/* nav */
+.topbar{
+  position:sticky; top:0; z-index:50; background:rgba(10,14,13,0.86);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border-subtle);
+}
+.topbar .container{display:flex; align-items:center; justify-content:space-between; height:64px; padding-left:var(--sp-4); padding-right:var(--sp-4);}
+.brandmark{display:flex; align-items:center; gap:var(--sp-2);}
+.brandmark .dot{width:8px; height:8px; border-radius:50%; background:var(--green-500); box-shadow:0 0 12px rgba(52,211,153,0.5);}
+.brandmark span{font-family:var(--font-display); font-weight:600; font-size:13px; letter-spacing:0.06em;}
+.topnav{display:flex; gap:var(--sp-3); list-style:none; margin:0; padding:0;}
+.topnav a{
+  color:var(--text-secondary); text-decoration:none; font-size:13px; font-weight:500;
+  letter-spacing:0.01em; transition:color .15s; border-radius:4px;
+}
+.topnav a:hover{color:var(--text-primary);}
+.topnav a:focus-visible{outline:2px solid var(--green-500); outline-offset:3px;}
+
+/* cover */
+.cover{padding-top:var(--sp-8); padding-bottom:var(--sp-8);}
+.cover-grid{display:grid; grid-template-columns:auto 1fr; gap:var(--sp-6); align-items:start;}
+.logo-slot{
+  width:96px; height:96px; border-radius:16px; border:1.5px dashed var(--border-subtle);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.logo-slot span{font:600 10px/1 var(--font-mono); letter-spacing:0.1em; color:var(--text-secondary);}
+.cover h1{font-size:clamp(40px,5vw,56px); line-height:1.05; margin-bottom:var(--sp-2);}
+.cover .tagline{color:var(--text-secondary); font-size:17px; max-width:56ch; margin-bottom:var(--sp-3);}
+.cover .meta-row{display:flex; gap:var(--sp-4); flex-wrap:wrap;}
+.meta-item{font:13px/1 var(--font-mono); color:var(--text-secondary);}
+.meta-item b{color:var(--text-secondary); font-weight:500;}
+.philosophy{
+  margin-top:var(--sp-6); padding:var(--sp-4); background:var(--bg-surface);
+  border:1px solid var(--border-subtle); border-radius:14px;
+}
+.philosophy p{font-size:16px; line-height:1.65; color:var(--text-secondary); max-width:72ch;}
+.philosophy p + p{margin-top:var(--sp-2);}
+.philosophy strong{color:var(--text-primary); font-weight:500;}
+
+/* color swatches */
+.swatch-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:var(--sp-2); margin-bottom:var(--sp-4);}
+.swatch{
+  border:1px solid var(--border-subtle); border-radius:12px; overflow:hidden; cursor:pointer;
+  background:var(--bg-surface); transition:transform .12s, border-color .12s; position:relative;
+  display:block; width:100%; margin:0; padding:0; text-align:left; font:inherit; color:inherit;
+}
+.swatch:hover{transform:translateY(-2px); border-color:var(--text-tertiary);}
+.swatch:focus-visible{outline:2px solid var(--green-500); outline-offset:2px; border-color:var(--green-500);}
+.swatch .fill{height:72px;}
+.swatch .info{padding:10px 12px;}
+.swatch .name{font-size:12px; font-weight:500; color:var(--text-primary); display:block;}
+.swatch .hex{font:12px/1 var(--font-mono); color:var(--text-secondary); margin-top:3px; display:block;}
+.swatch .role{font-size:11px; color:var(--text-secondary); display:block; margin-top:4px; line-height:1.4;}
+.group-label{font-size:13px; font-weight:500; color:var(--text-secondary); margin:var(--sp-3) 0 var(--sp-2);}
+.group-label:first-child{margin-top:0;}
+
+.depth-demo{display:flex; gap:var(--sp-2); margin-top:var(--sp-2);}
+.depth-layer{
+  flex:1; border-radius:12px; padding:var(--sp-3); border:1px solid var(--border-subtle);
+  font-size:12px; color:var(--text-secondary); font-family:var(--font-mono);
+}
+.depth-layer b{display:block; color:var(--text-primary); font-family:var(--font-body); font-size:14px; font-weight:500; margin-bottom:4px;}
+
+.accent-rule{
+  margin-top:var(--sp-3); padding:var(--sp-3); border-radius:12px; background:var(--bg-surface);
+  border:1px solid var(--border-subtle); font-size:13px; color:var(--text-secondary);
+}
+.accent-rule .green-500{color:var(--green-500); font-weight:600;}
+.accent-rule .red-500{color:var(--red-500); font-weight:600;}
+
+/* typography specimen */
+.type-row{display:flex; align-items:baseline; justify-content:space-between; padding:var(--sp-3) 0; border-bottom:1px solid var(--border-subtle); gap:var(--sp-4);}
+.type-row:last-child{border-bottom:none;}
+.type-sample{font-family:var(--font-display);}
+.type-label{font:12px/1 var(--font-mono); color:var(--text-secondary); white-space:nowrap; text-align:right;}
+.type-label b{display:block; color:var(--text-secondary); font-weight:500; font-size:12px; margin-bottom:2px;}
+.display-sample{font-size:44px; font-weight:600; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;}
+.h1-sample{font-size:28px; font-weight:600;}
+.h2-sample{font-size:20px; font-weight:500;}
+.body-sample{font-family:var(--font-body); font-size:15px; font-weight:400; color:var(--text-primary); max-width:44ch;}
+.small-sample{font-family:var(--font-body); font-size:13px; color:var(--text-tertiary);}
+
+.tabular-demo{margin-top:var(--sp-4);}
+.tabular-demo table{width:100%; border-collapse:collapse;}
+.tabular-demo th{text-align:left; font:12px/1 var(--font-mono); color:var(--text-secondary); font-weight:500; padding-bottom:var(--sp-2); border-bottom:1px solid var(--border-subtle); letter-spacing:0.07em; text-transform:uppercase;}
+.tabular-demo td{padding:10px 0; border-bottom:1px solid var(--border-subtle); font-size:14px;}
+.tabular-demo td.amt{text-align:right; font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--green-500);}
+.tabular-demo td.ticker{font-family:var(--font-mono); color:var(--text-primary);}
+
+/* icons */
+.icon-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:var(--sp-2);}
+.icon-tile{
+  border:1px solid var(--border-subtle); border-radius:12px; padding:var(--sp-3);
+  display:flex; flex-direction:column; align-items:center; gap:10px; background:var(--bg-surface);
+}
+.icon-tile svg{width:22px; height:22px; stroke:var(--text-secondary); stroke-width:1.5; fill:none;}
+.icon-tile.active svg{stroke:var(--green-500);}
+.icon-tile span{font-size:11px; color:var(--text-secondary); text-align:center;}
+.icon-btn-row{display:flex; gap:var(--sp-2); align-items:center; margin-top:var(--sp-3);}
+.icon-btn{
+  width:44px; height:44px; border-radius:10px; border:1px solid var(--border-subtle);
+  background:var(--bg-surface); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:background .08s, transform .08s;
+}
+.icon-btn:hover{background:var(--bg-hover);}
+.icon-btn:active{transform:translateY(1px);}
+.icon-btn:focus-visible{outline:2px solid var(--green-500); outline-offset:2px;}
+.icon-btn svg{width:18px; height:18px; stroke:var(--text-secondary); stroke-width:1.5; fill:none;}
+.icon-btn.is-active svg{stroke:var(--green-500);}
+.nav-item-mobile{display:flex; flex-direction:column; align-items:center; gap:6px;}
+.nav-item-mobile span{font-size:10px; color:var(--text-secondary); letter-spacing:0.02em;}
+
+/* elevation */
+.elev-stack{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp-2);}
+.elev-card{border-radius:14px; padding:var(--sp-3); border:1px solid var(--border-subtle);}
+.elev-card b{display:block; font-size:14px; font-weight:500; margin-bottom:4px;}
+.elev-card span{font-size:12px; color:var(--text-secondary); font-family:var(--font-mono);}
+.glow-demo{margin-top:var(--sp-4); display:flex; align-items:center; gap:var(--sp-3);}
+
+/* buttons */
+.btn{
+  font-family:var(--font-body); font-size:14px; font-weight:500; letter-spacing:0.01em;
+  border-radius:10px; padding:11px 20px; border:1px solid transparent; cursor:pointer;
+  display:inline-flex; align-items:center; gap:8px; transition:background .08s, transform .08s, opacity .12s;
+}
+.btn:active{transform:translateY(1px);}
+.btn:focus-visible{outline:2px solid var(--green-500); outline-offset:2px;}
+.btn:disabled{opacity:0.4; cursor:not-allowed; transform:none;}
+.btn-primary{background:var(--green-500); color:var(--bg-base); box-shadow:0 0 24px rgba(52,211,153,0.08);}
+.btn-primary:hover{background:var(--green-600);}
+.btn-secondary{background:transparent; border-color:var(--border-subtle); color:var(--text-primary);}
+.btn-secondary:hover{background:var(--bg-hover);}
+.btn-destructive{background:transparent; border-color:var(--red-500); color:var(--red-500);}
+.btn-destructive:hover{background:rgba(248,113,113,0.08);}
+.btn-row{display:flex; gap:var(--sp-2); flex-wrap:wrap; align-items:center;}
+
+/* cards */
+.card-row{display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);}
+.holding-card{
+  background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:14px; padding:var(--sp-3);
+}
+.holding-card .top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--sp-2);}
+.holding-card .ticker{font-family:var(--font-mono); font-weight:600; font-size:15px;}
+.holding-card .company{font-size:12px; color:var(--text-secondary); margin-top:2px;}
+.holding-card .value{text-align:right;}
+.holding-card .price{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:15px; font-weight:500;}
+.holding-card .change{font-size:12px; color:var(--green-500); font-family:var(--font-mono); margin-top:2px;}
+.holding-card .meta{display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary); padding-top:var(--sp-2); border-top:1px solid var(--border-subtle);}
+
+/* receipt / dividend alert card — hero component */
+.receipt-wrap{position:relative;}
+.receipt{
+  background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:14px;
+  padding:var(--sp-3); position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:space-between; gap:var(--sp-2);
+}
+.receipt::before{
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--green-500);
+}
+.receipt .left{display:flex; align-items:center; gap:12px; min-width:0;}
+.receipt .mark{
+  width:36px; height:36px; border-radius:9px; background:var(--bg-elevated); border:1px solid var(--border-subtle);
+  display:flex; align-items:center; justify-content:center; font:600 11px/1 var(--font-mono); color:var(--text-secondary); flex-shrink:0;
+}
+.receipt .ticker-name{min-width:0;}
+.receipt .ticker-name b{display:block; font-family:var(--font-mono); font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.receipt .ticker-name span{font-size:12px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;}
+.receipt .right{text-align:right; flex-shrink:0;}
+.receipt .amount{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:18px; font-weight:600; color:var(--green-500); white-space:nowrap;}
+.receipt .when{font-size:12px; color:var(--text-secondary); margin-top:2px;}
+.receipt.enter{animation:receiptIn .5s cubic-bezier(.2,.8,.2,1);}
+@keyframes receiptIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+@media (prefers-reduced-motion: reduce){
+  .receipt.enter{animation:none;}
+}
+.replay-btn{
+  margin-top:var(--sp-2); background:none; border:none; color:var(--text-secondary); font:12px/1 var(--font-mono);
+  cursor:pointer; letter-spacing:0.02em; padding:2px;
+}
+.replay-btn:hover{color:var(--green-500);}
+.replay-btn:focus-visible{outline:2px solid var(--green-500); outline-offset:2px; border-radius:4px;}
+
+/* states — empty / loading / error */
+.state-row{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp-3);}
+.state-card{
+  background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:14px;
+  padding:var(--sp-3); display:flex; flex-direction:column; align-items:flex-start; gap:8px; min-height:168px;
+}
+.state-card svg{width:20px; height:20px; stroke:var(--text-secondary); stroke-width:1.5; fill:none;}
+.state-card b{font-size:14px; font-weight:500; color:var(--text-primary);}
+.state-card p{font-size:13px; color:var(--text-secondary); line-height:1.5;}
+.state-card .btn{margin-top:auto; padding:8px 14px; font-size:13px;}
+.error-card svg{stroke:var(--amber-warning);}
+.skeleton-block{width:100%; display:flex; flex-direction:column; gap:8px;}
+.skeleton-line{height:12px; border-radius:6px; background:var(--bg-hover);}
+
+/* chart */
+.chart-row{display:grid; grid-template-columns:1.3fr 1fr; gap:var(--sp-3);}
+.chart-card{background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:14px; padding:var(--sp-3);}
+.chart-card h3{font-size:13px; font-weight:500; color:var(--text-secondary); margin-bottom:var(--sp-2);}
+.chart-card .fig{font:12px/1 var(--font-mono); color:var(--text-secondary); margin-top:8px;}
+
+/* spacing ruler */
+.ruler{display:flex; align-items:flex-end; gap:var(--sp-2); height:110px; padding-top:var(--sp-3);}
+.ruler-col{display:flex; flex-direction:column; align-items:center; gap:8px;}
+.ruler-bar{width:28px; background:var(--green-900); border:1px solid var(--green-900); border-top:2px solid var(--green-500); border-radius:2px 2px 0 0;}
+.ruler-col span{font:11px/1 var(--font-mono); color:var(--text-secondary);}
+
+footer{padding:var(--sp-6) 0 var(--sp-8); text-align:center;}
+footer p{font-size:12px; color:var(--text-secondary); font-family:var(--font-mono); letter-spacing:0.02em;}
+
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px);
+  background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-primary);
+  font:12px/1 var(--font-mono); padding:10px 16px; border-radius:10px; opacity:0; pointer-events:none;
+  transition:opacity .18s, transform .18s; z-index:100;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+@media (max-width:760px){
+  .cover-grid{grid-template-columns:1fr;}
+  .card-row, .chart-row, .state-row{grid-template-columns:1fr;}
+  .topnav{display:none;}
+  .type-row{flex-direction:column; align-items:flex-start; gap:6px;}
+  .type-label{text-align:left;}
+}
+@media (max-width:480px){
+  .container{padding:0 var(--sp-3);}
+  .receipt{gap:10px;}
+  .receipt .amount{font-size:16px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="container">
+    <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN SYSTEM</span></div>
+    <ul class="topnav">
+      <li><a href="#color">Color</a></li>
+      <li><a href="#type">Typography</a></li>
+      <li><a href="#icons">Iconography</a></li>
+      <li><a href="#elevation">Elevation</a></li>
+      <li><a href="#components">Components</a></li>
+      <li><a href="#spacing">Spacing</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+  <section class="section cover" id="overview" data-od-id="section-overview">
+    <div class="container">
+      <div class="cover-grid">
+        <div class="logo-slot" data-od-id="logo-slot"><span>LOGO</span></div>
+        <div>
+          <h1 data-od-id="doc-title">DivPulse Design System</h1>
+          <p class="tagline">Quiet confidence for dividend investors — the third lane between spreadsheet-cold and consumer-cute.</p>
+          <div class="meta-row">
+            <span class="meta-item">Prepared for <b>dividend investors</b></span>
+            <span class="meta-item">Status <b>reference document</b></span>
+            <span class="meta-item">Updated <b>Jul 13, 2026</b></span>
+            <span class="meta-item">Version <b>1.0</b></span>
+          </div>
+        </div>
+      </div>
+      <div class="philosophy" data-od-id="philosophy-panel">
+        <p>Financial dashboards fail in two directions: <strong>spreadsheet-cold</strong> or <strong>consumer-cute</strong>. DivPulse holds a third lane.</p>
+        <p>Dark backgrounds signal a serious tool. Restrained green signals growth without shouting. Generous whitespace signals that we trust the data enough not to decorate it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="color" data-od-id="section-color">
+    <div class="container">
+      <span class="eyebrow">01 — Color</span>
+      <h2>Color system</h2>
+      <p class="lede">Layered depth instead of flat black, one growth green used only where it means something, and red reserved strictly for loss data. Click a swatch to copy its hex.</p>
+
+      <div class="group-label">Backgrounds — layered depth</div>
+      <div class="depth-demo" style="margin-bottom:var(--sp-3);">
+        <div class="depth-layer" style="background:var(--bg-base);"><b>Base</b>#0A0E0D — canvas</div>
+        <div class="depth-layer" style="background:var(--bg-surface);"><b>Surface</b>#121816 — cards, panels</div>
+        <div class="depth-layer" style="background:var(--bg-elevated);"><b>Elevated</b>#1A211E — modals, dropdowns</div>
+      </div>
+      <div class="swatch-grid">
+        <button type="button" class="swatch" data-copy="#0A0E0D"><div class="fill" style="background:#0A0E0D;"></div><div class="info"><span class="name">bg-base</span><span class="hex">#0A0E0D</span></div></button>
+        <button type="button" class="swatch" data-copy="#121816"><div class="fill" style="background:#121816;"></div><div class="info"><span class="name">bg-surface</span><span class="hex">#121816</span></div></button>
+        <button type="button" class="swatch" data-copy="#1A211E"><div class="fill" style="background:#1A211E;"></div><div class="info"><span class="name">bg-elevated</span><span class="hex">#1A211E</span></div></button>
+        <button type="button" class="swatch" data-copy="#1E2724"><div class="fill" style="background:#1E2724;"></div><div class="info"><span class="name">bg-hover</span><span class="hex">#1E2724</span></div></button>
+      </div>
+
+      <div class="group-label">Primary green — growth, brand, positive</div>
+      <div class="swatch-grid">
+        <button type="button" class="swatch" data-copy="#34D399"><div class="fill" style="background:#34D399;"></div><div class="info"><span class="name">green-500</span><span class="hex">#34D399</span><span class="role">Primary CTA, core brand</span></div></button>
+        <button type="button" class="swatch" data-copy="#10B981"><div class="fill" style="background:#10B981;"></div><div class="info"><span class="name">green-600</span><span class="hex">#10B981</span><span class="role">Hover / pressed</span></div></button>
+        <button type="button" class="swatch" data-copy="#6EE7B7"><div class="fill" style="background:#6EE7B7;"></div><div class="info"><span class="name">green-300</span><span class="hex">#6EE7B7</span><span class="role">Highlights, glow</span></div></button>
+        <button type="button" class="swatch" data-copy="#064E3B"><div class="fill" style="background:#064E3B;"></div><div class="info"><span class="name">green-900</span><span class="hex">#064E3B</span><span class="role">Chart fill tint</span></div></button>
+      </div>
+
+      <div class="group-label">Red — loss data only, never decorative</div>
+      <div class="swatch-grid">
+        <button type="button" class="swatch" data-copy="#F87171"><div class="fill" style="background:#F87171;"></div><div class="info"><span class="name">red-500</span><span class="hex">#F87171</span></div></button>
+        <button type="button" class="swatch" data-copy="#450A0A"><div class="fill" style="background:#450A0A;"></div><div class="info"><span class="name">red-900</span><span class="hex">#450A0A</span><span class="role">Chart fill tint</span></div></button>
+      </div>
+
+      <div class="group-label">Neutrals — text hierarchy</div>
+      <div class="swatch-grid">
+        <button type="button" class="swatch" data-copy="#F5F7F6"><div class="fill" style="background:#F5F7F6;"></div><div class="info"><span class="name">text-primary</span><span class="hex">#F5F7F6</span></div></button>
+        <button type="button" class="swatch" data-copy="#A8B3AF"><div class="fill" style="background:#A8B3AF;"></div><div class="info"><span class="name">text-secondary</span><span class="hex">#A8B3AF</span></div></button>
+        <button type="button" class="swatch" data-copy="#6B7570"><div class="fill" style="background:#6B7570;"></div><div class="info"><span class="name">text-tertiary</span><span class="hex">#6B7570</span></div></button>
+        <button type="button" class="swatch" data-copy="#242C29"><div class="fill" style="background:#242C29;"></div><div class="info"><span class="name">border-subtle</span><span class="hex">#242C29</span></div></button>
+      </div>
+
+      <div class="group-label">Semantic accents — sparing use</div>
+      <div class="swatch-grid">
+        <button type="button" class="swatch" data-copy="#60A5FA"><div class="fill" style="background:#60A5FA;"></div><div class="info"><span class="name">blue-info</span><span class="hex">#60A5FA</span></div></button>
+        <button type="button" class="swatch" data-copy="#FBBF24"><div class="fill" style="background:#FBBF24;"></div><div class="info"><span class="name">amber-warning</span><span class="hex">#FBBF24</span></div></button>
+      </div>
+
+      <div class="accent-rule">Rule of thumb: <span class="green-500">green</span> appears only where it means something — gains, active states, primary buttons, success. <span class="red-500">Red</span> never decorates; it reports a loss.</div>
+      <div class="accent-rule" style="margin-top:var(--sp-2);"><b style="color:var(--text-primary); font-weight:500;">Accessibility note —</b> text-tertiary (#6B7570) measures ~4.1:1 against bg-base at small sizes, just under the 4.5:1 AA floor for normal text. Reserve it for the type specimen and disabled states; use text-secondary for anything a user needs to reliably read, including timestamps and captions inside cards.</div>
+    </div>
+  </section>
+
+  <section class="section" id="type" data-od-id="section-typography">
+    <div class="container">
+      <span class="eyebrow">02 — Typography</span>
+      <h2>Type system</h2>
+      <p class="lede">Inter Tight for the hero data, Inter for the workhorse UI, JetBrains Mono for anything that needs columns to line up.</p>
+
+      <div class="type-row">
+        <div class="type-sample display-sample">$24,516.80</div>
+        <div class="type-label"><b>Display</b>40–48px / 600 · Inter Tight</div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample h1-sample">Portfolio Overview</div>
+        <div class="type-label"><b>H1</b>28px / 600 · Inter Tight</div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample h2-sample">Recent Dividends</div>
+        <div class="type-label"><b>H2</b>20px / 500 · Inter Tight</div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample body-sample">Twelve companies paid a dividend this quarter, three raised their payout for the fourth consecutive year.</div>
+        <div class="type-label"><b>Body</b>15px / 400 · Inter</div>
+      </div>
+      <div class="type-row">
+        <div class="type-sample small-sample">Updated 2 minutes ago</div>
+        <div class="type-label"><b>Small / meta</b>13px / 400 · text-tertiary</div>
+      </div>
+
+      <div class="tabular-demo">
+        <div class="group-label">Tabular numbers — columns align, nothing else</div>
+        <table>
+          <thead><tr><th>Ticker</th><th style="text-align:right;">Amount</th></tr></thead>
+          <tbody>
+            <tr><td class="ticker">KO</td><td class="amt">$46.20</td></tr>
+            <tr><td class="ticker">JNJ</td><td class="amt">$128.50</td></tr>
+            <tr><td class="ticker">PG</td><td class="amt">$9.84</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="icons" data-od-id="section-iconography">
+    <div class="container">
+      <span class="eyebrow">03 — Iconography</span>
+      <h2>Icon system</h2>
+      <p class="lede">Outline, 1.5px stroke, rounded joins. Default <span class="mono" style="color:var(--text-secondary);">text-secondary</span>, shifts to <span class="mono" style="color:var(--green-500);">green-500</span> only on active or selected.</p>
+
+      <div class="icon-grid">
+        <div class="icon-tile"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg><span>Growth</span></div>
+        <div class="icon-tile active"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4a5 5 0 0 0-5 5v3.5L5 15h14l-2-2.5V9a5 5 0 0 0-5-5Z"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/></svg><span>Alerts (active)</span></div>
+        <div class="icon-tile"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 6.9 12"/></svg><span>Diversification</span></div>
+        <div class="icon-tile"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg><span>Calendar</span></div>
+        <div class="icon-tile"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h3"/></svg><span>Holdings</span></div>
+        <div class="icon-tile"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="1.6"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="1.6"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="1.6"/></svg><span>Settings</span></div>
+      </div>
+
+      <div class="group-label">Icon-only buttons — no text labels</div>
+      <div class="icon-btn-row">
+        <button class="icon-btn" aria-label="Growth"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></button>
+        <button class="icon-btn is-active" aria-label="Alerts"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4a5 5 0 0 0-5 5v3.5L5 15h14l-2-2.5V9a5 5 0 0 0-5-5Z"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/></svg></button>
+        <button class="icon-btn" aria-label="Holdings"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h3"/></svg></button>
+        <div class="nav-item-mobile">
+          <span>On small screens</span>
+          <button class="icon-btn" aria-label="Settings"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="1.6"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="1.6"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="1.6"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="elevation" data-od-id="section-elevation">
+    <div class="container">
+      <span class="eyebrow">04 — Elevation &amp; depth</span>
+      <h2>No shadows — lightness does the work</h2>
+      <p class="lede">Drop shadows vanish on dark surfaces, so depth is layered lightness instead: base → surface → elevated, each defined by a 1px hairline border.</p>
+
+      <div class="elev-stack">
+        <div class="elev-card" style="background:var(--bg-base);"><b>Base</b><span>#0A0E0D</span></div>
+        <div class="elev-card" style="background:var(--bg-surface);"><b>Surface</b><span>#121816</span></div>
+        <div class="elev-card" style="background:var(--bg-elevated);"><b>Elevated</b><span>#1A211E</span></div>
+      </div>
+
+      <div class="glow-demo">
+        <button class="btn btn-primary">Track a new position</button>
+        <span class="small-sample">Faint green glow reserved for the primary CTA only — <span class="mono">0 0 24px rgba(52,211,153,.08)</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="components" data-od-id="section-components">
+    <div class="container">
+      <span class="eyebrow">05 — Component language</span>
+      <h2>Buttons, cards &amp; the dividend receipt</h2>
+      <p class="lede">The dividend alert is the one component that carries the brand — everything else stays quiet so this can feel like it just happened.</p>
+
+      <div class="group-label">Buttons — default, hover, active &amp; disabled</div>
+      <div class="btn-row" style="margin-bottom:var(--sp-4);">
+        <button class="btn btn-primary">Add holding</button>
+        <button class="btn btn-secondary">View details</button>
+        <button class="btn btn-destructive">Remove position</button>
+        <button class="btn btn-secondary" disabled>Sync pending</button>
+      </div>
+
+      <div class="group-label">Holdings card</div>
+      <div class="card-row" style="margin-bottom:var(--sp-4);">
+        <div class="holding-card" data-od-id="holding-card-ko">
+          <div class="top">
+            <div><span class="ticker">KO</span><div class="company">The Coca-Cola Company</div></div>
+            <div class="value"><div class="price">64.28</div><div class="change">+0.42%</div></div>
+          </div>
+          <div class="meta"><span>240 shares</span><span>Yield 3.1%</span></div>
+        </div>
+        <div class="holding-card" data-od-id="holding-card-jnj">
+          <div class="top">
+            <div><span class="ticker">JNJ</span><div class="company">Johnson &amp; Johnson</div></div>
+            <div class="value"><div class="price">152.90</div><div class="change">+0.18%</div></div>
+          </div>
+          <div class="meta"><span>85 shares</span><span>Yield 3.4%</span></div>
+        </div>
+      </div>
+
+      <div class="group-label">Dividend alert — "receipt" card (core feature)</div>
+      <div class="receipt-wrap">
+        <div class="receipt" id="receiptDemo" data-od-id="dividend-receipt-card">
+          <div class="left">
+            <div class="mark">KO</div>
+            <div class="ticker-name"><b>Coca-Cola Co.</b><span>Quarterly dividend</span></div>
+          </div>
+          <div class="right">
+            <div class="amount" id="receiptAmount" data-value="46.20">+$46.20</div>
+            <div class="when">Just now</div>
+          </div>
+        </div>
+      </div>
+      <button class="replay-btn" id="replayBtn">↻ replay entrance</button>
+
+      <div class="group-label" style="margin-top:var(--sp-4);">States — empty, loading &amp; error</div>
+      <div class="state-row">
+        <div class="state-card" data-od-id="state-empty">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 6V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/></svg>
+          <b>No holdings yet</b>
+          <p>Add a ticker to start tracking dividend income.</p>
+          <button class="btn btn-primary">Add first holding</button>
+        </div>
+        <div class="state-card" data-od-id="state-loading" aria-label="Loading holdings">
+          <div class="skeleton-block">
+            <div class="skeleton-line" style="width:40%;"></div>
+            <div class="skeleton-line" style="width:70%;"></div>
+            <div class="skeleton-line" style="width:55%;"></div>
+          </div>
+          <p>Loading holdings…</p>
+        </div>
+        <div class="state-card error-card" data-od-id="state-error">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 4.3 2.8 18a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z"/></svg>
+          <b>Couldn't refresh prices</b>
+          <p>Last update failed. Showing cached values.</p>
+          <button class="btn btn-secondary">Retry</button>
+        </div>
+      </div>
+
+      <div class="group-label" style="margin-top:var(--sp-4);">Charts</div>
+      <div class="chart-row">
+        <div class="chart-card" data-od-id="chart-dividend-calendar">
+          <h3>Dividend calendar</h3>
+          <svg viewBox="0 0 320 110" width="100%" height="110">
+            <line x1="0" y1="20" x2="320" y2="20" stroke="#242C29" stroke-width="1"/>
+            <line x1="0" y1="55" x2="320" y2="55" stroke="#242C29" stroke-width="1"/>
+            <line x1="0" y1="90" x2="320" y2="90" stroke="#242C29" stroke-width="1"/>
+            <g>
+              <rect x="10"  y="46" width="20" height="44" rx="2" fill="#34D399"/>
+              <rect x="50"  y="60" width="20" height="30" rx="2" fill="#064E3B"/>
+              <rect x="90"  y="30" width="20" height="60" rx="2" fill="#34D399"/>
+              <rect x="130" y="66" width="20" height="24" rx="2" fill="#064E3B"/>
+              <rect x="170" y="20" width="20" height="70" rx="2" fill="#34D399"/>
+              <rect x="210" y="70" width="20" height="20" rx="2" fill="#064E3B"/>
+              <rect x="250" y="40" width="20" height="50" rx="2" fill="#34D399"/>
+              <rect x="290" y="76" width="20" height="14" rx="2" fill="#064E3B"/>
+            </g>
+          </svg>
+          <div class="fig">Jan–Aug · mono data labels omitted at this scale</div>
+        </div>
+        <div class="chart-card" data-od-id="chart-diversification">
+          <h3>Diversification</h3>
+          <svg viewBox="0 0 120 120" width="120" height="120" style="display:block; margin:0 auto;">
+            <defs>
+              <linearGradient id="gGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#34D399" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#34D399" stop-opacity="0.15"/>
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#242C29" stroke-width="14"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="url(#gGrad)" stroke-width="14"
+              stroke-dasharray="180 289" stroke-dashoffset="0" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+          </svg>
+          <div class="fig" style="text-align:center;">Consumer staples · 62%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="spacing" data-od-id="section-spacing">
+    <div class="container">
+      <span class="eyebrow">06 — Spacing</span>
+      <h2>8px base unit</h2>
+      <p class="lede">Nothing arbitrary. Dense dashboards live or die on consistent rhythm.</p>
+      <div class="ruler">
+        <div class="ruler-col"><div class="ruler-bar" style="height:8px;"></div><span>8</span></div>
+        <div class="ruler-col"><div class="ruler-bar" style="height:16px;"></div><span>16</span></div>
+        <div class="ruler-col"><div class="ruler-bar" style="height:24px;"></div><span>24</span></div>
+        <div class="ruler-col"><div class="ruler-bar" style="height:32px;"></div><span>32</span></div>
+        <div class="ruler-col"><div class="ruler-bar" style="height:48px;"></div><span>48</span></div>
+        <div class="ruler-col"><div class="ruler-bar" style="height:64px;"></div><span>64</span></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="logo-slot" style="margin:0 auto var(--sp-2);"><span>LOGO</span></div>
+  <p>DivPulse Design System · v1.0 · internal reference — logo mark to be supplied</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var toast = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 1200);
+  }
+  document.querySelectorAll('.swatch[data-copy]').forEach(function(sw){
+    sw.addEventListener('click', function(){
+      var hex = sw.getAttribute('data-copy');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(hex).then(function(){ showToast('Copied ' + hex); }).catch(function(){ showToast(hex); });
+      } else {
+        showToast(hex);
+      }
+    });
+  });
+
+  var receipt = document.getElementById('receiptDemo');
+  var replay = document.getElementById('replayBtn');
+  var amountEl = document.getElementById('receiptAmount');
+  var targetValue = parseFloat(amountEl.getAttribute('data-value'));
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function formatAmount(v){
+    return '+$' + v.toFixed(2);
+  }
+  function countUp(){
+    if (reduceMotion) { amountEl.textContent = formatAmount(targetValue); return; }
+    var duration = 600, start = null;
+    function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+    function step(ts){
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      amountEl.textContent = formatAmount(targetValue * easeOutCubic(p));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function playEntrance(){
+    receipt.classList.remove('enter');
+    void receipt.offsetWidth;
+    receipt.classList.add('enter');
+    countUp();
+  }
+  replay.addEventListener('click', playEntrance);
+  playEntrance();
+
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.section[id]'));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.topnav a'));
+  if ('IntersectionObserver' in window && sections.length && navLinks.length) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          var id = entry.target.id;
+          navLinks.forEach(function(a){
+            a.style.color = (a.getAttribute('href') === '#' + id) ? 'var(--text-primary)' : 'var(--text-secondary)';
+          });
+        }
+      });
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    sections.forEach(function(s){ io.observe(s); });
+  }
+})();
+</script>
+
+</body>
+</html>

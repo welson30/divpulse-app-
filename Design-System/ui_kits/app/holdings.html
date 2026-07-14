@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DivPulse — Holdings</title>
+<link rel="stylesheet" href="../../colors_and_type.css" />
+<link rel="stylesheet" href="../../kit/tokens.css" />
+<link rel="stylesheet" href="../../kit/components.css" />
+<link rel="stylesheet" href="app.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="app-sidebar" aria-label="Primary navigation">
+    <div class="app-logo-slot"><span>LOGO</span></div>
+    <nav class="app-nav">
+      <div class="nav-item">
+        <span class="icon-btn-label">Dashboard</span>
+        <a class="icon-btn" href="index.html" aria-label="Dashboard">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg>
+        </a>
+      </div>
+      <div class="nav-item">
+        <span class="icon-btn-label">Holdings</span>
+        <button class="icon-btn is-active" aria-label="Holdings">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h3"/></svg>
+        </button>
+      </div>
+      <div class="nav-item">
+        <span class="icon-btn-label">Alerts</span>
+        <a class="icon-btn" href="alerts.html" aria-label="Dividend alerts">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4a5 5 0 0 0-5 5v3.5L5 15h14l-2-2.5V9a5 5 0 0 0-5-5Z"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/></svg>
+        </a>
+      </div>
+    </nav>
+    <div class="app-nav-bottom">
+      <div class="nav-item">
+        <span class="icon-btn-label">Settings</span>
+        <button class="icon-btn" aria-label="Settings">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="1.6"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="1.6"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="1.6"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <div class="page-header" data-od-id="holdings-header">
+      <div>
+        <span class="page-eyebrow">Portfolio</span>
+        <h1 class="text-h1" data-od-id="holdings-title">Holdings</h1>
+      </div>
+      <div class="actions">
+        <div class="search-field" data-od-id="holdings-search-field">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="holdingSearch" placeholder="Search ticker or company" aria-label="Search holdings" data-od-id="holdings-search-input" />
+        </div>
+        <button class="btn btn-primary" data-od-id="action-add-holding">Add holding</button>
+      </div>
+    </div>
+
+    <table class="holdings-table" data-od-id="holdings-table">
+      <thead>
+        <tr>
+          <th>Ticker</th>
+          <th>Company</th>
+          <th class="num">Shares</th>
+          <th class="num">Price</th>
+          <th class="num">Change</th>
+          <th class="num">Yield</th>
+        </tr>
+      </thead>
+      <tbody id="holdingsBody">
+        <tr data-ticker="ko" data-company="the coca-cola company">
+          <td class="ticker-cell">KO</td>
+          <td class="company-cell">The Coca-Cola Company</td>
+          <td class="num">240</td>
+          <td class="num">64.28</td>
+          <td class="num change-pos">+0.42%</td>
+          <td class="num">3.1%</td>
+        </tr>
+        <tr data-ticker="jnj" data-company="johnson &amp; johnson">
+          <td class="ticker-cell">JNJ</td>
+          <td class="company-cell">Johnson &amp; Johnson</td>
+          <td class="num">85</td>
+          <td class="num">152.90</td>
+          <td class="num change-pos">+0.18%</td>
+          <td class="num">3.4%</td>
+        </tr>
+        <tr data-ticker="pg" data-company="procter &amp; gamble">
+          <td class="ticker-cell">PG</td>
+          <td class="company-cell">Procter &amp; Gamble</td>
+          <td class="num">64</td>
+          <td class="num">158.12</td>
+          <td class="num change-neg">−0.09%</td>
+          <td class="num">2.4%</td>
+        </tr>
+        <tr data-ticker="vz" data-company="verizon communications">
+          <td class="ticker-cell">VZ</td>
+          <td class="company-cell">Verizon Communications</td>
+          <td class="num">310</td>
+          <td class="num">40.55</td>
+          <td class="num change-neg">−0.31%</td>
+          <td class="num">6.6%</td>
+        </tr>
+        <tr data-ticker="msft" data-company="microsoft corporation">
+          <td class="ticker-cell">MSFT</td>
+          <td class="company-cell">Microsoft Corporation</td>
+          <td class="num">18</td>
+          <td class="num">418.62</td>
+          <td class="num change-pos">+1.05%</td>
+          <td class="num">0.7%</td>
+        </tr>
+        <tr data-ticker="o" data-company="realty income corp">
+          <td class="ticker-cell">O</td>
+          <td class="company-cell">Realty Income Corp</td>
+          <td class="num">150</td>
+          <td class="num">54.90</td>
+          <td class="num change-pos">+0.27%</td>
+          <td class="num">5.6%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p id="holdingsEmpty" class="feed-note" hidden data-od-id="holdings-empty-note">No holdings match "<span id="holdingsEmptyQuery"></span>".</p>
+  </main>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('holdingSearch');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('#holdingsBody tr'));
+  var emptyNote = document.getElementById('holdingsEmpty');
+  var emptyQuery = document.getElementById('holdingsEmptyQuery');
+
+  input.addEventListener('input', function () {
+    var q = input.value.trim().toLowerCase();
+    var visibleCount = 0;
+    rows.forEach(function (row) {
+      var match = !q || row.getAttribute('data-ticker').indexOf(q) !== -1 || row.getAttribute('data-company').indexOf(q) !== -1;
+      row.hidden = !match;
+      if (match) visibleCount++;
+    });
+    emptyNote.hidden = visibleCount !== 0;
+    emptyQuery.textContent = input.value.trim();
+  });
+})();
+</script>
+</body>
+</html>

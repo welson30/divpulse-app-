@@ -1,0 +1,59 @@
+/* Preview-card chrome only — never redefines a token or a kit/components.css
+   class. Loaded after kit/tokens.css + kit/components.css on every card. */
+body {
+  margin: 0;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font: 15px/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+.preview-container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: var(--sp-4);
+}
+.preview-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 12px/1 var(--font-mono);
+  color: var(--text-secondary);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--sp-3);
+}
+.preview-back:hover { color: var(--green-500); }
+.preview-eyebrow {
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: var(--sp-1);
+}
+.preview-container h1 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--sp-1);
+}
+.preview-lede {
+  color: var(--text-secondary);
+  max-width: 62ch;
+  margin-bottom: var(--sp-4);
+  font-size: 14px;
+}
+.preview-block { margin-bottom: var(--sp-5, 40px); }
+.preview-block-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0 0 var(--sp-2);
+}
+.preview-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; }
+.preview-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.preview-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
+@media (max-width: 700px) {
+  .preview-grid-2, .preview-grid-3 { grid-template-columns: 1fr; }
+}

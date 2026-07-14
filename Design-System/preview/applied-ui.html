@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DivPulse — Applied UI preview</title>
+<link rel="stylesheet" href="../kit/tokens.css" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .surface-card { margin-bottom: var(--sp-5, 40px); border: 1px solid var(--border-subtle); border-radius: var(--radius-card); overflow: hidden; background: var(--bg-surface); }
+  .surface-head { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border-subtle); }
+  .surface-head b { font-size: 13px; font-weight: 500; }
+  .surface-head a { font: 12px/1 var(--font-mono); color: var(--green-500); text-decoration: none; }
+  .surface-head a:hover { text-decoration: underline; }
+  iframe { display: block; width: 100%; height: 640px; border: 0; background: var(--bg-base); }
+</style>
+</head>
+<body>
+  <div class="preview-container">
+    <a class="preview-back" href="index.html">← all previews</a>
+    <span class="preview-eyebrow">Preview · 7 of 7</span>
+    <h1>Applied UI</h1>
+    <p class="preview-lede">The tokens and components applied to real DivPulse product screens, live in <code>../ui_kits/app/</code> — not a generic static mock.</p>
+
+    <div class="surface-card">
+      <div class="surface-head"><b>Dashboard</b><a href="../ui_kits/app/index.html" target="_blank" rel="noopener">open full screen ↗</a></div>
+      <iframe src="../ui_kits/app/index.html" title="DivPulse Dashboard" loading="lazy"></iframe>
+    </div>
+
+    <div class="surface-card">
+      <div class="surface-head"><b>Holdings</b><a href="../ui_kits/app/holdings.html" target="_blank" rel="noopener">open full screen ↗</a></div>
+      <iframe src="../ui_kits/app/holdings.html" title="DivPulse Holdings" loading="lazy"></iframe>
+    </div>
+
+    <div class="surface-card">
+      <div class="surface-head"><b>Dividend alerts</b><a href="../ui_kits/app/alerts.html" target="_blank" rel="noopener">open full screen ↗</a></div>
+      <iframe src="../ui_kits/app/alerts.html" title="DivPulse Alerts" loading="lazy"></iframe>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DivPulse — Design &amp; Component Guide</title>
+  <style>
+    /* ===========================================================
+       Deck framework — DO NOT EDIT the rules in this <style> block.
+       Edit only inside the second <style> block below (per-deck
+       styles) and inside <section class="slide"> bodies.
+
+       Contract this framework provides:
+         - 1920×1080 fixed canvas, scaled to fit the viewport
+         - Only .slide.active is visible at a time
+         - Prev/next + counter rendered outside the scaled stage
+         - Keyboard (← → space PgUp PgDn Home End), click, and stored
+           position survive iframe focus quirks
+         - "Save as PDF" produces a multi-page vertical PDF, one slide
+           per page, by toggling every slide visible under @media print
+       =========================================================== */
+    :root {
+      /* SLOT: theme tokens — mirrors DivPulse's real palette in
+         kit/tokens.css so this document is itself on-brand. */
+      --bg: #0A0E0D;
+      --fg: #F5F7F6;
+      --muted: #A8B3AF;
+      --accent: #34D399;
+      --surface: #121816;
+      --shell: #0A0E0D;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--shell);
+      color: var(--fg);
+      font: 18px/1.5 -apple-system, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .deck-shell {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+    .deck-stage {
+      width: 1920px;
+      height: 1080px;
+      background: var(--bg);
+      position: relative;
+      transform-origin: top left;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    .slide:not(.active) { display: none !important; }
+    :where(.slide.active) { display: flex; flex-direction: column; }
+
+    .deck-counter {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(10, 14, 26, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.18em;
+      z-index: 1000;
+    }
+    .deck-counter button {
+      width: 36px; height: 36px;
+      background: transparent;
+      color: #fff;
+      border: 0;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: background 0.15s;
+    }
+    .deck-counter button:hover { background: rgba(255, 255, 255, 0.12); }
+    .deck-counter button[disabled] { opacity: 0.3; cursor: default; }
+    .deck-counter .deck-count {
+      padding: 0 14px;
+      letter-spacing: 0.22em;
+    }
+    .deck-counter .deck-count .total { color: rgba(255, 255, 255, 0.5); }
+    .deck-hint {
+      position: fixed;
+      bottom: 26px;
+      right: 28px;
+      color: rgba(255, 255, 255, 0.4);
+      font: 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    @media print {
+      @page { size: 1920px 1080px; margin: 0; }
+      html, body {
+        width: 1920px !important;
+        height: auto !important;
+        overflow: visible !important;
+        background: #fff !important;
+      }
+      .deck-shell {
+        position: static !important;
+        display: block !important;
+        inset: auto !important;
+      }
+      .deck-stage {
+        width: 1920px !important;
+        height: auto !important;
+        transform: none !important;
+        box-shadow: none !important;
+        position: static !important;
+      }
+      .slide {
+        display: flex !important;
+        position: relative !important;
+        inset: auto !important;
+        width: 1920px !important;
+        height: 1080px !important;
+        page-break-after: always;
+        break-after: page;
+      }
+      .slide:last-child { page-break-after: auto; break-after: auto; }
+      .deck-counter, .deck-hint { display: none !important; }
+    }
+  </style>
+
+  <!-- Real DivPulse tokens + components — this document renders with the
+       live, current (post-audit) kit, not a re-described mockup. -->
+  <link rel="stylesheet" href="kit/tokens.css?v=2" />
+  <link rel="stylesheet" href="kit/components.css?v=2" />
+  <link rel="stylesheet" href="colors_and_type.css?v=2" />
+
+  <style>
+    /* SLOT: per-deck styles — document scaffold only. Every button, card,
+       receipt, state and badge on the following pages is a real class
+       from kit/components.css, not reinvented markup. */
+    .deck-stage, .slide { font-family: var(--font-body); }
+
+    .page { padding: 84px 120px 56px; }
+    .page-topbar {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 44px; flex-shrink: 0;
+    }
+    .page-topbar .brandmark { display: flex; align-items: center; gap: 12px; }
+    .page-topbar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-500); box-shadow: 0 0 12px rgba(52,211,153,.5); }
+    .page-topbar .brandmark span { font: 600 14px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-secondary); }
+    .page-topbar .section-name { font: 14px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+    .page-content { flex: 1; min-height: 0; }
+    .page-footer {
+      margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-subtle);
+      display: flex; justify-content: space-between; font: 14px/1 var(--font-mono);
+      color: var(--text-secondary); flex-shrink: 0;
+    }
+
+    .eyebrow { font: 600 15px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--green-500); display: block; margin-bottom: 16px; }
+    .page-title { font-family: var(--font-display); font-weight: 600; font-size: 46px; letter-spacing: -0.01em; margin-bottom: 12px; }
+    .page-lede { font-size: 21px; line-height: 1.6; color: var(--text-secondary); max-width: 74ch; margin-bottom: 40px; }
+
+    .logo-slot { width: 88px; height: 88px; border-radius: 16px; border: 1.5px dashed var(--border-subtle); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-slot span { font: 600 11px/1 var(--font-mono); letter-spacing: .1em; color: var(--text-secondary); }
+
+    /* ---- cover ---- */
+    .s-cover { justify-content: center; padding: 0 140px; }
+    .s-cover .cover-inner { display: flex; align-items: center; gap: 48px; margin-bottom: 56px; }
+    .s-cover h1 { font-family: var(--font-display); font-weight: 600; font-size: 128px; line-height: .98; letter-spacing: -0.02em; }
+    .s-cover .kicker { font: 600 20px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--green-500); margin-bottom: 20px; }
+    .s-cover .tagline { font-size: 26px; color: var(--text-secondary); max-width: 62ch; margin-bottom: 40px; }
+    .s-cover .meta-row { display: flex; gap: 32px; flex-wrap: wrap; }
+    .s-cover .meta-item { font: 15px/1 var(--font-mono); color: var(--text-secondary); }
+    .s-cover .meta-item b { color: var(--text-primary); font-weight: 500; }
+
+    /* ---- contents ---- */
+    .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 64px; }
+    .toc-item { display: flex; align-items: baseline; gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--border-subtle); }
+    .toc-item .n { font: 600 16px/1 var(--font-mono); color: var(--green-500); width: 32px; flex-shrink: 0; }
+    .toc-item .t { font-size: 19px; font-weight: 500; }
+    .toc-item .d { font-size: 14px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* ---- generic content grids ---- */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .stack { display: flex; flex-direction: column; gap: 24px; }
+
+    .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .swatch { border: 1px solid var(--border-subtle); border-radius: 14px; overflow: hidden; background: var(--bg-surface); }
+    .swatch .fill { height: 88px; }
+    .swatch .info { padding: 14px 16px; }
+    .swatch .name { font-size: 15px; font-weight: 500; display: block; }
+    .swatch .hex { font: 15px/1 var(--font-mono); color: var(--text-secondary); margin-top: 4px; display: block; }
+    .swatch .role { font-size: 13px; color: var(--text-secondary); display: block; margin-top: 6px; line-height: 1.4; }
+    .group-label { font-size: 17px; font-weight: 500; color: var(--text-secondary); margin: 28px 0 14px; }
+    .group-label:first-child { margin-top: 0; }
+
+    .callout { padding: 20px 24px; border-radius: 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); font-size: 15px; color: var(--text-secondary); line-height: 1.6; }
+    .callout b { color: var(--text-primary); font-weight: 500; }
+    .callout.warn { border-color: var(--amber-warning); }
+
+    .type-row { display: flex; align-items: baseline; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid var(--border-subtle); gap: 32px; }
+    .type-row:last-child { border-bottom: none; }
+    .type-label { font: 15px/1 var(--font-mono); color: var(--text-secondary); white-space: nowrap; text-align: right; }
+    .type-label b { display: block; color: var(--text-secondary); font-weight: 500; font-size: 15px; margin-bottom: 3px; }
+
+    .ruler { display: flex; align-items: flex-end; gap: 28px; height: 160px; padding-top: 24px; }
+    .ruler-col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .ruler-bar { width: 40px; background: var(--green-900); border: 1px solid var(--green-900); border-top: 3px solid var(--green-500); border-radius: 3px 3px 0 0; }
+    .ruler-col span { font: 14px/1 var(--font-mono); color: var(--text-secondary); }
+    .radius-row { display: flex; gap: 32px; }
+    .radius-tile { width: 160px; height: 100px; background: var(--bg-surface); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font: 15px/1.4 var(--font-mono); color: var(--text-secondary); text-align: center; }
+
+    .icon-row { display: flex; gap: 20px; align-items: center; }
+    .chart-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 24px; }
+    .chart-card h3 { font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 16px; }
+    .chart-card .fig { font: 14px/1 var(--font-mono); color: var(--text-secondary); margin-top: 12px; }
+
+    .dodont-table { width: 100%; border-collapse: collapse; }
+    .dodont-table th { text-align: left; font: 14px/1 var(--font-mono); color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle); }
+    .dodont-table td { padding: 16px 20px 16px 0; border-bottom: 1px solid var(--border-subtle); font-size: 16px; vertical-align: top; }
+    .dodont-table td.do { color: var(--green-500); }
+    .dodont-table td.dont { color: var(--text-secondary); }
+
+    .schematic { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+    .schematic h3 { font-size: 18px; font-weight: 500; }
+    .schematic .frame { display: flex; gap: 8px; height: 200px; }
+    .schematic .rail { width: 14%; background: var(--bg-elevated); border-radius: 8px; }
+    .schematic .body { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .schematic .bar { height: 12%; background: var(--bg-elevated); border-radius: 4px; }
+    .schematic .row { flex: 1; display: flex; gap: 6px; }
+    .schematic .cell { flex: 1; background: var(--bg-elevated); border-radius: 4px; }
+    .schematic p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+    .contrast-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .contrast-mini .item { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px; }
+    .contrast-mini .ratio { font: 600 22px/1 var(--font-mono); }
+    .contrast-mini .ratio.pass { color: var(--green-500); }
+    .contrast-mini .ratio.fixed { color: var(--amber-warning); }
+    .contrast-mini .label { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+
+    @media print { .deck-hint, .deck-counter { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="deck-shell">
+    <div class="deck-stage" id="deck-stage">
+
+      <!-- 01 — COVER -->
+      <section class="slide active s-cover" data-screen-label="01 Cover">
+        <div class="cover-inner" style="padding-left: 120px;">
+          <div class="logo-slot" data-od-id="guide-logo-slot"><span>LOGO</span></div>
+          <div>
+            <div class="kicker">Design System</div>
+            <h1 data-od-id="guide-cover-title">DivPulse</h1>
+          </div>
+        </div>
+        <div style="padding-left: 120px;">
+          <p class="tagline">Design &amp; component guide — quiet confidence for dividend investors. The third lane between spreadsheet-cold and consumer-cute.</p>
+          <div class="meta-row">
+            <span class="meta-item">Version <b>1.1</b></span>
+            <span class="meta-item">Updated <b>Jul 14, 2026</b></span>
+            <span class="meta-item">Prepared for <b>handoff &amp; review</b></span>
+            <span class="meta-item">Status <b>audited, WCAG-checked</b></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 — CONTENTS -->
+      <section class="slide page" data-screen-label="02 Contents">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Contents</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">Overview</span>
+          <h2 class="page-title">What's in this guide</h2>
+          <p class="page-lede">A shareable summary of the DivPulse design system for handoff and review. The living, canonical source stays in the project package — <code>DESIGN.md</code>, <code>colors_and_type.css</code>, <code>kit/</code>, and <code>ui_kits/app/</code> — this document is a printable snapshot of it.</p>
+          <div class="toc-grid">
+            <div class="toc-item"><span class="n">03</span><div><div class="t">Positioning &amp; Product</div><div class="d">Who this is for, what it does, the three signals</div></div></div>
+            <div class="toc-item"><span class="n">04</span><div><div class="t">Color — Backgrounds &amp; Green</div><div class="d">Layered depth, the primary brand green</div></div></div>
+            <div class="toc-item"><span class="n">05</span><div><div class="t">Color — Red, Neutrals &amp; Semantic</div><div class="d">Loss color, text hierarchy, info/warning</div></div></div>
+            <div class="toc-item"><span class="n">06</span><div><div class="t">Typography</div><div class="d">Type scale, tabular numerals</div></div></div>
+            <div class="toc-item"><span class="n">07</span><div><div class="t">Spacing &amp; Radius</div><div class="d">8px base unit, two radius tokens</div></div></div>
+            <div class="toc-item"><span class="n">08</span><div><div class="t">Buttons &amp; Controls</div><div class="d">Primary/secondary/destructive, icon buttons, inputs</div></div></div>
+            <div class="toc-item"><span class="n">09</span><div><div class="t">Cards &amp; Data</div><div class="d">Holdings card, dividend receipt, badges</div></div></div>
+            <div class="toc-item"><span class="n">10</span><div><div class="t">Charts</div><div class="d">Dividend calendar, diversification</div></div></div>
+            <div class="toc-item"><span class="n">11</span><div><div class="t">States &amp; Feedback</div><div class="d">Empty, loading, error</div></div></div>
+            <div class="toc-item"><span class="n">12</span><div><div class="t">Motion, Voice &amp; Accessibility</div><div class="d">Animation rules, copy tone, WCAG audit</div></div></div>
+            <div class="toc-item"><span class="n">13</span><div><div class="t">Applied UI Overview</div><div class="d">Dashboard, Holdings, Dividend Alerts</div></div></div>
+            <div class="toc-item"><span class="n">14</span><div><div class="t">Implementation &amp; Closing</div><div class="d">How to reuse this system</div></div></div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>02 / 14</span></div>
+      </section>
+
+      <!-- 03 — POSITIONING -->
+      <section class="slide page" data-screen-label="03 Positioning">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Positioning &amp; Product</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">01 — Theme &amp; Atmosphere</span>
+          <h2 class="page-title">Quiet confidence</h2>
+          <p class="page-lede">DivPulse is a dark-theme dividend income dashboard for dividend investors — a deliberate third lane between spreadsheet-cold (Bloomberg-terminal density with no warmth) and consumer-cute (Robinhood-style confetti and mascot energy). Financial dashboards that go too far in either direction lose the user's trust.</p>
+          <div class="grid-3" style="margin-bottom:40px;">
+            <div class="callout"><b>Dark canvas</b><br/>This is a serious tool, not a toy.</div>
+            <div class="callout"><b>One restrained green</b><br/>Used only where it means something — confidence without shouting.</div>
+            <div class="callout"><b>Generous whitespace</b><br/>An 8px rhythm — the interface trusts the data enough not to decorate it.</div>
+          </div>
+          <div class="group-label">Primary surfaces</div>
+          <div class="grid-3">
+            <div class="callout"><b>Dashboard</b><br/>Portfolio total, dividend calendar, diversification, recent payments.</div>
+            <div class="callout"><b>Holdings</b><br/>Full position table — ticker, shares, price, change, yield.</div>
+            <div class="callout"><b>Dividend Alerts</b><br/>The payment feed. The "receipt" card is the one flourish in the system.</div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>03 / 14</span></div>
+      </section>
+
+      <!-- 04 — COLOR 1 -->
+      <section class="slide page" data-screen-label="04 Color — Backgrounds & Green">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Color · 1 of 2</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">02 — Color</span>
+          <h2 class="page-title">Backgrounds &amp; green</h2>
+          <p class="page-lede">Layered depth instead of flat black; one growth green, used only where it means something. Hex values are canonical — do not substitute or reinterpret.</p>
+          <div class="group-label">Backgrounds — never flat black</div>
+          <div class="swatch-grid" style="margin-bottom:8px;">
+            <div class="swatch"><div class="fill" style="background:#0A0E0D;"></div><div class="info"><span class="name">bg-base</span><span class="hex">#0A0E0D</span><span class="role">Page canvas</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#121816;"></div><div class="info"><span class="name">bg-surface</span><span class="hex">#121816</span><span class="role">Cards, panels</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#1A211E;"></div><div class="info"><span class="name">bg-elevated</span><span class="hex">#1A211E</span><span class="role">Modals, dropdowns</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#1E2724;"></div><div class="info"><span class="name">bg-hover</span><span class="hex">#1E2724</span><span class="role">Hover state</span></div></div>
+          </div>
+          <div class="group-label">Primary green — brand / growth / positive</div>
+          <div class="swatch-grid">
+            <div class="swatch"><div class="fill" style="background:#34D399;"></div><div class="info"><span class="name">green-500</span><span class="hex">#34D399</span><span class="role">Primary CTA, core brand</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#10B981;"></div><div class="info"><span class="name">green-600</span><span class="hex">#10B981</span><span class="role">Hover / pressed</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#6EE7B7;"></div><div class="info"><span class="name">green-300</span><span class="hex">#6EE7B7</span><span class="role">Highlights, glow</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#064E3B;"></div><div class="info"><span class="name">green-900</span><span class="hex">#064E3B</span><span class="role">Chart fill tint</span></div></div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>04 / 14</span></div>
+      </section>
+
+      <!-- 05 — COLOR 2 -->
+      <section class="slide page" data-screen-label="05 Color — Red, Neutrals & Semantic">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Color · 2 of 2</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">02 — Color, continued</span>
+          <h2 class="page-title">Red, neutrals &amp; semantic accents</h2>
+          <div class="group-label">Red — loss data only, never decorative</div>
+          <div class="swatch-grid" style="grid-template-columns:repeat(6,1fr); margin-bottom:8px;">
+            <div class="swatch"><div class="fill" style="background:#F87171;"></div><div class="info"><span class="name">red-500</span><span class="hex">#F87171</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#450A0A;"></div><div class="info"><span class="name">red-900</span><span class="hex">#450A0A</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#F5F7F6;"></div><div class="info"><span class="name">text-primary</span><span class="hex">#F5F7F6</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#A8B3AF;"></div><div class="info"><span class="name">text-secondary</span><span class="hex">#A8B3AF</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#6B7570;"></div><div class="info"><span class="name">text-tertiary</span><span class="hex">#6B7570</span><span class="role">Decorative only</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#242C29;"></div><div class="info"><span class="name">border-subtle</span><span class="hex">#242C29</span></div></div>
+          </div>
+          <div class="group-label">Semantic accents — sparing use</div>
+          <div class="swatch-grid" style="grid-template-columns:repeat(2,1fr); margin-bottom: 28px;">
+            <div class="swatch"><div class="fill" style="background:#60A5FA;"></div><div class="info"><span class="name">blue-info</span><span class="hex">#60A5FA</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#FBBF24;"></div><div class="info"><span class="name">amber-warning</span><span class="hex">#FBBF24</span></div></div>
+          </div>
+          <div class="callout warn"><b>Contrast note —</b> <code>text-tertiary</code> measures ~4.1:1 on dark backgrounds (below the 4.5:1 AA text floor) and <code>border-subtle</code> measures ~1.1–1.4:1 (below the 3:1 non-text floor). Both are decorative-only — see page 12 for the full accessibility audit.</div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>05 / 14</span></div>
+      </section>
+
+      <!-- 06 — TYPOGRAPHY -->
+      <section class="slide page" data-screen-label="06 Typography">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Typography</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">03 — Typography</span>
+          <h2 class="page-title">Inter Tight, Inter &amp; JetBrains Mono</h2>
+          <p class="page-lede">Inter Tight for hero data, Inter for the workhorse UI, JetBrains Mono for anything that needs columns to line up.</p>
+          <div class="grid-2">
+            <div>
+              <div class="type-row"><div class="text-display">$24,516.80</div><div class="type-label"><b>Display</b>40–48px / 600</div></div>
+              <div class="type-row"><div class="text-h1">Portfolio Overview</div><div class="type-label"><b>H1</b>28px / 600</div></div>
+              <div class="type-row"><div class="text-h2">Recent Dividends</div><div class="type-label"><b>H2</b>20px / 500</div></div>
+              <div class="type-row"><div class="text-body" style="max-width:34ch;">Twelve companies paid a dividend this quarter.</div><div class="type-label"><b>Body</b>15px / 400</div></div>
+              <div class="type-row"><div class="text-small">Updated 2 minutes ago</div><div class="type-label"><b>Small</b>13px / 400</div></div>
+            </div>
+            <div class="chart-card">
+              <h3>Tabular numbers — columns align, nothing else</h3>
+              <table style="width:100%; border-collapse:collapse; margin-top:12px;">
+                <thead><tr><th style="text-align:left; font:14px/1 var(--font-mono); color:var(--text-secondary); padding-bottom:10px; border-bottom:1px solid var(--border-subtle);">Ticker</th><th style="text-align:right; font:14px/1 var(--font-mono); color:var(--text-secondary); padding-bottom:10px; border-bottom:1px solid var(--border-subtle);">Amount</th></tr></thead>
+                <tbody>
+                  <tr><td style="padding:12px 0; border-bottom:1px solid var(--border-subtle); font-family:var(--font-mono);">KO</td><td style="padding:12px 0; border-bottom:1px solid var(--border-subtle); text-align:right; font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--green-500);">$46.20</td></tr>
+                  <tr><td style="padding:12px 0; border-bottom:1px solid var(--border-subtle); font-family:var(--font-mono);">JNJ</td><td style="padding:12px 0; border-bottom:1px solid var(--border-subtle); text-align:right; font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--green-500);">$128.50</td></tr>
+                  <tr><td style="padding:12px 0; font-family:var(--font-mono);">PG</td><td style="padding:12px 0; text-align:right; font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--green-500);">$9.84</td></tr>
+                </tbody>
+              </table>
+              <p class="fig">Financial figures always show sign + currency, tabular alignment.</p>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>06 / 14</span></div>
+      </section>
+
+      <!-- 07 — SPACING & RADIUS -->
+      <section class="slide page" data-screen-label="07 Spacing & Radius">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Spacing &amp; Radius</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">04 — Spacing</span>
+          <h2 class="page-title">8px base unit, two radii</h2>
+          <p class="page-lede">Nothing arbitrary. Dense dashboards live or die on consistent rhythm.</p>
+          <div class="grid-2">
+            <div>
+              <div class="group-label">Scale — 8 / 16 / 24 / 32 / 48 / 64</div>
+              <div class="ruler">
+                <div class="ruler-col"><div class="ruler-bar" style="height:8px;"></div><span>8</span></div>
+                <div class="ruler-col"><div class="ruler-bar" style="height:16px;"></div><span>16</span></div>
+                <div class="ruler-col"><div class="ruler-bar" style="height:24px;"></div><span>24</span></div>
+                <div class="ruler-col"><div class="ruler-bar" style="height:32px;"></div><span>32</span></div>
+                <div class="ruler-col"><div class="ruler-bar" style="height:48px;"></div><span>48</span></div>
+                <div class="ruler-col"><div class="ruler-bar" style="height:64px;"></div><span>64</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="group-label">Radius tokens</div>
+              <div class="radius-row">
+                <div class="radius-tile" style="border-radius:10px;">--radius-control<br/>10px</div>
+                <div class="radius-tile" style="border-radius:14px;">--radius-card<br/>14px</div>
+              </div>
+              <div class="callout" style="margin-top:24px;">Cover/hero panels and the logo slot use a slightly larger 16px radius for distinction as the top-level brand container.</div>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>07 / 14</span></div>
+      </section>
+
+      <!-- 08 — BUTTONS & CONTROLS -->
+      <section class="slide page" data-screen-label="08 Buttons & Controls">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Components · Buttons &amp; Controls</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">05 — Components</span>
+          <h2 class="page-title">Buttons, icon buttons &amp; inputs</h2>
+          <div class="group-label">Buttons — dark text on green, not white-on-green</div>
+          <div class="icon-row" style="margin-bottom:32px;">
+            <button class="btn btn-primary">Add holding</button>
+            <button class="btn btn-secondary">View details</button>
+            <button class="btn btn-destructive">Remove position</button>
+            <button class="btn btn-secondary" disabled>Sync pending</button>
+          </div>
+          <div class="group-label">Icon-only buttons — no text labels (standing preference)</div>
+          <div class="icon-row" style="margin-bottom:32px;">
+            <button class="icon-btn is-active" aria-label="Alerts"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4a5 5 0 0 0-5 5v3.5L5 15h14l-2-2.5V9a5 5 0 0 0-5-5Z"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/></svg></button>
+            <button class="icon-btn" aria-label="Holdings"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h3"/></svg></button>
+            <button class="icon-btn" aria-label="Settings"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="1.6"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="1.6"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="1.6"/></svg></button>
+            <span class="text-small" style="align-self:center;">On small screens, label repositions above the icon rather than being removed.</span>
+          </div>
+          <div class="callout"><b>Fixed in the 2026-07-14 audit —</b> button and icon-button borders use <code>--text-tertiary</code> (~3.4–4.1:1), not <code>--border-subtle</code> (~1.1–1.4:1), so default-state edges clear the WCAG 1.4.11 3:1 floor.</div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>08 / 14</span></div>
+      </section>
+
+      <!-- 09 — CARDS & DATA -->
+      <section class="slide page" data-screen-label="09 Cards & Data">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Components · Cards &amp; Data</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">05 — Components, continued</span>
+          <h2 class="page-title">Holdings, the dividend receipt &amp; badges</h2>
+          <div class="grid-2" style="margin-bottom: 28px;">
+            <div>
+              <div class="group-label">Holding card</div>
+              <div class="holding-card">
+                <div class="top">
+                  <div><span class="ticker">KO</span><div class="company">The Coca-Cola Company</div></div>
+                  <div class="value"><div class="price">64.28</div><div class="change">+0.42%</div></div>
+                </div>
+                <div class="meta"><span>240 shares</span><span>Yield 3.1%</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="group-label">Dividend "receipt" — the one flourish in the system</div>
+              <div class="receipt" data-receipt data-od-id="guide-receipt-demo">
+                <div class="left">
+                  <div class="mark">KO</div>
+                  <div class="ticker-name"><b>Coca-Cola Co.</b><span>Quarterly dividend</span></div>
+                </div>
+                <div class="right">
+                  <div class="amount" data-value="46.20">+$46.20</div>
+                  <div class="when">Just now</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="group-label">Status badges</div>
+          <div class="icon-row"><span class="badge badge-info">New feature</span><span class="badge badge-warning">Trial ends in 3 days</span></div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>09 / 14</span></div>
+      </section>
+
+      <!-- 10 — CHARTS -->
+      <section class="slide page" data-screen-label="10 Charts">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Components · Charts</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">05 — Components, continued</span>
+          <h2 class="page-title">Charts</h2>
+          <p class="page-lede">Green gradient fill for growth visuals. Grid lines at <code>border-subtle</code> only. Data labels in mono with tabular figures. Loss segments use the red equivalents, never green.</p>
+          <div class="grid-2">
+            <div class="chart-card">
+              <h3>Dividend calendar</h3>
+              <svg viewBox="0 0 320 110" width="100%" height="130">
+                <line x1="0" y1="20" x2="320" y2="20" stroke="#242C29" stroke-width="1"/>
+                <line x1="0" y1="55" x2="320" y2="55" stroke="#242C29" stroke-width="1"/>
+                <line x1="0" y1="90" x2="320" y2="90" stroke="#242C29" stroke-width="1"/>
+                <rect x="10"  y="46" width="20" height="44" rx="2" fill="#34D399"/>
+                <rect x="50"  y="60" width="20" height="30" rx="2" fill="#064E3B"/>
+                <rect x="90"  y="30" width="20" height="60" rx="2" fill="#34D399"/>
+                <rect x="130" y="66" width="20" height="24" rx="2" fill="#064E3B"/>
+                <rect x="170" y="20" width="20" height="70" rx="2" fill="#34D399"/>
+                <rect x="210" y="70" width="20" height="20" rx="2" fill="#064E3B"/>
+                <rect x="250" y="40" width="20" height="50" rx="2" fill="#34D399"/>
+                <rect x="290" y="76" width="20" height="14" rx="2" fill="#064E3B"/>
+              </svg>
+              <p class="fig">Jan–Aug</p>
+            </div>
+            <div class="chart-card">
+              <h3>Diversification</h3>
+              <svg viewBox="0 0 120 120" width="140" height="140" style="display:block; margin:0 auto;">
+                <defs><linearGradient id="gGradGuide" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34D399" stop-opacity="0.9"/><stop offset="100%" stop-color="#34D399" stop-opacity="0.15"/></linearGradient></defs>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#242C29" stroke-width="14"/>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="url(#gGradGuide)" stroke-width="14" stroke-dasharray="180 289" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+              </svg>
+              <p class="fig" style="text-align:center;">Consumer staples · 62%</p>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>10 / 14</span></div>
+      </section>
+
+      <!-- 11 — STATES -->
+      <section class="slide page" data-screen-label="11 States & Feedback">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Components · States &amp; Feedback</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">05 — Components, continued</span>
+          <h2 class="page-title">Empty, loading &amp; error</h2>
+          <p class="page-lede">Every data module needs explicit treatment for all three — never let a table or card silently render blank.</p>
+          <div class="state-row">
+            <div class="state-card">
+              <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 6V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/></svg>
+              <b>No holdings yet</b>
+              <p>Add a ticker to start tracking dividend income.</p>
+              <button class="btn btn-primary">Add first holding</button>
+            </div>
+            <div class="state-card">
+              <div class="skeleton-block">
+                <div class="skeleton-line" style="width:40%;"></div>
+                <div class="skeleton-line" style="width:70%;"></div>
+                <div class="skeleton-line" style="width:55%;"></div>
+              </div>
+              <p>Loading holdings…</p>
+            </div>
+            <div class="state-card error-card">
+              <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 4.3 2.8 18a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z"/></svg>
+              <b>Couldn't refresh prices</b>
+              <p>Last update failed. Showing cached values.</p>
+              <button class="btn btn-secondary">Retry</button>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>11 / 14</span></div>
+      </section>
+
+      <!-- 12 — MOTION, VOICE & ACCESSIBILITY -->
+      <section class="slide page" data-screen-label="12 Motion, Voice & Accessibility">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Motion, Voice &amp; Accessibility</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">06–09 — Motion · Voice · Accessibility</span>
+          <h2 class="page-title">One flourish, a calm voice, verified contrast</h2>
+          <div class="grid-2" style="margin-bottom:24px;">
+            <div>
+              <div class="group-label">Motion — restraint is the point</div>
+              <div class="callout" style="margin-bottom:12px;">The receipt card is the <b>only</b> component with a designed entrance (slide-up + fade, 500ms) plus a 600ms count-up. Every animation has a <code>prefers-reduced-motion</code> fallback.</div>
+              <div class="group-label">Voice — calm, precise, quietly confident</div>
+              <table class="dodont-table">
+                <thead><tr><th>Do</th><th>Don't</th></tr></thead>
+                <tbody>
+                  <tr><td class="do">"Coca-Cola Co. · +$46.20"</td><td class="dont">"🎉 You just earned $46.20!"</td></tr>
+                  <tr><td class="do">"Couldn't refresh prices."</td><td class="dont">"Oops! Something went wrong 😅"</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <div class="group-label">Accessibility audit (2026-07-14) — computed, not estimated</div>
+              <div class="contrast-mini" style="margin-bottom: 16px;">
+                <div class="item"><div class="ratio pass">9.0:1</div><div class="label">text-secondary / bg-base</div></div>
+                <div class="item"><div class="ratio fixed">4.1:1</div><div class="label">text-tertiary — decorative only</div></div>
+                <div class="item"><div class="ratio fixed">~1.3:1</div><div class="label">border-subtle on interactive controls — fixed</div></div>
+              </div>
+              <div class="callout warn">Found: <code>border-subtle</code> failed WCAG 1.4.11 (~1.1–1.4:1) on <code>.btn-secondary</code> / <code>.icon-btn</code>, and <code>.search-field</code> had <code>outline:none</code> with no focus replacement (WCAG 2.4.7). Both fixed — see <code>context/provenance.md</code> for the full trail.</div>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>12 / 14</span></div>
+      </section>
+
+      <!-- 13 — APPLIED UI -->
+      <section class="slide page" data-screen-label="13 Applied UI Overview">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Applied UI</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">10 — Applied UI</span>
+          <h2 class="page-title">The system on real screens</h2>
+          <p class="page-lede">Live, working versions of all three at <code>ui_kits/app/</code> — this page is a schematic overview, not a substitute for opening them.</p>
+          <div class="grid-3">
+            <div class="schematic">
+              <h3>Dashboard</h3>
+              <div class="frame"><div class="rail"></div><div class="body"><div class="bar" style="height:20%;"></div><div class="row"><div class="cell"></div><div class="cell"></div></div><div class="row"><div class="cell"></div><div class="cell"></div><div class="cell"></div></div></div></div>
+              <p>Portfolio total, calendar + diversification charts, recent dividends, top holdings.</p>
+            </div>
+            <div class="schematic">
+              <h3>Holdings</h3>
+              <div class="frame"><div class="rail"></div><div class="body"><div class="bar" style="height:15%;"></div><div class="row" style="flex-direction:column; gap:6px;"><div class="cell" style="flex:0 0 18%;"></div><div class="cell" style="flex:0 0 18%;"></div><div class="cell" style="flex:0 0 18%;"></div><div class="cell" style="flex:0 0 18%;"></div></div></div></div>
+              <p>Full position table with live search filter over ticker/company.</p>
+            </div>
+            <div class="schematic">
+              <h3>Dividend Alerts</h3>
+              <div class="frame"><div class="rail"></div><div class="body"><div class="bar" style="height:15%;"></div><div class="row" style="flex-direction:column; gap:6px;"><div class="cell" style="flex:0 0 22%;"></div><div class="cell" style="flex:0 0 22%;"></div><div class="cell" style="flex:0 0 22%;"></div></div></div></div>
+              <p>Payment feed with All/Unread filter tabs, each entry a receipt card.</p>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide</span><span>13 / 14</span></div>
+      </section>
+
+      <!-- 14 — IMPLEMENTATION & CLOSING -->
+      <section class="slide page" data-screen-label="14 Implementation & Closing">
+        <div class="page-topbar">
+          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="section-name">Implementation &amp; Closing</div>
+        </div>
+        <div class="page-content">
+          <span class="eyebrow">11 — Implementation Notes</span>
+          <h2 class="page-title">Reusing this system</h2>
+          <div class="grid-2">
+            <div>
+              <div class="callout" style="margin-bottom:12px;"><b>Import order —</b> <code>colors_and_type.css</code> → <code>kit/tokens.css</code> → <code>kit/components.css</code> → <code>kit/interactions.js</code>.</div>
+              <div class="callout" style="margin-bottom:12px;"><b>Two-tier tokens —</b> prefer <code>--role-*</code> semantic aliases in new code over raw palette tokens.</div>
+              <div class="callout"><b>Dark-only by design —</b> no light mode exists; treat any request as new brand work, not inversion.</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between;">
+              <div>
+                <div class="logo-slot" style="margin-bottom:20px;"><span>LOGO</span></div>
+                <p class="text-body" style="max-width:40ch;">This guide is generated from real evidence — <code>brand-spec.md</code>, <code>design-system.html</code>, and <code>kit/</code> — and kept in sync with the audited, current package.</p>
+              </div>
+              <div class="text-small">DivPulse Design System · v1.1 · context/provenance.md has the full audit trail</div>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span>DivPulse Design Guide — thank you</span><span>14 / 14</span></div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Framework chrome — DO NOT EDIT below this line. -->
+  <nav class="deck-counter" role="navigation" aria-label="Deck navigation">
+    <button type="button" id="deck-prev" aria-label="Previous slide">‹</button>
+    <span class="deck-count"><span id="deck-cur">01</span> <span class="total">/ <span id="deck-total">01</span></span></span>
+    <button type="button" id="deck-next" aria-label="Next slide">›</button>
+  </nav>
+  <div class="deck-hint">← / → · space</div>
+
+  <script src="kit/interactions.js"></script>
+  <script>
+    (function () {
+      var stage = document.getElementById('deck-stage');
+      var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+      var prev = document.getElementById('deck-prev');
+      var next = document.getElementById('deck-next');
+      var cur = document.getElementById('deck-cur');
+      var total = document.getElementById('deck-total');
+      var STORE = 'deck:idx:' + (location.pathname || '/');
+      var idx = 0;
+
+      function fit() {
+        var sw = window.innerWidth;
+        var sh = window.innerHeight;
+        var pad = 32;
+        var s = Math.min((sw - pad) / 1920, (sh - pad) / 1080);
+        if (!isFinite(s) || s <= 0) s = 1;
+        var tx = (sw - 1920 * s) / 2;
+        var ty = (sh - 1080 * s) / 2;
+        stage.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
+      }
+
+      function pad2(n) { return (n < 10 ? '0' : '') + n; }
+      function paint() {
+        slides.forEach(function (el, i) { el.classList.toggle('active', i === idx); });
+        if (cur) cur.textContent = pad2(idx + 1);
+        if (total) total.textContent = pad2(slides.length);
+        if (prev) prev.toggleAttribute('disabled', idx <= 0);
+        if (next) next.toggleAttribute('disabled', idx >= slides.length - 1);
+      }
+      function go(i) {
+        idx = Math.max(0, Math.min(slides.length - 1, i));
+        paint();
+        try { localStorage.setItem(STORE, String(idx)); } catch (_) {}
+      }
+      function onKey(e) {
+        if (e.__odDeckKeyHandled) return;
+        var t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.__odDeckKeyHandled = true; e.preventDefault(); go(idx + 1); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.__odDeckKeyHandled = true; e.preventDefault(); go(idx - 1); }
+        else if (e.key === 'Home') { e.__odDeckKeyHandled = true; e.preventDefault(); go(0); }
+        else if (e.key === 'End') { e.__odDeckKeyHandled = true; e.preventDefault(); go(slides.length - 1); }
+      }
+      window.addEventListener('keydown', onKey, true);
+      document.addEventListener('keydown', onKey, true);
+      if (prev) prev.addEventListener('click', function () { go(idx - 1); });
+      if (next) next.addEventListener('click', function () { go(idx + 1); });
+
+      document.body.setAttribute('tabindex', '-1');
+      document.body.style.outline = 'none';
+      function focusDeck() { try { window.focus(); document.body.focus({ preventScroll: true }); } catch (_) {} }
+      document.addEventListener('mousedown', focusDeck);
+      window.addEventListener('load', focusDeck);
+
+      try {
+        var saved = parseInt(localStorage.getItem(STORE) || '0', 10);
+        if (!isNaN(saved) && saved >= 0 && saved < slides.length) idx = saved;
+      } catch (_) {}
+
+      window.addEventListener('resize', fit);
+      fit();
+      paint();
+      focusDeck();
+    })();
+  </script>
+</body>
+</html>

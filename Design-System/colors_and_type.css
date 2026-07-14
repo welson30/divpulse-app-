@@ -1,0 +1,107 @@
+/* ============================================================
+   DivPulse — Colors & Type (canonical distributable)
+   Source of truth: /brand-spec.md, documented in full in /DESIGN.md
+   §§2–4. This file is the package-level entry point for color, type,
+   and radius tokens, plus a --role-* semantic aliasing layer (see
+   bottom of :root) for stronger intent in new code. The full raw
+   token set (adds spacing) lives at /kit/tokens.css — import that
+   too if you need spacing values.
+   ============================================================ */
+
+/* font-display=block (not swap) — fixed 2026-07-14, see kit/tokens.css header */
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=block');
+
+:root {
+  /* ---- color: backgrounds — layered depth, not flat black ---- */
+  --bg-base: #0A0E0D;
+  --bg-surface: #121816;
+  --bg-elevated: #1A211E;
+  --bg-hover: #1E2724;
+
+  /* ---- color: primary green — brand / growth / positive ---- */
+  --green-500: #34D399; /* core brand, primary CTA */
+  --green-600: #10B981; /* hover / pressed */
+  --green-300: #6EE7B7; /* highlights, glow */
+  --green-900: #064E3B; /* chart fill tint */
+
+  /* ---- color: red — reserved ONLY for loss data, never decorative ---- */
+  --red-500: #F87171;
+  --red-900: #450A0A;
+
+  /* ---- color: neutrals — text hierarchy ---- */
+  --text-primary: #F5F7F6;
+  --text-secondary: #A8B3AF;
+  /* text-tertiary measures ~4.1:1 on these backgrounds at small sizes —
+     below the 4.5:1 AA floor. Reserve for decorative/demonstrative use
+     only; use --text-secondary for anything meant to be reliably read. */
+  --text-tertiary: #6B7570;
+  --border-subtle: #242C29;
+
+  /* ---- color: semantic accents — sparing use ---- */
+  --blue-info: #60A5FA;
+  --amber-warning: #FBBF24;
+
+  /* ---- type: families ---- */
+  --font-display: 'Inter Tight', Inter, system-ui, sans-serif;
+  --font-body: Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+
+  /* ---- type: scale ---- */
+  --text-display-size: clamp(40px, 4vw, 48px); /* 600, Inter Tight */
+  --text-h1-size: 28px;                        /* 600, Inter Tight */
+  --text-h2-size: 20px;                        /* 500, Inter Tight */
+  --text-body-size: 15px;                      /* 400, Inter */
+  --text-small-size: 13px;                     /* 400, Inter — pair with --text-secondary, not --text-tertiary */
+
+  /* ---- radii ---- */
+  /* Full token set (also spacing) lives in /kit/tokens.css — repeated here
+     so this file is a complete, standalone color+type+radius entry point. */
+  --radius-control: 10px; /* buttons, icon buttons */
+  --radius-card: 14px;    /* cards, panels, states */
+
+  /* ============================================================
+     Semantic role tokens — layer 2 of the token architecture.
+     These alias the raw palette above to what the color MEANS in a
+     given UI moment, so component authors reach for intent
+     ("this is the CTA background") instead of memorizing which raw
+     swatch maps to which job. No new hex values are introduced here;
+     every --role-* below resolves to a token already declared above.
+     Raw tokens remain available and are what kit/components.css uses
+     directly (preserved source) — prefer --role-* in new code. See
+     DESIGN.md §2 "Token roles" for the full rationale. */
+  --role-bg-canvas: var(--bg-base);
+  --role-bg-surface-1: var(--bg-surface);
+  --role-bg-surface-2: var(--bg-elevated);
+  --role-bg-hover: var(--bg-hover);
+
+  --role-cta-bg: var(--green-500);
+  --role-cta-bg-hover: var(--green-600);
+  --role-cta-fg: var(--bg-base); /* dark text on green — deliberate, see DESIGN.md §6 */
+  --role-cta-glow: rgba(52, 211, 153, 0.08);
+
+  --role-gain: var(--green-500);
+  --role-gain-tint: var(--green-900);
+  --role-loss: var(--red-500);
+  --role-loss-tint: var(--red-900);
+
+  --role-text-heading: var(--text-primary);
+  --role-text-body: var(--text-primary);
+  --role-text-label: var(--text-secondary); /* timestamps, captions, table headers — NOT text-tertiary */
+  --role-text-decorative: var(--text-tertiary); /* fails AA — decorative/demo use only, never real content */
+  --role-border: var(--border-subtle); /* structural/decorative dividers only — cards, table rows. NOT for interactive-control boundaries, see below */
+  --role-border-interactive: var(--text-tertiary); /* buttons, inputs, icon buttons — border-subtle fails WCAG 1.4.11 (~1.1-1.4:1) here; text-tertiary clears the 3:1 floor (~3.4-4.1:1) */
+
+  --role-info: var(--blue-info);
+  --role-warning: var(--amber-warning);
+  --role-focus-ring: var(--green-500);
+}
+
+/* Type utility classes — safe to use directly, or as a reference for
+   your own component classes. Numeric utilities set tabular-nums so
+   financial figures align in columns. */
+.dp-text-display { font-family: var(--font-display); font-size: var(--text-display-size); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.dp-text-h1 { font-family: var(--font-display); font-size: var(--text-h1-size); font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+.dp-text-h2 { font-family: var(--font-display); font-size: var(--text-h2-size); font-weight: 500; color: var(--text-primary); }
+.dp-text-body { font-family: var(--font-body); font-size: var(--text-body-size); font-weight: 400; color: var(--text-primary); line-height: 1.6; }
+.dp-text-small { font-family: var(--font-body); font-size: var(--text-small-size); color: var(--text-secondary); }
+.dp-mono-amount { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }

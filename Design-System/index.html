@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DivPulse — Design System</title>
+<meta name="description" content="DivPulse design system package — style guide, full documentation, token previews, and applied UI." />
+<link rel="stylesheet" href="colors_and_type.css" />
+<link rel="stylesheet" href="kit/tokens.css" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font: 15px/1.6 var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: var(--sp-6) var(--sp-4) var(--sp-8); }
+
+  /* ---- hero ---- */
+  .hero { text-align: center; margin-bottom: var(--sp-8); }
+  .logo-slot {
+    width: 72px; height: 72px; border-radius: 16px;
+    border: 1.5px dashed var(--border-subtle);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto var(--sp-3);
+  }
+  .logo-slot span { font: 600 9px/1 var(--font-mono); letter-spacing: 0.1em; color: var(--text-secondary); }
+  .eyebrow {
+    display: inline-block;
+    font: 600 11px/1 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green-500);
+    margin-bottom: var(--sp-2);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-display-size);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--sp-2);
+  }
+  .hero .lede {
+    color: var(--text-secondary);
+    max-width: 58ch;
+    margin: 0 auto var(--sp-3);
+    font-size: 15px;
+  }
+  .meta-row {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 6px 0; font: 12px/1 var(--font-mono); color: var(--text-tertiary);
+  }
+  .meta-row span:not(:last-child)::after { content: "·"; margin: 0 10px; color: var(--border-subtle); }
+
+  /* ---- section headings ---- */
+  .section-head { margin: 0 0 var(--sp-3); }
+  .section-head .n { font: 12px/1 var(--font-mono); color: var(--green-500); display: block; margin-bottom: 6px; letter-spacing: 0.06em; }
+  .section-head h2 { font-family: var(--font-display); font-size: var(--text-h2-size); font-weight: 500; margin: 0 0 4px; }
+  .section-head p { color: var(--text-secondary); font-size: 13px; margin: 0; max-width: 62ch; }
+
+  section { margin-bottom: var(--sp-8); }
+
+  /* ---- primary cards ---- */
+  .primary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-3);
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    background: var(--bg-surface);
+    text-decoration: none;
+    color: var(--text-primary);
+    padding: var(--sp-4);
+    transition: border-color .14s ease, transform .14s ease, background .14s ease;
+  }
+  .card:hover { border-color: var(--green-500); transform: translateY(-3px); background: var(--bg-elevated); }
+  .card:focus-visible { outline: 2px solid var(--green-500); outline-offset: 2px; }
+
+  .card .n {
+    font: 12px/1 var(--font-mono); color: var(--text-secondary);
+    display: inline-block; margin-bottom: var(--sp-2);
+  }
+  .card .icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--green-900); color: var(--green-500);
+    margin-bottom: var(--sp-3);
+  }
+  .card .icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .card b { font-family: var(--font-display); font-size: 17px; font-weight: 600; display: block; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--text-secondary); margin: 0 0 var(--sp-3); line-height: 1.55; flex-grow: 1; }
+  .card .go { font: 500 12px/1 var(--font-mono); color: var(--green-500); display: inline-flex; align-items: center; gap: 4px; }
+  .card:hover .go { text-decoration: underline; }
+
+  footer {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: var(--sp-4);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-2);
+    font: 12px/1 var(--font-mono); color: var(--text-tertiary);
+  }
+  footer a { color: var(--text-secondary); text-decoration: none; }
+  footer a:hover { color: var(--green-500); }
+
+  @media (max-width: 760px) {
+    .primary-grid { grid-template-columns: 1fr; }
+    .meta-row span:not(:last-child)::after { margin: 0 8px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="hero">
+      <div class="logo-slot" aria-label="Logo placeholder"><span>LOGO</span></div>
+      <span class="eyebrow">Design System Package</span>
+      <h1>DivPulse</h1>
+      <p class="lede">Quiet confidence — the third lane between spreadsheet-cold and consumer-cute. A dark-theme design system for a dividend income dashboard: tokens, components, and applied product screens, all in one package.</p>
+      <div class="meta-row">
+        <span>Dark canvas, single restrained green</span>
+        <span>8px spacing rhythm</span>
+        <span>Dividend investors</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="start-here">
+      <div class="section-head">
+        <span class="n">Start here</span>
+        <h2 id="start-here">Three ways to review the system</h2>
+        <p>Pick the format that fits — a printable handoff guide, the full token-by-token reference, or a card-by-card visual walkthrough.</p>
+      </div>
+      <div class="primary-grid">
+
+        <a class="card" href="style-guide.html">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/><path d="M14 4v6h6"/></svg></div>
+          <span class="n">01</span>
+          <b>Style Guide</b>
+          <p>A shareable, printable 14-page design + component guide — cover, positioning, color, type, spacing, buttons, cards, charts, states, motion, and applied-UI overview. Print / Save as PDF for a client handoff.</p>
+          <span class="go">Open guide →</span>
+        </a>
+
+        <a class="card" href="design-system.html">
+          <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+          <span class="n">02</span>
+          <b>Design System</b>
+          <p>The full original documentation surface — every color, type spec, spacing token, component, and interaction state rendered live on one page.</p>
+          <span class="go">Open documentation →</span>
+        </a>
+
+        <a class="card" href="preview/index.html">
+          <div class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+          <span class="n">03</span>
+          <b>Preview</b>
+          <p>Seven focused review cards, one concern each — color, typography, spacing, radius &amp; elevation, components, brand assets, and applied UI.</p>
+          <span class="go">Open previews →</span>
+        </a>
+
+      </div>
+    </section>
+
+    <footer>
+      <span>DivPulse Design System Package</span>
+    </footer>
+
+  </div>
+</body>
+</html>

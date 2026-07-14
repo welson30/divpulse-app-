@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DivPulse — Your broker never tells you when you get paid. We do.</title>
+<meta name="description" content="Instant push notifications when your dividends hit. Any broker, any device. Free to start.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#0B0F14;color:#fff;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid #1C2636;position:sticky;top:0;background:#0B0F14;z-index:200;gap:16px}
+.logo{display:flex;align-items:center;gap:9px;cursor:pointer;flex-shrink:0}
+.wm{font-size:18px;font-weight:800;letter-spacing:-.4px}
+.wm .g{color:#22C55E}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;color:#4A5568;font-weight:500;transition:color .15s}
+.nav-links a:hover{color:#fff}
+.nav-cta{background:#22C55E;color:#0B0F14;border:none;padding:9px 20px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;flex-shrink:0}
+@media(max-width:640px){.nav-links{display:none}}
+.hero{padding:0}
+.hero-inner{display:flex;align-items:center;justify-content:center;gap:52px;max-width:1100px;margin:0 auto;padding:64px 24px 56px;flex-wrap:wrap}
+.hero-left{flex:1;min-width:280px;max-width:480px}
+.hero-right{flex-shrink:0;display:flex;align-items:center;justify-content:center}
+@media(max-width:820px){.hero-inner{flex-direction:column-reverse;gap:36px;padding-top:44px}.hero-left{text-align:center;max-width:100%}.hero-form{align-items:center}.hero-bchips{justify-content:center}.hero-right{width:100%;display:flex;justify-content:center}}
+@media(max-width:480px){.hp{width:200px;height:410px;border-radius:38px}.hp-lb{font-size:42px}.demo-sec{padding:40px 8px}}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 14px;border-radius:20px;background:#0a1c11;border:1px solid rgba(34,197,94,.3);color:#22C55E;margin-bottom:18px;font-weight:600}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#22C55E;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:18px}
+h1 .g{color:#22C55E}
+.hero-sub{font-size:16px;color:#4A5568;line-height:1.7;margin-bottom:28px}
+.hero-bchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:18px}
+.hero-bchip{font-size:10px;color:#3a4555;background:#111820;border:1px solid #1C2636;padding:3px 8px;border-radius:9px;font-weight:500}
+/* HERO PHONE */
+.hp{width:228px;height:466px;background:#1C1C1E;border-radius:44px;border:1.5px solid #3a3a3c;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.75),inset 0 0 0 .5px rgba(255,255,255,.05)}
+.hp-bl{position:absolute;left:-2.5px;top:90px;width:2.5px;height:24px;background:#3a3a3c;border-radius:2px 0 0 2px}
+.hp-bl2{position:absolute;left:-2.5px;top:120px;width:2.5px;height:24px;background:#3a3a3c;border-radius:2px 0 0 2px}
+.hp-br{position:absolute;right:-2.5px;top:106px;width:2.5px;height:40px;background:#3a3a3c;border-radius:0 2px 2px 0}
+.hp-sc{position:absolute;inset:8px;border-radius:38px;background:#000c1a;overflow:hidden}
+.hp-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 28% 0%,#0a1e3c 0%,#000c1a 55%)}
+.hp-pill{width:72px;height:21px;background:#000;border-radius:10px;margin:8px auto 0;position:relative;z-index:2}
+.hp-sb{display:flex;justify-content:space-between;align-items:center;padding:2px 12px;position:relative;z-index:2}
+.hp-st{font-size:11px;font-weight:600;color:#fff}
+.hp-si{display:flex;gap:3px;align-items:center}
+.hp-wb{display:flex;gap:1px;align-items:flex-end}
+.hp-wb span{background:#fff;border-radius:1px;width:2.5px;display:block}
+.hp-bat{width:15px;height:7px;border:1px solid rgba(255,255,255,.4);border-radius:2px;display:flex;align-items:center;padding:1px;margin-left:2px}
+.hp-bf{width:68%;height:100%;background:#22C55E;border-radius:1px}
+.hp-lt{text-align:center;margin-top:8px;position:relative;z-index:2}
+.hp-lb{font-size:48px;font-weight:200;color:#fff;letter-spacing:-2px;line-height:1}
+.hp-ld{font-size:10px;color:rgba(255,255,255,.6);margin-top:1px}
+.hp-ns{padding:0 8px;margin-top:10px;display:flex;flex-direction:column;gap:4px;position:relative;z-index:2}
+.hp-nc{background:#182338;border-radius:11px;padding:5px 8px;border:.5px solid rgba(255,255,255,.07)}
+.hp-cf{font-size:7px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:.02em}
+.hp-nh{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.hp-ni{width:12px;height:12px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.hp-na{font-size:9px;color:rgba(255,255,255,.42);flex:1;font-weight:500}
+.hp-nt{font-size:8px;color:rgba(255,255,255,.25)}
+.hp-ti{font-size:10px;font-weight:600;color:#fff;margin-bottom:2px}
+.hp-am{font-size:15px;font-weight:700;color:#4ade80;letter-spacing:-.4px;line-height:1.1}
+.hp-hb{width:68px;height:3px;background:rgba(255,255,255,.27);border-radius:2px;position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
+/* ── PHONE NOTIFICATION ANIMATION ── */
+.hp .hp-ns .hp-nc{opacity:0;transform:translateY(-18px)}
+@keyframes notifIn{
+  0%{opacity:0;transform:translateY(-18px)}
+  55%{opacity:1;transform:translateY(3px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+.hp.anim .hp-nc:nth-child(1){animation:notifIn .55s cubic-bezier(.22,1,.36,1) .5s forwards}
+.hp.anim .hp-nc:nth-child(2){animation:notifIn .55s cubic-bezier(.22,1,.36,1) 1.5s forwards}
+.hp.anim .hp-nc:nth-child(3){animation:notifIn .55s cubic-bezier(.22,1,.36,1) 2.5s forwards}
+.hp.anim .hp-nc:nth-child(4){animation:notifIn .55s cubic-bezier(.22,1,.36,1) 3.5s forwards}
+.hp.anim .hp-nc:nth-child(5){animation:notifIn .55s cubic-bezier(.22,1,.36,1) 4.5s forwards}
+/* Fix: SVG fills container correctly */
+.hp-ni svg,.npi svg{width:100%;height:100%;display:block}
+/* Notification format selector */
+.fmt-sel{flex:1;border:.5px solid #1C2636;border-radius:8px;padding:7px 8px;cursor:pointer;background:#0d1117;transition:border-color .15s,background .15s}
+.fmt-sel:hover{border-color:#2a3848}
+.fmt-sel.on{border-color:#22C55E;background:#0a1c11}
+.fmt-sel-lbl{font-size:8px;font-weight:700;color:#3a4555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+.fmt-sel.on .fmt-sel-lbl{color:#22C55E}
+.fmt-mini{background:#111820;border-radius:6px;padding:5px 7px}
+/* ═══ DIVIDEND RECEIPT OVERLAY ═══ */
+.receipt-ov{position:absolute;inset:0;background:#09090f;z-index:50;display:none;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+.receipt-ov.show{display:flex;transform:translateY(0)}
+.receipt-bk{display:flex;align-items:center;gap:6px;padding:10px 13px;border-bottom:.5px solid #1C2636;flex-shrink:0;background:#0d1117;cursor:pointer;user-select:none}
+.receipt-bk:hover{background:#111820}
+.receipt-bk svg{flex-shrink:0}
+.receipt-sc{flex:1;overflow-y:auto;padding:16px 13px}
+.receipt-sc::-webkit-scrollbar{width:2px}
+.receipt-sc::-webkit-scrollbar-thumb{background:#1C2636}
+.rec-chk{width:44px;height:44px;border-radius:50%;background:#0a1c11;border:2px solid rgba(34,197,94,.4);color:#22C55E;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-weight:800;box-shadow:0 0 20px rgba(34,197,94,.12)}
+.rec-hl{font-size:16px;font-weight:800;text-align:center;letter-spacing:-.4px;margin-bottom:3px}
+.rec-sl{font-size:10px;color:#4A5568;text-align:center;margin-bottom:16px}
+.rec-card{background:#111820;border:.5px solid #1C2636;border-radius:11px;overflow:hidden;margin-bottom:9px}
+.rec-hero{padding:14px;border-bottom:.5px solid #0d1117}
+.rec-tk{font-size:13px;font-weight:800;color:#fff;letter-spacing:-.2px;margin-bottom:2px}
+.rec-nm{font-size:9px;color:#4A5568;margin-bottom:8px}
+.rec-am{font-size:28px;font-weight:800;color:#22C55E;letter-spacing:-1px;line-height:1}
+.rec-row{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;border-bottom:.5px solid #0d1117}
+.rec-row:last-child{border-bottom:none}
+.rec-rl{font-size:8px;color:#3a4555;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.rec-rv{font-size:10px;color:#ccc;font-weight:600}
+.rec-inc{background:#0a1c11;border:.5px solid rgba(34,197,94,.2);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.rec-inc-t{font-size:8px;color:#4A5568;margin-bottom:2px;font-weight:500}
+.rec-inc-v{font-size:12px;font-weight:700;color:#22C55E;letter-spacing:-.2px}
+.rec-btns{display:flex;gap:6px}
+.rec-btn-a{flex:1;background:#22C55E;color:#0B0F14;border:none;border-radius:9px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+.rec-btn-b{flex:1;background:#111820;color:#555;border:.5px solid #1C2636;border-radius:9px;padding:10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.notif-wrap{display:flex;justify-content:center;margin-bottom:36px}
+.notif-box{background:#1C1C1E;border:1px solid #2a2a3a;border-radius:16px;padding:14px 18px;width:256px;text-align:left}
+.nb-top{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.nb-ico{width:16px;height:16px;border-radius:4px;overflow:hidden;flex-shrink:0}
+.nb-app{font-size:11px;color:#555;flex:1}.nb-time{font-size:10px;color:#333}
+.nb-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.nb-amt{font-size:28px;font-weight:800;color:#4ade80;letter-spacing:-.5px;margin:2px 0}
+.nb-body{font-size:11px;color:#444;line-height:1.5}
+.hero-form{display:flex;flex-direction:column;align-items:center;gap:10px}
+.form-row{display:flex;gap:8px;width:100%;max-width:440px}
+.form-row input{flex:1;background:#111820;border:1px solid #1C2636;border-radius:10px;padding:13px 16px;font-size:15px;color:#fff;outline:none;font-family:'Inter',sans-serif;transition:border-color .15s}
+.form-row input:focus{border-color:#22C55E}
+.form-row input::placeholder{color:#2a3040}
+.btn-main{background:#22C55E;color:#0B0F14;border:none;border-radius:10px;padding:13px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.form-note{font-size:12px;color:#2a3040}
+.form-ok{display:none;background:#0a1c11;border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:14px 22px;font-size:14px;color:#22C55E;font-weight:600;max-width:440px;width:100%;text-align:center}
+@media(max-width:520px){.form-row{flex-direction:column}.btn-main{width:100%}}
+.slbl{font-size:11px;font-weight:600;color:#22C55E;letter-spacing:.12em;text-transform:uppercase;text-align:center;margin-bottom:8px}
+.sh2{font-size:clamp(22px,4vw,36px);font-weight:800;letter-spacing:-.6px;text-align:center;margin-bottom:6px}
+.sp{font-size:15px;color:#4A5568;text-align:center;margin-bottom:44px}
+.demo-sec{padding:64px 16px;background:#0d1117;border-top:1px solid #1C2636;border-bottom:1px solid #1C2636}
+.demo-inner{max-width:980px;margin:0 auto}
+.demo-frame{margin-top:32px;border-radius:14px;overflow:hidden;border:1px solid #1C2636;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.dp{background:#09090f;color:#fff;font-family:'Inter',sans-serif;font-size:13px}
+.dp-bar{display:flex;align-items:center;padding:0 10px;height:44px;background:#0d1117;border-bottom:.5px solid #1C2636;flex-shrink:0;gap:0}
+.dp-logo{display:flex;align-items:center;gap:7px;margin-right:8px;cursor:pointer;flex-shrink:0}
+.dp-logo svg{width:28px;height:28px;border-radius:7px}
+.dp-wm{font-size:13px;font-weight:800;letter-spacing:-.3px}
+.dp-wm .g{color:#22C55E}
+.dp-tabs{display:flex;flex:1;overflow-x:auto;scrollbar-width:none}
+.dp-tabs::-webkit-scrollbar{display:none}
+.dp-tab{padding:0 9px;height:44px;display:flex;align-items:center;font-size:10px;color:#4A5568;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;font-weight:500}
+.dp-tab:hover{color:#aaa}
+.dp-tab.on{color:#fff;border-bottom-color:#22C55E}
+.dp-tr{display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto}
+.csw,.lsw{display:flex;background:#141420;border:.5px solid #1C2636;border-radius:10px;overflow:hidden}
+.co,.lo{padding:3px 5px;font-size:9px;font-weight:700;color:#4A5568;cursor:pointer}
+.co.on,.lo.on{background:#22C55E;color:#09090f}
+.tp-btn{background:#22C55E;color:#09090f;font-size:9px;font-weight:700;padding:4px 8px;border-radius:10px;cursor:pointer;border:none;font-family:'Inter',sans-serif}
+.av{width:20px;height:20px;border-radius:50%;background:#0f2a1a;display:flex;align-items:center;justify-content:center;font-size:7px;color:#22C55E;font-weight:800;cursor:pointer;border:.5px solid #22533a}
+/* ═══ AX USER DROPDOWN ═══ */
+.av-wrap{position:relative;flex-shrink:0}
+.av{cursor:pointer;user-select:none}
+.ax-dd{position:absolute;right:0;top:26px;width:196px;background:#0d1117;border:.5px solid #1C2636;border-radius:11px;box-shadow:0 8px 28px rgba(0,0,0,.65);z-index:300;display:none;overflow:hidden}
+.ax-dd.open{display:block}
+.ax-u{padding:10px 12px;border-bottom:.5px solid #1C2636;display:flex;align-items:center;gap:8px}
+.ax-u-av{width:24px;height:24px;border-radius:50%;background:#0f2a1a;display:flex;align-items:center;justify-content:center;font-size:7px;color:#22C55E;font-weight:800;border:.5px solid #22533a;flex-shrink:0}
+.ax-u-nm{font-size:11px;font-weight:600;color:#ddd;line-height:1}
+.ax-u-pl{font-size:8px;color:#22C55E;margin-top:2px;font-weight:500}
+.ax-sl{font-size:8px;font-weight:700;color:#3a4555;text-transform:uppercase;letter-spacing:.08em;padding:8px 12px 3px}
+.ax-cr{display:flex;gap:3px;padding:2px 12px 8px}
+.ax-cr .co,.ax-cr .lo{border-radius:5px;border:.5px solid #1C2636;background:#111820;padding:3px 7px}
+.ax-cr .co.on,.ax-cr .lo.on{background:#22C55E;color:#0B0F14;border-color:#22C55E}
+.ax-div{height:.5px;background:#1C2636;margin:0}
+.ax-item{padding:8px 12px;font-size:11px;color:#4A5568;cursor:pointer;display:flex;align-items:center;gap:6px}
+.ax-item:hover{background:#111820;color:#ddd}
+.dp-body{display:flex;height:520px;position:relative;overflow:hidden}
+.dp-main{flex:1;overflow-y:auto}
+.dp-main::-webkit-scrollbar{width:2px}
+.dp-main::-webkit-scrollbar-thumb{background:#1C2636}
+.dp-pad{padding:13px}
+.dp-sc{display:none}.dp-sc.on{display:block}
+.dp-sb{width:145px;background:#0d1117;border-left:.5px solid #1C2636;padding:6px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.sb-box{background:#111820;border:.5px solid rgba(34,197,94,.2);border-radius:5px;padding:3px 6px;margin-bottom:5px;cursor:pointer}
+.sb-lbl{font-size:9px;color:#22C55E;font-weight:600}
+.sb-sub{font-size:7px;color:#4A5568;margin-top:1px}
+.sb-ttl{font-size:7px;color:#2a3040;text-transform:uppercase;letter-spacing:.05em;padding:2px 0 4px}
+.sb-row{display:flex;justify-content:space-between;align-items:center;padding:4px 2px;border-radius:3px;cursor:pointer}
+.sb-row:hover{background:#111820}
+.sb-tk{font-size:9px;font-weight:700;color:#ccc}
+.sb-nm{font-size:7px;color:#4A5568}
+.sb-pr{font-size:9px;font-weight:700;color:#bbb}
+.gn{color:#22C55E}.rd{color:#f87171}
+.dsh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.dstl{font-size:8px;font-weight:700;color:#3a4555;text-transform:uppercase;letter-spacing:.06em}
+.dsa{font-size:9px;color:#22C55E;cursor:pointer;font-weight:600}
+.dcard{background:#111820;border:.5px solid #1C2636;border-radius:9px;padding:11px;margin-bottom:8px}
+.dtf{padding:3px 7px;border-radius:9px;font-size:9px;color:#4A5568;cursor:pointer;background:#111820;border:.5px solid #1C2636;font-weight:600}
+.dtf.on{background:#f59e0b;color:#09090f;border-color:#f59e0b}
+.dpp{background:#111820;border:.5px solid #1C2636;border-radius:7px;padding:7px 9px;display:flex;align-items:center;gap:7px;margin-bottom:4px;cursor:pointer}
+.dpp:hover{border-color:#22C55E}
+.dpp-i{width:22px;height:22px;border-radius:5px;background:#0f2a1c;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#22C55E;flex-shrink:0}
+.dpp-amt{font-size:12px;font-weight:800;color:#22C55E;letter-spacing:-.2px}
+.dpp-meta{font-size:9px;color:#4A5568}
+.dpp-time{font-size:8px;color:#3a4555;margin-left:auto;white-space:nowrap}
+.dhc{background:#111820;border:.5px solid #1C2636;border-radius:9px;padding:10px;position:relative;overflow:hidden;min-height:80px}
+.dhc-lbl{font-size:8px;color:#4A5568;margin-bottom:1px}
+.dhc-val{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.4px;margin-bottom:1px}
+.dhc-sub{font-size:7px;color:#3a4555;display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.dhc-sub b{color:#555}
+.dhr{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:.5px solid #0d1117;cursor:pointer}
+.dhr:last-child{border-bottom:none}
+.dhi{width:22px;height:22px;border-radius:5px;background:#0d1117;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#555;flex-shrink:0}
+.dhn{font-size:10px;font-weight:500;color:#ddd;flex:1}
+.dbk{display:inline-block;font-size:7px;padding:1px 4px;border-radius:2px;background:#1C2636;color:#555;margin-top:1px}
+.dmbar{display:flex;align-items:flex-end;gap:2px;height:50px;margin-bottom:3px}
+.dmbc{display:flex;flex-direction:column;align-items:center;flex:1}
+.dmbf{background:#f59e0b;border-radius:2px 2px 0 0;width:100%;min-height:3px}
+.dcg{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:30px;gap:2px;align-content:start}
+.dcdh{font-size:7px;color:#3a4555;text-align:center;display:flex;align-items:center;justify-content:center}
+.dcd{background:#111820;border:.5px solid #1C2636;border-radius:3px;padding:2px;height:30px;overflow:hidden;cursor:pointer}
+.dcd:hover{border-color:#22C55E}
+.dcd.hp{border-color:rgba(34,197,94,.4);background:#0a1c11}
+.dcd.tod{border-color:#22C55E;border-width:1.5px}
+.dcd.emp{background:transparent;border-color:transparent;cursor:default}
+.dcdn{font-size:7px;font-weight:600;color:#3a4555;margin-bottom:1px}
+.dcd.tod .dcdn{color:#22C55E;font-weight:800}
+.dep{background:#0f4a2a;color:#22C55E;border-radius:2px;padding:1px 2px;font-size:6px;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dex{background:#2a1500;color:#f59e0b;border-radius:2px;padding:1px 2px;font-size:6px;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dee{background:#0a1221;color:#60a5fa;border-radius:2px;padding:1px 2px;font-size:6px;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dem{background:#1a0a2a;color:#a78bfa;border-radius:2px;padding:1px 2px;font-size:6px;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+
+/* ═══ FULL PHONE TEMPLATE SELECTOR ═══ */
+.ftp-wrap{display:flex;gap:12px;margin-bottom:14px;justify-content:center}
+.ftp{flex:0 0 212px;cursor:pointer;text-align:center}
+.ftp-phone{background:#1C1C1E;border-radius:40px;border:1.5px solid #2a2a3a;position:relative;height:452px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.ftp.sel .ftp-phone{border-color:#22C55E;box-shadow:0 0 0 2px rgba(34,197,94,.18)}
+.ftp-bl{position:absolute;left:-2px;top:80px;width:2px;height:20px;background:#3a3a3c;border-radius:2px 0 0 2px}
+.ftp-bl2{position:absolute;left:-2px;top:108px;width:2px;height:20px;background:#3a3a3c;border-radius:2px 0 0 2px}
+.ftp-br{position:absolute;right:-2px;top:94px;width:2px;height:34px;background:#3a3a3c;border-radius:0 2px 2px 0}
+.ftp-scr{position:absolute;inset:8px;border-radius:34px;background:linear-gradient(160deg,#0a1628 0%,#000c1a 55%);overflow:hidden}
+.ftp-pill{width:58px;height:17px;background:#000;border-radius:9px;margin:7px auto 0;position:relative;z-index:2}
+.ftp-sb{display:flex;justify-content:space-between;align-items:center;padding:1px 11px;position:relative;z-index:2}
+.ftp-st{font-size:10px;font-weight:600;color:#fff}
+.ftp-si{display:flex;gap:3px;align-items:center}
+.ftp-wb{display:flex;gap:1px;align-items:flex-end}
+.ftp-wb span{background:#fff;border-radius:1px;width:2px;display:block}
+.ftp-bat{width:13px;height:6px;border:1px solid rgba(255,255,255,.4);border-radius:2px;display:flex;align-items:center;padding:1px;margin-left:1px}
+.ftp-bf{width:70%;height:100%;background:#22C55E;border-radius:1px}
+.ftp-lt{text-align:center;margin-top:6px;position:relative;z-index:2}
+.ftp-lb{font-size:44px;font-weight:200;color:#fff;letter-spacing:-2px;line-height:1}
+.ftp-ld{font-size:8px;color:rgba(255,255,255,.58);margin-top:1px}
+.ftp-ns{padding:0 7px;margin-top:7px;position:relative;z-index:2;display:flex;flex-direction:column;gap:3px}
+.ftp-nc{background:#182338;border-radius:10px;padding:7px 9px;border:.5px solid rgba(255,255,255,.07)}
+.ftp-nh{display:flex;align-items:center;gap:3px;margin-bottom:2px}
+.ftp-ni{width:13px;height:13px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.ftp-ni svg{width:100%;height:100%;display:block}
+.ftp-na{font-size:9px;color:rgba(255,255,255,.4);flex:1;font-weight:500}
+.ftp-nt{font-size:8px;color:rgba(255,255,255,.25)}
+.ftp-ti{font-size:10px;font-weight:700;color:#fff;margin-bottom:2px;line-height:1.2}
+.ftp-am{font-size:17px;font-weight:800;color:#4ade80;letter-spacing:-.5px;line-height:1}
+.ftp-cf{font-size:8px;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.01em}
+.ftp-ds{font-size:8px;color:rgba(255,255,255,.4);line-height:1.5;margin-top:2px}
+.ftp-hb{width:58px;height:3px;background:rgba(255,255,255,.26);border-radius:2px;position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
+.ftp-lbl{font-size:10px;font-weight:600;color:#4A5568;margin-top:8px}
+.ftp.sel .ftp-lbl{color:#22C55E}
+.ftp-rec{font-size:8px;color:#22C55E;font-weight:600;margin-top:2px}
+/* ═══ NOTIFICATION TEMPLATE PHONE MOCKUPS ═══ */
+.tp-phones{display:flex;gap:8px;margin-bottom:12px}
+.tp-phone{flex:1;cursor:pointer;text-align:center}
+.tp-frame{background:#1C1C1E;border-radius:14px;border:1.5px solid #2a2a3a;padding:8px 6px 10px;transition:border-color .15s,box-shadow .15s;min-height:108px;display:flex;flex-direction:column;justify-content:center}
+.tp-phone.sel .tp-frame{border-color:#22C55E;box-shadow:0 0 0 1.5px rgba(34,197,94,.2)}
+.tp-screen{background:linear-gradient(160deg,#0a1628 0%,#000c1a 100%);border-radius:8px;padding:6px;overflow:hidden}
+.tp-notif{background:#182338;border-radius:7px;padding:5px 7px;border:.5px solid rgba(255,255,255,.06)}
+.tp-hd{display:flex;align-items:center;gap:3px;margin-bottom:3px}
+.tp-ico{width:9px;height:9px;border-radius:2px;overflow:hidden;flex-shrink:0}
+.tp-ico svg{width:100%;height:100%;display:block}
+.tp-ap{font-size:6px;color:rgba(255,255,255,.38);flex:1;font-weight:500}
+.tp-tm{font-size:5px;color:rgba(255,255,255,.22)}
+.tp-ti{font-size:6.5px;font-weight:600;color:#fff;margin-bottom:2px;line-height:1.3}
+.tp-am{font-size:12px;font-weight:800;color:#4ade80;letter-spacing:-.3px;line-height:1}
+.tp-cf{font-size:5px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:.01em}
+.tp-ds{font-size:5.5px;color:rgba(255,255,255,.35);line-height:1.45;margin-top:2px}
+.tp-lbl{font-size:9px;font-weight:600;color:#4A5568;margin-top:7px}
+.tp-phone.sel .tp-lbl{color:#22C55E}
+.tp-rec{font-size:7px;color:#22C55E;font-weight:700;margin-top:2px}
+.devi{background:#111820;border:.5px solid #1C2636;border-radius:7px;padding:7px 9px;display:flex;align-items:center;gap:7px;margin-bottom:4px;cursor:pointer}
+.devi:hover{border-color:#22C55E}
+.devi.pay{border-left:2px solid #22C55E}
+.devi.exd{border-left:2px solid #f59e0b}
+.devi.ern{border-left:2px solid #60a5fa}
+.devi.mac{border-left:2px solid #a78bfa}
+.devdc{text-align:center;flex-shrink:0;width:22px}
+.devmo{font-size:7px;color:#4A5568;text-transform:uppercase}
+.devdy{font-size:13px;font-weight:800;color:#fff;line-height:1}
+.devbg{font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;flex-shrink:0}
+.bp{background:#0f4a2a;color:#22C55E}
+.bx{background:#2a1500;color:#f59e0b}
+.be{background:#0a1221;color:#60a5fa}
+.bm{background:#1a0a2a;color:#a78bfa}
+.devnm{font-size:9px;font-weight:600;color:#ddd}
+.devdt{font-size:8px;color:#4A5568;margin-top:1px}
+.devr{margin-left:auto;text-align:right;flex-shrink:0}
+.devamt{font-size:10px;font-weight:700}
+.devst{font-size:7px;color:#4A5568}
+.cchip{background:#111820;border:.5px solid #1C2636;border-radius:9px;padding:3px 7px;font-size:9px;color:#4A5568;cursor:pointer;font-weight:500}
+.cchip:hover{border-color:#22C55E;color:#ddd}
+.cchip.on{border-color:#22C55E;color:#22C55E;background:#0a1c11}
+.ccrd{background:#111820;border:.5px solid #1C2636;border-radius:7px;padding:7px 9px;display:flex;align-items:center;gap:7px;margin-bottom:4px;cursor:pointer}
+.ccrd:hover{border-color:#22C55E}
+.cadd{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;border:.5px solid rgba(34,197,94,.3);background:#0a1c11;color:#22C55E;cursor:pointer;margin-left:auto;flex-shrink:0}
+.dlr{display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:.5px solid #0d1117}
+.dlr:last-child{border-bottom:none}
+.dld{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+.dll{font-size:9px;color:#bbb;flex:1}
+.dlp{font-size:10px;font-weight:700;color:#fff}
+.dlv{font-size:8px;color:#4A5568}
+.dai{background:#111820;border:.5px solid rgba(34,197,94,.25);border-radius:7px;padding:8px 10px;margin-top:8px}
+.dail{font-size:8px;color:#3a4555;margin-bottom:2px}
+.dait{font-size:10px;color:#555;line-height:1.5}
+.dait .gg{color:#22C55E}.dait b{color:#bbb}
+.dyr{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}
+.dyc{background:#0d1117;border:.5px solid #1C2636;border-radius:7px;padding:7px 8px;cursor:help}
+.dyc:hover{border-color:rgba(34,197,94,.3)}
+.dycl{font-size:8px;color:#4A5568;margin-bottom:1px}
+.dycv{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.dycd{font-size:7px;color:#3a4555;margin-top:1px}
+.dtp{display:none;background:#1C2636;border:.5px solid rgba(34,197,94,.3);border-radius:7px;padding:7px 9px;margin-top:7px;font-size:9px;color:#888;line-height:1.6}
+.dtp.show{display:block}
+.dtp b{color:#fff}.dtp .gg{color:#22C55E}
+.dpb{background:#0c2218;border:.5px solid rgba(34,197,94,.2);border-radius:7px;padding:6px 9px;display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.dpbt{font-size:9px;color:#4A5568;flex:1}
+.dpbt b{color:#ddd}
+.pcard{background:#111820;border:.5px solid #1C2636;border-radius:9px;padding:11px;margin-bottom:9px}
+.pctit{font-size:11px;font-weight:700;color:#fff;margin-bottom:4px}
+.pcsub{font-size:9px;color:#4A5568;line-height:1.6;margin-bottom:7px}
+.pcrow{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:.5px solid #0d1117}
+.pcrow:last-child{border-bottom:none}
+.pcico{width:26px;height:16px;border-radius:3px;background:#1C2636;display:flex;align-items:center;justify-content:center;font-size:7px;color:#666;flex-shrink:0;font-weight:700}
+.pcnm{font-size:9px;color:#ddd;flex:1}
+.pcbg{font-size:7px;font-weight:700;padding:2px 5px;border-radius:9px}
+.pball{background:#0a1c11;color:#22C55E;border:.5px solid rgba(34,197,94,.3)}
+.pbbr{background:#0a1221;color:#60a5fa;border:.5px solid rgba(96,165,250,.2)}
+.nprev{background:#1c1c1e;border-radius:10px;padding:10px 14px;margin-bottom:9px}
+.npt{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.npi{width:14px;height:14px;border-radius:3px;overflow:hidden;flex-shrink:0}
+.nptit{font-size:10px;font-weight:600;color:#fff;margin-bottom:1px}
+.npamt{font-size:18px;font-weight:800;color:#4ade80;letter-spacing:-.3px}
+.npdet{font-size:9px;color:#444;margin-top:1px}
+.lfeats{padding:64px 24px;max-width:1000px;margin:0 auto}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.fc{background:#111820;border:1px solid #1C2636;border-radius:12px;padding:22px}
+.fc-ico{font-size:26px;margin-bottom:12px}
+.fc-t{font-size:15px;font-weight:700;margin-bottom:6px}
+.fc-d{font-size:13px;color:#4A5568;line-height:1.6}
+.fc-b{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:9px;margin-top:8px}
+.b-free{background:#0a1c11;color:#22C55E;border:1px solid rgba(34,197,94,.3)}
+.b-pro{background:#1a2a0a;color:#a3e635;border:1px solid rgba(163,230,53,.2)}
+.b-pp{background:#1a1500;color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
+.lhow{padding:56px 24px;background:#0d1117;border-top:1px solid #1C2636;border-bottom:1px solid #1C2636}
+.lhow-in{max-width:820px;margin:0 auto}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px;margin-top:44px}
+.step{text-align:center}
+.step-n{width:38px;height:38px;border-radius:50%;background:#0a1c11;border:1px solid rgba(34,197,94,.3);color:#22C55E;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.step-t{font-size:14px;font-weight:700;margin-bottom:6px}
+.step-d{font-size:13px;color:#4A5568;line-height:1.6}
+.lbrokers{padding:48px 24px;text-align:center;border-bottom:1px solid #1C2636}
+.bchips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px;max-width:680px;margin-left:auto;margin-right:auto}
+.bchip{background:#111820;border:1px solid #1C2636;border-radius:20px;padding:6px 14px;font-size:13px;color:#4A5568;font-weight:500}
+.lpricing{padding:64px 24px;max-width:880px;margin:0 auto}
+.ptoggle{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px}
+.ptl{font-size:13px;font-weight:600;color:#4A5568}
+.ptl.act{color:#fff}
+.ptsw{width:34px;height:18px;background:#22C55E;border-radius:9px;cursor:pointer;position:relative;transition:background .2s}
+.ptsw.mo{background:#1C2636}
+.ptk{width:12px;height:12px;border-radius:50%;background:#fff;position:absolute;top:3px;left:19px;transition:left .2s}
+.ptsw.mo .ptk{left:3px}
+.stag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:9px;background:#0a1c11;color:#22C55E;border:1px solid rgba(34,197,94,.3)}
+.plg{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.plc{background:#111820;border:1px solid #1C2636;border-radius:13px;padding:22px}
+.plc.pop{border-color:#22C55E}
+.plpb{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:#0a1c11;color:#22C55E;border:1px solid rgba(34,197,94,.3);margin-bottom:10px}
+.pln{font-size:15px;font-weight:700;margin-bottom:4px}
+.plp{font-size:34px;font-weight:800;color:#22C55E;letter-spacing:-1px;line-height:1}
+.plper{font-size:12px;color:#4A5568;margin-top:3px;margin-bottom:16px}
+.plf{font-size:12px;color:#4A5568;margin-bottom:5px;padding-left:14px;position:relative}
+.plf::before{content:'✓';position:absolute;left:0;color:#22C55E;font-weight:700}
+.plf.no{color:#2a3040}
+.plf.no::before{content:'×';color:#2a3040}
+.plbtn{width:100%;margin-top:18px;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;border:none}
+.bg{background:#22C55E;color:#0B0F14}
+.bgh{background:#0d1117;border:1px solid #1C2636;color:#4A5568}
+.lsp{padding:56px 24px;background:#0d1117;border-top:1px solid #1C2636;border-bottom:1px solid #1C2636}
+.lsp-in{max-width:900px;margin:0 auto;text-align:center}
+.wlbox{background:#0a1c11;border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:14px 24px;display:inline-flex;align-items:center;gap:10px;margin-bottom:36px}
+.wldot{width:8px;height:8px;border-radius:50%;background:#22C55E;animation:blink 2s infinite}
+.wlt{font-size:14px;font-weight:600}
+.rg{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;text-align:left}
+.rc{background:#111820;border:1px solid #1C2636;border-radius:12px;padding:16px}
+.rc-stars{color:#f59e0b;font-size:12px;margin-bottom:7px}
+.rc-text{font-size:13px;color:#4A5568;line-height:1.6;margin-bottom:7px}
+.rc-src{font-size:11px;color:#2a3040}
+.rd{font-size:11px;color:#1C2636;text-align:center;margin-top:10px}
+.lfaq{padding:56px 24px;max-width:660px;margin:0 auto}
+.fi{border:1px solid #1C2636;border-radius:10px;margin-bottom:7px;overflow:hidden}
+.fq{padding:14px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.fq:hover{background:#111820}
+.fq::after{content:'+';font-size:16px;color:#4A5568;flex-shrink:0;transition:transform .2s}
+.fq.open::after{transform:rotate(45deg);color:#22C55E}
+.fa{padding:0 18px;font-size:13px;color:#4A5568;line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.fa.open{max-height:200px;padding:0 18px 14px}
+footer{padding:40px 24px;border-top:1px solid #1C2636;text-align:center}
+.flr{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:14px}
+.flinks{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.flinks a{font-size:12px;color:#2a3040}
+.flinks a:hover{color:#555}
+.flangs{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.flng{font-size:11px;color:#22C55E;background:#0a1c11;border:1px solid rgba(34,197,94,.2);padding:3px 8px;border-radius:9px}
+.flng.cs{color:#2a3040;background:transparent;border-color:#1C2636;font-style:italic}
+.fcp{font-size:12px;color:#1C2636}
+</style>
+</head>
+<body>
+
+<!-- ══ SPARK LOGO SVG SYMBOLS ══ -->
+<svg style="display:none">
+  <symbol id="dpl" viewBox="0 0 100 100">
+    <rect width="100" height="100" rx="22" fill="#0B0F14"/>
+    <path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/>
+  </symbol>
+  <symbol id="dpl-bare" viewBox="0 0 100 100">
+    <path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/>
+  </symbol>
+  <symbol id="dpl-lt" viewBox="0 0 100 100">
+    <rect width="100" height="100" rx="22" fill="#F0F3F6"/>
+    <path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/>
+  </symbol>
+</svg>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo" onclick="window.scrollTo(0,0)">
+    <svg width="30" height="30" viewBox="0 0 100 100"><use href="#dpl"/></svg>
+    <div class="wm">Div<span class="g">Pulse</span></div>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#demo">Demo</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('hemail').focus()">Join waitlist</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+
+    <!-- LEFT: text + form -->
+    <div class="hero-left">
+      <div class="hero-badge"><span class="badge-dot"></span>Push notifications for dividend investors</div>
+      <h1>Your broker never tells you when you get paid.<br><span class="g">We do.</span></h1>
+      <p class="hero-sub">DivPulse sends an instant notification the moment a dividend lands — Fidelity, Schwab, XP, any broker. Never miss a payment again.</p>
+      <form class="hero-form" action="https://formspree.io/f/mqevwqoj" method="POST" onsubmit="doForm(event)">
+        <input type="hidden" name="_subject" value="DivPulse waitlist">
+        <div class="form-row">
+          <input type="email" id="hemail" name="email" placeholder="your@email.com" required>
+          <button type="submit" class="btn-main">Join free waitlist</button>
+        </div>
+        <div class="form-note">Free forever for early members · No credit card required</div>
+        <div class="form-ok" id="form-ok">✅ You're on the list! We'll reach out when we launch.</div>
+      </form>
+      <div class="hero-bchips">
+        <span class="hero-bchip">Fidelity</span>
+        <span class="hero-bchip">Schwab</span>
+        <span class="hero-bchip">XP Investimentos</span>
+        <span class="hero-bchip">Avenue</span>
+        <span class="hero-bchip">Nomad</span>
+        <span class="hero-bchip">IBKR</span>
+        <span class="hero-bchip">Robinhood</span>
+        <span class="hero-bchip">+ any broker</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: phone mockup -->
+    <div class="hero-right">
+      <div class="hp">
+        <div class="hp-bl"></div><div class="hp-bl2"></div><div class="hp-br"></div>
+        <div class="hp-sc">
+          <div class="hp-bg"></div>
+          <div class="hp-pill"></div>
+          <div class="hp-sb">
+            <span class="hp-st">9:41</span>
+            <div class="hp-si">
+              <div class="hp-wb"><span style="height:3px"></span><span style="height:5px"></span><span style="height:7px"></span><span style="height:9px"></span></div>
+              <div class="hp-bat"><div class="hp-bf"></div></div>
+            </div>
+          </div>
+          <div class="hp-lt">
+            <div class="hp-lb">9:41</div>
+            <div class="hp-ld" id="hp-date">Thursday, July 3</div>
+          </div>
+          <div class="hp-ns">
+            <div class="hp-nc">
+              <div class="hp-nh"><div class="hp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="hp-na">DivPulse</span><span class="hp-nt">now</span></div>
+              <div class="hp-ti pn-title" data-ticker="JEPI">Dividend received · JEPI</div>
+              <div class="hp-am">+$61.20</div>
+              <div class="hp-cf">Fidelity · Payment confirmed ✓</div>
+            </div>
+            <div class="hp-nc">
+              <div class="hp-nh"><div class="hp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="hp-na">DivPulse</span><span class="hp-nt">3m ago</span></div>
+              <div class="hp-ti pn-title" data-ticker="SCHD">Dividend received · SCHD</div>
+              <div class="hp-am">+$85.34</div>
+              <div class="hp-cf">Fidelity · Payment confirmed ✓</div>
+            </div>
+            <div class="hp-nc">
+              <div class="hp-nh"><div class="hp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="hp-na">DivPulse</span><span class="hp-nt">yesterday</span></div>
+              <div class="hp-ti pn-title" data-ticker="O">Dividend received · O</div>
+              <div class="hp-am">+$18.44</div>
+              <div class="hp-cf">Schwab · Payment confirmed ✓</div>
+            </div>
+            <div class="hp-nc">
+              <div class="hp-nh"><div class="hp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="hp-na">DivPulse</span><span class="hp-nt">2d ago</span></div>
+              <div class="hp-ti pn-title" data-ticker="ADC">Dividend received · ADC</div>
+              <div class="hp-am">+$14.82</div>
+              <div class="hp-cf">IBKR · Payment confirmed ✓</div>
+            </div>
+            <div class="hp-nc">
+              <div class="hp-nh"><div class="hp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="hp-na">DivPulse</span><span class="hp-nt">2d ago</span></div>
+              <div class="hp-ti pn-title" data-ticker="VOO">Dividend received · VOO</div>
+              <div class="hp-am">+$21.10</div>
+              <div class="hp-cf">Schwab · Payment confirmed ✓</div>
+            </div>
+          </div>
+          <div class="hp-hb"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- APP DEMO -->
+<section class="demo-sec" id="demo">
+  <div class="demo-inner">
+    <div class="slbl">Live demo</div>
+    <h2 class="sh2">See DivPulse in action</h2>
+    <p class="sp">Click every tab — this is the real app you'll use.</p>
+    <div class="demo-frame">
+      <div class="dp">
+        <div class="dp-bar">
+          <div class="dp-logo" onclick="dpTab('fy')">
+            <svg width="28" height="28" viewBox="0 0 100 100"><use href="#dpl"/></svg>
+            <div class="dp-wm">Div<span class="g">Pulse</span></div>
+          </div>
+          <div class="dp-tabs">
+            <div class="dp-tab on" data-t="fy"  onclick="dpTab('fy')">For You</div>
+            <div class="dp-tab"    data-t="hld" onclick="dpTab('hld')">Holdings</div>
+            <div class="dp-tab"    data-t="div" onclick="dpTab('div')">Dividends</div>
+            <div class="dp-tab"    data-t="cal" onclick="dpTab('cal')">Calendar</div>
+            <div class="dp-tab"    data-t="col" onclick="dpTab('col')">Collections</div>
+            <div class="dp-tab"    data-t="dv"  onclick="dpTab('dv')">Diversification</div>
+            <div class="dp-tab"    data-t="wl"  onclick="dpTab('wl')">Watchlist</div>
+            <div class="dp-tab"    data-t="gl"  onclick="dpTab('gl')">Goals</div>
+            <div class="dp-tab"    data-t="pay" onclick="dpTab('pay')">Payments</div>
+          </div>
+          <div class="dp-tr">
+            <button class="tp-btn" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Try Pro ↗</button>
+            <div class="av-wrap">
+              <div class="av" onclick="toggleAX()">AX</div>
+              <div class="ax-dd" id="axDD">
+                <div class="ax-u">
+                  <div class="ax-u-av">AX</div>
+                  <div style="flex:1"><div class="ax-u-nm">Alex</div><div class="ax-u-pl">Free plan · <span style="color:#22C55E;cursor:pointer" onclick="window.scrollTo(0,0);toggleAX()">Upgrade ↗</span></div></div>
+                </div>
+                <div style="padding:7px 12px 8px;border-bottom:.5px solid #1C2636;background:#0a1218">
+                  <div style="font-size:8px;color:#4A5568;margin-bottom:2px;font-weight:500">Today's income</div>
+                  <div style="font-size:13px;font-weight:700;color:#22C55E;letter-spacing:-.3px">+$61.20 · 2 dividends</div>
+                </div>
+                <div class="ax-sl">Currency</div>
+                <div class="ax-cr">
+                  <div class="co on" onclick="setCur('USD',this)">USD</div>
+                  <div class="co"    onclick="setCur('BRL',this)">BRL</div>
+                  <div class="co"    onclick="setCur('MXN',this)">MXN</div>
+                </div>
+                <div class="ax-div"></div>
+                <div class="ax-sl">Language</div>
+                <div class="ax-cr">
+                  <div class="lo on" onclick="setLng('EN',this)">EN</div>
+                  <div class="lo"    onclick="setLng('PT',this)">PT</div>
+                  <div class="lo"    onclick="setLng('ES',this)">ES</div>
+                </div>
+                <div class="ax-div"></div>
+                <div class="ax-item" onclick="dpTab('pay');toggleAX()">🔔 Notification settings</div>
+                <div class="ax-item" onclick="dpTab('hld');toggleAX()">📊 Portfolio</div>
+                <div class="ax-item">⚙️ Settings</div>
+                <div class="ax-div"></div>
+                <div class="ax-item" onclick="window.scrollTo(0,0);toggleAX()" style="color:#22C55E;font-weight:600">🚀 Upgrade to Pro</div>
+                <div class="ax-item" style="color:#f87171">↩ Sign out</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-body">
+          <div class="dp-main" id="dpm">
+            <!-- FOR YOU -->
+            <div class="dp-sc on" id="dp-fy"><div class="dp-pad">
+              <div style="font-size:15px;font-weight:800;letter-spacing:-.3px;margin-bottom:1px" id="dpgreet">Good morning, Alex</div>
+              <div style="font-size:9px;color:#4A5568;margin-bottom:9px">Jul 3 · 2 dividends today · <span class="gn" id="dptoday">+$79.64</span></div>
+              <div class="dpb"><span style="font-size:12px;color:#22C55E;flex-shrink:0">🔔</span><span class="dpbt"><b>Push notifications active.</b> You know the moment a dividend lands.</span><span style="font-size:9px;color:#22C55E;cursor:pointer;white-space:nowrap">Configure</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px">
+                <div class="dhc">
+                  <div class="dhc-lbl">Portfolio value</div>
+                  <div class="dhc-val" id="dppfv">$84,230</div>
+                  <div style="font-size:8px;margin-bottom:2px" class="gn">+<span id="dpytd">$3,041</span> · +3.74% YTD</div>
+                  <div class="dhc-sub"><span>Fidelity</span><b id="dpfid">$34k</b><span>Schwab</span><b id="dpsch">$28k</b></div>
+                  <svg style="position:absolute;bottom:0;left:0;right:0;height:28px;opacity:.45" viewBox="0 0 200 28" preserveAspectRatio="none"><polyline points="0,25 40,20 80,15 120,10 160,6 200,2" fill="none" stroke="#22C55E" stroke-width="1.5"/></svg>
+                </div>
+                <div class="dhc">
+                  <div class="dhc-lbl">Annual dividend income</div>
+                  <div class="dhc-val" id="dpannv">$5,220</div>
+                  <div style="font-size:8px;margin-bottom:2px" class="gn">+<span id="dpmthv">$412</span> this month</div>
+                  <div class="dhc-sub"><span>Yield</span><b>5.84%</b><span>YoC</span><b>6.71%</b></div>
+                  <svg style="position:absolute;bottom:0;left:0;right:0;height:28px;opacity:.45" viewBox="0 0 200 28" preserveAspectRatio="none"><polyline points="0,26 50,21 100,15 150,9 200,3" fill="none" stroke="#f59e0b" stroke-width="1.5"/></svg>
+                </div>
+              </div>
+              <div class="dsh"><span class="dstl">Today's payments</span><span class="dsa">See all</span></div>
+              <div class="dpp"><div class="dpp-i">JEPI</div><div><div class="dpp-amt" id="dpjepi">+$61.20</div><div class="dpp-meta">JPMorgan Equity Premium · Fidelity</div></div><span class="dpp-time">9:02 AM</span></div>
+              <div class="dpp"><div class="dpp-i">O</div><div><div class="dpp-amt" id="dpo">+$18.44</div><div class="dpp-meta">Realty Income Corp · Schwab</div></div><span class="dpp-time">9:02 AM</span></div>
+              <div class="dsh" style="margin-top:8px"><span class="dstl">Next payment</span></div>
+              <div class="dpp" style="border-color:#2a2200"><div class="dpp-i" style="background:#1a1500;color:#f59e0b">ADC</div><div><div style="font-size:11px;font-weight:800;color:#f59e0b" id="dpadc">$14.82 expected</div><div class="dpp-meta">Agree Realty Corp · IBKR · Jul 7</div></div><span class="dpp-time">in 4 days</span></div>
+            </div></div>
+            <!-- HOLDINGS -->
+            <div class="dp-sc" id="dp-hld"><div class="dp-pad">
+              <div style="font-size:8px;color:#4A5568;margin-bottom:1px">Total portfolio</div>
+              <div style="font-size:19px;font-weight:800;letter-spacing:-.4px;margin-bottom:2px" id="dphtot">$84,230.00</div>
+              <div style="font-size:9px;margin-bottom:7px" class="gn">+$3,041 · +3.74% YTD</div>
+              <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap">
+                <div class="dtf on">1D</div><div class="dtf">1W</div><div class="dtf">1M</div><div class="dtf">3M</div><div class="dtf">YTD</div><div class="dtf">1Y</div><div class="dtf">Max</div>
+              </div>
+              <div class="dsh"><span class="dstl">Assets (17)</span><span class="dsa" onclick="showToast()">+ Add holding</span></div>
+              <div class="dcard" style="padding:7px 9px">
+                <div class="dhr"><div class="dhi">SCHD</div><div style="flex:1"><div class="dhn">Schwab US Dividend ETF</div><span class="dbk">Fidelity</span></div><div style="text-align:right"><div style="font-size:11px;font-weight:600;color:#fff">$28,101</div><div style="font-size:8px" class="gn">+1.2%</div></div></div>
+                <div class="dhr"><div class="dhi">JEPI</div><div style="flex:1"><div class="dhn">JPMorgan Equity Premium</div><span class="dbk">Fidelity</span></div><div style="text-align:right"><div style="font-size:11px;font-weight:600;color:#fff">$11,697</div><div style="font-size:8px" class="rd">-0.8%</div></div></div>
+                <div class="dhr"><div class="dhi">XYLD</div><div style="flex:1"><div class="dhn">Global X Covered Call ETF</div><span class="dbk">Schwab</span></div><div style="text-align:right"><div style="font-size:11px;font-weight:600;color:#fff">$8,522</div><div style="font-size:8px" class="gn">+0.4%</div></div></div>
+                <div class="dhr"><div class="dhi">VOO</div><div style="flex:1"><div class="dhn">Vanguard S&P 500 ETF</div><span class="dbk">Schwab</span></div><div style="text-align:right"><div style="font-size:11px;font-weight:600;color:#fff">$6,880</div><div style="font-size:8px" class="gn">+0.3%</div></div></div>
+                <div class="dhr"><div class="dhi">O</div><div style="flex:1"><div class="dhn">Realty Income Corp</div><span class="dbk">XP Investimentos</span></div><div style="text-align:right"><div style="font-size:11px;font-weight:600;color:#fff">$4,803</div><div style="font-size:8px" class="rd">-0.3%</div></div></div>
+                <div class="dhr"><div class="dhi">ADC</div><div style="flex:1"><div class="dhn">Agree Realty Corp</div><span class="dbk">IBKR</span></div><div style="text-align:right"><div style="font-size:11px;font-weight:600;color:#fff">$4,512</div><div style="font-size:8px" class="gn">+0.6%</div></div></div>
+              </div>
+            </div></div>
+            <!-- DIVIDENDS -->
+            <div class="dp-sc" id="dp-div"><div class="dp-pad">
+              <div class="dcard" style="margin-bottom:9px">
+                <div style="font-size:8px;color:#4A5568;margin-bottom:1px">Annual dividend income</div>
+                <div style="font-size:20px;font-weight:800;letter-spacing:-.6px;margin-bottom:2px" id="dpdivann">$5,220</div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1C2636;border-radius:6px;overflow:hidden;margin-bottom:9px">
+                  <div style="background:#0d1117;padding:8px 6px;text-align:center"><div style="font-size:7px;color:#4A5568;margin-bottom:2px">Per day</div><div style="font-size:13px;font-weight:800;color:#22C55E" id="dpdivd">$14.30</div></div>
+                  <div style="background:#0d1117;padding:8px 6px;text-align:center"><div style="font-size:7px;color:#4A5568;margin-bottom:2px">Per month</div><div style="font-size:13px;font-weight:800;color:#22C55E" id="dpdivm">$435</div></div>
+                  <div style="background:#0d1117;padding:8px 6px;text-align:center"><div style="font-size:7px;color:#4A5568;margin-bottom:2px">Per year</div><div style="font-size:13px;font-weight:800;color:#22C55E" id="dpdivy">$5,220</div></div>
+                </div>
+                <div class="dyr">
+                  <div class="dyc" onclick="dpTip('ytip')"><div class="dycl">Current Yield <span style="font-size:7px;color:#3a4555;font-style:italic">tap ⓘ</span></div><div class="dycv">5.84%</div><div class="dycd">dividends ÷ current value</div></div>
+                  <div class="dyc" onclick="dpTip('yoctip')"><div class="dycl">Yield on Cost <span style="font-size:7px;color:#3a4555;font-style:italic">tap ⓘ</span></div><div class="dycv">6.71%</div><div class="dycd">dividends ÷ cost paid</div></div>
+                </div>
+                <div class="dtp" id="ytip"><b>Current Yield (5.84%)</b> = $5,220 annual ÷ $84,230 value today.</div>
+                <div class="dtp" id="yoctip"><b>Yield on Cost (6.71%)</b> = $5,220 ÷ ~$77,800 originally invested. Grows as companies raise dividends.</div>
+              </div>
+              <div class="dsh"><span class="dstl">Monthly income 2026</span></div>
+              <div class="dmbar" id="dpbars"></div>
+              <div style="display:flex;margin-bottom:6px" id="dpbarlbls"></div>
+              <div class="dsh"><span class="dstl">Top earners</span></div>
+              <div class="dcard" style="padding:7px 9px">
+                <div class="dhr"><div class="dhi" style="background:#1a1500;color:#f59e0b">XYLD</div><div style="flex:1"><div class="dhn">Global X Covered Call</div></div><div style="text-align:right"><div style="font-size:8px;color:#f59e0b">10.31%</div><div style="font-size:11px;font-weight:600;color:#fff">$879/yr</div></div></div>
+                <div class="dhr"><div class="dhi" style="background:#1a1500;color:#f59e0b">JEPI</div><div style="flex:1"><div class="dhn">JPMorgan Equity Premium</div></div><div style="text-align:right"><div style="font-size:8px;color:#f59e0b">7.21%</div><div style="font-size:11px;font-weight:600;color:#fff">$843/yr</div></div></div>
+                <div class="dhr"><div class="dhi" style="background:#1a1500;color:#f59e0b">SCHD</div><div style="flex:1"><div class="dhn">Schwab US Dividend ETF</div></div><div style="text-align:right"><div style="font-size:8px;color:#f59e0b">3.52%</div><div style="font-size:11px;font-weight:600;color:#fff">$988/yr</div></div></div>
+              </div>
+            </div></div>
+            <!-- CALENDAR -->
+            <div class="dp-sc" id="dp-cal"><div class="dp-pad">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+                <span style="font-size:13px;font-weight:700">July 2026</span>
+                <div style="display:flex;gap:5px">
+                  <div class="dtf on" id="ctg" onclick="dpCalV('g')">Calendar</div>
+                  <div class="dtf" id="cte" onclick="dpCalV('e')">Events</div>
+                </div>
+              </div>
+              <div id="dpCalGrid">
+                <div class="dcg">
+                  <div class="dcdh">M</div><div class="dcdh">T</div><div class="dcdh">W</div><div class="dcdh">T</div><div class="dcdh">F</div><div class="dcdh">S</div><div class="dcdh">S</div>
+                  <div class="dcd emp"></div><div class="dcd emp"></div><div class="dcd"><div class="dcdn">1</div><div class="dex">ADC ex-d</div></div>
+                  <div class="dcd"><div class="dcdn">2</div><div class="dep">JEPI $61</div></div>
+                  <div class="dcd tod"><div class="dcdn">3</div></div>
+                  <div class="dcd"><div class="dcdn">4</div></div><div class="dcd"><div class="dcdn">5</div></div>
+                  <div class="dcd"><div class="dcdn">6</div></div><div class="dcd hp"><div class="dcdn">7</div><div class="dep">ADC $15</div></div><div class="dcd"><div class="dcdn">8</div></div>
+                  <div class="dcd"><div class="dcdn">9</div><div class="dex">SCHD</div></div><div class="dcd hp"><div class="dcdn">10</div><div class="dep">XYLD $45</div></div>
+                  <div class="dcd" style="border-color:#1a2a4a;background:#0a1221"><div class="dcdn">11</div><div class="dee">JPM ER</div></div><div class="dcd"><div class="dcdn">12</div></div>
+                  <div class="dcd"><div class="dcdn">13</div></div><div class="dcd"><div class="dcdn">14</div></div><div class="dcd"><div class="dcdn">15</div></div><div class="dcd"><div class="dcdn">16</div></div>
+                  <div class="dcd hp"><div class="dcdn">17</div><div class="dep">JEPI $61</div></div><div class="dcd"><div class="dcdn">18</div></div><div class="dcd"><div class="dcdn">19</div></div><div class="dcd"><div class="dcdn">20</div></div>
+                  <div class="dcd hp"><div class="dcdn">21</div><div class="dep">O $18</div></div><div class="dcd"><div class="dcdn">22</div></div><div class="dcd"><div class="dcdn">23</div></div>
+                  <div class="dcd"><div class="dcdn">24</div><div class="dex">JEPI ex</div></div>
+                  <div class="dcd" style="border-color:#2a1a4a;background:#1a0a2a"><div class="dcdn">25</div><div class="dem">Fed</div></div>
+                  <div class="dcd"><div class="dcdn">26</div></div><div class="dcd"><div class="dcdn">27</div></div>
+                  <div class="dcd hp"><div class="dcdn">28</div><div class="dep">SCHD $88</div></div><div class="dcd"><div class="dcdn">29</div></div><div class="dcd"><div class="dcdn">30</div></div>
+                  <div class="dcd hp"><div class="dcdn">31</div><div class="dep">VOO $21</div></div><div class="dcd emp"></div><div class="dcd emp"></div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:6px;font-size:8px;color:#3a4555;flex-wrap:wrap">
+                  <span><span style="display:inline-block;width:6px;height:6px;border-radius:1px;background:#0f4a2a;margin-right:2px"></span>Payment</span>
+                  <span><span style="display:inline-block;width:6px;height:6px;border-radius:1px;background:#2a1500;margin-right:2px"></span>Ex-date</span>
+                  <span><span style="display:inline-block;width:6px;height:6px;border-radius:1px;background:#0a1221;margin-right:2px"></span>Earnings</span>
+                  <span><span style="display:inline-block;width:6px;height:6px;border-radius:1px;background:#1a0a2a;margin-right:2px"></span>Macro</span>
+                </div>
+              </div>
+              <div id="dpCalEv" style="display:none">
+                <div style="font-size:9px;font-weight:700;color:#2a3040;text-transform:uppercase;letter-spacing:.05em;padding-bottom:5px">Today · Jul 3</div>
+                <div class="devi pay"><div class="devdc"><div class="devmo">Jul</div><div class="devdy">2</div></div><div class="devbg bp">DIV</div><div style="flex:1"><div class="devnm">JEPI · JPMorgan Equity Premium</div><div class="devdt">Payment · 210 shares · Fidelity</div></div><div class="devr"><div class="devamt gn">+$61.20</div><div class="devst">confirmed ✓</div></div></div>
+                <div style="font-size:9px;font-weight:700;color:#2a3040;text-transform:uppercase;letter-spacing:.05em;padding:7px 0 5px">Upcoming</div>
+                <div class="devi pay"><div class="devdc"><div class="devmo">Jul</div><div class="devdy">7</div></div><div class="devbg bp">DIV</div><div style="flex:1"><div class="devnm">ADC · Agree Realty Corp</div><div class="devdt">Payment · 60 shares</div></div><div class="devr"><div class="devamt gn">+$14.82</div><div class="devst">confirmed ✓</div></div></div>
+                <div class="devi exd"><div class="devdc"><div class="devmo">Jul</div><div class="devdy">9</div></div><div class="devbg bx">EX</div><div style="flex:1"><div class="devnm">SCHD · Schwab US Dividend ETF</div><div class="devdt">Ex-dividend date</div></div><div class="devr"><div class="devamt" style="color:#f59e0b">$0.251/sh</div></div></div>
+                <div class="devi ern"><div class="devdc"><div class="devmo">Jul</div><div class="devdy">11</div></div><div class="devbg be">ER</div><div style="flex:1"><div class="devnm">JPM · JPMorgan Chase & Co</div><div class="devdt">Q2 2026 earnings · affects JEPI</div></div><div class="devr"><div class="devamt" style="color:#60a5fa">EPS $4.28</div></div></div>
+                <div class="devi mac"><div class="devdc"><div class="devmo">Jul</div><div class="devdy">25</div></div><div class="devbg bm">FED</div><div style="flex:1"><div class="devnm">Federal Reserve — Rate Decision</div><div class="devdt">FOMC · affects REITs and dividend stocks</div></div><div class="devr"><div class="devamt" style="color:#a78bfa">HIGH</div></div></div>
+              </div>
+            </div></div>
+            <!-- COLLECTIONS -->
+            <div class="dp-sc" id="dp-col"><div class="dp-pad">
+              <div style="font-size:13px;font-weight:800;margin-bottom:2px">Collections</div>
+              <div style="background:#0a1221;border:.5px solid rgba(96,165,250,.2);border-radius:7px;padding:7px 9px;margin-bottom:8px;font-size:9px;color:#555;line-height:1.5"><b style="color:#60a5fa">Auto-populated.</b> Tap a category → DivPulse shows all matching stocks and ETFs instantly.</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px">
+                <div class="cchip on" onclick="dpCol('div',this)">Dividends</div>
+                <div class="cchip" onclick="dpCol('reits',this)">REITs</div>
+                <div class="cchip" onclick="dpCol('hy',this)">High Yield</div>
+                <div class="cchip" onclick="dpCol('cc',this)">Covered Calls</div>
+                <div class="cchip" onclick="dpCol('bdc',this)">BDCs</div>
+                <div class="cchip" onclick="dpCol('ym',this)">YieldMax</div>
+                <div class="cchip" onclick="dpCol('br',this)">BR in the US</div>
+                <div class="cchip" onclick="dpCol('tech',this)">Technology</div>
+                <div class="cchip" onclick="dpCol('ai',this)">Top AI</div>
+              </div>
+              <div class="dsh"><span class="dstl" id="dpColT">Dividend ETFs & Stocks</span><span style="font-size:8px;color:#4A5568" id="dpColC">12 assets</span></div>
+              <div style="font-size:9px;color:#4A5568;margin-bottom:7px;line-height:1.5" id="dpColD">High-quality dividend payers with consistent history.</div>
+              <div id="dpColL"></div>
+            </div></div>
+            <!-- DIVERSIFICATION -->
+            <div class="dp-sc" id="dp-dv"><div class="dp-pad">
+              <div style="font-size:13px;font-weight:800;margin-bottom:2px">Diversification</div>
+              <div style="font-size:9px;color:#4A5568;margin-bottom:8px">Portfolio breakdown — updates as you add holdings</div>
+              <div style="display:flex;gap:4px;margin-bottom:9px;flex-wrap:wrap">
+                <div class="dtf on" id="dvt-c" onclick="dpDv('class',this)">Asset class</div>
+                <div class="dtf" id="dvt-s" onclick="dpDv('sector',this)">Sector</div>
+                <div class="dtf" id="dvt-b" onclick="dpDv('broker',this)">Broker</div>
+                <div class="dtf" id="dvt-g" onclick="dpDv('geo',this)">Country</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <canvas id="dvCanvas" width="130" height="130" style="flex-shrink:0"></canvas>
+                <div style="flex:1" id="dvLeg"></div>
+              </div>
+              <div class="dai"><div class="dail">AI insight</div><div class="dait" id="dvAI">Your portfolio is <span class="gg">overweight in ETFs (61%)</span>. Adding stocks like <b>O, ADC, STAG</b> could improve diversification while maintaining yield.</div></div>
+            </div></div>
+            <!-- WATCHLIST -->
+            <div class="dp-sc" id="dp-wl"><div class="dp-pad">
+              <div style="font-size:13px;font-weight:800;margin-bottom:2px">Watchlist</div>
+              <div style="font-size:9px;color:#4A5568;margin-bottom:9px">Assets you're tracking before adding to portfolio</div>
+              <div class="dsh"><span class="dstl">Watching (4)</span><span class="dsa">+ Add ticker</span></div>
+              <div class="dcard" style="padding:0;overflow:hidden">
+                <div class="dhr" style="padding:8px 9px">
+                  <div class="dhi" style="background:#1a1500;color:#f59e0b">NVDA</div>
+                  <div style="flex:1"><div class="dhn">NVIDIA Corporation</div><div style="font-size:8px;color:#3a4555">Yield: 0.03% · Not a dividend stock</div></div>
+                  <div style="text-align:right;margin-right:6px"><div style="font-size:11px;font-weight:600">$124.92</div><div style="font-size:8px" class="gn">+2.1%</div></div>
+                  <span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;background:#0a1c11;color:#22C55E;border:.5px solid rgba(34,197,94,.3);cursor:pointer">+ Add</span>
+                </div>
+                <div class="dhr" style="padding:8px 9px">
+                  <div class="dhi" style="background:#1a1500;color:#f59e0b">MSFT</div>
+                  <div style="flex:1"><div class="dhn">Microsoft Corporation</div><div style="font-size:8px;color:#3a4555">Yield: 0.80% · Low dividend</div></div>
+                  <div style="text-align:right;margin-right:6px"><div style="font-size:11px;font-weight:600">$430.15</div><div style="font-size:8px" class="rd">-0.4%</div></div>
+                  <span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;background:#0a1c11;color:#22C55E;border:.5px solid rgba(34,197,94,.3);cursor:pointer">+ Add</span>
+                </div>
+                <div class="dhr" style="padding:8px 9px">
+                  <div class="dhi" style="background:#0a1c11;color:#22C55E">ARCC</div>
+                  <div style="flex:1"><div class="dhn">Ares Capital Corporation</div><div style="font-size:8px;color:#3a4555">Yield: 9.20% · BDC · Strong income</div></div>
+                  <div style="text-align:right;margin-right:6px"><div style="font-size:11px;font-weight:600">$21.80</div><div style="font-size:8px" class="gn">+0.9%</div></div>
+                  <span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;background:#0a1c11;color:#22C55E;border:.5px solid rgba(34,197,94,.3);cursor:pointer">+ Add</span>
+                </div>
+                <div class="dhr" style="padding:8px 9px;border-bottom:none">
+                  <div class="dhi" style="background:#0a1c11;color:#22C55E">MAIN</div>
+                  <div style="flex:1"><div class="dhn">Main Street Capital</div><div style="font-size:8px;color:#3a4555">Yield: 5.80% · BDC · Monthly dividend</div></div>
+                  <div style="text-align:right;margin-right:6px"><div style="font-size:11px;font-weight:600">$55.40</div><div style="font-size:8px" class="gn">+0.3%</div></div>
+                  <span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;background:#0a1c11;color:#22C55E;border:.5px solid rgba(34,197,94,.3);cursor:pointer">+ Add</span>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- GOALS -->
+            <div class="dp-sc" id="dp-gl"><div class="dp-pad">
+              <div style="font-size:13px;font-weight:800;margin-bottom:1px">Goals &amp; Planning</div>
+              <div style="font-size:9px;color:#4A5568;margin-bottom:8px">Passive income · Emergency reserve · Financial freedom</div>
+              <div style="display:flex;gap:4px;margin-bottom:9px">
+                <div class="cchip on gl-chip" onclick="glTab('income',this)" style="font-size:8px;padding:3px 7px">📈 Income</div>
+                <div class="cchip gl-chip" onclick="glTab('reserve',this)" style="font-size:8px;padding:3px 7px">🛡️ Reserve</div>
+                <div class="cchip gl-chip" onclick="glTab('freedom',this)" style="font-size:8px;padding:3px 7px">🏝️ Freedom</div>
+              </div>
+              <div id="gl-income" class="gl-panel">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px">
+                  <div class="dhc" style="border-color:rgba(34,197,94,.3)"><div class="dhc-lbl">Monthly income goal</div><div class="dhc-val">$1,000</div><div style="margin-top:6px;background:#1C2636;border-radius:3px;height:4px;overflow:hidden"><div style="width:43.5%;height:100%;background:#22C55E;border-radius:3px"></div></div><div class="dhc-sub"><span>Progress</span><b class="gn">43.5%</b></div></div>
+                  <div class="dhc"><div class="dhc-lbl">Current monthly</div><div class="dhc-val gn">$435</div><div class="dhc-sub"><span>of $1,000</span><b>$565 to go</b></div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px">
+                  <div class="dhc"><div class="dhc-lbl">Time to goal</div><div class="dhc-val">~4.2 yrs</div></div>
+                  <div class="dhc"><div class="dhc-lbl">Capital needed</div><div class="dhc-val">~$96k</div></div>
+                </div>
+                <div class="dai"><div class="dail">🤖 AI Advisor</div><div class="dait">Adding <b>$500/month</b> and reinvesting dividends, you reach <span class="gg">$1,000/month</span> by <b>2030</b>. SCHD + JEPI + O recommended.</div></div>
+              </div>
+              <div id="gl-reserve" class="gl-panel" style="display:none">
+                <div style="display:flex;gap:4px;margin-bottom:8px">
+                  <div class="cchip gl-mth" onclick="setGlMonths(3,this,10500,14200)" style="font-size:8px;padding:2px 6px">3 months</div>
+                  <div class="cchip on gl-mth" onclick="setGlMonths(6,this,21000,14200)" style="font-size:8px;padding:2px 6px">6 months</div>
+                  <div class="cchip gl-mth" onclick="setGlMonths(12,this,42000,14200)" style="font-size:8px;padding:2px 6px">12 months</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px">
+                  <div class="dhc"><div class="dhc-lbl">Monthly expenses</div><div class="dhc-val">$3,500</div></div>
+                  <div class="dhc" style="border-color:rgba(34,197,94,.3)"><div class="dhc-lbl">Target (6 months)</div><div class="dhc-val gn" id="gl-rmeta">$21,000</div></div>
+                </div>
+                <div class="dcard" style="padding:9px 11px;margin-bottom:8px">
+                  <div style="display:flex;justify-content:space-between;font-size:8px;color:#4A5568;margin-bottom:4px"><span>$14,200 of <span id="gl-rmeta2">$21,000</span></span><span class="gn" id="gl-rpct">67.6%</span></div>
+                  <div style="background:#1C2636;border-radius:3px;height:5px;overflow:hidden;margin-bottom:7px"><div id="gl-rfill" style="width:67.6%;height:100%;background:#22C55E;border-radius:3px"></div></div>
+                  <div style="display:flex;justify-content:space-between;font-size:8px;margin-bottom:2px"><span style="color:#4A5568">Current reserve</span><span class="gn" style="font-weight:700">$14,200</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:8px;margin-bottom:2px"><span style="color:#4A5568">Still needed</span><span style="color:#f59e0b;font-weight:700" id="gl-rfalta">$6,800</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:8px"><span style="color:#4A5568">Current protection</span><span style="font-weight:700">~4.1 months</span></div>
+                </div>
+                <div class="dai"><div class="dail">🤖 AI Advisor</div><div class="dait">Reserve dividends from the next <b>11 months</b> before reinvesting to complete your <span class="gg">6-month</span> emergency reserve.</div></div>
+              </div>
+              <div id="gl-freedom" class="gl-panel" style="display:none">
+                <div class="dcard" style="padding:7px 9px;margin-bottom:8px">
+                  <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:.5px solid #0d1117"><span style="font-size:11px">✅</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:#ddd">Emergency reserve</div><div style="font-size:7px;color:#4A5568">$14,200 of $21,000 · 67%</div></div><span style="font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;background:#1a1500;color:#f59e0b">In progress</span></div>
+                  <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:.5px solid #0d1117"><span style="font-size:11px">📈</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:#ddd">Passive income $1,000/mo</div><div style="font-size:7px;color:#4A5568">$435/mo · 43%</div></div><span style="font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;background:#1a1500;color:#f59e0b">In progress</span></div>
+                  <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:.5px solid #0d1117"><span style="font-size:11px">🏠</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:#555">Dividends cover 50% of expenses</div><div style="font-size:7px;color:#3a4555">Need $21,000/year</div></div><span style="font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;background:#111820;color:#3a4555">Future</span></div>
+                  <div style="display:flex;align-items:center;gap:7px;padding:5px 0"><span style="font-size:11px">🏝️</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:#555">Full financial freedom</div><div style="font-size:7px;color:#3a4555">Dividends = 100% of living costs</div></div><span style="font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;background:#111820;color:#3a4555">Future</span></div>
+                </div>
+                <div class="dhc" style="margin-bottom:8px"><div class="dhc-lbl">Portfolio needed for freedom</div><div class="dhc-val">~$719k</div><div class="dhc-sub"><span>$500/mo → 2037</span><b class="gn">$1k/mo → 2032</b></div></div>
+                <div class="dai"><div class="dail">🤖 AI Advisor</div><div class="dait">At <b>5.84%</b> yield, you need <span class="gg">$719k</span> to be financially free. Increasing to <b>$1,000/mo</b> gets you there by <span class="gg">2032</span>.</div></div>
+              </div>
+            </div></div>
+                  <div class="dhc-sub"><span>Progress</span><b class="gn">43.5%</b></div>
+                </div>
+                <div class="dhc">
+                  <div class="dhc-lbl">Current monthly income</div>
+                  <div class="dhc-val gn">$435</div>
+                  <div class="dhc-sub"><span>of $1,000 goal</span><b>$565 to go</b></div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px">
+                <div class="dhc">
+                  <div class="dhc-lbl">Time to goal</div>
+                  <div class="dhc-val">~4.2 yrs</div>
+                  <div class="dhc-sub"><span>At current growth</span></div>
+                </div>
+                <div class="dhc">
+                  <div class="dhc-lbl">Capital needed</div>
+                  <div class="dhc-val">$171k</div>
+                  <div class="dhc-sub"><span>At 5.84% avg yield</span></div>
+                </div>
+              </div>
+              <div class="dai">
+                <div class="dail">🎯 AI Goal advisor</div>
+                <div class="dait">Adding <b>$500/month</b> to your portfolio and reinvesting dividends, you could reach <span class="gg">$1,000/month</span> in passive income by <b>2030</b>. SCHD + JEPI + O combination recommended.</div>
+              </div>
+            </div></div>
+
+                        <!-- PAYMENTS -->
+            <div class="dp-sc" id="dp-pay"><div class="dp-pad">
+              <div style="font-size:13px;font-weight:800;margin-bottom:2px">Notifications</div>
+              <div style="font-size:9px;color:#4A5568;margin-bottom:9px">Personalize how and when you get paid alerts</div>
+
+              <!-- 3-OPTION FORMAT SELECTOR -->
+              <div class="pcard">
+                <div class="pctit">Notification template</div>
+                <div class="pcsub">Each dividend triggers one of these. Choose what feels right to you.</div>
+                <!-- 3 FULL PHONE TEMPLATE SELECTOR -->
+                <div class="ftp-wrap">
+
+                  <!-- COMPACT -->
+                  <div class="ftp" id="fp-c" onclick="setFmt('c')">
+                    <div class="ftp-phone">
+                                <div class="ftp-bl"></div><div class="ftp-bl2"></div><div class="ftp-br"></div>
+          <div class="ftp-scr">
+            <div class="ftp-pill"></div>
+            <div class="ftp-sb">
+              <span class="ftp-st">9:41</span>
+              <div class="ftp-si">
+                <div class="ftp-wb"><span style="height:3px"></span><span style="height:5px"></span><span style="height:7px"></span><span style="height:8px"></span></div>
+                <div class="ftp-bat"><div class="ftp-bf"></div></div>
+              </div>
+            </div>
+            <div class="ftp-lt"><div class="ftp-lb">9:41</div><div class="ftp-ld">Thursday, July 3</div></div>
+            <div class="ftp-ns">
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">now</span></div>
+                <div class="ftp-ti">Dividend received · JEPI</div>
+                <div class="ftp-am">+$61.20</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">3m ago</span></div>
+                <div class="ftp-ti">Dividend received · SCHD</div>
+                <div class="ftp-am">+$85.34</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">yesterday</span></div>
+                <div class="ftp-ti">Dividend received · O</div>
+                <div class="ftp-am">+$18.44</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">2d ago</span></div>
+                <div class="ftp-ti">Dividend received · ADC</div>
+                <div class="ftp-am">+$14.82</div>
+              </div>
+                                  </div>
+            <div class="ftp-hb"></div>
+          </div>
+                    </div>
+                    <div class="ftp-lbl">Compact</div>
+                  </div>
+
+                  <!-- DESCRIPTIVE -->
+                  <div class="ftp" id="fp-d" onclick="setFmt('d')">
+                    <div class="ftp-phone">
+                                <div class="ftp-bl"></div><div class="ftp-bl2"></div><div class="ftp-br"></div>
+          <div class="ftp-scr">
+            <div class="ftp-pill"></div>
+            <div class="ftp-sb">
+              <span class="ftp-st">9:41</span>
+              <div class="ftp-si">
+                <div class="ftp-wb"><span style="height:3px"></span><span style="height:5px"></span><span style="height:7px"></span><span style="height:8px"></span></div>
+                <div class="ftp-bat"><div class="ftp-bf"></div></div>
+              </div>
+            </div>
+            <div class="ftp-lt"><div class="ftp-lb">9:41</div><div class="ftp-ld">Thursday, July 3</div></div>
+            <div class="ftp-ns">
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">now</span></div>
+                <div class="ftp-ti">Dividend received · JEPI</div>
+                <div class="ftp-ds">Received <span style="color:#4ade80;font-weight:700">+$61.20</span> · Now in your account.</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">3m ago</span></div>
+                <div class="ftp-ti">Dividend received · SCHD</div>
+                <div class="ftp-ds">Received <span style="color:#4ade80;font-weight:700">+$85.34</span> · Now in your account.</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">yesterday</span></div>
+                <div class="ftp-ti">Dividend received · O</div>
+                <div class="ftp-ds">Received <span style="color:#4ade80;font-weight:700">+$18.44</span> · Now in your account.</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">2d ago</span></div>
+                <div class="ftp-ti">Dividend received · ADC</div>
+                <div class="ftp-ds">Received <span style="color:#4ade80;font-weight:700">+$14.82</span> · Now in your account.</div>
+              </div>
+                                  </div>
+            <div class="ftp-hb"></div>
+          </div>
+                    </div>
+                    <div class="ftp-lbl">Descriptive</div>
+                  </div>
+
+                  <!-- PREMIUM -->
+                  <div class="ftp sel" id="fp-p" onclick="setFmt('p')">
+                    <div class="ftp-phone">
+                                <div class="ftp-bl"></div><div class="ftp-bl2"></div><div class="ftp-br"></div>
+          <div class="ftp-scr">
+            <div class="ftp-pill"></div>
+            <div class="ftp-sb">
+              <span class="ftp-st">9:41</span>
+              <div class="ftp-si">
+                <div class="ftp-wb"><span style="height:3px"></span><span style="height:5px"></span><span style="height:7px"></span><span style="height:8px"></span></div>
+                <div class="ftp-bat"><div class="ftp-bf"></div></div>
+              </div>
+            </div>
+            <div class="ftp-lt"><div class="ftp-lb">9:41</div><div class="ftp-ld">Thursday, July 3</div></div>
+            <div class="ftp-ns">
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">now</span></div>
+                <div class="ftp-ti">Dividend received · JEPI</div>
+                <div class="ftp-am">+$61.20</div>
+                <div class="ftp-cf">Fidelity · Payment confirmed ✓</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">3m ago</span></div>
+                <div class="ftp-ti">Dividend received · SCHD</div>
+                <div class="ftp-am">+$85.34</div>
+                <div class="ftp-cf">Fidelity · Payment confirmed ✓</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">yesterday</span></div>
+                <div class="ftp-ti">Dividend received · O</div>
+                <div class="ftp-am">+$18.44</div>
+                <div class="ftp-cf">Schwab · Payment confirmed ✓</div>
+              </div>
+              <div class="ftp-nc">
+                <div class="ftp-nh"><div class="ftp-ni"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="22" fill="#0B0F14"/><path d="M 50,6 L 58,42 L 94,50 L 58,58 L 50,94 L 42,58 L 6,50 L 42,42 Z" fill="#22C55E"/></svg></div><span class="ftp-na">DivPulse</span><span class="ftp-nt">2d ago</span></div>
+                <div class="ftp-ti">Dividend received · ADC</div>
+                <div class="ftp-am">+$14.82</div>
+                <div class="ftp-cf">IBKR · Payment confirmed ✓</div>
+              </div>
+                                  </div>
+            <div class="ftp-hb"></div>
+          </div>
+                    </div>
+                    <div class="ftp-lbl">✦ Premium</div>
+                    <div class="ftp-rec">Recommended</div>
+                  </div>
+
+                </div>
+                <div style="font-size:8px;font-weight:600;color:#3a4555;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Preview</div>
+                <div class="nprev" id="fmt-prev">
+                  <div style="padding:3px 1px">
+                    <div class="npt"><div class="npi"><svg width="14" height="14" viewBox="0 0 100 100"><use href="#dpl"/></svg></div><span style="font-size:9px;color:rgba(255,255,255,.4);font-weight:500;flex:1">DivPulse</span><span style="font-size:8px;color:rgba(255,255,255,.25)">now</span></div>
+                    <div style="font-size:11px;font-weight:600;color:#fff;margin-bottom:7px;margin-top:1px">Dividend received · JEPI</div>
+                    <div style="font-size:22px;font-weight:800;color:#4ade80;letter-spacing:-.5px;line-height:1;margin-bottom:7px">+$61.20</div>
+                    <div style="font-size:9px;color:rgba(255,255,255,.35)">Fidelity · Payment confirmed ✓</div>
+                  </div>
+                </div>
+              </div>
+
+
+
+              <!-- PAYMENT METHODS -->
+              <div class="pcard">
+                <div class="pctit">Payment methods</div>
+                <div class="pcsub">All via Stripe — you never share card details with us.</div>
+                <div class="pcrow"><div class="pcico">CARD</div><div class="pcnm">Credit/Debit card (Visa, Mastercard, Amex)</div></div>
+                <div class="pcrow"><div class="pcico">PIX</div><div class="pcnm">PIX — instant bank transfer</div></div>
+                <div class="pcrow"><div class="pcico">PP</div><div class="pcnm">PayPal</div></div>
+              </div>
+
+              <!-- PLAN ACCESS -->
+              <div class="pcard">
+                <div class="pctit">Plan access</div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px">
+                  <div style="background:#0d1117;border:.5px solid #1C2636;border-radius:6px;padding:7px 8px"><div style="font-size:9px;font-weight:700;color:#ddd;margin-bottom:4px">Free</div><div style="font-size:8px;color:#4A5568;line-height:1.6">Push ✓<br>Calendar ✓<br>5 holdings</div></div>
+                  <div style="background:#0d1117;border:.5px solid rgba(34,197,94,.3);border-radius:6px;padding:7px 8px"><div style="font-size:9px;font-weight:700;color:#22C55E;margin-bottom:4px">Pro $59/yr</div><div style="font-size:8px;color:#4A5568;line-height:1.6">Push ✓<br>Unlimited ✓<br>AI ✓ Telegram ✓</div></div>
+                  <div style="background:#0d1117;border:.5px solid #f59e0b;border-radius:6px;padding:7px 8px"><div style="font-size:9px;font-weight:700;color:#f59e0b;margin-bottom:4px">Pro+ $119/yr</div><div style="font-size:8px;color:#4A5568;line-height:1.6">Push ✓<br>AI unlimited ✓<br>Auto-sync ✓</div></div>
+                </div>
+              </div>
+
+            </div></div>
+          </div>
+          <div class="dp-sb">
+            <div class="sb-box"><div class="sb-lbl">Combined ▾</div><div class="sb-sub">All brokers · 17 assets</div></div>
+            <div class="sb-ttl">Watchlist</div>
+            <div class="sb-row"><div><div class="sb-tk">JEPI</div><div class="sb-nm">JPMorgan</div></div><div><div class="sb-pr">$55.71</div><div style="font-size:7px" class="gn">+0.4%</div></div></div>
+            <div class="sb-row"><div><div class="sb-tk">SCHD</div><div class="sb-nm">Schwab</div></div><div><div class="sb-pr">$82.65</div><div style="font-size:7px" class="gn">+1.2%</div></div></div>
+            <div class="sb-row"><div><div class="sb-tk">O</div><div class="sb-nm">Realty</div></div><div><div class="sb-pr">$54.58</div><div style="font-size:7px" class="rd">-0.3%</div></div></div>
+            <div class="sb-row"><div><div class="sb-tk">XYLD</div><div class="sb-nm">Global X</div></div><div><div class="sb-pr">$48.70</div><div style="font-size:7px" class="gn">+0.4%</div></div></div>
+            <div class="sb-row"><div><div class="sb-tk">VOO</div><div class="sb-nm">Vanguard</div></div><div><div class="sb-pr">$412.40</div><div style="font-size:7px" class="rd">-0.1%</div></div></div>
+            <div class="sb-row"><div><div class="sb-tk">ADC</div><div class="sb-nm">Agree</div></div><div><div class="sb-pr">$75.20</div><div style="font-size:7px" class="gn">+0.6%</div></div></div>
+            <div class="sb-row"><div><div class="sb-tk">NVDA</div><div class="sb-nm">NVIDIA</div></div><div><div class="sb-pr">$124.92</div><div style="font-size:7px" class="gn">+2.1%</div></div></div>
+            <div class="sb-row"><div><div class="sb-tk">MSFT</div><div class="sb-nm">Microsoft</div></div><div><div class="sb-pr">$430.15</div><div style="font-size:7px" class="rd">-0.4%</div></div></div>
+            <div style="margin-top:auto;padding-top:5px;border-top:.5px solid #1C2636">
+              <div style="font-size:7px;color:#2a3040;margin-bottom:2px">DivPulse · Free</div>
+              <div style="font-size:8px;color:#22C55E;font-weight:700;cursor:pointer" onclick="document.getElementById('hemail').focus();window.scrollTo(0,0)">Upgrade to Pro ↗</div>
+            </div>
+          </div>
+
+          <!-- ═══ DIVIDEND RECEIPT OVERLAY ═══ -->
+          <div class="receipt-ov" id="receiptOv">
+            <div class="receipt-bk" onclick="hideReceipt()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              <span style="font-size:10px;color:#22C55E;font-weight:600">Back</span>
+              <span style="font-size:10px;color:#3a4555;margin-left:4px">· Dividend Receipt</span>
+            </div>
+            <div class="receipt-sc">
+              <div style="text-align:center;margin-bottom:16px">
+                <div class="rec-chk">✓</div>
+                <div class="rec-hl">Payment confirmed</div>
+                <div class="rec-sl">Dividend successfully deposited to your account</div>
+              </div>
+              <div class="rec-card">
+                <div class="rec-hero">
+                  <div class="rec-tk">JEPI</div>
+                  <div class="rec-nm">JPMorgan Equity Premium Income ETF</div>
+                  <div class="rec-am">+$61.20</div>
+                </div>
+                <div class="rec-row"><span class="rec-rl">Broker</span><span class="rec-rv">Fidelity</span></div>
+                <div class="rec-row"><span class="rec-rl">Account</span><span class="rec-rv">ROTH IRA</span></div>
+                <div class="rec-row"><span class="rec-rl">Payment date</span><span class="rec-rv">July 3, 2026</span></div>
+                <div class="rec-row"><span class="rec-rl">Dividend/share</span><span class="rec-rv">$0.3870</span></div>
+                <div class="rec-row"><span class="rec-rl">Shares held</span><span class="rec-rv">158</span></div>
+                <div class="rec-row"><span class="rec-rl">Payment ID</span><span class="rec-rv" style="font-family:monospace;font-size:8px;color:#4A5568;letter-spacing:.03em">DIV-26-07-JEPI-0302</span></div>
+              </div>
+              <div class="rec-inc">
+                <div style="font-size:18px;flex-shrink:0">📊</div>
+                <div style="flex:1">
+                  <div class="rec-inc-t">Annual dividend income updated</div>
+                  <div class="rec-inc-v">$5,158.80 → $5,220.00 &nbsp;·&nbsp; <span style="opacity:.7">+$61.20 this payment</span></div>
+                </div>
+              </div>
+              <div class="rec-btns">
+                <button class="rec-btn-a" onclick="alert('Share feature coming in the real app!')">📤 Share receipt</button>
+                <button class="rec-btn-b" onclick="dpTab('hld');hideReceipt()">View holdings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="lfeats" id="features">
+  <div class="slbl">Why DivPulse</div>
+  <h2 class="sh2">Everything dividend investors need</h2>
+  <p class="sp">And nothing they don't.</p>
+  <div class="fg">
+    <div class="fc"><div class="fc-ico">🔔</div><div class="fc-t">Instant push notifications</div><div class="fc-d">Get notified on your lock screen the exact moment a dividend lands. Before opening your broker app.</div><span class="fc-b b-free">All plans</span></div>
+    <div class="fc"><div class="fc-ico">📅</div><div class="fc-t">Dividend calendar</div><div class="fc-d">Ex-dates, payment dates and earnings reports for all your holdings, always up to date.</div><span class="fc-b b-free">All plans</span></div>
+    <div class="fc"><div class="fc-ico">✈️</div><div class="fc-t">Telegram alerts</div><div class="fc-d">@DivPulseBot · /start · 90%+ open rate. Get notified on Telegram instantly, completely free.</div><span class="fc-b b-pro">Pro</span></div>
+    <div class="fc" style="opacity:.45"><div class="fc-ico">💬</div><div class="fc-t">WhatsApp alerts <span style="font-size:10px;color:#3a4555;font-weight:500">— coming soon</span></div><div class="fc-d">Get dividend alerts directly in WhatsApp. Launching when we reach our first 1,000 users.</div><span class="fc-b" style="background:#111820;color:#3a4555;border:1px solid #1C2636">Planned</span></div>
+    <div class="fc"><div class="fc-ico">🤖</div><div class="fc-t">AI income advisor</div><div class="fc-d">"How much do I need to earn $1,000/month?" Ask anything, get a real personalized answer instantly.</div><span class="fc-b b-pro">Pro</span></div>
+    <div class="fc"><div class="fc-ico">🌎</div><div class="fc-t">EN · PT · ES</div><div class="fc-d">Built for global investors. Full UI in English, Portuguese and Spanish. View values in USD, BRL or MXN.</div><span class="fc-b b-free">All plans</span></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="lhow">
+  <div class="lhow-in">
+    <div class="slbl">How it works</div>
+    <h2 class="sh2" style="text-align:center">Up and running in 3 minutes</h2>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div class="step-t">Add your holdings</div><div class="step-d">Enter ticker, shares and broker name. Works with Fidelity, Schwab, Robinhood, XP, Avenue — any broker worldwide.</div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-t">Enable push notifications</div><div class="step-d">Android: install in one tap. iPhone: Add to Home Screen → Allow. 4 taps, done once forever.</div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-t">Get paid, get notified</div><div class="step-d">The moment a dividend lands, your phone buzzes. While your broker is still processing it.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BROKERS -->
+<section class="lbrokers">
+  <div class="slbl">Compatible with</div>
+  <h2 class="sh2">Every broker, worldwide</h2>
+  <div class="bchips">
+    <div class="bchip">Fidelity</div><div class="bchip">Schwab</div><div class="bchip">Robinhood</div><div class="bchip">IBKR</div><div class="bchip">Vanguard</div><div class="bchip">XP Investimentos</div><div class="bchip">Avenue</div><div class="bchip">Nomad</div><div class="bchip">Webull</div><div class="bchip">Moomoo</div><div class="bchip">TD Ameritrade</div><div class="bchip">+ any other</div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="lpricing" id="pricing">
+  <div class="slbl">Pricing</div>
+  <h2 class="sh2" style="text-align:center">Simple, honest pricing</h2>
+  <p class="sp">14-day money-back guarantee on paid plans · No credit card for free plan</p>
+  <div style="text-align:center;font-size:12px;color:#2a3040;margin-bottom:20px;margin-top:-32px">All prices in USD · Billed annually or monthly · Cancel anytime</div>
+  <div class="ptoggle">
+    <span class="ptl" id="ptmo">Monthly</span>
+    <div class="ptsw" id="ptsw" onclick="toggleBill()"><div class="ptk" id="ptk"></div></div>
+    <span class="ptl act" id="ptyr">Annual</span>
+    <span class="stag">Save 2 months</span>
+  </div>
+  <div class="plg">
+
+    <!-- FREE -->
+    <div class="plc">
+      <div class="pln">Free</div>
+      <div class="plp">$0</div>
+      <div class="plper">forever · no credit card</div>
+      <div class="plf">Push notifications</div>
+      <div class="plf">Dividend calendar</div>
+      <div class="plf">Goals & financial planning</div>
+      <div class="plf">Up to 5 holdings</div>
+      <div class="plf">EN · PT · ES</div>
+      <div class="plf no">Unlimited holdings</div>
+      <div class="plf no">AI advisor</div>
+      <div class="plf no">Telegram alerts</div>
+      <button class="plbtn bgh" onclick="document.getElementById('hemail').focus();window.scrollTo(0,0)">Get started free</button>
+    </div>
+
+    <!-- PRO -->
+    <div class="plc pop">
+      <div class="plpb">Most popular</div>
+      <div class="pln">Pro</div>
+      <div style="font-size:10px;color:#22C55E;font-weight:600;margin-bottom:4px">✓ 14-day money-back</div>
+      <div class="plp" id="prprice">$59</div>
+      <div class="plper" id="prper">/year · ~$4.92/month</div>
+      <div class="plf">Push notifications</div>
+      <div class="plf">Unlimited holdings</div>
+      <div class="plf">Dividend calendar</div>
+      <div class="plf">Goals &amp; financial planning</div>
+      <div class="plf">Telegram alerts</div>
+      <div class="plf">AI advisor (30/day)</div>
+      <div class="plf">12-month projections</div>
+      <div class="plf no">AI advisor unlimited</div>
+      <div class="plf no">Broker auto-sync</div>
+      <button class="plbtn bg" onclick="document.getElementById('hemail').focus();window.scrollTo(0,0)">Start Pro</button>
+    </div>
+
+    <!-- PRO+ -->
+    <div class="plc">
+      <div class="pln">Pro+</div>
+      <div style="font-size:10px;color:#22C55E;font-weight:600;margin-bottom:4px">✓ 14-day money-back</div>
+      <div class="plp" id="ppprice">$119</div>
+      <div class="plper" id="ppper">/year · ~$9.92/month</div>
+      <div class="plf">Push notifications</div>
+      <div class="plf">Unlimited holdings</div>
+      <div class="plf">Dividend calendar</div>
+      <div class="plf">Goals &amp; financial planning</div>
+      <div class="plf">Telegram alerts</div>
+      <div class="plf" style="color:#22C55E;font-weight:600">AI advisor unlimited</div>
+      <div class="plf" style="color:#22C55E;font-weight:600">Broker auto-sync</div>
+      <div class="plf">Priority support</div>
+      <button class="plbtn bgh" onclick="document.getElementById('hemail').focus();window.scrollTo(0,0)">Start Pro+</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHY DIVPULSE -->
+<section class="lsp">
+  <div class="lsp-in">
+    <div class="wlbox"><div class="wldot"></div><div class="wlt">Now in early access — join the waitlist</div></div>
+    <div class="rg">
+      <div class="rc">
+        <div style="font-size:28px;margin-bottom:12px">🔔</div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px">Real push notifications</div>
+        <div class="rc-text">Not emails. Not app badges. An instant buzz on your lock screen the exact moment a dividend lands — while your broker is still processing it.</div>
+      </div>
+      <div class="rc">
+        <div style="font-size:28px;margin-bottom:12px">🌎</div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px">Any broker, worldwide</div>
+        <div class="rc-text">Fidelity, Schwab, XP Investimentos, Avenue, Nomad, IBKR — enter your holdings manually or connect automatically with Pro+.</div>
+      </div>
+      <div class="rc">
+        <div style="font-size:28px;margin-bottom:12px">💚</div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px">Built by an investor</div>
+        <div class="rc-text">DivPulse started because the founder was tired of discovering dividends days after they arrived. Every feature solves a real problem.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="lfaq" id="faq">
+  <h2 class="sh2" style="text-align:center;margin-bottom:28px">Frequently asked questions</h2>
+  <div class="fi"><div class="fq" onclick="faqT(this)">How do push notifications work on iPhone?</div><div class="fa">Open DivPulse in Safari → tap the Share icon → "Add to Home Screen" → open from your home screen → tap Allow. 4 taps, done once. Notifications arrive on your lock screen exactly like a banking app.</div></div>
+  <div class="fi"><div class="fq" onclick="faqT(this)">Which brokers are supported?</div><div class="fa">All of them. You enter holdings manually (ticker + shares + broker name). Fidelity, Schwab, Robinhood, IBKR, XP Investimentos, Avenue, Nomad, Vanguard, Webull, Moomoo or any name you type. Automatic broker sync coming in Pro+.</div></div>
+  <div class="fi"><div class="fq" onclick="faqT(this)">How does DivPulse know my dividend dates?</div><div class="fa">We pull ex-dividend dates, payment dates and per-share amounts daily from official financial APIs. Confirmed dividends show in green, estimated dividends show in amber.</div></div>
+  <div class="fi"><div class="fq" onclick="faqT(this)">Can I see values in BRL or MXN?</div><div class="fa">Yes. Use the USD · BRL · MXN switcher in the top bar. Exchange rates update daily. Perfect for Brazilian investors using Avenue, Nomad or XP Investimentos.</div></div>
+  <div class="fi"><div class="fq" onclick="faqT(this)">Is my financial data safe?</div><div class="fa">DivPulse is a tracking tool only. We never access your broker account, never execute trades, and never hold your money. You enter tickers and share counts manually. All data is encrypted.</div></div>
+  <div class="fi"><div class="fq" onclick="faqT(this)">Can I cancel my subscription?</div><div class="fa">Yes, cancel anytime from Settings. Your plan stays active until end of billing period. Annual plans include a 14-day money-back guarantee.</div></div>
+  <div class="fi"><div class="fq" onclick="faqT(this)">How does broker auto-sync work?</div><div class="fa">Available on Pro+. For US brokers (Fidelity, Schwab), we use Plaid — a secure industry standard used by Mint and Personal Capital. You authorize read-only access once and your holdings sync automatically. For Brazilian brokers (XP, Avenue, Nomad), auto-sync works via CSV import. Manual entry remains available on all plans.</div></div>
+  <div class="fi"><div class="fq" onclick="faqT(this)">Does DivPulse work on iPhone and Android?</div><div class="fa">Yes. DivPulse is a web app that works on any browser. On iPhone: open in Safari → tap Share → "Add to Home Screen" → open from your home screen → allow notifications. On Android: open in Chrome → tap menu → "Add to Home Screen". It installs like a native app with full notification support.</div></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="flr">
+    <svg width="28" height="28" viewBox="0 0 100 100"><use href="#dpl"/></svg>
+    <span style="font-size:17px;font-weight:800">Div<span style="color:#22C55E">Pulse</span></span>
+  </div>
+  <div class="flinks">
+    <a href="#features">Features</a><a href="#demo">Demo</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="#">Privacy Policy</a><a href="#">Terms of Service</a>
+  </div>
+  <div class="flangs">
+    <span class="flng">🇺🇸 English</span>
+    <span class="flng">🇧🇷 Português</span>
+    <span class="flng">🇪🇸 Español</span>
+    <span class="flng cs">🇩🇪 Deutsch — coming</span>
+    <span class="flng cs">🇫🇷 Français — coming</span>
+    <span class="flng cs">🇮🇹 Italiano — coming</span>
+  </div>
+  <div class="fcp">© 2026 DivPulse · Not financial advice · Built for dividend investors worldwide</div>
+</footer>
+
+<script>
+function doForm(e){e.preventDefault();fetch(e.target.action,{method:'POST',body:new FormData(e.target),headers:{'Accept':'application/json'}}).then(()=>{e.target.style.display='none';document.getElementById('form-ok').style.display='block';}).catch(()=>{e.target.style.display='none';document.getElementById('form-ok').style.display='block';});}
+function faqT(el){const a=el.nextElementSibling;el.classList.toggle('open');a.classList.toggle('open');}
+let isAnn=true;
+function toggleBill(){isAnn=!isAnn;document.getElementById('ptsw').classList.toggle('mo',!isAnn);document.getElementById('ptk').style.left=isAnn?'19px':'3px';document.getElementById('ptmo').classList.toggle('act',!isAnn);document.getElementById('ptyr').classList.toggle('act',isAnn);document.getElementById('prprice').textContent=isAnn?'$59':'$7.99';document.getElementById('prper').textContent=isAnn?'/year · ~$4.92/month':'/month';document.getElementById('ppprice').textContent=isAnn?'$119':'$14.99';document.getElementById('ppper').textContent=isAnn?'/year · ~$9.92/month':'/month';}
+document.addEventListener('click',e=>{if(e.target.classList.contains('dtf')){const p=e.target.parentElement;p.querySelectorAll('.dtf').forEach(x=>x.classList.remove('on'));e.target.classList.add('on');}});
+const rates={USD:1,BRL:5.52,MXN:17.1};const syms={USD:'$',BRL:'R$',MXN:'$'};let cur='USD';
+const fmt=(v)=>{const r=v*rates[cur];const s=syms[cur];return r>=1000?s+(r/1000).toFixed(1)+'k':s+r.toFixed(2);};
+const fmtK=(v)=>syms[cur]+Math.round(v*rates[cur]/1000)+'k';
+function setCur(c,el){cur=c;document.querySelectorAll('.co').forEach(x=>x.classList.remove('on'));el.classList.add('on');const S=id=>document.getElementById(id);if(S('dppfv'))S('dppfv').textContent=fmt(84230);if(S('dpytd'))S('dpytd').textContent=fmt(3041);if(S('dpfid'))S('dpfid').textContent=fmtK(34000);if(S('dpsch'))S('dpsch').textContent=fmtK(28000);if(S('dpannv'))S('dpannv').textContent=fmt(5220);if(S('dpmthv'))S('dpmthv').textContent=fmt(412);if(S('dptoday'))S('dptoday').textContent='+'+fmt(79.64);if(S('dpjepi'))S('dpjepi').textContent='+'+fmt(61.20);if(S('dpo'))S('dpo').textContent='+'+fmt(18.44);if(S('dpadc'))S('dpadc').textContent=fmt(14.82)+' expected';if(S('dphtot'))S('dphtot').textContent=fmt(84230);if(S('dpdivann'))S('dpdivann').textContent=fmt(5220);if(S('dpdivd'))S('dpdivd').textContent=fmt(14.30);if(S('dpdivm'))S('dpdivm').textContent=fmt(435);if(S('dpdivy'))S('dpdivy').textContent=fmt(5220);}
+function setLng(l,el){
+  document.querySelectorAll('.lo').forEach(x=>x.classList.remove('on'));el.classList.add('on');
+  const g={EN:{m:'Good morning',a:'Good afternoon',e:'Good evening'},PT:{m:'Bom dia',a:'Boa tarde',e:'Boa noite'},ES:{m:'Buenos días',a:'Buenas tardes',e:'Buenas noches'}};
+  const h=new Date().getHours();const t=g[l]||g.EN;
+  const el2=document.getElementById('dpgreet');if(el2)el2.textContent=(h<12?t.m:h<18?t.a:t.e)+', Alex';
+  // Update phone lock screen notifications
+  const divTitles={EN:'Dividend received',PT:'Dividendo recebido',ES:'Dividendo recibido'};
+  const appNames={EN:'DivPulse',PT:'DivPulse',ES:'DivPulse'};
+  const dateStr={EN:'Thursday, July 3',PT:'Quinta-feira, 3 de julho',ES:'Jueves, 3 de julio'};
+  const title=divTitles[l]||divTitles.EN;
+  document.querySelectorAll('.pn-title').forEach(el=>{el.textContent=title+' · '+el.dataset.ticker;});
+  const hpDate=document.getElementById('hp-date');if(hpDate)hpDate.textContent=dateStr[l]||dateStr.EN;
+  document.querySelectorAll('.hp-na').forEach(el=>{el.textContent=appNames[l]||'DivPulse';});
+}
+function initGreeting(){const h=new Date().getHours();const t=h<12?'Good morning':h<18?'Good afternoon':'Good evening';const el=document.getElementById('dpgreet');if(el)el.textContent=t+', Alex';}
+const TABS=['fy','hld','div','cal','col','dv','wl','gl','pay'];
+function dpTab(id){TABS.forEach(t=>{const s=document.getElementById('dp-'+t);if(s)s.classList.toggle('on',t===id);});document.querySelectorAll('.dp-tab').forEach(el=>el.classList.toggle('on',el.dataset.t===id));document.getElementById('dpm').scrollTop=0;if(id==='div')initBars();if(id==='dv')setTimeout(()=>dpDv('class',document.getElementById('dvt-c')),50);if(id==='col')dpCol('div',document.querySelector('.cchip'));}
+function dpTip(id){const t=document.getElementById(id);const o=id==='ytip'?'yoctip':'ytip';document.getElementById(o).classList.remove('show');t.classList.toggle('show');}
+function setFmt(t){
+  ['c','d','p'].forEach(x=>{const el=document.getElementById('fmt-'+x);if(el)el.classList.toggle('on',x===t);});
+  ['c','d','p'].forEach(x=>{const el=document.getElementById('fp-'+x);if(el)el.classList.toggle('sel',x===t);});
+  const prev=document.getElementById('fmt-prev');if(!prev)return;
+  const hd='<div style="padding:3px 1px"><div class="npt"><div class="npi"><svg width="14" height="14" viewBox="0 0 100 100"><use href="#dpl"/></svg></div><span style="font-size:9px;color:rgba(255,255,255,.4);font-weight:500;flex:1">DivPulse</span><span style="font-size:8px;color:rgba(255,255,255,.25)">now</span></div>';
+  if(t==='c'){
+    prev.innerHTML='<div class="npt"><div class="npi"><svg width="14" height="14" viewBox="0 0 100 100"><use href="#dpl"/></svg></div><span style="font-size:8px;color:#555">DivPulse · now</span></div><div class="nptit">Dividend received · JEPI</div><div class="npamt">+$61.20</div>';
+  } else if(t==='d'){
+    prev.innerHTML='<div class="npt"><div class="npi"><svg width="14" height="14" viewBox="0 0 100 100"><use href="#dpl"/></svg></div><span style="font-size:8px;color:#555">DivPulse · now</span></div><div class="nptit">Dividend received · JEPI</div><div style="font-size:9px;color:rgba(255,255,255,.5);line-height:1.5;margin-top:3px">You received <span style="color:#4ade80;font-weight:700">+$61.20</span> · Now available in your account.</div>';
+  } else {
+    prev.innerHTML=hd+'<div style="font-size:11px;font-weight:600;color:#fff;margin-bottom:7px;margin-top:1px">Dividend received · JEPI</div><div style="font-size:22px;font-weight:800;color:#4ade80;letter-spacing:-.5px;line-height:1;margin-bottom:7px">+$61.20</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Fidelity · Payment confirmed ✓</div></div>';
+  }
+}
+function showReceipt(){
+  const ov=document.getElementById('receiptOv');
+  if(ov){ov.classList.add('show');setTimeout(()=>{ov.querySelector('.receipt-sc').scrollTop=0;},50);}
+}
+function hideReceipt(){
+  const ov=document.getElementById('receiptOv');
+  if(ov)ov.classList.remove('show');
+}
+function dpCalV(v){document.getElementById('dpCalGrid').style.display=v==='g'?'block':'none';document.getElementById('dpCalEv').style.display=v==='e'?'block':'none';document.getElementById('ctg').classList.toggle('on',v==='g');document.getElementById('cte').classList.toggle('on',v==='e');}
+function glTab(id,el){
+  document.querySelectorAll('.gl-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.gl-chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('gl-'+id).style.display='block';
+  el.classList.add('on');
+}
+function setGlMonths(m,el,meta,atual){
+  document.querySelectorAll('.gl-mth').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  const pct=Math.round(atual/meta*1000)/10;
+  const mF='$'+meta.toLocaleString();
+  const S=id=>document.getElementById(id);
+  if(S('gl-rmeta'))S('gl-rmeta').textContent=mF;
+  if(S('gl-rmeta2'))S('gl-rmeta2').textContent=mF;
+  if(S('gl-rpct'))S('gl-rpct').textContent=pct+'%';
+  if(S('gl-rfill'))S('gl-rfill').style.width=pct+'%';
+  if(S('gl-rfalta'))S('gl-rfalta').textContent='$'+(meta-atual).toLocaleString();
+}
+function initBars(){const w=document.getElementById('dpbars');const l=document.getElementById('dpbarlbls');if(!w||w.children.length>0)return;const months=['J','F','M','A','M','J','J','A','S','O','N','D'];const vals=[312,330,358,372,388,400,412,435,451,438,445,479];const mx=Math.max(...vals);months.forEach((m,i)=>{const h=Math.round(vals[i]/mx*100);w.innerHTML+=`<div class="dmbc"><div class="dmbf" style="height:${h}%;${i>=7?'background:#2a2a0a;border:.5px solid #f59e0b':''}"></div></div>`;l.innerHTML+=`<span style="font-size:7px;color:#3a4555;flex:1;text-align:center">${m}</span>`;});}
+const colDB={div:{t:'Dividend ETFs & Stocks',c:'12 assets',d:'High-quality dividend payers with consistent history.',a:[['SCHD','Schwab US Dividend ETF','3.52%','$82.65'],['VYM','Vanguard High Dividend Yield','2.9%','$124.30'],['O','Realty Income Corp','5.5%','$54.58'],['JNJ','Johnson & Johnson','3.1%','$159.20'],['DGRO','iShares Dividend Growth','2.1%','$58.40']]},reits:{t:'REITs',c:'8 assets',d:'Required to distribute 90%+ of income. Monthly & quarterly payers.',a:[['O','Realty Income Corp','5.5%','$54.58'],['STAG','STAG Industrial','3.6%','$39.80'],['ADC','Agree Realty Corp','4.4%','$75.20'],['VNQ','Vanguard Real Estate ETF','4.1%','$87.60']]},hy:{t:'High Yield (5%+)',c:'9 assets',d:'Assets paying 5%+ annually.',a:[['XYLD','Global X Covered Call','10.3%','$48.70'],['JEPI','JPMorgan Equity Premium','7.2%','$55.71'],['AGNC','AGNC Investment Corp','14.2%','$10.22'],['MO','Altria Group Inc','8.9%','$42.10']]},cc:{t:'Covered Call ETFs',c:'7 assets',d:'Sell options to generate income. 7-12% yields.',a:[['JEPI','JPMorgan Equity Premium','7.2%','$55.71'],['XYLD','Global X S&P 500 CC','10.3%','$48.70'],['QYLD','Global X NASDAQ-100 CC','11.8%','$17.44'],['JEPQ','JPMorgan NASDAQ Eq Prem','9.1%','$52.30']]},bdc:{t:'BDCs',c:'6 assets',d:'Lend to private businesses. Pay 8-12%+ yields.',a:[['ARCC','Ares Capital Corporation','9.2%','$21.80'],['MAIN','Main Street Capital','5.8%','$55.40'],['PSEC','Prospect Capital Corp','13.1%','$5.72'],['FSK','FS KKR Capital Corp','12.4%','$18.90']]},ym:{t:'YieldMax ETFs',c:'8 assets',d:'Synthetic covered calls. Very high yields. High risk.',a:[['TSLY','YieldMax TSLA Option','70.8%','$26.73'],['NVDY','YieldMax NVDA Option','43.2%','$12.04'],['AMZY','YieldMax AMZN Option','38.5%','$19.80']]},br:{t:'BR in the US',c:'15 assets',d:'For Brazilian investors via Avenue, Nomad, XP. Switch to BRL above.',a:[['JEPI','JPMorgan Equity Premium','7.2%','$55.71'],['VOO','Vanguard S&P 500 ETF','1.4%','$412.40'],['SCHD','Schwab US Dividend ETF','3.5%','$82.65'],['AAPL','Apple Inc','0.5%','$218.30'],['NVDA','NVIDIA Corporation','0.03%','$124.92']]},tech:{t:'Technology',c:'10 assets',d:'Top tech stocks and ETFs.',a:[['QQQ','Invesco QQQ Trust','0.6%','$487.50'],['NVDA','NVIDIA Corporation','0.03%','$124.92'],['MSFT','Microsoft Corporation','0.8%','$430.15'],['AAPL','Apple Inc','0.5%','$218.30']]},ai:{t:'Top AI Stocks',c:'10 assets',d:'Leading AI companies.',a:[['NVDA','NVIDIA Corporation','0.03%','$124.92'],['MSFT','Microsoft Corporation','0.8%','$430.15'],['GOOGL','Alphabet Inc','0%','$194.80'],['META','Meta Platforms','0.4%','$596.40']]}};
+function dpCol(key,el){document.querySelectorAll('.cchip').forEach(c=>c.classList.remove('on'));if(el)el.classList.add('on');const d=colDB[key];if(!d)return;document.getElementById('dpColT').textContent=d.t;document.getElementById('dpColC').textContent=d.c+' — updated today';document.getElementById('dpColD').textContent=d.d;document.getElementById('dpColL').innerHTML=d.a.map(a=>`<div class="ccrd"><div style="width:22px;height:22px;border-radius:5px;background:#0d1117;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#555;flex-shrink:0">${a[0]}</div><div style="flex:1"><div style="font-size:10px;font-weight:600;color:#ddd">${a[1]}</div><div style="font-size:8px;color:#4A5568">${a[0]}</div></div><div style="text-align:right;margin-right:5px"><div style="font-size:8px;color:#f59e0b">${a[2]}</div><div style="font-size:10px;font-weight:600;color:#ddd">${a[3]}</div></div><div class="cadd" onclick="showToast()">+ Add</div></div>`).join('');}
+const dvDB={class:{l:['ETFs','REITs','Stocks','Cash'],v:[61,18,17,4],c:['#f59e0b','#22C55E','#60a5fa','#555'],ai:'Your portfolio is <span class="gg">overweight in ETFs (61%)</span>. Adding stocks like <b>O, ADC, STAG</b> could improve diversification while maintaining yield.'},sector:{l:['Real Estate','Tech','Finance','Energy','Consumer'],v:[32,24,20,14,10],c:['#22C55E','#60a5fa','#f59e0b','#f87171','#a78bfa'],ai:'<b>Real Estate at 32%</b> is your top sector. Consider adding more <span class="gg">Finance (20%)</span> for balance.'},broker:{l:['Fidelity','Schwab','Avenue','XP','Nomad'],v:[40,34,14,7,5],c:['#f59e0b','#22C55E','#60a5fa','#f87171','#a78bfa'],ai:'Fidelity and Schwab hold <b>74% of your portfolio</b>.'},geo:{l:['USA','Brazil','Intl','Cash'],v:[78,10,8,4],c:['#60a5fa','#22C55E','#f59e0b','#555'],ai:'<b>78% US exposure</b> is typical. Your <span class="gg">10% Brazil allocation</span> reflects your investor profile.'}};
+function dpDv(key,el){document.querySelectorAll('[id^="dvt-"]').forEach(x=>x.classList.remove('on'));if(el)el.classList.add('on');const d=dvDB[key];document.getElementById('dvAI').innerHTML=d.ai;document.getElementById('dvLeg').innerHTML=d.l.map((l,i)=>`<div class="dlr"><div class="dld" style="background:${d.c[i]}"></div><div class="dll">${l}</div><div style="text-align:right"><div class="dlp">${d.v[i]}%</div><div class="dlv">$${Math.round(84230*d.v[i]/100).toLocaleString()}</div></div></div>`).join('');const cv=document.getElementById('dvCanvas');if(!cv)return;const ctx=cv.getContext('2d');const cx=65,cy=65,R=50,r=28;ctx.clearRect(0,0,130,130);const total=d.v.reduce((a,b)=>a+b,0);let s=-Math.PI/2;d.v.forEach((val,i)=>{const sw=(val/total)*2*Math.PI;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,s,s+sw);ctx.closePath();ctx.fillStyle=d.c[i];ctx.fill();ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(s),cy+R*Math.sin(s));ctx.strokeStyle='#09090f';ctx.lineWidth=1.5;ctx.stroke();s+=sw;});ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.fillStyle='#0d1117';ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 9px Inter,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('$84,230',cx,cy-4);ctx.fillStyle='#4A5568';ctx.font='8px Inter,sans-serif';ctx.fillText('portfolio',cx,cy+6);s=-Math.PI/2;d.v.forEach((val,i)=>{const sw=(val/total)*2*Math.PI;const mid=s+sw/2;if(val>=8){const lr=R+14;ctx.fillStyle=d.c[i];ctx.font='bold 9px Inter,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(val+'%',cx+lr*Math.cos(mid),cy+lr*Math.sin(mid));}s+=sw;});}
+/* ── PHONE ANIMATION CONTROLLER ── */
+(function(){
+  const phone = document.querySelector('.hp');
+  if(!phone) return;
+  function startAnim(){
+    phone.classList.remove('anim');
+    void phone.offsetWidth; // force reflow
+    phone.classList.add('anim');
+  }
+  // Trigger when phone enters viewport
+  const obs = new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting){
+      setTimeout(startAnim, 200);
+      obs.disconnect();
+    }
+  },{threshold:0.4});
+  obs.observe(phone);
+  // Loop every 8s so visitors who stay on page keep seeing it
+  setInterval(startAnim, 8000);
+})();
+function showToast(msg){
+  msg = msg || '✓ Available in the full app — join the waitlist';
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#22C55E;color:#0B0F14;padding:11px 22px;border-radius:12px;font-size:13px;font-weight:700;z-index:9999;opacity:0;transition:all .25s;white-space:nowrap;box-shadow:0 4px 20px rgba(34,197,94,.35)';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';});
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';setTimeout(()=>t.remove(),300);},2800);
+}
+function toggleAX(){
+  const dd=document.getElementById('axDD');
+  if(dd)dd.classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.av-wrap')){
+    const dd=document.getElementById('axDD');
+    if(dd)dd.classList.remove('open');
+  }
+});
+initGreeting();dpTab('fy');dpCol('div',document.querySelector('.cchip'));setTimeout(()=>dpDv('class',document.getElementById('dvt-c')),100);
+</script>
+</body>
+</html>

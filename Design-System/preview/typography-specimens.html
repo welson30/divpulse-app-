@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DivPulse — Typography preview</title>
+<link rel="stylesheet" href="../kit/tokens.css" />
+<link rel="stylesheet" href="../kit/components.css" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .type-row { display: flex; align-items: baseline; justify-content: space-between; padding: var(--sp-3) 0; border-bottom: 1px solid var(--border-subtle); gap: var(--sp-4); }
+  .type-row:last-child { border-bottom: none; }
+  .type-label { font: 12px/1 var(--font-mono); color: var(--text-secondary); white-space: nowrap; text-align: right; }
+  .type-label b { display: block; color: var(--text-secondary); font-weight: 500; font-size: 12px; margin-bottom: 2px; }
+  .tabular-demo table { width: 100%; border-collapse: collapse; }
+  .tabular-demo th { text-align: left; font: 12px/1 var(--font-mono); color: var(--text-secondary); font-weight: 500; padding-bottom: var(--sp-2); border-bottom: 1px solid var(--border-subtle); letter-spacing: 0.07em; text-transform: uppercase; }
+  .tabular-demo td { padding: 10px 0; border-bottom: 1px solid var(--border-subtle); font-size: 14px; }
+  .tabular-demo td.amt { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--green-500); }
+  .tabular-demo td.ticker { font-family: var(--font-mono); color: var(--text-primary); }
+</style>
+</head>
+<body>
+  <div class="preview-container">
+    <a class="preview-back" href="index.html">← all previews</a>
+    <span class="preview-eyebrow">Preview · 2 of 7</span>
+    <h1>Typography</h1>
+    <p class="preview-lede">Type utility classes rendered live from <code>../kit/components.css</code> (<code>.text-display</code>, <code>.text-h1</code>…). Inter Tight for hero data, Inter for UI, JetBrains Mono for anything that needs columns to line up.</p>
+
+    <div class="type-row">
+      <div class="text-display">$24,516.80</div>
+      <div class="type-label"><b>Display</b>40–48px / 600 · Inter Tight</div>
+    </div>
+    <div class="type-row">
+      <div class="text-h1">Portfolio Overview</div>
+      <div class="type-label"><b>H1</b>28px / 600 · Inter Tight</div>
+    </div>
+    <div class="type-row">
+      <div class="text-h2">Recent Dividends</div>
+      <div class="type-label"><b>H2</b>20px / 500 · Inter Tight</div>
+    </div>
+    <div class="type-row">
+      <div class="text-body" style="max-width:44ch;">Twelve companies paid a dividend this quarter, three raised their payout for the fourth consecutive year.</div>
+      <div class="type-label"><b>Body</b>15px / 400 · Inter</div>
+    </div>
+    <div class="type-row">
+      <div class="text-small">Updated 2 minutes ago</div>
+      <div class="type-label"><b>Small / meta</b>13px / 400 · text-secondary</div>
+    </div>
+
+    <div class="preview-block tabular-demo" style="margin-top:var(--sp-4);">
+      <div class="preview-block-label">Tabular numbers — columns align, nothing else</div>
+      <table>
+        <thead><tr><th>Ticker</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody>
+          <tr><td class="ticker">KO</td><td class="amt">$46.20</td></tr>
+          <tr><td class="ticker">JNJ</td><td class="amt">$128.50</td></tr>
+          <tr><td class="ticker">PG</td><td class="amt">$9.84</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

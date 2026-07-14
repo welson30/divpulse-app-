@@ -1,0 +1,109 @@
+/* ============================================================
+   DivPulse — Component Kit
+   Requires tokens.css loaded first. Every class here is real
+   product UI (not documentation-only) — pulled directly from the
+   approved design-system.html, no new design decisions made here,
+   with one documented exception: .btn-secondary and .icon-btn use
+   --text-tertiary (not --border-subtle) for their default border,
+   fixing a WCAG 1.4.11 non-text-contrast failure found in a
+   2026-07-14 audit — --border-subtle measures only ~1.1-1.4:1
+   against these dark backgrounds, well under the 3:1 floor for
+   essential interactive-control boundaries. --text-tertiary already
+   appears in design-system.html as the .swatch:hover border color,
+   so this reuses an existing in-palette "emphasis border" pattern
+   rather than inventing one. See /context/provenance.md for the
+   full audit note.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ---------- buttons ---------- */
+.btn{
+  font-family: var(--font-body); font-size: 14px; font-weight: 500; letter-spacing: 0.01em;
+  border-radius: var(--radius-control); padding: 11px 20px; border: 1px solid transparent; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; transition: background .08s, transform .08s, opacity .12s;
+}
+.btn:active{ transform: translateY(1px); }
+.btn:focus-visible{ outline: 2px solid var(--green-500); outline-offset: 2px; }
+.btn:disabled{ opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-primary{ background: var(--green-500); color: var(--bg-base); box-shadow: 0 0 24px rgba(52,211,153,0.08); }
+.btn-primary:hover{ background: var(--green-600); }
+.btn-secondary{ background: transparent; border-color: var(--text-tertiary); color: var(--text-primary); }
+.btn-secondary:hover{ background: var(--bg-hover); }
+.btn-destructive{ background: transparent; border-color: var(--red-500); color: var(--red-500); }
+.btn-destructive:hover{ background: rgba(248,113,113,0.08); }
+
+/* ---------- icon-only button (standing preference: no text labels) ---------- */
+.icon-btn{
+  width: 44px; height: 44px; border-radius: var(--radius-control); border: 1px solid var(--text-tertiary);
+  background: var(--bg-surface); display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: background .08s, transform .08s;
+}
+.icon-btn:hover{ background: var(--bg-hover); }
+.icon-btn:active{ transform: translateY(1px); }
+.icon-btn:focus-visible{ outline: 2px solid var(--green-500); outline-offset: 2px; }
+.icon-btn svg{ width: 18px; height: 18px; stroke: var(--text-secondary); stroke-width: 1.5; fill: none; }
+.icon-btn.is-active svg{ stroke: var(--green-500); }
+/* on small screens, reposition the label above the icon rather than removing it */
+.icon-btn-label{ display: none; font-size: 10px; color: var(--text-secondary); letter-spacing: 0.02em; text-align: center; margin-bottom: 4px; }
+@media (max-width: 480px){
+  .icon-btn-label{ display: block; }
+}
+
+/* ---------- typography utilities ---------- */
+.text-display{ font-family: var(--font-display); font-size: var(--text-display-size); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.text-h1{ font-family: var(--font-display); font-size: var(--text-h1-size); font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+.text-h2{ font-family: var(--font-display); font-size: var(--text-h2-size); font-weight: 500; color: var(--text-primary); }
+.text-body{ font-family: var(--font-body); font-size: var(--text-body-size); font-weight: 400; color: var(--text-primary); line-height: 1.6; }
+.text-small{ font-family: var(--font-body); font-size: var(--text-small-size); color: var(--text-secondary); }
+
+/* ---------- status pill ---------- */
+.badge{
+  display: inline-flex; align-items: center; font: 500 12px/1 var(--font-mono); letter-spacing: 0.02em;
+  padding: 4px 10px; border-radius: 999px;
+}
+.badge-info{ color: var(--blue-info); background: rgba(96,165,250,0.12); }
+.badge-warning{ color: var(--amber-warning); background: rgba(251,191,36,0.12); }
+
+/* ---------- holdings card ---------- */
+.holding-card{ background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-card); padding: var(--sp-3); }
+.holding-card .top{ display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-2); }
+.holding-card .ticker{ font-family: var(--font-mono); font-weight: 600; font-size: 15px; color: var(--text-primary); }
+.holding-card .company{ font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.holding-card .value{ text-align: right; }
+.holding-card .price{ font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 500; color: var(--text-primary); }
+.holding-card .change{ font-size: 12px; color: var(--green-500); font-family: var(--font-mono); margin-top: 2px; }
+.holding-card .meta{ display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); padding-top: var(--sp-2); border-top: 1px solid var(--border-subtle); }
+
+/* ---------- dividend "receipt" alert card — hero component ---------- */
+.receipt{
+  background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-card);
+  padding: var(--sp-3); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
+}
+.receipt::before{ content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--green-500); }
+.receipt .left{ display: flex; align-items: center; gap: 12px; min-width: 0; }
+.receipt .mark{ width: 36px; height: 36px; border-radius: 9px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font: 600 11px/1 var(--font-mono); color: var(--text-secondary); flex-shrink: 0; }
+.receipt .ticker-name{ min-width: 0; }
+.receipt .ticker-name b{ display: block; font-family: var(--font-mono); font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.receipt .ticker-name span{ font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.receipt .right{ text-align: right; flex-shrink: 0; }
+.receipt .amount{ font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 600; color: var(--green-500); white-space: nowrap; }
+.receipt .when{ font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.receipt.enter{ animation: receiptIn .5s cubic-bezier(.2,.8,.2,1); }
+@keyframes receiptIn{ from{ opacity: 0; transform: translateY(10px); } to{ opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce){ .receipt.enter{ animation: none; } }
+
+/* ---------- states — empty / loading / error ---------- */
+.state-row{ display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
+.state-card{ background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-card); padding: var(--sp-3); display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-height: 168px; }
+.state-card svg{ width: 20px; height: 20px; stroke: var(--text-secondary); stroke-width: 1.5; fill: none; }
+.state-card b{ font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.state-card p{ font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.state-card .btn{ margin-top: auto; padding: 8px 14px; font-size: 13px; }
+.error-card svg{ stroke: var(--amber-warning); }
+.skeleton-block{ width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.skeleton-line{ height: 12px; border-radius: 6px; background: var(--bg-hover); }
+
+@media (max-width: 760px){
+  .state-row{ grid-template-columns: 1fr; }
+}
