@@ -1,16 +1,19 @@
 # Assets
 
-## Logo — not supplied
+## Logo — supplied 2026-07-15
 
-`brand-spec.md` states this explicitly:
+`brand-spec.md`'s original instruction — "Not supplied. Every layout reserves an empty, clearly labelled logo slot until one is provided — do not invent a mark" — held until a real mark was supplied. A mark now exists:
 
-> Not supplied. Every layout reserves an empty, clearly labelled logo slot until one is provided — do not invent a mark.
+- `assets/logo.svg` — canonical vector source (1254×1254 viewBox), green (`--green-500`-family) bar-chart-and-trend-arrow mark on a near-black (`#040706`) square, matching `--bg-base`.
+- `assets/logo.png` — 1254×1254 raster export of the same mark.
 
-No logo file, wordmark, favicon, app icon, or brand imagery exists anywhere in the source evidence for this project. Nothing has been fabricated to fill this gap — see `context/provenance.md` for the full blocker note.
+Use `logo.svg` wherever the mark appears in product UI. Do not resize, recolor, or reinterpret it — swap the reserved `.logo-slot` markup below for an `<img>`/inline `<svg>` referencing this file as-is.
 
-### The reserved slot pattern
+The full favicon/app-icon/PWA-manifest set generated from this source lives in the Next.js app, not here (see `app/favicon.ico`, `app/icon.svg`, `app/apple-icon.png`, `app/manifest.ts`, `public/icons/manifest-*.png`, regenerated via `scripts/generate-icons.mjs`) — this folder holds the canonical source files only.
 
-Every surface that would normally show a logo instead renders a labeled placeholder, matching `design-system.html`'s `.logo-slot`:
+### The reserved slot pattern (historical — superseded)
+
+Every surface that would normally show a logo previously rendered a labeled placeholder, matching `design-system.html`'s `.logo-slot`:
 
 ```html
 <div class="logo-slot" aria-label="Logo placeholder">
@@ -32,7 +35,7 @@ Every surface that would normally show a logo instead renders a labeled placehol
 }
 ```
 
-This pattern is already implemented in `design-system.html` (cover header + footer) and reused in `ui_kits/app/`. When a real logo file is supplied, drop it into this folder (e.g. `assets/logo.svg`, `assets/wordmark.svg`) and swap the `.logo-slot` markup for an `<img>`/inline `<svg>` — do not resize or reinterpret the mark once supplied.
+`design-system.html` and `ui_kits/app/` (the preserved source evidence) still show the dashed placeholder — that's expected, they document the state as originally captured. New product surfaces should use the real mark instead.
 
 ## Other imagery
 

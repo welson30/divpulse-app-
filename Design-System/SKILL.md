@@ -12,7 +12,7 @@ This package is a complete, source-backed Claude Design skill for the DivPulse b
 
 ## Source context
 
-DivPulse is a dividend income dashboard for dividend investors, positioned as "quiet confidence" — a third lane between spreadsheet-cold and consumer-cute financial tools. The source evidence (`brand-spec.md`, a full documentation page `design-system.html`, and a reusable `kit/`) was supplied directly as a complete, approved brand brief — not inferred. Read `context/provenance.md` for the exact evidence-to-artifact mapping and open blockers (no logo asset, no self-hosted font binaries).
+DivPulse is a dividend income dashboard for dividend investors, positioned as "quiet confidence" — a third lane between spreadsheet-cold and consumer-cute financial tools. The source evidence (`brand-spec.md`, a full documentation page `design-system.html`, and a reusable `kit/`) was supplied directly as a complete, approved brand brief — not inferred. Read `context/provenance.md` for the exact evidence-to-artifact mapping and open blockers (no self-hosted font binaries; the logo-asset blocker was resolved 2026-07-15, see `assets/README.md`).
 
 ## When to use
 
@@ -49,7 +49,7 @@ Every rule below is grounded in source evidence (`brand-spec.md`, `design-system
 - **No drop shadows for elevation** — layered lightness (`--bg-base` → `--bg-surface` → `--bg-elevated`) plus a 1px `--border-subtle` edge instead (`brand-spec.md` §Elevation).
 - **Icon buttons are icon-only, no text label**; on screens ≤480px reposition the label above the icon instead of removing it (`brand-spec.md` §Iconography, confirmed as a standing cross-project preference).
 - **Green signals something** (gain, primary action, active state) — never generic decoration.
-- **No logo mark exists yet.** Reserve the empty, labeled logo slot pattern from `assets/README.md` — do not invent one (`brand-spec.md` §Logo, explicit instruction).
+- **A logo mark now exists** (`assets/logo.svg`, supplied 2026-07-15) — use it unresized and unrecolored; see `assets/README.md`. The old "reserve an empty slot, do not invent one" rule was for the prior no-logo period, not a standing instruction to avoid the mark now that one is supplied.
 - **Every data module needs empty / loading / error states** (`kit/components.css` `.state-card` variants) — observed pattern in `design-system.html`.
 - **The dividend receipt card is the only component with a designed entrance + count-up animation** (`kit/interactions.js`). Don't add competing motion elsewhere.
 - **Respect `prefers-reduced-motion`** on any animation you add — every animation in source evidence has a reduced-motion fallback.
@@ -77,7 +77,7 @@ Every rule below is grounded in source evidence (`brand-spec.md`, `design-system
 - [ ] Icon buttons have no visible text label (desktop) and a repositioned label ≤480px.
 - [ ] Financial figures use tabular numerals and a visible sign (`+$46.20`, not `46.20`).
 - [ ] Every data list/card has an empty, loading, and error variant defined or reused.
-- [ ] Logo area is the reserved empty slot, not an invented mark.
+- [ ] Logo area uses the real mark (`assets/logo.svg`), unresized and unrecolored.
 - [ ] New animation (if any) has a `prefers-reduced-motion` fallback.
 - [ ] Interactive-control borders (buttons, inputs, icon buttons) use `--text-tertiary`, not `--border-subtle`.
 - [ ] Every focusable element has a visible focus style — never `outline: none` without a replacement.

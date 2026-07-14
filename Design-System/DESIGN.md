@@ -172,7 +172,7 @@ Every data module needs explicit empty / loading / error treatments — do not l
 Green gradient fill (`--green-500` → transparent) for growth visuals. Grid lines at `--border-subtle` only — never a contrasting grid color. Data labels in mono with tabular figures. Loss bars/segments use the red equivalents, never green.
 
 ### Logo
-**Not supplied.** Every layout reserves an empty, clearly labeled logo slot (dashed border, `LOGO` mono micro-label) until a mark is provided — do not invent one. See `assets/README.md`.
+**Supplied 2026-07-15** — see `assets/README.md` and `assets/logo.svg`. Prior to this date no mark existed and every layout reserved an empty, clearly labeled logo slot (dashed border, `LOGO` mono micro-label); that pattern is now superseded for new work — use the real mark, unresized and unrecolored, instead of the placeholder. `design-system.html` and `ui_kits/app/` still show the placeholder because they're preserved source evidence, not live product surfaces.
 
 ### Component interaction states
 

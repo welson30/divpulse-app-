@@ -3,12 +3,8 @@ import { Button } from "@/components/ui/button";
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-sp-6 px-sp-3 py-sp-8">
-      {/* Reserved logo slot — no mark has been supplied, do not invent one (DESIGN.md §6) */}
-      <div className="flex h-16 w-16 items-center justify-center rounded-card border border-dashed border-border-subtle">
-        <span className="font-mono text-[10px] tracking-wide text-text-tertiary">
-          LOGO
-        </span>
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, next/image needs dangerouslyAllowSVG for this */}
+      <img src="/logo.svg" alt="DivPulse" className="h-16 w-16 rounded-card" width={64} height={64} />
 
       <div className="flex max-w-md flex-col items-center gap-sp-2 text-center">
         <h1 className="text-h1">DivPulse</h1>

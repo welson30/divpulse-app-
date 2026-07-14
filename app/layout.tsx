@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,15 @@ export const metadata: Metadata = {
   title: "DivPulse — Dividend Income Dashboard",
   description:
     "Track holdings, dividend calendars, portfolio diversification, and incoming dividend payments.",
+};
+
+// dark-only by deliberate brand decision (DESIGN.md §10) — no
+// prefers-color-scheme handling, so color-scheme is pinned to dark
+// rather than left to the OS (native scrollbars/form controls, etc).
+// themeColor matches app/manifest.ts's --green-900, not raw --bg-base.
+export const viewport: Viewport = {
+  themeColor: "#064E3B",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
