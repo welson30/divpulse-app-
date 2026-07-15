@@ -6,7 +6,11 @@
       "Bash(mkdir -p public/icons)",
       "Bash(cp Design-System/build/icons/*.svg public/icons/)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3001/)",
-      "Bash(curl -s http://localhost:3001/)"
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3050/)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")",
+      "Bash(\"/c/Users/Hp/AppData/Local/Programs/Python/Python310/Scripts/playwright\" --version)",
+      "Bash(python3 -c \"import playwright; print\\('ok'\\)\")"
     ]
   }
 }
