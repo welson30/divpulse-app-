@@ -264,6 +264,13 @@ body {
   outline-offset: 2px;
 }
 
+/* Text selection in brand tint — --green-900 is the sanctioned subtle
+   background use of green (DESIGN.md §2). */
+::selection {
+  background: var(--green-900);
+  color: var(--text-primary);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

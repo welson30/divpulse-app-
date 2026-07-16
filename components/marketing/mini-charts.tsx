@@ -4,31 +4,42 @@
 
 export function DividendCalendarChart() {
   const bars = [
-    { x: 10, y: 46, h: 44, tone: "high" },
-    { x: 50, y: 60, h: 30, tone: "low" },
-    { x: 90, y: 30, h: 60, tone: "high" },
-    { x: 130, y: 66, h: 24, tone: "low" },
-    { x: 170, y: 20, h: 70, tone: "high" },
-    { x: 210, y: 70, h: 20, tone: "low" },
-    { x: 250, y: 40, h: 50, tone: "high" },
-    { x: 290, y: 76, h: 14, tone: "low" },
+    { x: 10, y: 46, h: 44, tone: "high", month: "Jan" },
+    { x: 50, y: 60, h: 30, tone: "low", month: "Feb" },
+    { x: 90, y: 30, h: 60, tone: "high", month: "Mar" },
+    { x: 130, y: 66, h: 24, tone: "low", month: "Apr" },
+    { x: 170, y: 20, h: 70, tone: "high", month: "May" },
+    { x: 210, y: 70, h: 20, tone: "low", month: "Jun" },
+    { x: 250, y: 40, h: 50, tone: "high", month: "Jul" },
+    { x: 290, y: 76, h: 14, tone: "low", month: "Aug" },
   ] as const;
 
   return (
-    <svg viewBox="0 0 320 110" width="100%" height="110" role="img" aria-label="Monthly dividend income, eight months shown">
+    <svg viewBox="0 0 320 126" width="100%" height="126" role="img" aria-label="Monthly dividend income, January through August">
       <line x1="0" y1="20" x2="320" y2="20" stroke="var(--border-subtle)" strokeWidth={1} />
       <line x1="0" y1="55" x2="320" y2="55" stroke="var(--border-subtle)" strokeWidth={1} />
       <line x1="0" y1="90" x2="320" y2="90" stroke="var(--border-subtle)" strokeWidth={1} />
       {bars.map((b) => (
-        <rect
-          key={b.x}
-          x={b.x}
-          y={b.y}
-          width={20}
-          height={b.h}
-          rx={2}
-          fill={b.tone === "high" ? "var(--green-500)" : "var(--green-900)"}
-        />
+        <g key={b.x}>
+          <rect
+            x={b.x}
+            y={b.y}
+            width={20}
+            height={b.h}
+            rx={2}
+            fill={b.tone === "high" ? "var(--green-500)" : "var(--green-900)"}
+          />
+          <text
+            x={b.x + 10}
+            y={104}
+            textAnchor="middle"
+            fill="var(--text-secondary)"
+            fontFamily="var(--font-mono)"
+            fontSize={9}
+          >
+            {b.month}
+          </text>
+        </g>
       ))}
     </svg>
   );

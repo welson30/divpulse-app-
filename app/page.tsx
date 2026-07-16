@@ -15,8 +15,6 @@ import {
   IconEye,
   IconGrowth,
   IconHoldings,
-  IconLock,
-  IconPlug,
 } from "@/components/marketing/icons";
 
 const NAV_LINKS = [
@@ -43,16 +41,22 @@ const STEPS = [
     index: "01",
     title: "Connect your holdings",
     body: "Add positions manually, import a CSV from your broker, or authorize a read-only Plaid connection. Nothing here can move money.",
+    meta: "Manual · CSV · Plaid",
+    terminal: false,
   },
   {
     index: "02",
     title: "We watch the tape",
     body: "A scheduled job checks Yahoo Finance dividend data against every ticker you hold, every day, without you doing anything.",
+    meta: "Every ticker · Every day",
+    terminal: false,
   },
   {
     index: "03",
     title: "You know first",
     body: "The instant a payment is detected, you get a notification — before the brokerage app has finished catching up.",
+    meta: "Push · Telegram · Email",
+    terminal: true,
   },
 ];
 
@@ -239,7 +243,7 @@ function TimingDifference() {
           maskImage: "radial-gradient(ellipse 80% 100% at 50% 50%, black 40%, transparent 100%)",
         }}
       />
-      <div className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-sp-3 px-sp-3 py-sp-8 text-center">
+      <div className="relative mx-auto flex w-full max-w-[1180px] flex-col items-center gap-sp-3 px-sp-3 py-sp-8 text-center md:py-[calc(var(--sp-8)+var(--sp-4))]">
         <p className="font-mono text-sm text-text-secondary">A dividend lands in your account at</p>
         <p className="font-mono text-[clamp(64px,10vw,120px)] leading-none font-semibold tracking-[-0.04em] tabular-nums text-text-primary">
           9:02<span className="text-[0.42em] font-medium text-text-secondary"> AM</span>
@@ -273,29 +277,54 @@ function TimingDifference() {
   );
 }
 
+/**
+ * An open timeline rather than three boxed cards: the rail runs through the
+ * step nodes and terminates in a solid green node at step 3 — the layout
+ * itself encodes "setup → watch → money arrives." Green appears only at the
+ * terminal node (the signal), per the brand's green-means-something rule.
+ */
 function HowItWorks() {
   return (
     <section id="how-it-works" className="scroll-mt-16 border-b border-border-subtle">
-      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8">
+      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8 md:py-[calc(var(--sp-8)+var(--sp-4))]">
         <SectionHeading
           eyebrow="How it works"
           title="Three steps between you and knowing first."
-          className="mb-sp-4"
+          className="mb-sp-6"
         />
 
-        <div className="relative grid gap-sp-3 md:grid-cols-3">
+        <div className="relative grid gap-sp-6 md:grid-cols-3 md:gap-sp-3">
+          {/* the rail — from node 1's center to node 3's center; the canvas-filled
+              nodes render above it and mask their crossing points */}
           <div
             aria-hidden
-            className="absolute top-[38px] right-[16.5%] left-[16.5%] hidden h-px bg-linear-to-r from-border-subtle via-green-500/30 to-border-subtle md:block"
+            className="absolute top-[5px] left-[5px] hidden h-px w-[calc(66.66%+16px)] bg-linear-to-r from-border-subtle via-border-subtle to-green-500/70 md:block"
           />
           {STEPS.map((step, i) => (
-            <Reveal key={step.index} delayMs={i * 110}>
-              <div className="group relative flex h-full flex-col gap-sp-2 rounded-card border border-border-subtle bg-surface p-sp-3 transition-all duration-200 hover:-translate-y-1 hover:border-border-interactive hover:shadow-[0_16px_40px_-16px_rgba(0,0,0,0.5)]">
-                <span className="flex size-9 items-center justify-center rounded-full border border-border-subtle bg-surface-2 font-mono text-sm text-green-500 transition-colors group-hover:border-green-500/40">
+            <Reveal key={step.index} delayMs={i * 130}>
+              <div className="relative flex h-full flex-col gap-sp-2 md:pr-sp-4">
+                <span
+                  aria-hidden
+                  className={
+                    step.terminal
+                      ? "mb-sp-1 block size-[11px] rounded-full bg-green-500"
+                      : "mb-sp-1 block size-[11px] rounded-full border border-border-interactive bg-canvas"
+                  }
+                />
+                <span className="font-mono text-[13px] font-medium tracking-[0.08em] text-text-secondary">
                   {step.index}
                 </span>
-                <h3 className="text-h2 font-display font-medium text-text-primary">{step.title}</h3>
-                <p className="text-sm leading-relaxed text-text-secondary">{step.body}</p>
+                <h3 className="font-display text-[22px] font-medium tracking-[-0.01em] text-text-primary">
+                  {step.title}
+                </h3>
+                <p className="max-w-[38ch] text-sm leading-relaxed text-text-secondary">{step.body}</p>
+                <p
+                  className={`mt-auto pt-sp-1 font-mono text-xs tracking-[0.02em] ${
+                    step.terminal ? "text-green-500" : "text-text-secondary"
+                  }`}
+                >
+                  {step.meta}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -308,7 +337,7 @@ function HowItWorks() {
 function ProductSurface() {
   return (
     <section id="product" className="scroll-mt-16 border-b border-border-subtle bg-surface">
-      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8">
+      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8 md:py-[calc(var(--sp-8)+var(--sp-4))]">
         <SectionHeading
           eyebrow="The product"
           title="One dashboard. Every holding, every payment, every dollar accounted for."
@@ -373,7 +402,7 @@ function FeatureCell({
 function Features() {
   return (
     <section className="border-b border-border-subtle">
-      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8">
+      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8 md:py-[calc(var(--sp-8)+var(--sp-4))]">
         <SectionHeading
           eyebrow="Everything included"
           title="Built for people who track income, not just price."
@@ -450,47 +479,70 @@ function Features() {
   );
 }
 
+/**
+ * A security fact sheet instead of icon cards: each row states the guarantee
+ * in mono (the tag is the promise) and explains it in plain language. Reads
+ * like terms that happen to be good — which is the brand voice: facts talk,
+ * decoration doesn't.
+ */
 function Trust() {
-  const points = [
+  const rows = [
     {
-      icon: IconLock,
-      title: "Read-only, always",
-      body: "Broker connections via Plaid never carry the ability to move funds or place trades — DivPulse can see your holdings, nothing else.",
+      label: "Access",
+      tag: "Read-only",
+      body: "Broker connections via Plaid can see holdings — never move funds or place trades. Manual and CSV tracking involve no broker login at all.",
     },
     {
-      icon: IconPlug,
-      title: "Encrypted end to end",
-      body: "Data is encrypted at rest and in transit. API keys and credentials are stored server-side, never exposed to the client.",
+      label: "Custody",
+      tag: "None",
+      body: "DivPulse is a tracker, not a broker. It never holds, touches, or routes your money — there is nothing here to withdraw.",
     },
     {
-      icon: IconEye,
-      title: "You control what's tracked",
+      label: "Encryption",
+      tag: "At rest + in transit",
+      body: "Portfolio data is encrypted in the database and on the wire. API keys and credentials live server-side, never in the client.",
+    },
+    {
+      label: "Control",
+      tag: "Yours",
       body: "Remove a holding or disconnect a broker at any time — nothing lingers in a sync queue after you've said stop.",
     },
   ];
 
   return (
     <section className="border-b border-border-subtle bg-surface">
-      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8">
+      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8 md:py-[calc(var(--sp-8)+var(--sp-4))]">
         <SectionHeading
           eyebrow="Trust"
           title="Access to see. Never access to move."
+          description="The four facts that matter before you connect anything."
           align="center"
           className="mb-sp-6"
         />
-        <div className="grid gap-px overflow-hidden rounded-card border border-border-subtle bg-border-subtle md:grid-cols-3">
-          {points.map((point, i) => (
-            <Reveal key={point.title} delayMs={i * 100}>
-              <div className="group flex h-full flex-col items-center gap-sp-2 bg-surface-2 p-sp-4 text-center transition-colors duration-200 hover:bg-surface-hover">
-                <div className="flex size-11 items-center justify-center rounded-full border border-border-interactive bg-surface text-text-secondary transition-colors duration-200 group-hover:border-green-500/50 group-hover:text-green-500">
-                  <point.icon className="size-5" />
+        <Reveal>
+          <div className="mx-auto max-w-[860px] divide-y divide-border-subtle overflow-hidden rounded-card border border-border-subtle bg-surface-2">
+            {rows.map((row) => (
+              <div
+                key={row.label}
+                className="grid gap-sp-1 p-sp-3 transition-colors duration-200 hover:bg-surface-hover sm:grid-cols-[200px_1fr] sm:gap-sp-3 sm:p-sp-4"
+              >
+                <div>
+                  <div className="font-mono text-xs font-semibold tracking-[0.08em] text-text-secondary uppercase">
+                    {row.label}
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[13px] font-medium text-green-500">
+                    <IconCheck className="size-3.5 shrink-0" />
+                    {row.tag}
+                  </div>
                 </div>
-                <h3 className="text-[15px] font-medium text-text-primary">{point.title}</h3>
-                <p className="text-sm leading-relaxed text-text-secondary">{point.body}</p>
+                <p className="text-sm leading-relaxed text-text-secondary">{row.body}</p>
               </div>
-            </Reveal>
-          ))}
-        </div>
+            ))}
+          </div>
+        </Reveal>
+        <p className="mt-sp-3 text-center font-mono text-xs text-text-secondary">
+          Questions about any of these — <a href="#faq" className="text-text-primary underline decoration-border-interactive underline-offset-4 transition-colors hover:decoration-green-500">the FAQ answers them plainly</a>.
+        </p>
       </div>
     </section>
   );
@@ -499,7 +551,7 @@ function Trust() {
 function Pricing() {
   return (
     <section id="pricing" className="scroll-mt-16 border-b border-border-subtle">
-      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8">
+      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8 md:py-[calc(var(--sp-8)+var(--sp-4))]">
         <SectionHeading
           eyebrow="Pricing"
           title="Start free. Pay when auto-sync earns its keep."
@@ -562,7 +614,7 @@ function Pricing() {
 function FaqSection() {
   return (
     <section id="faq" className="scroll-mt-16 border-b border-border-subtle">
-      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8">
+      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8 md:py-[calc(var(--sp-8)+var(--sp-4))]">
         <SectionHeading
           eyebrow="FAQ"
           title="The questions a money product should answer."
@@ -598,7 +650,7 @@ function FinalCta() {
               "radial-gradient(60% 120% at 50% 100%, rgba(52,211,153,0.20) 0%, rgba(52,211,153,0) 70%), radial-gradient(70% 60% at 50% 0%, var(--bg-surface) 0%, transparent 100%)",
           }}
         />
-        <div className="relative flex flex-col items-center gap-sp-3 px-sp-3 py-sp-8 text-center">
+        <div className="relative flex flex-col items-center gap-sp-3 px-sp-3 py-sp-8 text-center md:py-[calc(var(--sp-8)+var(--sp-4))]">
           <Reveal className="flex flex-col items-center gap-sp-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-border-subtle bg-surface-2 px-3 py-1.5 font-mono text-xs tracking-[0.02em] text-text-secondary">
               <span className="relative flex size-1.5">
