@@ -101,6 +101,15 @@ export function IconPlug({ className }: IconProps) {
   );
 }
 
+export function IconShield({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M12 3 5 6v5c0 4.6 3 8.4 7 10 4-1.6 7-5.4 7-10V6l-7-3Z" />
+      <path d="m9.2 12 2 2 3.6-4" />
+    </svg>
+  );
+}
+
 export function IconBell({ className }: IconProps) {
   return <IconAlerts className={className} />;
 }

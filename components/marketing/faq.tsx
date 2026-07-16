@@ -35,7 +35,9 @@ export function Faq() {
   return (
     <div className="mx-auto w-full max-w-[720px] divide-y divide-border-subtle border-y border-border-subtle">
       {FAQ_ITEMS.map((item) => (
-        <details key={item.q} className="group">
+        // faq-item: open/close is animated via ::details-content in
+        // globals.css (progressive enhancement — unsupported browsers snap)
+        <details key={item.q} className="faq-item group">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-sp-2 py-sp-3 text-[15px] font-medium text-text-primary transition-colors hover:text-green-500 [&::-webkit-details-marker]:hidden">
             {item.q}
             <svg

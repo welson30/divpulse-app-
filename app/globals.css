@@ -271,6 +271,148 @@ body {
   color: var(--text-primary);
 }
 
+/* ============================================================
+   Marketing micro-interactions
+   Both are hover/toggle feedback (DESIGN.md §7 allows fast, subtle
+   interaction feedback) — not entrance flourishes, which stay
+   reserved for the receipt card. Reduced motion disables each.
+   ============================================================ */
+
+/* Primary-CTA sheen: one specular band sweeps across on hover-in only
+   (no reverse sweep on hover-out — the transition lives on :hover).
+   The highlight is a lighting effect over --green-500, not a palette
+   addition, mirroring the glass sheen already used on the phone mock.
+   The resting glow is the kit's sanctioned CTA glow; hover blooms it. */
+.btn-sheen {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(52, 211, 153, 0.1);
+  transition: box-shadow 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.btn-sheen:hover,
+.btn-sheen:focus-visible {
+  box-shadow: 0 0 40px rgba(52, 211, 153, 0.22);
+}
+.btn-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.28) 50%, transparent 62%);
+  transform: translateX(-160%);
+  pointer-events: none;
+}
+.btn-sheen:hover::after,
+.btn-sheen:focus-visible::after {
+  transform: translateX(160%);
+  transition: transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* FAQ <details>: animate the content's block-size between 0 and auto.
+   Progressive enhancement — browsers without interpolate-size /
+   ::details-content simply snap open, exactly as before. */
+:root {
+  interpolate-size: allow-keywords;
+}
+details.faq-item::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  opacity: 0;
+  transition:
+    content-visibility 320ms allow-discrete,
+    opacity 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    block-size 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+details.faq-item[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+}
+
+/* Label roll on primary CTAs: the visible label flows up and out while an
+   aria-hidden duplicate reappears from below; the arrow rolls out right and
+   back in from the left. Triggered by the .btn-sheen parent so text, arrow,
+   and sheen play as one gesture. */
+.btn-roll {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+.btn-roll-a {
+  display: inline-block;
+  transition: transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.btn-roll-b {
+  position: absolute;
+  inset: 0;
+  transform: translateY(110%);
+  transition: transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.btn-sheen:hover .btn-roll-a,
+.btn-sheen:focus-visible .btn-roll-a {
+  transform: translateY(-110%);
+}
+.btn-sheen:hover .btn-roll-b,
+.btn-sheen:focus-visible .btn-roll-b {
+  transform: translateY(0);
+}
+
+.btn-arrow-roll {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+}
+/* the arrow trails the label by a beat — one orchestrated gesture,
+   not two elements firing at once */
+.btn-arrow-roll > :first-child {
+  transition: transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 60ms;
+}
+.btn-arrow-roll > :last-child {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-130%);
+  transition: transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 60ms;
+}
+.btn-sheen:hover .btn-arrow-roll > :first-child,
+.btn-sheen:focus-visible .btn-arrow-roll > :first-child {
+  transform: translateX(130%);
+}
+.btn-sheen:hover .btn-arrow-roll > :last-child,
+.btn-sheen:focus-visible .btn-arrow-roll > :last-child {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-sheen:hover::after,
+  .btn-sheen:focus-visible::after {
+    transition: none;
+    transform: translateX(-160%);
+  }
+  details.faq-item::details-content {
+    transition: none;
+  }
+  .btn-roll-a,
+  .btn-roll-b,
+  .btn-arrow-roll > :first-child,
+  .btn-arrow-roll > :last-child {
+    transition: none;
+  }
+  .btn-sheen:hover .btn-roll-a,
+  .btn-sheen:focus-visible .btn-roll-a {
+    transform: none;
+  }
+  .btn-sheen:hover .btn-roll-b,
+  .btn-sheen:focus-visible .btn-roll-b {
+    transform: translateY(110%);
+  }
+  .btn-sheen:hover .btn-arrow-roll > :first-child,
+  .btn-sheen:focus-visible .btn-arrow-roll > :first-child {
+    transform: none;
+  }
+  .btn-sheen:hover .btn-arrow-roll > :last-child,
+  .btn-sheen:focus-visible .btn-arrow-roll > :last-child {
+    transform: translateX(-130%);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

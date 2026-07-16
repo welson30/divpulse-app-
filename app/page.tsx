@@ -15,6 +15,9 @@ import {
   IconEye,
   IconGrowth,
   IconHoldings,
+  IconLock,
+  IconPlug,
+  IconShield,
 } from "@/components/marketing/icons";
 
 const NAV_LINKS = [
@@ -93,6 +96,29 @@ const PLANS = [
   },
 ];
 
+/** Label for .btn-sheen CTAs: rolls up and reappears from below on hover
+ * (see globals.css). The duplicate is aria-hidden so the name reads once. */
+function RollingLabel({ children }: { children: string }) {
+  return (
+    <span className="btn-roll">
+      <span className="btn-roll-a">{children}</span>
+      <span className="btn-roll-b" aria-hidden>
+        {children}
+      </span>
+    </span>
+  );
+}
+
+/** Arrow for .btn-sheen CTAs: rolls out right, back in from the left. */
+function RollingArrow() {
+  return (
+    <span className="btn-arrow-roll" aria-hidden>
+      <IconArrowRight className="size-4" />
+      <IconArrowRight className="size-4" />
+    </span>
+  );
+}
+
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
@@ -134,8 +160,10 @@ function SiteHeader() {
             </a>
           ))}
         </nav>
-        <Button size="sm" className="px-4" asChild>
-          <Link href="/signup">Sign up free</Link>
+        <Button size="sm" className="btn-sheen px-4" asChild>
+          <Link href="/signup">
+            <RollingLabel>Sign up free</RollingLabel>
+          </Link>
         </Button>
       </div>
     </header>
@@ -145,22 +173,34 @@ function SiteHeader() {
 function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-border-subtle">
+      {/* Graph-paper ruling — the same 56px grid as the timing and closing
+          sections, so the page opens and closes on one texture. Masked to
+          dissolve before the fold; no color, just structure. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] opacity-60"
+        className="pointer-events-none absolute inset-0 opacity-[0.22]"
         style={{
-          background: "radial-gradient(60% 60% at 50% 0%, rgba(52,211,153,0.10) 0%, rgba(52,211,153,0) 70%)",
+          backgroundImage:
+            "linear-gradient(to right, var(--border-subtle) 1px, transparent 1px), linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px)",
+          backgroundSize: "56px 56px",
+          maskImage: "radial-gradient(90% 70% at 50% 6%, black 28%, transparent 76%)",
         }}
+      />
+      {/* a whisper of surface tone under the glass nav for depth */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[220px]"
+        style={{ background: "linear-gradient(180deg, rgba(18,24,22,0.5), transparent)" }}
       />
       <div className="relative mx-auto grid w-full max-w-[1180px] gap-sp-6 px-sp-3 py-sp-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div className="flex flex-col items-start gap-sp-3">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border-subtle bg-surface px-3 py-1.5 font-mono text-xs tracking-[0.04em] text-text-secondary">
+          <p className="flex items-center gap-2.5 font-mono text-xs font-medium tracking-[0.16em] text-text-secondary uppercase">
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex size-1.5 rounded-full bg-green-500 opacity-60 motion-safe:animate-ping" />
               <span className="relative inline-flex size-1.5 rounded-full bg-green-500" />
             </span>
             Real-time dividend alerts
-          </span>
+          </p>
 
           <h1 className="text-balance font-display text-[clamp(38px,5.2vw,64px)] leading-[1.04] font-semibold tracking-[-0.02em] text-text-primary">
             Your broker never tells you when you get paid.
@@ -173,10 +213,10 @@ function Hero() {
           </p>
 
           <div className="mt-sp-1 flex flex-wrap items-center gap-sp-2">
-            <Button size="lg" className="group h-11 px-6 text-[15px]" asChild>
+            <Button size="lg" className="btn-sheen h-11 px-6 text-[15px]" asChild>
               <Link href="/signup">
-                Start tracking free
-                <IconArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <RollingLabel>Start tracking free</RollingLabel>
+                <RollingArrow />
               </Link>
             </Button>
             <Button size="lg" variant="secondary" className="h-11 px-6 text-[15px]" asChild>
@@ -189,14 +229,9 @@ function Hero() {
           </p>
         </div>
 
+        {/* the only green light in the hero comes from the phone itself —
+            the glow belongs to the notifications, not the background */}
         <div className="relative flex flex-col items-center gap-sp-3">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10"
-            style={{
-              background: "radial-gradient(50% 50% at 50% 40%, rgba(52,211,153,0.14) 0%, rgba(52,211,153,0) 72%)",
-            }}
-          />
           <PhoneMockup />
           <div className="flex w-full max-w-[280px] items-center justify-between px-1">
             <span className="font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">On your lock screen</span>
@@ -353,13 +388,15 @@ function ProductSurface() {
   );
 }
 
+// Square-ish tinted tags (the prototype's own tag vocabulary — 5px radius,
+// elevation fill, no hairline) rather than the stock bordered-pill look.
 function ChipRow({ chips }: { chips: string[] }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {chips.map((chip) => (
         <span
           key={chip}
-          className="rounded-full border border-border-subtle bg-surface-2 px-2.5 py-1 font-mono text-[11px] text-text-secondary"
+          className="rounded-[5px] bg-surface-hover px-2.5 py-1 font-mono text-[11px] font-medium text-text-secondary"
         >
           {chip}
         </span>
@@ -486,63 +523,68 @@ function Features() {
  * decoration doesn't.
  */
 function Trust() {
-  const rows = [
+  const points = [
     {
-      label: "Access",
-      tag: "Read-only",
-      body: "Broker connections via Plaid can see holdings — never move funds or place trades. Manual and CSV tracking involve no broker login at all.",
+      icon: IconLock,
+      title: "Read-only by design",
+      tag: "Access",
+      body: "Plaid connections can see holdings — never move funds or place trades. Manual and CSV tracking involve no broker login at all.",
     },
     {
-      label: "Custody",
-      tag: "None",
+      icon: IconShield,
+      title: "No custody, ever",
+      tag: "Your money",
       body: "DivPulse is a tracker, not a broker. It never holds, touches, or routes your money — there is nothing here to withdraw.",
     },
     {
-      label: "Encryption",
-      tag: "At rest + in transit",
-      body: "Portfolio data is encrypted in the database and on the wire. API keys and credentials live server-side, never in the client.",
+      icon: IconPlug,
+      title: "Encrypted at rest & in transit",
+      tag: "Your data",
+      body: "Portfolio data is encrypted in the database and on the wire. Keys and credentials live server-side, never in the client.",
     },
     {
-      label: "Control",
-      tag: "Yours",
+      icon: IconEye,
+      title: "You decide what's tracked",
+      tag: "Control",
       body: "Remove a holding or disconnect a broker at any time — nothing lingers in a sync queue after you've said stop.",
     },
   ];
 
   return (
     <section className="border-b border-border-subtle bg-surface">
-      <div className="mx-auto w-full max-w-[1180px] px-sp-3 py-sp-8 md:py-[calc(var(--sp-8)+var(--sp-4))]">
-        <SectionHeading
-          eyebrow="Trust"
-          title="Access to see. Never access to move."
-          description="The four facts that matter before you connect anything."
-          align="center"
-          className="mb-sp-6"
-        />
-        <Reveal>
-          <div className="mx-auto max-w-[860px] divide-y divide-border-subtle overflow-hidden rounded-card border border-border-subtle bg-surface-2">
-            {rows.map((row) => (
-              <div
-                key={row.label}
-                className="grid gap-sp-1 p-sp-3 transition-colors duration-200 hover:bg-surface-hover sm:grid-cols-[200px_1fr] sm:gap-sp-3 sm:p-sp-4"
-              >
-                <div>
-                  <div className="font-mono text-xs font-semibold tracking-[0.08em] text-text-secondary uppercase">
-                    {row.label}
+      <div className="mx-auto grid w-full max-w-[1180px] gap-sp-6 px-sp-3 py-sp-8 md:py-[calc(var(--sp-8)+var(--sp-4))] lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="flex flex-col items-start gap-sp-3 lg:sticky lg:top-24 lg:self-start">
+          <SectionHeading
+            eyebrow="Trust"
+            title="Access to see. Never access to move."
+            description="Connecting a brokerage should feel boring. These four guarantees are why it can."
+          />
+          <a
+            href="#faq"
+            className="font-mono text-xs text-text-secondary underline decoration-border-interactive underline-offset-4 transition-colors hover:text-text-primary hover:decoration-green-500"
+          >
+            The FAQ answers these in plain words
+          </a>
+        </div>
+
+        <div className="grid gap-sp-2 sm:grid-cols-2">
+          {points.map((point, i) => (
+            <Reveal key={point.title} delayMs={i * 90} className="h-full">
+              <div className="group flex h-full flex-col gap-sp-2 rounded-card border border-border-subtle bg-surface-2 p-sp-3 transition-colors duration-200 hover:border-border-interactive hover:bg-surface-hover">
+                <div className="flex items-center justify-between gap-sp-1">
+                  <div className="flex size-10 items-center justify-center rounded-[10px] border border-border-subtle bg-surface text-text-secondary transition-colors duration-200 group-hover:border-green-500/50 group-hover:text-green-500">
+                    <point.icon className="size-[18px]" />
                   </div>
-                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[13px] font-medium text-green-500">
-                    <IconCheck className="size-3.5 shrink-0" />
-                    {row.tag}
-                  </div>
+                  <span className="font-mono text-[11px] tracking-[0.08em] text-text-secondary uppercase">
+                    {point.tag}
+                  </span>
                 </div>
-                <p className="text-sm leading-relaxed text-text-secondary">{row.body}</p>
+                <h3 className="text-[15px] font-medium text-text-primary">{point.title}</h3>
+                <p className="text-sm leading-relaxed text-text-secondary">{point.body}</p>
               </div>
-            ))}
-          </div>
-        </Reveal>
-        <p className="mt-sp-3 text-center font-mono text-xs text-text-secondary">
-          Questions about any of these — <a href="#faq" className="text-text-primary underline decoration-border-interactive underline-offset-4 transition-colors hover:decoration-green-500">the FAQ answers them plainly</a>.
-        </p>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -595,8 +637,14 @@ function Pricing() {
                     </li>
                   ))}
                 </ul>
-                <Button className="mt-auto h-11" variant={plan.featured ? "default" : "secondary"} asChild>
-                  <Link href="/signup">{plan.cta}</Link>
+                <Button
+                  className={plan.featured ? "btn-sheen mt-auto h-11" : "mt-auto h-11"}
+                  variant={plan.featured ? "default" : "secondary"}
+                  asChild
+                >
+                  <Link href="/signup">
+                    {plan.featured ? <RollingLabel>{plan.cta}</RollingLabel> : plan.cta}
+                  </Link>
                 </Button>
               </div>
             </Reveal>
@@ -652,23 +700,23 @@ function FinalCta() {
         />
         <div className="relative flex flex-col items-center gap-sp-3 px-sp-3 py-sp-8 text-center md:py-[calc(var(--sp-8)+var(--sp-4))]">
           <Reveal className="flex flex-col items-center gap-sp-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border-subtle bg-surface-2 px-3 py-1.5 font-mono text-xs tracking-[0.02em] text-text-secondary">
+            <p className="flex items-center gap-2.5 font-mono text-xs font-medium tracking-[0.16em] text-text-secondary uppercase">
               <span className="relative flex size-1.5">
-                <span className="absolute inline-flex size-1.5 rounded-full bg-green-500 opacity-75" />
+                <span className="absolute inline-flex size-1.5 rounded-full bg-green-500 opacity-60 motion-safe:animate-ping" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-green-500" />
               </span>
               5 assets free, forever
-            </span>
+            </p>
             <h2 className="text-balance font-display text-[clamp(28px,4vw,40px)] font-semibold tracking-[-0.02em] text-text-primary">
               Stop checking. Start knowing.
             </h2>
             <p className="max-w-md text-body text-text-secondary">
               No card required, no trial clock, no catch — just a notification the moment your money moves.
             </p>
-            <Button size="lg" className="group mt-sp-1 h-11 px-6 text-[15px]" asChild>
+            <Button size="lg" className="btn-sheen mt-sp-1 h-11 px-6 text-[15px]" asChild>
               <Link href="/signup">
-                Start tracking free
-                <IconArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <RollingLabel>Start tracking free</RollingLabel>
+                <RollingArrow />
               </Link>
             </Button>
           </Reveal>
