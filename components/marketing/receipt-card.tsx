@@ -30,38 +30,40 @@ function easeOutCubic(t: number) {
  * reinvented — same durations, same easing, same reduced-motion guard.
  */
 export function ReceiptCard({ ticker, name, cadence, amount, when, delayMs = 0, className }: ReceiptCardProps) {
-  const [entered, setEntered] = useState(false);
+  // Visible at final value on the server render, so the card never depends
+  // on JavaScript (or on motion being allowed) to show its content. The
+  // entrance replays from a hidden state only after hydration, deferred a
+  // frame so the reset never runs synchronously inside the effect.
+  const [entered, setEntered] = useState(true);
   const [displayAmount, setDisplayAmount] = useState(amount);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    if (reduceMotion) {
-      setEntered(true);
-      setDisplayAmount(amount);
-      return;
-    }
-
-    setDisplayAmount(0);
-    const enterTimer = setTimeout(() => setEntered(true), delayMs);
-
-    let start: number | null = null;
-    const duration = 600;
-    function step(ts: number) {
-      if (start === null) start = ts;
-      const p = Math.min((ts - start) / duration, 1);
-      setDisplayAmount(amount * easeOutCubic(p));
-      if (p < 1) rafRef.current = requestAnimationFrame(step);
-    }
-    const countTimer = setTimeout(() => {
-      rafRef.current = requestAnimationFrame(step);
-    }, delayMs);
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    rafRef.current = requestAnimationFrame(() => {
+      setEntered(false);
+      setDisplayAmount(0);
+      timers.push(setTimeout(() => setEntered(true), delayMs));
+      timers.push(
+        setTimeout(() => {
+          let start: number | null = null;
+          const duration = 600;
+          const step = (ts: number) => {
+            if (start === null) start = ts;
+            const p = Math.min((ts - start) / duration, 1);
+            setDisplayAmount(amount * easeOutCubic(p));
+            if (p < 1) rafRef.current = requestAnimationFrame(step);
+          };
+          rafRef.current = requestAnimationFrame(step);
+        }, delayMs),
+      );
+    });
 
     return () => {
-      clearTimeout(enterTimer);
-      clearTimeout(countTimer);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      timers.forEach(clearTimeout);
     };
     // amount/delayMs are stable per-card props in practice; re-running on
     // identity change would just replay the same entrance.

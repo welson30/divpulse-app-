@@ -18,18 +18,23 @@ type RevealProps = {
  */
 export function Reveal({ children, className, delayMs = 0, as = "div" }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  // SSR/no-JS renders content visible — the page must never depend on
+  // JavaScript to show its copy. The hide-then-reveal only kicks in after
+  // hydration, and only for elements still below the fold (pre-paint, so
+  // in-view content never flashes).
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) {
-      setVisible(true);
-      return;
-    }
+    if (reduceMotion) return;
 
+    const rect = node.getBoundingClientRect();
+    if (rect.top <= window.innerHeight * 0.92) return;
+
+    setVisible(false);
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {

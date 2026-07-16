@@ -29,9 +29,15 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DivPulse — Dividend Income Dashboard",
+  title: "DivPulse — Know the moment you're paid",
   description:
-    "Track holdings, dividend calendars, portfolio diversification, and incoming dividend payments.",
+    "Real-time dividend alerts by push, Telegram, and email — the moment a payment lands, before your broker's app tells you. Track holdings, payment calendars, and income goals. Free for 5 assets.",
+  openGraph: {
+    title: "DivPulse — Know the moment you're paid",
+    description:
+      "Real-time dividend alerts by push, Telegram, and email — before your broker's app tells you.",
+    type: "website",
+  },
 };
 
 // dark-only by deliberate brand decision (DESIGN.md §10) — no

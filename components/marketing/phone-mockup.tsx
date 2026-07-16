@@ -15,7 +15,13 @@ const NOTIFICATIONS: LockNotification[] = [
   { ticker: "KO", title: "Dividend received · Coca-Cola Co.", amount: "+$46.20", meta: "Fidelity · Payment confirmed", when: "now" },
   { ticker: "JNJ", title: "Dividend received · Johnson & Johnson", amount: "+$128.50", meta: "Schwab · Payment confirmed", when: "2m ago" },
   { ticker: "PG", title: "Dividend received · Procter & Gamble", amount: "+$9.84", meta: "Fidelity · Payment confirmed", when: "3d ago" },
+  { ticker: "O", title: "Dividend received · Realty Income", amount: "+$18.44", meta: "Schwab · Payment confirmed", when: "1w ago" },
 ];
+
+// The lock screen tells one story with the rest of the page: the demo
+// portfolio's payments land at 9:02 AM. A live device clock (4:15 AM on
+// someone's first visit) breaks that story, so the time is pinned.
+const NARRATIVE_TIME = "9:02";
 
 function BatteryGlyph() {
   return (
@@ -74,14 +80,11 @@ const MOBILE_SCALE = 0.82;
  * dead gap where the unscaled height used to be.
  */
 export function PhoneMockup({ className }: { className?: string }) {
-  const [time, setTime] = useState("9:41");
+  const time = NARRATIVE_TIME;
   const [mounted, setMounted] = useState(false);
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
-    setTime(
-      new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).format(new Date()),
-    );
     const id = requestAnimationFrame(() => setMounted(true));
 
     const mql = window.matchMedia("(min-width: 640px)");
@@ -172,19 +175,20 @@ export function PhoneMockup({ className }: { className?: string }) {
                   <div className="font-display text-[58px] leading-none font-extralight tracking-[-0.03em] text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.4)]">
                     {time}
                   </div>
-                  <div className="mt-1 font-mono text-[11px] tracking-[0.02em] text-white/55">Dividend day · 3 payments</div>
+                  <div className="mt-1 font-mono text-[11px] tracking-[0.02em] text-white/55">Thursday, July 3 · 4 payments</div>
                 </div>
 
-                {/* notification stack */}
+                {/* notification stack — entrance is the kit.css receiptIn
+                    keyframe as a CSS animation (not a JS-gated transition), so
+                    the stack renders without JavaScript and motion-safe covers
+                    reduced motion. */}
                 <div className="relative z-10 mt-4 flex flex-col gap-[7px] px-3">
                   {NOTIFICATIONS.map((n, i) => (
                     <div
                       key={n.ticker + n.when}
-                      className="rounded-[16px] border border-white/[0.08] bg-white/[0.08] px-3.5 py-2.5 backdrop-blur-xl transition-[opacity,transform] duration-500 ease-[cubic-bezier(.2,.8,.2,1)]"
+                      className="rounded-[16px] border border-white/[0.08] bg-white/[0.08] px-3.5 py-2.5 backdrop-blur-xl motion-safe:animate-[receiptIn_.5s_cubic-bezier(.2,.8,.2,1)_both]"
                       style={{
-                        opacity: mounted ? 1 : 0,
-                        transform: mounted ? "translateY(0)" : "translateY(10px)",
-                        transitionDelay: `${260 + i * 180}ms`,
+                        animationDelay: `${260 + i * 180}ms`,
                         boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.08)",
                       }}
                     >

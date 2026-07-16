@@ -241,6 +241,14 @@ body {
   height: 100%;
 }
 
+/* In-page anchor navigation (marketing sections). Motion-guarded per
+   DESIGN.md §7 — reduced-motion users get instant jumps. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   background: var(--role-bg-canvas);
   color: var(--role-text-body);

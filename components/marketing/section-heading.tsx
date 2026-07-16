@@ -23,7 +23,11 @@ export function SectionHeading({ eyebrow, title, description, align = "left", cl
         <span aria-hidden className="h-px w-4 bg-green-500/50" />
         {eyebrow}
       </span>
-      <h2 className="text-h1 text-balance font-display font-semibold tracking-[-0.01em] text-text-primary">{title}</h2>
+      {/* Marketing-scale display size — the app's 28px H1 reads like a page
+          title, not a section statement, at 1180px width. */}
+      <h2 className="text-balance font-display text-[clamp(26px,3.4vw,38px)] leading-[1.15] font-semibold tracking-[-0.01em] text-text-primary">
+        {title}
+      </h2>
       {description ? <p className="text-body text-text-secondary">{description}</p> : null}
     </Reveal>
   );
