@@ -12,10 +12,10 @@ type LockNotification = {
 };
 
 const NOTIFICATIONS: LockNotification[] = [
-  { ticker: "KO", title: "Dividend received · Coca-Cola Co.", amount: "+$46.20", meta: "Fidelity · Payment confirmed", when: "now" },
-  { ticker: "JNJ", title: "Dividend received · Johnson & Johnson", amount: "+$128.50", meta: "Schwab · Payment confirmed", when: "2m ago" },
-  { ticker: "PG", title: "Dividend received · Procter & Gamble", amount: "+$9.84", meta: "Fidelity · Payment confirmed", when: "3d ago" },
-  { ticker: "O", title: "Dividend received · Realty Income", amount: "+$18.44", meta: "Schwab · Payment confirmed", when: "1w ago" },
+  { ticker: "KO", title: "Dividend received · KO", amount: "+$46.20", meta: "Fidelity · Payment confirmed", when: "now" },
+  { ticker: "JNJ", title: "Dividend received · JNJ", amount: "+$128.50", meta: "Schwab · Payment confirmed", when: "2m ago" },
+  { ticker: "PG", title: "Dividend received · PG", amount: "+$9.84", meta: "Fidelity · Payment confirmed", when: "3d ago" },
+  { ticker: "O", title: "Dividend received · O", amount: "+$18.44", meta: "Schwab · Payment confirmed", when: "1w ago" },
 ];
 
 // The lock screen tells one story with the rest of the page: the demo
@@ -178,37 +178,54 @@ export function PhoneMockup({ className }: { className?: string }) {
                   <div className="mt-1 font-mono text-[11px] tracking-[0.02em] text-white/55">Thursday, July 3 · 4 payments</div>
                 </div>
 
-                {/* notification stack — entrance is the kit.css receiptIn
-                    keyframe as a CSS animation (not a JS-gated transition), so
-                    the stack renders without JavaScript and motion-safe covers
-                    reduced motion. */}
-                <div className="relative z-10 mt-4 flex flex-col gap-[7px] px-3">
+                {/* notification stack — each card "arrives" like a real lock-
+                    screen push: drops in from above with a spring overshoot,
+                    scales up from slightly compressed, and flashes a brief
+                    green edge-glow on landing. Plain CSS animation (not a
+                    JS-gated transition) so it plays without JavaScript, and
+                    motion-safe respects prefers-reduced-motion. */}
+                <div className="relative z-10 mt-4 flex flex-col gap-[6px] px-3">
                   {NOTIFICATIONS.map((n, i) => (
                     <div
                       key={n.ticker + n.when}
-                      className="rounded-[16px] border border-white/[0.08] bg-white/[0.08] px-3.5 py-2.5 backdrop-blur-xl motion-safe:animate-[receiptIn_.5s_cubic-bezier(.2,.8,.2,1)_both]"
+                      className="origin-top rounded-[10px] border border-white/[0.07] bg-white/[0.08] px-[9px] py-[7px] opacity-0 backdrop-blur-xl motion-safe:animate-[notif-drop_.62s_cubic-bezier(.34,1.35,.4,1)_both]"
                       style={{
-                        animationDelay: `${260 + i * 180}ms`,
+                        animationDelay: `${240 + i * 260}ms`,
                         boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.08)",
                       }}
                     >
-                      <div className="mb-1 flex items-center gap-1.5">
+                      <div className="mb-[3px] flex items-center gap-1">
                         <NotificationGlyph />
-                        <span className="flex-1 font-sans text-[10px] font-semibold tracking-[0.01em] text-white/50 uppercase">
-                          DivPulse
-                        </span>
-                        <span className="font-sans text-[9.5px] text-white/35">{n.when}</span>
+                        <span className="flex-1 font-sans text-[9px] font-medium text-white/40">DivPulse</span>
+                        <span className="font-sans text-[8px] text-white/25">{n.when}</span>
                       </div>
-                      <div className="mb-1 text-[11.5px] leading-tight font-semibold text-white">{n.title}</div>
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="font-mono text-[19px] leading-none font-bold tracking-[-0.01em] text-green-500 tabular-nums">
-                          {n.amount}
-                        </span>
-                        <span className="text-[9px] leading-tight text-white/35">{n.meta} ✓</span>
+                      <div className="mb-0.5 text-[10px] leading-tight font-bold text-white">{n.title}</div>
+                      <div className="font-mono text-[17px] leading-none font-extrabold tracking-[-0.02em] text-green-500 tabular-nums">
+                        {n.amount}
                       </div>
+                      <div className="mt-0.5 text-[8px] leading-tight text-white/30">{n.meta} ✓</div>
                     </div>
                   ))}
                 </div>
+                <style>{`
+                  @keyframes notif-drop {
+                    0% {
+                      opacity: 0;
+                      transform: translateY(-18px) scale(0.92);
+                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 0 0 rgba(52,211,153,0);
+                    }
+                    55% {
+                      opacity: 1;
+                      transform: translateY(2px) scale(1.015);
+                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 20px 2px rgba(52,211,153,0.28);
+                    }
+                    100% {
+                      opacity: 1;
+                      transform: translateY(0) scale(1);
+                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 0 0 rgba(52,211,153,0);
+                    }
+                  }
+                `}</style>
 
                 {/* home indicator */}
                 <div className="absolute bottom-2 left-1/2 h-[4px] w-[120px] -translate-x-1/2 rounded-full bg-white/30" />

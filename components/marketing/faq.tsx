@@ -16,6 +16,10 @@ const FAQ_ITEMS = [
     a: "Push notification (DivPulse installs to your home screen on iOS and Android), Telegram message, and email — any combination you switch on. Each alert names the ticker, the amount, and the broker it landed in.",
   },
   {
+    q: "Do I need to turn notifications on myself?",
+    a: "Yes — the first time you install DivPulse, your phone will ask you to allow notifications. Accept the prompt once and every dividend alert lands on your lock screen from then on. If you skip it or say no by mistake, you can turn it back on anytime from your phone's notification settings for DivPulse, or from Settings inside the app.",
+  },
+  {
     q: "What does the free plan actually include?",
     a: "Up to 5 tracked assets with manual entry, dividend alerts, the dashboard, the payment calendar, and the diversification view. No card, no trial clock — it stays free.",
   },

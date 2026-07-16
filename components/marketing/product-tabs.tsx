@@ -2,9 +2,9 @@
 
 import { useState, type ReactNode } from "react";
 import { ReceiptCard } from "@/components/marketing/receipt-card";
-import { DividendCalendarChart } from "@/components/marketing/mini-charts";
+import { DividendCalendarChart, DiversificationRing } from "@/components/marketing/mini-charts";
 import { HoldingsPreviewTable } from "@/components/marketing/holdings-preview-table";
-import { IconAlerts, IconBell } from "@/components/marketing/icons";
+import { IconAlerts, IconBell, IconCheck } from "@/components/marketing/icons";
 import { cn } from "@/lib/utils";
 
 const LIVE_TABS = [
@@ -12,9 +12,10 @@ const LIVE_TABS = [
   { key: "holdings", label: "Holdings" },
   { key: "dividends", label: "Dividends" },
   { key: "calendar", label: "Calendar" },
+  { key: "collections", label: "Collections" },
+  { key: "diversification", label: "Diversification" },
+  { key: "payments", label: "Payments" },
 ] as const;
-
-const COMING_TABS = ["Collections", "Diversification", "Payments"];
 
 type TabKey = (typeof LIVE_TABS)[number]["key"];
 
@@ -30,10 +31,9 @@ const WATCHLIST = [
 /**
  * Full app shell — top nav + utility bar + watchlist rail, matching the
  * real product's chrome from Prototype/index.html — rather than a bare
- * marketing-only tab switcher. Only the four tabs an investor opens daily
- * (For You/Holdings/Dividends/Calendar) carry real interactive content;
- * Collections/Diversification/Payments sit in the nav as inert chrome so
- * the shell reads as the whole app without fabricating three more panels.
+ * marketing-only tab switcher. All seven tabs (For You, Holdings,
+ * Dividends, Calendar, Collections, Diversification, Payments) are live
+ * and clickable, each with real content sourced from the prototype/PRD.
  */
 export function ProductTabs() {
   const [active, setActive] = useState<TabKey>("for-you");
@@ -101,16 +101,6 @@ export function ProductTabs() {
             </button>
           );
         })}
-        <span aria-hidden className="h-4 w-px shrink-0 bg-border-subtle" />
-        {COMING_TABS.map((label) => (
-          <span
-            key={label}
-            className="shrink-0 py-3 font-sans text-[13px] text-text-secondary/40 whitespace-nowrap"
-            aria-disabled
-          >
-            {label}
-          </span>
-        ))}
       </div>
 
       {/* body: main panel + watchlist rail */}
@@ -127,6 +117,15 @@ export function ProductTabs() {
           </PanelSwitch>
           <PanelSwitch active={active} panel="calendar">
             <CalendarPanel />
+          </PanelSwitch>
+          <PanelSwitch active={active} panel="collections">
+            <CollectionsPanel />
+          </PanelSwitch>
+          <PanelSwitch active={active} panel="diversification">
+            <DiversificationPanel />
+          </PanelSwitch>
+          <PanelSwitch active={active} panel="payments">
+            <PaymentsPanel />
           </PanelSwitch>
         </div>
 
@@ -369,6 +368,229 @@ function CalendarPanel() {
           <span aria-hidden className="size-2 rounded-[2px] border border-green-500" />
           Today
         </span>
+      </div>
+    </div>
+  );
+}
+
+const COLLECTION_CATEGORIES = ["Dividends", "REITs", "High Yield", "Covered Calls", "BDCs", "YieldMax", "Technology"];
+
+const COLLECTION_ASSETS = [
+  { ticker: "SCHD", name: "Schwab US Dividend ETF", yield: "3.52%", price: "82.65", inPortfolio: false },
+  { ticker: "VYM", name: "Vanguard High Dividend Yield", yield: "2.90%", price: "124.30", inPortfolio: false },
+  { ticker: "O", name: "Realty Income Corp", yield: "5.50%", price: "54.58", inPortfolio: true },
+  { ticker: "JNJ", name: "Johnson & Johnson", yield: "3.10%", price: "159.20", inPortfolio: false },
+];
+
+function CollectionsPanel() {
+  const [activeCategory, setActiveCategory] = useState(COLLECTION_CATEGORIES[0]);
+
+  return (
+    <div className="flex flex-col gap-sp-3">
+      <div>
+        <h3 className="text-h2 font-display font-medium text-text-primary">Collections</h3>
+        <p className="text-sm text-text-secondary">Auto-populated by category — tap any to explore.</p>
+      </div>
+
+      <div className="flex flex-wrap gap-1.5">
+        {COLLECTION_CATEGORIES.map((category) => {
+          const isActive = category === activeCategory;
+          return (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setActiveCategory(category)}
+              className={cn(
+                "rounded-full border px-3 py-1.5 font-sans text-xs font-medium transition-colors",
+                isActive
+                  ? "border-green-500/50 bg-[rgba(52,211,153,0.12)] text-green-500"
+                  : "border-border-subtle text-text-secondary hover:border-border-interactive hover:text-text-primary",
+              )}
+            >
+              {category}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid gap-sp-2 sm:grid-cols-2">
+        {COLLECTION_ASSETS.map((asset) => (
+          <div
+            key={asset.ticker}
+            className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface-2 p-sp-2 transition-colors hover:border-border-interactive"
+          >
+            <div className="min-w-0 flex-1">
+              <div className="font-mono text-[13px] font-semibold text-text-primary">{asset.ticker}</div>
+              <div className="truncate text-[11px] text-text-secondary">{asset.name}</div>
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="font-mono text-xs font-semibold text-warning">{asset.yield}</div>
+              <div className="font-mono text-[13px] tabular-nums text-text-primary">${asset.price}</div>
+            </div>
+            <button
+              type="button"
+              disabled={asset.inPortfolio}
+              className={cn(
+                "shrink-0 rounded-control px-2.5 py-1.5 font-sans text-[11px] font-semibold transition-colors",
+                asset.inPortfolio
+                  ? "border border-green-500/30 text-green-500"
+                  : "bg-green-500 text-canvas hover:bg-green-600",
+              )}
+            >
+              {asset.inPortfolio ? "In portfolio" : "+ Add"}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const DIVERSIFICATION_DIMENSIONS = ["Asset class", "Sector", "Broker", "Country"] as const;
+
+const DIVERSIFICATION_BREAKDOWNS: Record<(typeof DIVERSIFICATION_DIMENSIONS)[number], { label: string; percent: number; value: string }[]> = {
+  "Asset class": [
+    { label: "ETFs", percent: 61, value: "$51,380" },
+    { label: "REITs", percent: 18, value: "$15,161" },
+    { label: "Stocks", percent: 17, value: "$14,319" },
+    { label: "Cash", percent: 4, value: "$3,369" },
+  ],
+  Sector: [
+    { label: "Consumer staples", percent: 34, value: "$28,638" },
+    { label: "Real estate", percent: 22, value: "$18,531" },
+    { label: "Technology", percent: 21, value: "$17,688" },
+    { label: "Healthcare", percent: 23, value: "$19,373" },
+  ],
+  Broker: [
+    { label: "Fidelity", percent: 47, value: "$39,588" },
+    { label: "Schwab", percent: 31, value: "$26,111" },
+    { label: "IBKR", percent: 15, value: "$12,635" },
+    { label: "XP Investimentos", percent: 7, value: "$5,896" },
+  ],
+  Country: [
+    { label: "United States", percent: 89, value: "$74,965" },
+    { label: "Brazil", percent: 7, value: "$5,896" },
+    { label: "Other", percent: 4, value: "$3,369" },
+  ],
+};
+
+function DiversificationPanel() {
+  const [dimension, setDimension] = useState<(typeof DIVERSIFICATION_DIMENSIONS)[number]>("Asset class");
+  const breakdown = DIVERSIFICATION_BREAKDOWNS[dimension];
+  const top = breakdown[0];
+
+  return (
+    <div className="flex flex-col gap-sp-3">
+      <div>
+        <h3 className="text-h2 font-display font-medium text-text-primary">Diversification</h3>
+        <p className="text-sm text-text-secondary">Portfolio breakdown by four dimensions.</p>
+      </div>
+
+      <div className="flex flex-wrap gap-1.5">
+        {DIVERSIFICATION_DIMENSIONS.map((dim) => {
+          const isActive = dim === dimension;
+          return (
+            <button
+              key={dim}
+              type="button"
+              onClick={() => setDimension(dim)}
+              className={cn(
+                "rounded-full border px-3 py-1.5 font-sans text-xs font-medium transition-colors",
+                isActive
+                  ? "border-green-500/50 bg-[rgba(52,211,153,0.12)] text-green-500"
+                  : "border-border-subtle text-text-secondary hover:border-border-interactive hover:text-text-primary",
+              )}
+            >
+              {dim}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid gap-sp-3 md:grid-cols-[auto_1fr]">
+        <div className="flex items-center justify-center rounded-card border border-border-subtle bg-surface-2 p-sp-3">
+          <DiversificationRing label={top.label} percent={top.percent} />
+        </div>
+        <div className="flex flex-col gap-sp-2">
+          <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-3">
+            <span className="mb-sp-2 block font-mono text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
+              Breakdown
+            </span>
+            <div className="flex flex-col gap-2">
+              {breakdown.map((row) => (
+                <div key={row.label} className="flex items-center justify-between text-sm">
+                  <span className="text-text-secondary">{row.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs text-text-secondary">{row.value}</span>
+                    <span className="font-mono text-sm font-semibold text-text-primary">{row.percent}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-card border border-green-500/25 bg-[rgba(52,211,153,0.08)] p-sp-3">
+            <span className="mb-1 block text-xs font-semibold text-text-secondary uppercase">AI insight</span>
+            <p className="text-[13px] leading-relaxed text-text-secondary">
+              Your portfolio is <span className="font-semibold text-green-500">overweight in {top.label.toLowerCase()} ({top.percent}%)</span>.
+              Adding a few more names outside this bucket could improve diversification while keeping yield steady.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PAYMENT_HISTORY = [
+  { ticker: "JEPI", name: "JPMorgan Equity Premium", broker: "Fidelity", amount: 61.2, when: "Today, 9:02 AM", status: "confirmed" as const },
+  { ticker: "O", name: "Realty Income Corp", broker: "Schwab", amount: 18.44, when: "Today, 9:02 AM", status: "confirmed" as const },
+  { ticker: "SCHD", name: "Schwab US Dividend ETF", broker: "Fidelity", amount: 85.34, when: "Yesterday", status: "confirmed" as const },
+  { ticker: "ADC", name: "Agree Realty Corp", broker: "IBKR", amount: 14.82, when: "Jul 7 (expected)", status: "pending" as const },
+];
+
+function PaymentsPanel() {
+  return (
+    <div className="flex flex-col gap-sp-3">
+      <div>
+        <h3 className="text-h2 font-display font-medium text-text-primary">Payments</h3>
+        <p className="text-sm text-text-secondary">Broker-confirmed payouts — matched against Yahoo Finance detection.</p>
+      </div>
+
+      <div className="flex flex-col gap-sp-2">
+        {PAYMENT_HISTORY.map((payment) => (
+          <div
+            key={payment.ticker + payment.when}
+            className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface-2 p-sp-2 transition-colors hover:border-border-interactive"
+          >
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-[9px] border border-border-subtle bg-surface font-mono text-[11px] font-semibold text-text-secondary">
+              {payment.ticker}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[13px] font-medium text-text-primary">{payment.name}</div>
+              <div className="text-[11px] text-text-secondary">
+                {payment.broker} · {payment.when}
+              </div>
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="font-mono text-sm font-semibold tabular-nums text-green-500">+${payment.amount.toFixed(2)}</div>
+              <div
+                className={cn(
+                  "mt-0.5 inline-flex items-center gap-1 font-mono text-[10px] font-medium",
+                  payment.status === "confirmed" ? "text-green-500" : "text-warning",
+                )}
+              >
+                {payment.status === "confirmed" ? (
+                  <>
+                    <IconCheck className="size-3" />
+                    Confirmed
+                  </>
+                ) : (
+                  "Pending"
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
