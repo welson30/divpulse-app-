@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 // rather than left to the OS (native scrollbars/form controls, etc).
 // themeColor matches app/manifest.ts's --green-900, not raw --bg-base.
 export const viewport: Viewport = {
-  themeColor: "#064E3B",
+  themeColor: "#14532D",
   colorScheme: "dark",
 };
 

@@ -102,7 +102,7 @@ Start at `preview/index.html` — it links all seven cards. Then open `ui_kits/a
 ## Known constraints
 
 - **No logo supplied.** Every surface reserves an empty, labeled logo slot rather than inventing a mark — see `assets/README.md`.
-- **`--text-tertiary` fails WCAG AA** at small sizes on dark backgrounds (~4.1:1). It is included in the tokens for completeness but restricted to decorative/demonstrative use — see `DESIGN.md` §2 and §12.
+- **`--text-tertiary` fails WCAG AA** at small sizes on every background except `--bg-base` (3.4–4.9:1 across the four surfaces). It is included in the tokens for completeness but restricted to decorative/demonstrative use — see `DESIGN.md` §2 and §12.
 - **Fonts load via Google Fonts `@import`** in both `colors_and_type.css` and `kit/tokens.css`. This blocks render until fetched; self-host or preload for production. No font binaries were present in source evidence to package into `fonts/`.
 - **Dark-only by design, no light mode.** PaidPrime has never had light-mode tokens in source evidence; `DESIGN.md` §10 documents this as a deliberate brand decision and what would need re-verification (not just inversion) if a light mode is ever requested.
 

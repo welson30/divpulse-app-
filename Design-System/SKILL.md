@@ -45,7 +45,7 @@ Every rule below is grounded in source evidence (`brand-spec.md`, `design-system
 
 - **Primary buttons: `--green-500` fill with `--bg-base` (dark) text — never white-on-green.** Deliberate, higher-contrast, premium choice (`brand-spec.md` §Components).
 - **Destructive buttons: `--red-500` outline only, never filled.** Solid red is reserved for loss data (`brand-spec.md` §Components).
-- **`--text-tertiary` is decorative-only** — it measures ~4.1:1 on dark backgrounds, under the 4.5:1 AA floor (`kit/README.md` known-constraint note). Use `--text-secondary` for any real label, timestamp, or caption.
+- **`--text-tertiary` is decorative-only** — it measures 3.4–4.9:1 across the four backgrounds, clearing the 4.5:1 AA floor on `--bg-base` alone and failing it on every other surface (`kit/README.md` known-constraint note). Use `--text-secondary` for any real label, timestamp, or caption.
 - **No drop shadows for elevation** — layered lightness (`--bg-base` → `--bg-surface` → `--bg-elevated`) plus a 1px `--border-subtle` edge instead (`brand-spec.md` §Elevation).
 - **Icon buttons are icon-only, no text label**; on screens ≤480px reposition the label above the icon instead of removing it (`brand-spec.md` §Iconography, confirmed as a standing cross-project preference).
 - **Green signals something** (gain, primary action, active state) — never generic decoration.
@@ -55,7 +55,7 @@ Every rule below is grounded in source evidence (`brand-spec.md`, `design-system
 - **Respect `prefers-reduced-motion`** on any animation you add — every animation in source evidence has a reduced-motion fallback.
 - **PaidPrime is dark-only by deliberate policy, not a gap** — no light-mode tokens exist and none should be invented ad hoc; see `DESIGN.md` §10 before ever adding `prefers-color-scheme: light` handling.
 - **Prefer `--role-*` semantic tokens over raw palette tokens** in new code (`--role-cta-bg` instead of `--green-500` when you mean "the CTA color") — see `DESIGN.md` §2 "Token roles" and §11 "Implementation Notes."
-- **Interactive-control borders use `--text-tertiary` (`--role-border-interactive`), never `--border-subtle`.** `--border-subtle` measures ~1.1–1.4:1 against every background — it fails WCAG 1.4.11 for buttons/inputs/icon-buttons. Fixed package-wide in a 2026-07-14 audit; see `DESIGN.md` §2 and §12.
+- **Interactive-control borders use `--text-tertiary` (`--role-border-interactive`), never `--border-subtle`.** `--border-subtle` measures ~1.1–1.5:1 against every background — it fails WCAG 1.4.11 for buttons/inputs/icon-buttons. Fixed package-wide in a 2026-07-14 audit; see `DESIGN.md` §2 and §12.
 
 ## Component quick-reference
 

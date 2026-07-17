@@ -9,7 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        // Hover uses the dedicated --green-600 hover token (a deliberate darker
+        // green), not primary at reduced alpha: primary/80 over the dark canvas
+        // barely differs from the base fill. See DESIGN.md §6.
+        default: "bg-primary text-primary-foreground hover:bg-green-600",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:

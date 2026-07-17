@@ -141,7 +141,7 @@ export default function Home() {
 
 function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border-subtle bg-[rgba(10,14,13,0.86)] backdrop-blur-[10px]">
+    <header className="sticky top-0 z-50 border-b border-border-subtle bg-[rgba(9,9,11,0.86)] backdrop-blur-[10px]">
       <div className="mx-auto flex h-16 w-full max-w-[1180px] items-center justify-between px-sp-3">
         <Link href="/" className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
@@ -190,7 +190,7 @@ function Hero() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[220px]"
-        style={{ background: "linear-gradient(180deg, rgba(18,24,22,0.5), transparent)" }}
+        style={{ background: "linear-gradient(180deg, rgba(28,28,30,0.5), transparent)" }}
       />
       <div className="relative mx-auto grid w-full max-w-[1180px] gap-sp-6 px-sp-3 py-sp-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div className="flex flex-col items-start gap-sp-3">
@@ -607,12 +607,12 @@ function Pricing() {
               <div
                 className={`group relative flex h-full flex-col gap-sp-3 rounded-card border p-sp-4 transition-all duration-200 hover:-translate-y-1 ${
                   plan.featured
-                    ? "border-green-500/40 bg-surface-2 py-[40px] shadow-[0_0_32px_rgba(52,211,153,0.1)] md:scale-[1.04] hover:shadow-[0_0_48px_rgba(52,211,153,0.16)]"
+                    ? "border-green-500/40 bg-surface-2 py-[40px] shadow-[0_0_32px_rgba(34,197,94,0.1)] md:scale-[1.04] hover:shadow-[0_0_48px_rgba(34,197,94,0.16)]"
                     : "border-border-subtle bg-surface hover:border-border-interactive"
                 }`}
               >
                 {plan.featured ? (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-green-500 px-2.5 py-1 font-mono text-xs font-semibold whitespace-nowrap text-canvas shadow-[0_0_24px_rgba(52,211,153,0.35)]">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-green-500 px-2.5 py-1 font-mono text-xs font-semibold whitespace-nowrap text-canvas shadow-[0_0_24px_rgba(34,197,94,0.35)]">
                     Most popular
                   </span>
                 ) : null}
@@ -695,7 +695,7 @@ function FinalCta() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(60% 120% at 50% 100%, rgba(52,211,153,0.20) 0%, rgba(52,211,153,0) 70%), radial-gradient(70% 60% at 50% 0%, var(--bg-surface) 0%, transparent 100%)",
+              "radial-gradient(60% 120% at 50% 100%, rgba(34, 197, 94,0.20) 0%, rgba(34, 197, 94,0) 70%), radial-gradient(70% 60% at 50% 0%, var(--bg-surface) 0%, transparent 100%)",
           }}
         />
         <div className="relative flex flex-col items-center gap-sp-3 px-sp-3 py-sp-8 text-center md:py-[calc(var(--sp-8)+var(--sp-4))]">

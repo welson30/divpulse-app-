@@ -9,13 +9,13 @@
 
 :root{
   /* backgrounds — layered depth */
-  --bg-base:#0A0E0D; --bg-surface:#121816; --bg-elevated:#1A211E; --bg-hover:#1E2724;
+  --bg-base:#09090B; --bg-surface:#1C1C1E; --bg-elevated:#252528; --bg-hover:#2C2C30;
   /* primary green */
-  --green-500:#34D399; --green-600:#10B981; --green-300:#6EE7B7; --green-900:#064E3B;
+  --green-500:#22C55E; --green-600:#149141; --green-300:#86EFAC; --green-900:#14532D;
   /* red — loss only */
   --red-500:#F87171; --red-900:#450A0A;
   /* neutrals */
-  --text-primary:#F5F7F6; --text-secondary:#A8B3AF; --text-tertiary:#6B7570; --border-subtle:#242C29;
+  --text-primary:#FFFFFF; --text-secondary:#A1A1AA; --text-tertiary:#7D7D85; --border-subtle:#303034;
   /* semantic */
   --blue-info:#60A5FA; --amber-warning:#FBBF24;
   /* type */
@@ -47,13 +47,13 @@ p{margin:0;}
 
 /* nav */
 .topbar{
-  position:sticky; top:0; z-index:50; background:rgba(10,14,13,0.86);
+  position:sticky; top:0; z-index:50; background:rgba(9,9,11,0.86);
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
   border-bottom:1px solid var(--border-subtle);
 }
 .topbar .container{display:flex; align-items:center; justify-content:space-between; height:64px; padding-left:var(--sp-4); padding-right:var(--sp-4);}
 .brandmark{display:flex; align-items:center; gap:var(--sp-2);}
-.brandmark .dot{width:8px; height:8px; border-radius:50%; background:var(--green-500); box-shadow:0 0 12px rgba(52,211,153,0.5);}
+.brandmark .dot{width:8px; height:8px; border-radius:50%; background:var(--green-500); box-shadow:0 0 12px rgba(34,197,94,0.5);}
 .brandmark span{font-family:var(--font-display); font-weight:600; font-size:13px; letter-spacing:0.06em;}
 .topnav{display:flex; gap:var(--sp-3); list-style:none; margin:0; padding:0;}
 .topnav a{
@@ -173,7 +173,7 @@ p{margin:0;}
 .btn:active{transform:translateY(1px);}
 .btn:focus-visible{outline:2px solid var(--green-500); outline-offset:2px;}
 .btn:disabled{opacity:0.4; cursor:not-allowed; transform:none;}
-.btn-primary{background:var(--green-500); color:var(--bg-base); box-shadow:0 0 24px rgba(52,211,153,0.08);}
+.btn-primary{background:var(--green-500); color:var(--bg-base); box-shadow:0 0 24px rgba(34,197,94,0.08);}
 .btn-primary:hover{background:var(--green-600);}
 .btn-secondary{background:transparent; border-color:var(--border-subtle); color:var(--text-primary);}
 .btn-secondary:hover{background:var(--bg-hover);}
@@ -329,23 +329,23 @@ footer p{font-size:12px; color:var(--text-secondary); font-family:var(--font-mon
 
       <div class="group-label">Backgrounds — layered depth</div>
       <div class="depth-demo" style="margin-bottom:var(--sp-3);">
-        <div class="depth-layer" style="background:var(--bg-base);"><b>Base</b>#0A0E0D — canvas</div>
-        <div class="depth-layer" style="background:var(--bg-surface);"><b>Surface</b>#121816 — cards, panels</div>
-        <div class="depth-layer" style="background:var(--bg-elevated);"><b>Elevated</b>#1A211E — modals, dropdowns</div>
+        <div class="depth-layer" style="background:var(--bg-base);"><b>Base</b>#09090B — canvas</div>
+        <div class="depth-layer" style="background:var(--bg-surface);"><b>Surface</b>#1C1C1E — cards, panels</div>
+        <div class="depth-layer" style="background:var(--bg-elevated);"><b>Elevated</b>#252528 — modals, dropdowns</div>
       </div>
       <div class="swatch-grid">
-        <button type="button" class="swatch" data-copy="#0A0E0D"><div class="fill" style="background:#0A0E0D;"></div><div class="info"><span class="name">bg-base</span><span class="hex">#0A0E0D</span></div></button>
-        <button type="button" class="swatch" data-copy="#121816"><div class="fill" style="background:#121816;"></div><div class="info"><span class="name">bg-surface</span><span class="hex">#121816</span></div></button>
-        <button type="button" class="swatch" data-copy="#1A211E"><div class="fill" style="background:#1A211E;"></div><div class="info"><span class="name">bg-elevated</span><span class="hex">#1A211E</span></div></button>
-        <button type="button" class="swatch" data-copy="#1E2724"><div class="fill" style="background:#1E2724;"></div><div class="info"><span class="name">bg-hover</span><span class="hex">#1E2724</span></div></button>
+        <button type="button" class="swatch" data-copy="#09090B"><div class="fill" style="background:#09090B;"></div><div class="info"><span class="name">bg-base</span><span class="hex">#09090B</span></div></button>
+        <button type="button" class="swatch" data-copy="#1C1C1E"><div class="fill" style="background:#1C1C1E;"></div><div class="info"><span class="name">bg-surface</span><span class="hex">#1C1C1E</span></div></button>
+        <button type="button" class="swatch" data-copy="#252528"><div class="fill" style="background:#252528;"></div><div class="info"><span class="name">bg-elevated</span><span class="hex">#252528</span></div></button>
+        <button type="button" class="swatch" data-copy="#2C2C30"><div class="fill" style="background:#2C2C30;"></div><div class="info"><span class="name">bg-hover</span><span class="hex">#2C2C30</span></div></button>
       </div>
 
       <div class="group-label">Primary green — growth, brand, positive</div>
       <div class="swatch-grid">
-        <button type="button" class="swatch" data-copy="#34D399"><div class="fill" style="background:#34D399;"></div><div class="info"><span class="name">green-500</span><span class="hex">#34D399</span><span class="role">Primary CTA, core brand</span></div></button>
-        <button type="button" class="swatch" data-copy="#10B981"><div class="fill" style="background:#10B981;"></div><div class="info"><span class="name">green-600</span><span class="hex">#10B981</span><span class="role">Hover / pressed</span></div></button>
-        <button type="button" class="swatch" data-copy="#6EE7B7"><div class="fill" style="background:#6EE7B7;"></div><div class="info"><span class="name">green-300</span><span class="hex">#6EE7B7</span><span class="role">Highlights, glow</span></div></button>
-        <button type="button" class="swatch" data-copy="#064E3B"><div class="fill" style="background:#064E3B;"></div><div class="info"><span class="name">green-900</span><span class="hex">#064E3B</span><span class="role">Chart fill tint</span></div></button>
+        <button type="button" class="swatch" data-copy="#22C55E"><div class="fill" style="background:#22C55E;"></div><div class="info"><span class="name">green-500</span><span class="hex">#22C55E</span><span class="role">Primary CTA, core brand</span></div></button>
+        <button type="button" class="swatch" data-copy="#149141"><div class="fill" style="background:#149141;"></div><div class="info"><span class="name">green-600</span><span class="hex">#149141</span><span class="role">Hover / pressed</span></div></button>
+        <button type="button" class="swatch" data-copy="#86EFAC"><div class="fill" style="background:#86EFAC;"></div><div class="info"><span class="name">green-300</span><span class="hex">#86EFAC</span><span class="role">Highlights, glow</span></div></button>
+        <button type="button" class="swatch" data-copy="#14532D"><div class="fill" style="background:#14532D;"></div><div class="info"><span class="name">green-900</span><span class="hex">#14532D</span><span class="role">Chart fill tint</span></div></button>
       </div>
 
       <div class="group-label">Red — loss data only, never decorative</div>
@@ -356,10 +356,10 @@ footer p{font-size:12px; color:var(--text-secondary); font-family:var(--font-mon
 
       <div class="group-label">Neutrals — text hierarchy</div>
       <div class="swatch-grid">
-        <button type="button" class="swatch" data-copy="#F5F7F6"><div class="fill" style="background:#F5F7F6;"></div><div class="info"><span class="name">text-primary</span><span class="hex">#F5F7F6</span></div></button>
-        <button type="button" class="swatch" data-copy="#A8B3AF"><div class="fill" style="background:#A8B3AF;"></div><div class="info"><span class="name">text-secondary</span><span class="hex">#A8B3AF</span></div></button>
-        <button type="button" class="swatch" data-copy="#6B7570"><div class="fill" style="background:#6B7570;"></div><div class="info"><span class="name">text-tertiary</span><span class="hex">#6B7570</span></div></button>
-        <button type="button" class="swatch" data-copy="#242C29"><div class="fill" style="background:#242C29;"></div><div class="info"><span class="name">border-subtle</span><span class="hex">#242C29</span></div></button>
+        <button type="button" class="swatch" data-copy="#FFFFFF"><div class="fill" style="background:#FFFFFF;"></div><div class="info"><span class="name">text-primary</span><span class="hex">#FFFFFF</span></div></button>
+        <button type="button" class="swatch" data-copy="#A1A1AA"><div class="fill" style="background:#A1A1AA;"></div><div class="info"><span class="name">text-secondary</span><span class="hex">#A1A1AA</span></div></button>
+        <button type="button" class="swatch" data-copy="#7D7D85"><div class="fill" style="background:#7D7D85;"></div><div class="info"><span class="name">text-tertiary</span><span class="hex">#7D7D85</span></div></button>
+        <button type="button" class="swatch" data-copy="#303034"><div class="fill" style="background:#303034;"></div><div class="info"><span class="name">border-subtle</span><span class="hex">#303034</span></div></button>
       </div>
 
       <div class="group-label">Semantic accents — sparing use</div>
@@ -369,7 +369,7 @@ footer p{font-size:12px; color:var(--text-secondary); font-family:var(--font-mon
       </div>
 
       <div class="accent-rule">Rule of thumb: <span class="green-500">green</span> appears only where it means something — gains, active states, primary buttons, success. <span class="red-500">Red</span> never decorates; it reports a loss.</div>
-      <div class="accent-rule" style="margin-top:var(--sp-2);"><b style="color:var(--text-primary); font-weight:500;">Accessibility note —</b> text-tertiary (#6B7570) measures ~4.1:1 against bg-base at small sizes, just under the 4.5:1 AA floor for normal text. Reserve it for the type specimen and disabled states; use text-secondary for anything a user needs to reliably read, including timestamps and captions inside cards.</div>
+      <div class="accent-rule" style="margin-top:var(--sp-2);"><b style="color:var(--text-primary); font-weight:500;">Accessibility note —</b> text-tertiary (#7D7D85) clears 4.5:1 against bg-base alone (4.9:1) but drops to 4.2/3.7/3.4:1 on bg-surface/bg-elevated/bg-hover — under the AA floor for normal text on every surface a card or modal actually sits on. Reserve it for the type specimen and disabled states; use text-secondary for anything a user needs to reliably read, including timestamps and captions inside cards. Its exact value is tuned for double duty as the interactive-control border (3:1 WCAG 1.4.11 floor) — see brand-spec.md §Neutrals before changing it.</div>
     </div>
   </section>
 
@@ -449,14 +449,14 @@ footer p{font-size:12px; color:var(--text-secondary); font-family:var(--font-mon
       <p class="lede">Drop shadows vanish on dark surfaces, so depth is layered lightness instead: base → surface → elevated, each defined by a 1px hairline border.</p>
 
       <div class="elev-stack">
-        <div class="elev-card" style="background:var(--bg-base);"><b>Base</b><span>#0A0E0D</span></div>
-        <div class="elev-card" style="background:var(--bg-surface);"><b>Surface</b><span>#121816</span></div>
-        <div class="elev-card" style="background:var(--bg-elevated);"><b>Elevated</b><span>#1A211E</span></div>
+        <div class="elev-card" style="background:var(--bg-base);"><b>Base</b><span>#09090B</span></div>
+        <div class="elev-card" style="background:var(--bg-surface);"><b>Surface</b><span>#1C1C1E</span></div>
+        <div class="elev-card" style="background:var(--bg-elevated);"><b>Elevated</b><span>#252528</span></div>
       </div>
 
       <div class="glow-demo">
         <button class="btn btn-primary">Track a new position</button>
-        <span class="small-sample">Faint green glow reserved for the primary CTA only — <span class="mono">0 0 24px rgba(52,211,153,.08)</span></span>
+        <span class="small-sample">Faint green glow reserved for the primary CTA only — <span class="mono">0 0 24px rgba(34,197,94,.08)</span></span>
       </div>
     </div>
   </section>
@@ -537,18 +537,18 @@ footer p{font-size:12px; color:var(--text-secondary); font-family:var(--font-mon
         <div class="chart-card" data-od-id="chart-dividend-calendar">
           <h3>Dividend calendar</h3>
           <svg viewBox="0 0 320 110" width="100%" height="110">
-            <line x1="0" y1="20" x2="320" y2="20" stroke="#242C29" stroke-width="1"/>
-            <line x1="0" y1="55" x2="320" y2="55" stroke="#242C29" stroke-width="1"/>
-            <line x1="0" y1="90" x2="320" y2="90" stroke="#242C29" stroke-width="1"/>
+            <line x1="0" y1="20" x2="320" y2="20" stroke="#303034" stroke-width="1"/>
+            <line x1="0" y1="55" x2="320" y2="55" stroke="#303034" stroke-width="1"/>
+            <line x1="0" y1="90" x2="320" y2="90" stroke="#303034" stroke-width="1"/>
             <g>
-              <rect x="10"  y="46" width="20" height="44" rx="2" fill="#34D399"/>
-              <rect x="50"  y="60" width="20" height="30" rx="2" fill="#064E3B"/>
-              <rect x="90"  y="30" width="20" height="60" rx="2" fill="#34D399"/>
-              <rect x="130" y="66" width="20" height="24" rx="2" fill="#064E3B"/>
-              <rect x="170" y="20" width="20" height="70" rx="2" fill="#34D399"/>
-              <rect x="210" y="70" width="20" height="20" rx="2" fill="#064E3B"/>
-              <rect x="250" y="40" width="20" height="50" rx="2" fill="#34D399"/>
-              <rect x="290" y="76" width="20" height="14" rx="2" fill="#064E3B"/>
+              <rect x="10"  y="46" width="20" height="44" rx="2" fill="#22C55E"/>
+              <rect x="50"  y="60" width="20" height="30" rx="2" fill="#14532D"/>
+              <rect x="90"  y="30" width="20" height="60" rx="2" fill="#22C55E"/>
+              <rect x="130" y="66" width="20" height="24" rx="2" fill="#14532D"/>
+              <rect x="170" y="20" width="20" height="70" rx="2" fill="#22C55E"/>
+              <rect x="210" y="70" width="20" height="20" rx="2" fill="#14532D"/>
+              <rect x="250" y="40" width="20" height="50" rx="2" fill="#22C55E"/>
+              <rect x="290" y="76" width="20" height="14" rx="2" fill="#14532D"/>
             </g>
           </svg>
           <div class="fig">Jan–Aug · mono data labels omitted at this scale</div>
@@ -558,11 +558,11 @@ footer p{font-size:12px; color:var(--text-secondary); font-family:var(--font-mon
           <svg viewBox="0 0 120 120" width="120" height="120" style="display:block; margin:0 auto;">
             <defs>
               <linearGradient id="gGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#34D399" stop-opacity="0.9"/>
-                <stop offset="100%" stop-color="#34D399" stop-opacity="0.15"/>
+                <stop offset="0%" stop-color="#22C55E" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#22C55E" stop-opacity="0.15"/>
               </linearGradient>
             </defs>
-            <circle cx="60" cy="60" r="46" fill="none" stroke="#242C29" stroke-width="14"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#303034" stroke-width="14"/>
             <circle cx="60" cy="60" r="46" fill="none" stroke="url(#gGrad)" stroke-width="14"
               stroke-dasharray="180 289" stroke-dashoffset="0" transform="rotate(-90 60 60)" stroke-linecap="round"/>
           </svg>

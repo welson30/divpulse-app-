@@ -69,7 +69,7 @@ export function ProductTabs() {
             <IconBell className="size-3.5" />
             <span aria-hidden className="absolute top-0.5 right-0.5 size-1.5 rounded-full bg-green-500" />
           </button>
-          <div className="flex size-7 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(52,211,153,0.12)] font-mono text-[10px] font-bold text-green-500">
+          <div className="flex size-7 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(34,197,94,0.12)] font-mono text-[10px] font-bold text-green-500">
             AX
           </div>
         </div>
@@ -196,7 +196,7 @@ function ForYouPanel() {
         </div>
       </div>
 
-      <div className="rounded-card border border-green-500/25 bg-[rgba(52,211,153,0.08)] p-sp-3">
+      <div className="rounded-card border border-green-500/25 bg-[rgba(34,197,94,0.08)] p-sp-3">
         <div className="mb-1 flex items-center gap-2">
           <IconAlerts className="size-4 text-green-500" />
           <span className="text-sm font-semibold text-green-500">Push notifications active</span>
@@ -329,9 +329,9 @@ function CalendarPanel() {
                 "group relative flex min-h-[46px] cursor-default flex-col gap-0.5 rounded-[6px] border p-1 text-[10px] transition-all duration-150 ease-out",
                 !isInert && "hover:z-10 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)]",
                 cell?.kind === "today"
-                  ? "border-green-500 hover:shadow-[0_0_0_1px_var(--green-500),0_8px_20px_-8px_rgba(52,211,153,0.35)]"
+                  ? "border-green-500 hover:shadow-[0_0_0_1px_var(--green-500),0_8px_20px_-8px_rgba(34,197,94,0.35)]"
                   : cell?.kind === "pay"
-                    ? "border-green-500/30 bg-[rgba(52,211,153,0.08)] hover:border-green-500/60 hover:bg-[rgba(52,211,153,0.14)]"
+                    ? "border-green-500/30 bg-[rgba(34,197,94,0.08)] hover:border-green-500/60 hover:bg-[rgba(34,197,94,0.14)]"
                     : cell?.kind === "ex"
                       ? "border-warning/20 bg-[rgba(251,191,36,0.06)] hover:border-warning/50 hover:bg-[rgba(251,191,36,0.12)]"
                       : "border-border-subtle bg-surface-2 hover:border-border-interactive",
@@ -403,7 +403,7 @@ function CollectionsPanel() {
               className={cn(
                 "rounded-full border px-3 py-1.5 font-sans text-xs font-medium transition-colors",
                 isActive
-                  ? "border-green-500/50 bg-[rgba(52,211,153,0.12)] text-green-500"
+                  ? "border-green-500/50 bg-[rgba(34,197,94,0.12)] text-green-500"
                   : "border-border-subtle text-text-secondary hover:border-border-interactive hover:text-text-primary",
               )}
             >
@@ -497,7 +497,7 @@ function DiversificationPanel() {
               className={cn(
                 "rounded-full border px-3 py-1.5 font-sans text-xs font-medium transition-colors",
                 isActive
-                  ? "border-green-500/50 bg-[rgba(52,211,153,0.12)] text-green-500"
+                  ? "border-green-500/50 bg-[rgba(34,197,94,0.12)] text-green-500"
                   : "border-border-subtle text-text-secondary hover:border-border-interactive hover:text-text-primary",
               )}
             >
@@ -528,7 +528,7 @@ function DiversificationPanel() {
               ))}
             </div>
           </div>
-          <div className="rounded-card border border-green-500/25 bg-[rgba(52,211,153,0.08)] p-sp-3">
+          <div className="rounded-card border border-green-500/25 bg-[rgba(34,197,94,0.08)] p-sp-3">
             <span className="mb-1 block text-xs font-semibold text-text-secondary uppercase">AI insight</span>
             <p className="text-[13px] leading-relaxed text-text-secondary">
               Your portfolio is <span className="font-semibold text-green-500">overweight in {top.label.toLowerCase()} ({top.percent}%)</span>.

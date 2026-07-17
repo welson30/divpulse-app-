@@ -14,27 +14,28 @@
    ============================================================ */
 :root {
   /* backgrounds — layered depth, never flat black */
-  --bg-base: #0A0E0D;
-  --bg-surface: #121816;
-  --bg-elevated: #1A211E;
-  --bg-hover: #1E2724;
+  --bg-base: #09090B;
+  --bg-surface: #1C1C1E;
+  --bg-elevated: #252528;
+  --bg-hover: #2C2C30;
 
   /* primary green — brand / growth / positive */
-  --green-300: #6EE7B7;
-  --green-500: #34D399;
-  --green-600: #10B981;
-  --green-900: #064E3B;
+  --green-300: #86EFAC;
+  --green-500: #22C55E;
+  --green-600: #149141;
+  --green-900: #14532D;
 
   /* red — reserved exclusively for negative/loss data, never decorative */
   --red-500: #F87171;
   --red-900: #450A0A;
 
   /* neutrals — text hierarchy */
-  --text-primary: #F5F7F6;
-  --text-secondary: #A8B3AF;
-  /* decorative/demonstrative only — fails WCAG AA (~4.1:1) for real text, see DESIGN.md §2 */
-  --text-tertiary: #6B7570;
-  --border-subtle: #242C29;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  /* decorative/demonstrative only — fails WCAG AA (3.4-4.9:1) for real text, see DESIGN.md §2.
+     Tuned for --role-border-interactive duty, not the neutral ramp — brand-spec.md §Neutrals */
+  --text-tertiary: #7D7D85;
+  --border-subtle: #303034;
 
   /* semantic accents — sparing, never competing with green */
   --blue-info: #60A5FA;
@@ -73,7 +74,7 @@
   --role-cta-bg: var(--green-500);
   --role-cta-bg-hover: var(--green-600);
   --role-cta-fg: var(--bg-base); /* dark text on green — deliberate, see DESIGN.md §6 */
-  --role-cta-glow: rgba(52, 211, 153, 0.08);
+  --role-cta-glow: rgba(34, 197, 94, 0.08); /* --green-500 as rgba — keep in sync */
 
   --role-gain: var(--green-500);
   --role-gain-tint: var(--green-900);
@@ -286,12 +287,12 @@ body {
 .btn-sheen {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 24px rgba(52, 211, 153, 0.1);
+  box-shadow: 0 0 24px rgba(34, 197, 94, 0.1);
   transition: box-shadow 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .btn-sheen:hover,
 .btn-sheen:focus-visible {
-  box-shadow: 0 0 40px rgba(52, 211, 153, 0.22);
+  box-shadow: 0 0 40px rgba(34, 197, 94, 0.22);
 }
 .btn-sheen::after {
   content: "";

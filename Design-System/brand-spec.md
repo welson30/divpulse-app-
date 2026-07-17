@@ -2,33 +2,47 @@
 
 Source: provided directly by the user as a complete brand brief (Branch A — treated as canonical; not a generic picked direction).
 
+Color palette revised 2026-07-17 from a user-supplied brand-guide image. The
+guide specified five colors (`#22C55E`, `#09090B`, `#1C1C1E`, `#A1A1AA`,
+`#FFFFFF`); the remaining ramp steps are derived and marked below. Naming in
+that guide predated the PaidPrime rename and was deliberately not applied —
+color only.
+
 ## Positioning
 
-Quiet confidence — the third lane between spreadsheet-cold (Bloomberg terminal) and cute-consumer (Robinhood cosplay). Dark canvas signals "serious tool," restrained green signals growth without shouting, generous whitespace signals trust in the data.
+Quiet confidence — the third lane between spreadsheet-cold (Bloomberg terminal) and cute-consumer (Robinhood cosplay). Dark canvas signals "serious tool," a pure-neutral ground keeps green as the only chromatic voice in the room, and generous whitespace signals trust in the data.
 
 ## Color tokens (hex is canonical for this brand — do not substitute or reinterpret)
 
 ### Backgrounds — layered depth, not flat black
-- `--bg-base` `#0A0E0D` — near-black, whisper of green undertone
-- `--bg-surface` `#121816` — cards, panels
-- `--bg-elevated` `#1A211E` — modals, dropdowns, floating surfaces
-- `--bg-hover` `#1E2724` — hover state for interactive surfaces
+- `--bg-base` `#09090B` — near-black, pure neutral (no undertone)
+- `--bg-surface` `#1C1C1E` — cards, panels
+- `--bg-elevated` `#252528` — modals, dropdowns, floating surfaces (derived)
+- `--bg-hover` `#2C2C30` — hover state for interactive surfaces (derived)
 
 ### Primary green — brand / growth / positive
-- `--green-500` `#34D399` — core brand, primary CTA
-- `--green-600` `#10B981` — hover / pressed
-- `--green-300` `#6EE7B7` — highlights, subtle glow
-- `--green-900` `#064E3B` — chart fill tint, subtle backgrounds
+- `--green-500` `#22C55E` — core brand, primary CTA
+- `--green-600` `#149141` — hover / pressed (derived)
+- `--green-300` `#86EFAC` — highlights, subtle glow (derived)
+- `--green-900` `#14532D` — chart fill tint, subtle backgrounds (derived)
+
+`--green-600` is intentionally deeper than standard Tailwind green-600 (`#16A34A`). At `#16A34A` the hover was only ~1.5× darker than the `#22C55E` base — on the dark canvas it read as the same color. `#149141` is ~2× darker (a clearly perceptible hover step) while the dark CTA label on it still clears AA (4.9:1). Do not "correct" it back to `#16A34A`. The primary button hover binds to this token directly (`components/ui/button.tsx`), not to `primary` at reduced opacity.
 
 ### Red — reserved ONLY for negative/loss data, never decorative
 - `--red-500` `#F87171`
 - `--red-900` `#450A0A` — chart fill tint
 
 ### Neutrals — text hierarchy
-- `--text-primary` `#F5F7F6` — headlines, key numbers
-- `--text-secondary` `#A8B3AF` — labels, supporting text
-- `--text-tertiary` `#6B7570` — placeholder, disabled, timestamps
-- `--border-subtle` `#242C29` — hairline dividers
+- `--text-primary` `#FFFFFF` — headlines, key numbers
+- `--text-secondary` `#A1A1AA` — labels, supporting text
+- `--text-tertiary` `#7D7D85` — placeholder, disabled, timestamps (derived)
+- `--border-subtle` `#303034` — hairline dividers (derived)
+
+`--text-tertiary` is *not* the zinc-500 (`#71717A`) the rest of this ramp would
+imply. It doubles as `--role-border-interactive`, and zinc-500 measures 2.88:1
+on `--bg-hover` — under the 3:1 WCAG 1.4.11 floor for control boundaries.
+`#7D7D85` is the nearest value clearing 3:1 on all four backgrounds
+(3.41–4.87:1). Do not "correct" it back to a round zinc step.
 
 ### Semantic accents — sparing, never competing with green
 - `--blue-info` `#60A5FA` — informational states, links, non-financial notices
@@ -50,7 +64,7 @@ Outline, 1.5px stroke, rounded joins — not filled, not sharp. Default color `t
 
 ## Elevation & depth
 
-No drop shadows on dark surfaces (invisible). Depth cue = layered lightness: base → surface → elevated. 1px `border-subtle` outline defines card edges. Optional faint green glow (`box-shadow: 0 0 24px rgba(52,211,153,0.08)`) behind primary CTA only.
+No drop shadows on dark surfaces (invisible). Depth cue = layered lightness: base → surface → elevated. 1px `border-subtle` outline defines card edges. Optional faint green glow (`box-shadow: 0 0 24px rgba(34,197,94,0.08)`) behind primary CTA only.
 
 ## Components
 

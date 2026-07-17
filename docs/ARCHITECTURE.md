@@ -304,7 +304,7 @@ Unlike the sections above, this part is **already built**, not proposed. Three l
 
 **Dark-only:** no `prefers-color-scheme` handling exists or should be added without the same evidence-gathering rigor the design system used for the dark palette (`Design-System/DESIGN.md` §10).
 
-**Logo & PWA icons:** fully configured — `app/favicon.ico`, `app/icon.svg`, `app/apple-icon.png`, `app/manifest.ts` (name, theme_color `#064E3B`, background_color `#0A0E0D`, full + maskable icon variants), all regenerable from `public/logo.png` via `scripts/generate-icons.mjs`. The canonical logo source also lives in `Design-System/assets/`.
+**Logo & PWA icons:** fully configured — `app/favicon.ico`, `app/icon.svg`, `app/apple-icon.png`, `app/manifest.ts` (name, theme_color `#14532D`, background_color `#09090B`, full + maskable icon variants), all regenerable from `public/logo.png` via `scripts/generate-icons.mjs`. The canonical logo source also lives in `Design-System/assets/`.
 
 ---
 
