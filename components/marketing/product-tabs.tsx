@@ -45,7 +45,7 @@ export function ProductTabs() {
         <div className="flex items-center gap-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
           <img src="/logo.svg" alt="" className="h-5 w-5 rounded-[6px]" width={20} height={20} />
-          <span className="font-display text-[13px] font-semibold tracking-[-0.01em] text-text-primary">DivPulse</span>
+          <span className="font-display text-[13px] font-semibold tracking-[-0.01em] text-text-primary">PaidPrime</span>
         </div>
         <div className="hidden items-center gap-1 rounded-full border border-border-subtle bg-surface p-0.5 sm:flex">
           {["USD", "BRL", "MXN"].map((cur, i) => (

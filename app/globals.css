@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================
-   DivPulse — Design Tokens
+   PaidPrime — Design Tokens
    Canonical source: Design-System/colors_and_type.css and
    Design-System/kit/tokens.css. Hex/px values are copied verbatim —
    if this ever needs to change, update the Design-System package
@@ -91,8 +91,8 @@
   --role-warning: var(--amber-warning);
   --role-focus-ring: var(--green-500);
 
-  /* ---- shadcn/ui variables — aliased to DivPulse tokens above, not
-     shadcn's own light-mode defaults. DivPulse ships dark-only (see
+  /* ---- shadcn/ui variables — aliased to PaidPrime tokens above, not
+     shadcn's own light-mode defaults. PaidPrime ships dark-only (see
      DESIGN.md §10), so these are the final values, not a ":root vs
      .dark" pair — there is no .dark override block. --border and
      --input intentionally point at --role-border-interactive
@@ -139,7 +139,7 @@
 
 /* ============================================================
    Tailwind theme mapping
-   DivPulse is a closed-world palette (brand-spec.md §Color,
+   PaidPrime is a closed-world palette (brand-spec.md §Color,
    DESIGN.md §12 anti-patterns): reset Tailwind's default color
    scale entirely so utilities like `bg-blue-500` or `text-red-400`
    can't silently introduce an undocumented color. Only the tokens
@@ -231,7 +231,7 @@
 
 /* ============================================================
    Base styles
-   DivPulse ships dark-only by deliberate brand decision, not an
+   PaidPrime ships dark-only by deliberate brand decision, not an
    oversight — no prefers-color-scheme handling. See DESIGN.md §10;
    do not add a light mode without the same evidence-gathering rigor
    described there.

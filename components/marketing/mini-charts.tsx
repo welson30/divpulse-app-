@@ -48,7 +48,7 @@ export function DividendCalendarChart() {
 export function DiversificationRing({ label, percent }: { label: string; percent: number }) {
   const circumference = 2 * Math.PI * 46;
   const dash = (percent / 100) * circumference;
-  const gradientId = "divpulse-ring-gradient";
+  const gradientId = "paidprime-ring-gradient";
 
   return (
     <div className="flex flex-col items-center gap-2">

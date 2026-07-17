@@ -1,4 +1,4 @@
-# DivPulse — Design System
+# PaidPrime — Design System
 
 > Category: Project Design System
 > Surface: web (responsive dashboard)
@@ -6,7 +6,7 @@
 
 ## 0. Product Context & Source Evidence
 
-**Product:** DivPulse — a dividend income dashboard used by dividend investors to track holdings, dividend calendars, portfolio diversification, and incoming dividend payments. This is a data product (financial dashboard), not a marketing site.
+**Product:** PaidPrime — a dividend income dashboard used by dividend investors to track holdings, dividend calendars, portfolio diversification, and incoming dividend payments. This is a data product (financial dashboard), not a marketing site.
 
 **Primary surfaces:** Dashboard (portfolio summary), Holdings (full position list), Dividend Alerts (payment feed). See `ui_kits/app/` for the applied implementation of all three.
 
@@ -30,7 +30,7 @@ Nothing in this document is invented or picked from a generic direction library 
 
 ## 1. Visual Theme & Atmosphere
 
-DivPulse is a dark-theme dividend income dashboard for dividend investors. The positioning is **quiet confidence** — a deliberate third lane between two failure modes: spreadsheet-cold (Bloomberg-terminal density with no warmth) and consumer-cute (Robinhood-style confetti and mascot energy). Financial dashboards that go too far in either direction lose the user's trust.
+PaidPrime is a dark-theme dividend income dashboard for dividend investors. The positioning is **quiet confidence** — a deliberate third lane between two failure modes: spreadsheet-cold (Bloomberg-terminal density with no warmth) and consumer-cute (Robinhood-style confetti and mascot energy). Financial dashboards that go too far in either direction lose the user's trust.
 
 The system leans on three signals working together:
 - **Dark canvas** → this is a serious tool, not a toy.
@@ -224,11 +224,11 @@ Every focus state uses the same `2px solid var(--role-focus-ring)` outline at `2
 
 ## 10. Light/Dark Mode Policy
 
-**DivPulse ships dark-only, by deliberate brand decision — not an oversight.** `brand-spec.md`'s positioning statement is explicit: dark canvas signals "serious tool," and every layered-lightness elevation rule (§6) depends on a dark base. No light-mode tokens, markup, or `prefers-color-scheme` handling exist anywhere in source evidence, and none should be invented speculatively.
+**PaidPrime ships dark-only, by deliberate brand decision — not an oversight.** `brand-spec.md`'s positioning statement is explicit: dark canvas signals "serious tool," and every layered-lightness elevation rule (§6) depends on a dark base. No light-mode tokens, markup, or `prefers-color-scheme` handling exist anywhere in source evidence, and none should be invented speculatively.
 
 If a light mode is ever requested, treat it as a new brand decision requiring the same evidence-gathering rigor as this package — not a mechanical token inversion. Do not ship one without that step. For reference, here is what would and wouldn't change:
 
-- **Would stay identical across modes:** `--green-500` (gain/CTA) and `--red-500` (loss) — these are semantic, not surface-dependent, and DivPulse's brand identity rests on this specific green.
+- **Would stay identical across modes:** `--green-500` (gain/CTA) and `--red-500` (loss) — these are semantic, not surface-dependent, and PaidPrime's brand identity rests on this specific green.
 - **Would need light counterparts:** every `--bg-*` and `--text-*` token (background/text inverts), plus the elevation model itself — layered lightness works because dark surfaces can only get *lighter*; a light mode would need a different depth cue (e.g. shadows, which source evidence explicitly avoids on dark).
 - **Would need re-verification, not reuse:** the `--text-tertiary` AA failure is specific to these dark hex values at these sizes — a light-mode neutral scale would need its own contrast audit, not an assumption that the same 4.1:1 gap applies.
 
@@ -240,7 +240,7 @@ Reusable notes for anyone integrating this kit into a real codebase, distilled f
 
 - **Import order:** `colors_and_type.css` (or `kit/tokens.css` for the full set including spacing) → `kit/components.css` → `kit/interactions.js`. Component classes assume the custom properties already exist; loading order matters because CSS custom properties resolve at used-value time, not parse time, but undefined vars silently fall back to nothing.
 - **Two-tier tokens:** use `--role-*` (semantic) in new code, reach for raw `--green-500`-style tokens only when extending `kit/components.css` itself to keep it consistent with its existing style. See §2 "Token roles."
-- **JS is multi-instance safe:** `kit/interactions.js` scans for every `[data-receipt]` on the page and wires each independently (`DivPulseKit.initReceipts(root)`), so multiple receipt cards on one screen (see `ui_kits/app/alerts.html`) don't collide. Call `DivPulseKit.playReceiptEntrance(el)` directly when a new dividend notification is pushed into the DOM after page load, rather than re-running `initReceipts` on the whole document.
+- **JS is multi-instance safe:** `kit/interactions.js` scans for every `[data-receipt]` on the page and wires each independently (`PaidPrimeKit.initReceipts(root)`), so multiple receipt cards on one screen (see `ui_kits/app/alerts.html`) don't collide. Call `PaidPrimeKit.playReceiptEntrance(el)` directly when a new dividend notification is pushed into the DOM after page load, rather than re-running `initReceipts` on the whole document.
 - **Reduced motion is load-bearing, not optional:** both the receipt entrance and the count-up check `window.matchMedia('(prefers-reduced-motion: reduce)')` and render the end state instantly when true. Any new animated component must follow the same guard — see `kit/interactions.js` for the exact pattern to copy.
 - **Font loading:** `@import` in `colors_and_type.css`/`kit/tokens.css` is a Google Fonts CDN reference, not self-hosted — it blocks render until fetched. For production, replace with `<link rel="preload" as="font">` + self-hosted `.woff2` files and keep the same `--font-*` variable names so no component CSS needs to change.
 - **Extending components:** add a new component class in a way that only reads `--role-*` / raw tokens and reuses `--radius-control` / `--radius-card` and the `--sp-*` scale — never hardcode a new pixel or hex value. If a genuinely new color is needed, it does not exist in this brand yet; stop and treat it as a brand-spec update, not a CSS-only addition.

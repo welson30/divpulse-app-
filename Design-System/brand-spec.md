@@ -1,4 +1,4 @@
-# DivPulse — Brand & Design System Spec
+# PaidPrime — Brand & Design System Spec
 
 Source: provided directly by the user as a complete brand brief (Branch A — treated as canonical; not a generic picked direction).
 

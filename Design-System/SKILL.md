@@ -1,22 +1,22 @@
 ---
-name: divpulse-design-system
-description: Dark-theme design system for DivPulse, a dividend income dashboard for dividend investors. Use whenever generating or editing any DivPulse surface — dashboard screens, marketing pages, or component work — so color, type, spacing, and component rules stay consistent with the approved brand.
+name: paidprime-design-system
+description: Dark-theme design system for PaidPrime, a dividend income dashboard for dividend investors. Use whenever generating or editing any PaidPrime surface — dashboard screens, marketing pages, or component work — so color, type, spacing, and component rules stay consistent with the approved brand.
 user-invocable: true
 ---
 
-# DivPulse design system — agent instructions
+# PaidPrime design system — agent instructions
 
 ## What is inside
 
-This package is a complete, source-backed Claude Design skill for the DivPulse brand: an authoritative design reference (`DESIGN.md`), a canonical color/type/radius stylesheet (`colors_and_type.css`), a preserved production component kit (`kit/`), extracted brand icons (`build/icons/`), seven focused review previews (`preview/`), and an applied interface kit with real product screens (`ui_kits/app/`). Nothing here is a generic direction — every token and rule traces back to `brand-spec.md`, `design-system.html`, and `kit/` as documented in `context/provenance.md`.
+This package is a complete, source-backed Claude Design skill for the PaidPrime brand: an authoritative design reference (`DESIGN.md`), a canonical color/type/radius stylesheet (`colors_and_type.css`), a preserved production component kit (`kit/`), extracted brand icons (`build/icons/`), seven focused review previews (`preview/`), and an applied interface kit with real product screens (`ui_kits/app/`). Nothing here is a generic direction — every token and rule traces back to `brand-spec.md`, `design-system.html`, and `kit/` as documented in `context/provenance.md`.
 
 ## Source context
 
-DivPulse is a dividend income dashboard for dividend investors, positioned as "quiet confidence" — a third lane between spreadsheet-cold and consumer-cute financial tools. The source evidence (`brand-spec.md`, a full documentation page `design-system.html`, and a reusable `kit/`) was supplied directly as a complete, approved brand brief — not inferred. Read `context/provenance.md` for the exact evidence-to-artifact mapping and open blockers (no self-hosted font binaries; the logo-asset blocker was resolved 2026-07-15, see `assets/README.md`).
+PaidPrime is a dividend income dashboard for dividend investors, positioned as "quiet confidence" — a third lane between spreadsheet-cold and consumer-cute financial tools. The source evidence (`brand-spec.md`, a full documentation page `design-system.html`, and a reusable `kit/`) was supplied directly as a complete, approved brand brief — not inferred. Read `context/provenance.md` for the exact evidence-to-artifact mapping and open blockers (no self-hosted font binaries; the logo-asset blocker was resolved 2026-07-15, see `assets/README.md`).
 
 ## When to use
 
-Use this skill whenever the task touches the DivPulse brand: dashboard screens, holdings/portfolio views, dividend alerts, marketing pages, or any new component. Treat its tokens and rules as fixed, not as a starting point to riff on.
+Use this skill whenever the task touches the PaidPrime brand: dashboard screens, holdings/portfolio views, dividend alerts, marketing pages, or any new component. Treat its tokens and rules as fixed, not as a starting point to riff on.
 
 ## How to use
 
@@ -53,7 +53,7 @@ Every rule below is grounded in source evidence (`brand-spec.md`, `design-system
 - **Every data module needs empty / loading / error states** (`kit/components.css` `.state-card` variants) — observed pattern in `design-system.html`.
 - **The dividend receipt card is the only component with a designed entrance + count-up animation** (`kit/interactions.js`). Don't add competing motion elsewhere.
 - **Respect `prefers-reduced-motion`** on any animation you add — every animation in source evidence has a reduced-motion fallback.
-- **DivPulse is dark-only by deliberate policy, not a gap** — no light-mode tokens exist and none should be invented ad hoc; see `DESIGN.md` §10 before ever adding `prefers-color-scheme: light` handling.
+- **PaidPrime is dark-only by deliberate policy, not a gap** — no light-mode tokens exist and none should be invented ad hoc; see `DESIGN.md` §10 before ever adding `prefers-color-scheme: light` handling.
 - **Prefer `--role-*` semantic tokens over raw palette tokens** in new code (`--role-cta-bg` instead of `--green-500` when you mean "the CTA color") — see `DESIGN.md` §2 "Token roles" and §11 "Implementation Notes."
 - **Interactive-control borders use `--text-tertiary` (`--role-border-interactive`), never `--border-subtle`.** `--border-subtle` measures ~1.1–1.4:1 against every background — it fails WCAG 1.4.11 for buttons/inputs/icon-buttons. Fixed package-wide in a 2026-07-14 audit; see `DESIGN.md` §2 and §12.
 
@@ -69,7 +69,7 @@ Every rule below is grounded in source evidence (`brand-spec.md`, `design-system
 | Empty / loading / error module | `.state-card` (+ `.error-card`) | `kit/components.css` |
 | Display/H1/H2/body/small type | `.dp-text-*` (`colors_and_type.css`) or `.text-*` (`kit/components.css`) | either |
 
-## Checklist before shipping a DivPulse surface
+## Checklist before shipping a PaidPrime surface
 
 - [ ] Tokens bound from `colors_and_type.css` + `kit/tokens.css` — no ad-hoc hex/px values.
 - [ ] Primary CTA uses dark text on green; destructive is outline-only.

@@ -1,4 +1,4 @@
-// Regenerates the DivPulse favicon/app-icon set from the master logo.
+// Regenerates the PaidPrime favicon/app-icon set from the master logo.
 // Source of truth: public/logo.png (1254x1254, solid brand-black background).
 // Run with: node scripts/generate-icons.mjs
 //

@@ -1,6 +1,6 @@
-# DivPulse — Applied UI kit
+# PaidPrime — Applied UI kit
 
-Real DivPulse product screens, composed entirely from `../../colors_and_type.css` + `../../kit/tokens.css` + `../../kit/components.css` + `../../kit/interactions.js`. This is the system in use, not a generic static mock — every class here is the same class documented in `../../preview/components-buttons.html`.
+Real PaidPrime product screens, composed entirely from `../../colors_and_type.css` + `../../kit/tokens.css` + `../../kit/components.css` + `../../kit/interactions.js`. This is the system in use, not a generic static mock — every class here is the same class documented in `../../preview/components-buttons.html`.
 
 ## Source basis
 
@@ -42,7 +42,7 @@ ui_kits/app/
 
 ## Reuse elsewhere
 
-To bring this applied shell into a different DivPulse surface, copy `app.css` alongside the three token/component stylesheets and reuse the `.app-shell` / `.app-sidebar` / `.app-main` / `.page-header` classes — they are page-composition helpers designed to be shared across any new DivPulse screen, not screen-specific one-offs.
+To bring this applied shell into a different PaidPrime surface, copy `app.css` alongside the three token/component stylesheets and reuse the `.app-shell` / `.app-sidebar` / `.app-main` / `.page-header` classes — they are page-composition helpers designed to be shared across any new PaidPrime screen, not screen-specific one-offs.
 
 ### Porting to a component framework (optional)
 

@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "DivPulse — Dividend Income Dashboard",
-    short_name: "DivPulse",
+    name: "PaidPrime — Dividend Income Dashboard",
+    short_name: "PaidPrime",
     description:
       "Track holdings, dividend calendars, portfolio diversification, and incoming dividend payments.",
     start_url: "/",

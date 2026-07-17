@@ -1,4 +1,4 @@
-# DivPulse — Architecture Document
+# PaidPrime — Architecture Document
 
 **Version:** 1.0
 **Date:** 2026-07-15
@@ -7,9 +7,9 @@
 
 ---
 
-## 1. What DivPulse Is
+## 1. What PaidPrime Is
 
-DivPulse is a dividend-tracking SaaS web platform, delivered as an installable Progressive Web App (no native iOS/Android app in Phase 1). Its entire value proposition is one sentence: **the user finds out a dividend landed before their broker's own app tells them.**
+PaidPrime is a dividend-tracking SaaS web platform, delivered as an installable Progressive Web App (no native iOS/Android app in Phase 1). Its entire value proposition is one sentence: **the user finds out a dividend landed before their broker's own app tells them.**
 
 Positioning (from the design system): "quiet confidence" — a serious financial tool, not a gamified consumer app. Dark-canvas UI, one restrained brand green, numbers that do the talking.
 
@@ -21,7 +21,7 @@ Positioning (from the design system): "quiet confidence" — a serious financial
 
 ## 2. Problem & Users
 
-**Problem:** brokerage apps don't proactively notify on dividend payments — investors have to manually check. DivPulse closes that gap with real-time, cross-channel alerts (push, Telegram, email).
+**Problem:** brokerage apps don't proactively notify on dividend payments — investors have to manually check. PaidPrime closes that gap with real-time, cross-channel alerts (push, Telegram, email).
 
 **Target users:**
 - Dividend/income-focused retail investors
@@ -62,7 +62,7 @@ The Brazilian-broker case is not incidental: the app prototype's topbar already 
 | Layer | Choice | Notes |
 |---|---|---|
 | Frontend framework | Next.js (App Router) | PRD specifies 14; **actual scaffold runs 16.2.10** — see Section 15 discrepancy #1. |
-| Styling | Tailwind CSS v4 | `@theme inline` mapping to DivPulse design tokens; default palette reset to a closed world (see Section 13). |
+| Styling | Tailwind CSS v4 | `@theme inline` mapping to PaidPrime design tokens; default palette reset to a closed world (see Section 13). |
 | Component primitives | shadcn/ui (Radix UI) | Already integrated, re-themed to brand tokens (Section 13). |
 | Fonts | Inter, Inter Tight, JetBrains Mono | Self-hosted via `next/font/google`, not the design system's CDN `@import`. |
 | Database / Auth / Storage | Supabase (Postgres) | Not yet connected in code — see Section 14. |
@@ -75,17 +75,17 @@ The Brazilian-broker case is not incidental: the app prototype's topbar already 
 | Messaging | Telegram Bot API | Pro+; requires a per-user chat-linking flow (Section 9.4), not just the single owner chat ID currently in `.env`. |
 | Transactional email | Resend | Free to 3k emails/mo — welcome, password reset, payment confirmation. |
 | AI Advisor | **Conflicting spec** — PRD says Google Gemini Flash, `services.md` says OpenAI (~$0.001/query) | Unresolved — see Section 15 discrepancy #2. |
-| Supplementary calendar data | Alpha Vantage (free tier) or a static DivPulse-maintained list | For FOMC/earnings dates only, not core dividend data. |
+| Supplementary calendar data | Alpha Vantage (free tier) or a static PaidPrime-maintained list | For FOMC/earnings dates only, not core dividend data. |
 
 ---
 
 ## 5. High-Level System Architecture
 
-![DivPulse System Architecture](./architecture-diagram.png)
+![PaidPrime System Architecture](./architecture-diagram.png)
 
 > Full-resolution diagram: [`docs/architecture-diagram.png`](./architecture-diagram.png)
 
-**Architecture summary:** DivPulse has **no standalone backend service** — Vercel-hosted Next.js Route Handlers are the entire backend surface, calling Supabase and third-party APIs directly. This matches the PRD's non-functional requirement to avoid over-engineering for current scale.
+**Architecture summary:** PaidPrime has **no standalone backend service** — Vercel-hosted Next.js Route Handlers are the entire backend surface, calling Supabase and third-party APIs directly. This matches the PRD's non-functional requirement to avoid over-engineering for current scale.
 
 ```
 CLIENT (Browser / PWA)
@@ -112,11 +112,11 @@ SUPABASE                THIRD-PARTY SERVICES
 
 ## 6. Information Architecture / Routing Map
 
-Derived from `Prototype/app.html`'s sidebar (Main / Explore / Account sections) and `Prototype/divpulse-spark_2.html` (separate marketing landing). Per the design system's own screen-file-first policy (`Design-System/DESIGN-MANIFEST.json`), the landing page, auth flow, and product app are kept as distinct route groups — never merged into one screen.
+Derived from `Prototype/app.html`'s sidebar (Main / Explore / Account sections) and `Prototype/paidprime-spark_2.html` (separate marketing landing). Per the design system's own screen-file-first policy (`Design-System/DESIGN-MANIFEST.json`), the landing page, auth flow, and product app are kept as distinct route groups — never merged into one screen.
 
 | Route (proposed) | Surface | Auth | Notes |
 |---|---|---|---|
-| `app/(marketing)/page.tsx` → `/` | Landing page | Public | Hero, value props, pricing, proof — content from `divpulse-spark_2.html`. |
+| `app/(marketing)/page.tsx` → `/` | Landing page | Public | Hero, value props, pricing, proof — content from `paidprime-spark_2.html`. |
 | `app/(auth)/login/page.tsx` → `/login` | Sign in | Public | Email/password, "Continue with Google", demo-mode entry (prototype has all three). |
 | `app/(auth)/signup/page.tsx` → `/signup` | Sign up | Public | |
 | `app/(dashboard)/dashboard/page.tsx` → `/dashboard` | "For You" home | Authenticated | Default landing post-login. |
@@ -294,11 +294,11 @@ Explicitly out of scope for Phase 1 (PRD §9): native mobile apps, real money mo
 
 Unlike the sections above, this part is **already built**, not proposed. Three layers, each with a distinct job:
 
-1. **Token layer** (`app/globals.css` `:root`) — DivPulse's canonical design tokens (colors, spacing, radii, type scale) copied verbatim from `Design-System/colors_and_type.css`/`kit/tokens.css`, plus a `--role-*` semantic aliasing layer.
-2. **Tailwind theme mapping** (`app/globals.css` `@theme inline`) — exposes those tokens as Tailwind utilities (`bg-canvas`, `text-text-secondary`, `rounded-card`, `gap-sp-3`, etc.). The default Tailwind color palette is **fully reset** (`--color-*: initial`) so undocumented colors like `bg-blue-500` can't silently appear — DivPulse is a closed-world palette by design-system mandate.
+1. **Token layer** (`app/globals.css` `:root`) — PaidPrime's canonical design tokens (colors, spacing, radii, type scale) copied verbatim from `Design-System/colors_and_type.css`/`kit/tokens.css`, plus a `--role-*` semantic aliasing layer.
+2. **Tailwind theme mapping** (`app/globals.css` `@theme inline`) — exposes those tokens as Tailwind utilities (`bg-canvas`, `text-text-secondary`, `rounded-card`, `gap-sp-3`, etc.). The default Tailwind color palette is **fully reset** (`--color-*: initial`) so undocumented colors like `bg-blue-500` can't silently appear — PaidPrime is a closed-world palette by design-system mandate.
 3. **Component kit** (`app/kit.css`) — the approved, preserved production component classes (`.btn`, `.badge`, `.holding-card`, `.receipt`, `.state-card`) ported verbatim from `Design-System/kit/components.css`. Prefer these over inventing new component styles.
 
-**shadcn/ui** is integrated on top (Radix primitives + `class-variance-authority`), with every shadcn CSS variable (`--primary`, `--background`, `--destructive`, `--ring`, etc.) remapped to the same DivPulse tokens rather than shadcn's light-mode defaults — see `app/globals.css` for the full mapping and the "closed-world" rationale repeated there. Use shadcn primitives for structural components the kit doesn't cover (Dialog, Dropdown, Sheet, Select); use kit.css classes for anything it already defines.
+**shadcn/ui** is integrated on top (Radix primitives + `class-variance-authority`), with every shadcn CSS variable (`--primary`, `--background`, `--destructive`, `--ring`, etc.) remapped to the same PaidPrime tokens rather than shadcn's light-mode defaults — see `app/globals.css` for the full mapping and the "closed-world" rationale repeated there. Use shadcn primitives for structural components the kit doesn't cover (Dialog, Dropdown, Sheet, Select); use kit.css classes for anything it already defines.
 
 **Fonts** are self-hosted via `next/font/google` (Inter, Inter Tight, JetBrains Mono, variable weight) rather than the design system's CDN `@import`, per `Design-System/DESIGN.md` §11's own production recommendation.
 

@@ -1,4 +1,4 @@
-# DivPulse — Product Requirements Document
+# PaidPrime — Product Requirements Document
 
 **Version:** 1.0
 **Date:** July 2026
@@ -9,7 +9,7 @@
 
 ## 1. Overview
 
-DivPulse is a dividend-tracking SaaS web platform for investors. Its core value proposition: users receive an instant push notification the moment a dividend is paid into their account — before their broker's own app shows it.
+PaidPrime is a dividend-tracking SaaS web platform for investors. Its core value proposition: users receive an instant push notification the moment a dividend is paid into their account — before their broker's own app shows it.
 
 The platform is a web-based Progressive Web App (PWA), installable on iOS and Android, with no native mobile app required at this stage.
 
@@ -17,7 +17,7 @@ The platform is a web-based Progressive Web App (PWA), installable on iOS and An
 
 ## 2. Problem Statement
 
-Most brokerage apps do not proactively notify users when a dividend payment lands. Investors have to manually check their accounts to know if and when they got paid. DivPulse closes that gap with real-time, cross-channel alerts.
+Most brokerage apps do not proactively notify users when a dividend payment lands. Investors have to manually check their accounts to know if and when they got paid. PaidPrime closes that gap with real-time, cross-channel alerts.
 
 ---
 

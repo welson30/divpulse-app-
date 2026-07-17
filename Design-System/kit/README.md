@@ -1,4 +1,4 @@
-# DivPulse System Kit
+# PaidPrime System Kit
 
 The reusable, implementation-ready package derived from `/design-system.html` and `/brand-spec.md`. This folder is what a developer imports — the root files remain the reference documentation and philosophy.
 
@@ -38,7 +38,7 @@ Mark the card with `data-receipt` and give the amount element `data-value` (a pl
 <button data-receipt-replay>Replay</button>
 ```
 
-Every `[data-receipt]` on the page plays its entrance once on load (e.g. when a new dividend notification is pushed into the DOM, call `DivPulseKit.playReceiptEntrance(el)` directly rather than waiting for the page-load pass).
+Every `[data-receipt]` on the page plays its entrance once on load (e.g. when a new dividend notification is pushed into the DOM, call `PaidPrimeKit.playReceiptEntrance(el)` directly rather than waiting for the page-load pass).
 
 ## Not included here (documentation-only, stays in `/design-system.html`)
 

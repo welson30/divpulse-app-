@@ -29,13 +29,16 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DivPulse — Know the moment you're paid",
+  metadataBase: new URL("https://paidprime.com"),
+  title: "PaidPrime — Know the moment you're paid",
   description:
     "Real-time dividend alerts by push, Telegram, and email — the moment a payment lands, before your broker's app tells you. Track holdings, payment calendars, and income goals. Free for 5 assets.",
   openGraph: {
-    title: "DivPulse — Know the moment you're paid",
+    title: "PaidPrime — Know the moment you're paid",
     description:
       "Real-time dividend alerts by push, Telegram, and email — before your broker's app tells you.",
+    url: "https://paidprime.com",
+    siteName: "PaidPrime",
     type: "website",
   },
 };
