@@ -146,7 +146,7 @@ function SiteHeader() {
         <Link href="/" className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
           <img src="/logo.svg" alt="" className="h-7 w-7 rounded-[8px]" width={28} height={28} />
-          <span className="font-display text-[17px] font-semibold tracking-[-0.01em] text-text-primary">PaidPrime</span>
+          <span className="font-display text-[17px] font-semibold tracking-[-0.01em] text-text-primary">Paid<span className="text-green-500">Prime</span></span>
         </Link>
         <nav aria-label="Primary" className="hidden items-center gap-sp-4 md:flex">
           {NAV_LINKS.map((link) => (
@@ -753,7 +753,7 @@ function SiteFooter() {
           <Link href="/" className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
             <img src="/logo.svg" alt="" className="h-7 w-7 rounded-[8px]" width={28} height={28} />
-            <span className="font-display text-[17px] font-semibold tracking-[-0.01em] text-text-primary">PaidPrime</span>
+            <span className="font-display text-[17px] font-semibold tracking-[-0.01em] text-text-primary">Paid<span className="text-green-500">Prime</span></span>
           </Link>
           <p className="max-w-[26ch] text-sm leading-relaxed text-text-secondary">
             The instant your dividend lands, you know — before your broker gets around to telling you.
