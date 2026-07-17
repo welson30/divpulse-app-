@@ -556,7 +556,11 @@ function Trust() {
         <div className="flex flex-col items-start gap-sp-3 lg:sticky lg:top-24 lg:self-start">
           <SectionHeading
             eyebrow="Trust"
-            title="Access to see. Never access to move."
+            title={
+              <>
+                Access to see. <span className="text-green-500">Never access to move.</span>
+              </>
+            }
             description="Connecting a brokerage should feel boring. These four guarantees are why it can."
           />
           <a
