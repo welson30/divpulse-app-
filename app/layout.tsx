@@ -29,13 +29,16 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DivPulse — Know the moment you're paid",
+  metadataBase: new URL("https://paidprime.com"),
+  title: "PaidPrime — Know the moment you're paid",
   description:
     "Real-time dividend alerts by push, Telegram, and email — the moment a payment lands, before your broker's app tells you. Track holdings, payment calendars, and income goals. Free for 5 assets.",
   openGraph: {
-    title: "DivPulse — Know the moment you're paid",
+    title: "PaidPrime — Know the moment you're paid",
     description:
       "Real-time dividend alerts by push, Telegram, and email — before your broker's app tells you.",
+    url: "https://paidprime.com",
+    siteName: "PaidPrime",
     type: "website",
   },
 };
@@ -45,7 +48,7 @@ export const metadata: Metadata = {
 // rather than left to the OS (native scrollbars/form controls, etc).
 // themeColor matches app/manifest.ts's --green-900, not raw --bg-base.
 export const viewport: Viewport = {
-  themeColor: "#064E3B",
+  themeColor: "#14532D",
   colorScheme: "dark",
 };
 

@@ -1,10 +1,10 @@
-# DivPulse — Design System Package
+# PaidPrime — Design System Package
 
-A dark-theme design system for **DivPulse**, a dividend income dashboard for dividend investors. Positioning: quiet confidence — the third lane between spreadsheet-cold and consumer-cute. Extracted and packaged from a source project that already contained a complete brand brief, a full documentation surface, and a reusable component kit — see `context/provenance.md` for the exact evidence-to-artifact mapping.
+A dark-theme design system for **PaidPrime**, a dividend income dashboard for dividend investors. Positioning: quiet confidence — the third lane between spreadsheet-cold and consumer-cute. Extracted and packaged from a source project that already contained a complete brand brief, a full documentation surface, and a reusable component kit — see `context/provenance.md` for the exact evidence-to-artifact mapping.
 
 ## Product Overview
 
-**Product:** DivPulse is a web application that provides dividend investors with a single dashboard for dividend income — holdings, an incoming-payment calendar, portfolio diversification, and a feed of dividend payments as they land.
+**Product:** PaidPrime is a web application that provides dividend investors with a single dashboard for dividend income — holdings, an incoming-payment calendar, portfolio diversification, and a feed of dividend payments as they land.
 
 **Primary surfaces:**
 - **Dashboard** — portfolio total value, dividend calendar chart, diversification chart, recent dividends feed, top holdings preview.
@@ -46,7 +46,7 @@ assets/
 
 preview/                    ← 7 focused review cards, one concern per file (manifest below)
 
-ui_kits/app/                ← applied interface kit — real DivPulse product screens
+ui_kits/app/                ← applied interface kit — real PaidPrime product screens
   index.html                   Dashboard
   holdings.html                Holdings
   alerts.html                  Dividend alerts / notifications
@@ -102,9 +102,9 @@ Start at `preview/index.html` — it links all seven cards. Then open `ui_kits/a
 ## Known constraints
 
 - **No logo supplied.** Every surface reserves an empty, labeled logo slot rather than inventing a mark — see `assets/README.md`.
-- **`--text-tertiary` fails WCAG AA** at small sizes on dark backgrounds (~4.1:1). It is included in the tokens for completeness but restricted to decorative/demonstrative use — see `DESIGN.md` §2 and §12.
+- **`--text-tertiary` fails WCAG AA** at small sizes on every background except `--bg-base` (3.4–4.9:1 across the four surfaces). It is included in the tokens for completeness but restricted to decorative/demonstrative use — see `DESIGN.md` §2 and §12.
 - **Fonts load via Google Fonts `@import`** in both `colors_and_type.css` and `kit/tokens.css`. This blocks render until fetched; self-host or preload for production. No font binaries were present in source evidence to package into `fonts/`.
-- **Dark-only by design, no light mode.** DivPulse has never had light-mode tokens in source evidence; `DESIGN.md` §10 documents this as a deliberate brand decision and what would need re-verification (not just inversion) if a light mode is ever requested.
+- **Dark-only by design, no light mode.** PaidPrime has never had light-mode tokens in source evidence; `DESIGN.md` §10 documents this as a deliberate brand decision and what would need re-verification (not just inversion) if a light mode is ever requested.
 
 ## Stronger token roles & reuse notes
 

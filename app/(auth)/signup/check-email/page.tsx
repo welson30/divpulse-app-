@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Check your email — DivPulse",
+  title: "Check your email — PaidPrime",
 };
 
 export default function CheckEmailPage() {

@@ -5,19 +5,19 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is my brokerage account safe?",
-    a: "Broker connections run through Plaid and are read-only — DivPulse can see holdings, never touch them. There is no ability to move funds or place trades, on any plan. If you track manually or by CSV import, no broker login is involved at all.",
+    a: "Broker connections run through Plaid and are read-only — PaidPrime can see holdings, never touch them. There is no ability to move funds or place trades, on any plan. If you track manually or by CSV import, no broker login is involved at all.",
   },
   {
-    q: "My broker isn't a US broker. Does DivPulse work?",
+    q: "My broker isn't a US broker. Does PaidPrime work?",
     a: "Yes. Manual tracking works with any broker on earth — XP, Avenue, Nomad, or a local broker we've never heard of. Pro+ adds CSV import so you can bulk-load positions straight from your broker's export instead of typing them.",
   },
   {
     q: "Where do the alerts arrive?",
-    a: "Push notification (DivPulse installs to your home screen on iOS and Android), Telegram message, and email — any combination you switch on. Each alert names the ticker, the amount, and the broker it landed in.",
+    a: "Push notification (PaidPrime installs to your home screen on iOS and Android), Telegram message, and email — any combination you switch on. Each alert names the ticker, the amount, and the broker it landed in.",
   },
   {
     q: "Do I need to turn notifications on myself?",
-    a: "Yes — the first time you install DivPulse, your phone will ask you to allow notifications. Accept the prompt once and every dividend alert lands on your lock screen from then on. If you skip it or say no by mistake, you can turn it back on anytime from your phone's notification settings for DivPulse, or from Settings inside the app.",
+    a: "Yes — the first time you install PaidPrime, your phone will ask you to allow notifications. Accept the prompt once and every dividend alert lands on your lock screen from then on. If you skip it or say no by mistake, you can turn it back on anytime from your phone's notification settings for PaidPrime, or from Settings inside the app.",
   },
   {
     q: "What does the free plan actually include?",

@@ -1,5 +1,5 @@
 /* ============================================================
-   DivPulse — Colors & Type (canonical distributable)
+   PaidPrime — Colors & Type (canonical distributable)
    Source of truth: /brand-spec.md, documented in full in /DESIGN.md
    §§2–4. This file is the package-level entry point for color, type,
    and radius tokens, plus a --role-* semantic aliasing layer (see
@@ -13,29 +13,31 @@
 
 :root {
   /* ---- color: backgrounds — layered depth, not flat black ---- */
-  --bg-base: #0A0E0D;
-  --bg-surface: #121816;
-  --bg-elevated: #1A211E;
-  --bg-hover: #1E2724;
+  --bg-base: #09090B;
+  --bg-surface: #1C1C1E;
+  --bg-elevated: #252528;
+  --bg-hover: #2C2C30;
 
   /* ---- color: primary green — brand / growth / positive ---- */
-  --green-500: #34D399; /* core brand, primary CTA */
-  --green-600: #10B981; /* hover / pressed */
-  --green-300: #6EE7B7; /* highlights, glow */
-  --green-900: #064E3B; /* chart fill tint */
+  --green-500: #22C55E; /* core brand, primary CTA */
+  --green-600: #149141; /* hover / pressed */
+  --green-300: #86EFAC; /* highlights, glow */
+  --green-900: #14532D; /* chart fill tint */
 
   /* ---- color: red — reserved ONLY for loss data, never decorative ---- */
   --red-500: #F87171;
   --red-900: #450A0A;
 
   /* ---- color: neutrals — text hierarchy ---- */
-  --text-primary: #F5F7F6;
-  --text-secondary: #A8B3AF;
-  /* text-tertiary measures ~4.1:1 on these backgrounds at small sizes —
-     below the 4.5:1 AA floor. Reserve for decorative/demonstrative use
-     only; use --text-secondary for anything meant to be reliably read. */
-  --text-tertiary: #6B7570;
-  --border-subtle: #242C29;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  /* text-tertiary measures 3.4-4.9:1 on these backgrounds — below the 4.5:1
+     AA floor on every surface except --bg-base. Reserve for
+     decorative/demonstrative use only; use --text-secondary for anything
+     meant to be reliably read. Value is tuned for its --role-border-interactive
+     duty, not picked off the neutral ramp — see brand-spec.md §Neutrals. */
+  --text-tertiary: #7D7D85;
+  --border-subtle: #303034;
 
   /* ---- color: semantic accents — sparing use ---- */
   --blue-info: #60A5FA;
@@ -77,7 +79,7 @@
   --role-cta-bg: var(--green-500);
   --role-cta-bg-hover: var(--green-600);
   --role-cta-fg: var(--bg-base); /* dark text on green — deliberate, see DESIGN.md §6 */
-  --role-cta-glow: rgba(52, 211, 153, 0.08);
+  --role-cta-glow: rgba(34, 197, 94, 0.08); /* --green-500 as rgba — keep in sync */
 
   --role-gain: var(--green-500);
   --role-gain-tint: var(--green-900);
@@ -89,7 +91,7 @@
   --role-text-label: var(--text-secondary); /* timestamps, captions, table headers — NOT text-tertiary */
   --role-text-decorative: var(--text-tertiary); /* fails AA — decorative/demo use only, never real content */
   --role-border: var(--border-subtle); /* structural/decorative dividers only — cards, table rows. NOT for interactive-control boundaries, see below */
-  --role-border-interactive: var(--text-tertiary); /* buttons, inputs, icon buttons — border-subtle fails WCAG 1.4.11 (~1.1-1.4:1) here; text-tertiary clears the 3:1 floor (~3.4-4.1:1) */
+  --role-border-interactive: var(--text-tertiary); /* buttons, inputs, icon buttons — border-subtle fails WCAG 1.4.11 (~1.1-1.5:1) here; text-tertiary clears the 3:1 floor (3.4-4.9:1) */
 
   --role-info: var(--blue-info);
   --role-warning: var(--amber-warning);

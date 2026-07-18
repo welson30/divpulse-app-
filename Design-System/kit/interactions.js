@@ -1,5 +1,5 @@
 /* ============================================================
-   DivPulse — Kit Interactions
+   PaidPrime — Kit Interactions
    Reusable behavior for the dividend "receipt" alert card: entrance
    animation + amount count-up, generalized to any number of instances
    (design-system.html hardcoded this to one #receiptDemo element).
@@ -52,6 +52,6 @@
     });
   }
 
-  window.DivPulseKit = { initReceipts: initReceipts, playReceiptEntrance: playEntrance };
+  window.PaidPrimeKit = { initReceipts: initReceipts, playReceiptEntrance: playEntrance };
   document.addEventListener('DOMContentLoaded', function () { initReceipts(document); });
 })();

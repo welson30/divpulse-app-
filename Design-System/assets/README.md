@@ -39,4 +39,4 @@ Every surface that would normally show a logo previously rendered a labeled plac
 
 ## Other imagery
 
-No photography, illustration, or app-icon assets were present in source evidence either. DivPulse's visual system is intentionally token- and typography-driven (see `DESIGN.md` §1) rather than imagery-driven, so this is not expected to be a gap for most surfaces — icons live in `build/icons/` instead.
+No photography, illustration, or app-icon assets were present in source evidence either. PaidPrime's visual system is intentionally token- and typography-driven (see `DESIGN.md` §1) rather than imagery-driven, so this is not expected to be a gap for most surfaces — icons live in `build/icons/` instead.

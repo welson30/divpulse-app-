@@ -1,5 +1,5 @@
 /* ============================================================
-   DivPulse — Design Tokens
+   PaidPrime — Design Tokens
    Source of truth: /brand-spec.md. If a value here and in that
    file ever disagree, brand-spec.md wins — update it first, then
    mirror the change here.
@@ -15,29 +15,31 @@
 
 :root {
   /* backgrounds — layered depth, not flat black */
-  --bg-base: #0A0E0D;
-  --bg-surface: #121816;
-  --bg-elevated: #1A211E;
-  --bg-hover: #1E2724;
+  --bg-base: #09090B;
+  --bg-surface: #1C1C1E;
+  --bg-elevated: #252528;
+  --bg-hover: #2C2C30;
 
   /* primary green — brand / growth / positive */
-  --green-500: #34D399; /* core brand, primary CTA */
-  --green-600: #10B981; /* hover / pressed */
-  --green-300: #6EE7B7; /* highlights, glow */
-  --green-900: #064E3B; /* chart fill tint */
+  --green-500: #22C55E; /* core brand, primary CTA */
+  --green-600: #149141; /* hover / pressed */
+  --green-300: #86EFAC; /* highlights, glow */
+  --green-900: #14532D; /* chart fill tint */
 
   /* red — reserved ONLY for loss data, never decorative */
   --red-500: #F87171;
   --red-900: #450A0A;
 
   /* neutrals — text hierarchy */
-  --text-primary: #F5F7F6;
-  --text-secondary: #A8B3AF;
-  /* text-tertiary measures ~4.1:1 on these backgrounds at small sizes —
-     below the 4.5:1 AA floor. Reserve for decorative/demonstrative use
-     only; use --text-secondary for anything meant to be reliably read. */
-  --text-tertiary: #6B7570;
-  --border-subtle: #242C29;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  /* text-tertiary measures 3.4-4.9:1 on these backgrounds — below the 4.5:1
+     AA floor on every surface except --bg-base. Reserve for
+     decorative/demonstrative use only; use --text-secondary for anything
+     meant to be reliably read. Value is tuned for its --role-border-interactive
+     duty, not picked off the neutral ramp — see brand-spec.md §Neutrals. */
+  --text-tertiary: #7D7D85;
+  --border-subtle: #303034;
 
   /* semantic accents — sparing use, never competing with green */
   --blue-info: #60A5FA;

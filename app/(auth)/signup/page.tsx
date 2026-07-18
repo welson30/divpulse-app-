@@ -5,8 +5,8 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { signUpWithPassword } from "@/app/(auth)/actions";
 
 export const metadata: Metadata = {
-  title: "Sign up — DivPulse",
-  description: "Create your DivPulse account. Free for up to 5 tracked assets.",
+  title: "Sign up — PaidPrime",
+  description: "Create your PaidPrime account. Free for up to 5 tracked assets.",
 };
 
 export default function SignUpPage() {

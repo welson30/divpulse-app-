@@ -5,8 +5,8 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { signInWithPassword } from "@/app/(auth)/actions";
 
 export const metadata: Metadata = {
-  title: "Sign in — DivPulse",
-  description: "Sign in to your DivPulse dashboard.",
+  title: "Sign in — PaidPrime",
+  description: "Sign in to your PaidPrime dashboard.",
 };
 
 export default async function LoginPage({

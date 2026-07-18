@@ -1,4 +1,4 @@
-# DivPulse — Design System
+# PaidPrime — Design System
 
 > Category: Project Design System
 > Surface: web (responsive dashboard)
@@ -6,7 +6,7 @@
 
 ## 0. Product Context & Source Evidence
 
-**Product:** DivPulse — a dividend income dashboard used by dividend investors to track holdings, dividend calendars, portfolio diversification, and incoming dividend payments. This is a data product (financial dashboard), not a marketing site.
+**Product:** PaidPrime — a dividend income dashboard used by dividend investors to track holdings, dividend calendars, portfolio diversification, and incoming dividend payments. This is a data product (financial dashboard), not a marketing site.
 
 **Primary surfaces:** Dashboard (portfolio summary), Holdings (full position list), Dividend Alerts (payment feed). See `ui_kits/app/` for the applied implementation of all three.
 
@@ -30,7 +30,7 @@ Nothing in this document is invented or picked from a generic direction library 
 
 ## 1. Visual Theme & Atmosphere
 
-DivPulse is a dark-theme dividend income dashboard for dividend investors. The positioning is **quiet confidence** — a deliberate third lane between two failure modes: spreadsheet-cold (Bloomberg-terminal density with no warmth) and consumer-cute (Robinhood-style confetti and mascot energy). Financial dashboards that go too far in either direction lose the user's trust.
+PaidPrime is a dark-theme dividend income dashboard for dividend investors. The positioning is **quiet confidence** — a deliberate third lane between two failure modes: spreadsheet-cold (Bloomberg-terminal density with no warmth) and consumer-cute (Robinhood-style confetti and mascot energy). Financial dashboards that go too far in either direction lose the user's trust.
 
 The system leans on three signals working together:
 - **Dark canvas** → this is a serious tool, not a toy.
@@ -46,18 +46,18 @@ Hex values are canonical (source: `brand-spec.md`) — do not substitute or rein
 ### Backgrounds — layered depth, never flat black
 | Token | Hex | Role |
 |---|---|---|
-| `--bg-base` | `#0A0E0D` | Page canvas — near-black with a whisper of green undertone |
-| `--bg-surface` | `#121816` | Cards, panels |
-| `--bg-elevated` | `#1A211E` | Modals, dropdowns, floating surfaces |
-| `--bg-hover` | `#1E2724` | Hover state for interactive surfaces |
+| `--bg-base` | `#09090B` | Page canvas — near-black, pure neutral (no undertone) |
+| `--bg-surface` | `#1C1C1E` | Cards, panels |
+| `--bg-elevated` | `#252528` | Modals, dropdowns, floating surfaces |
+| `--bg-hover` | `#2C2C30` | Hover state for interactive surfaces |
 
 ### Primary green — brand / growth / positive
 | Token | Hex | Role |
 |---|---|---|
-| `--green-500` | `#34D399` | Core brand, primary CTA fill |
-| `--green-600` | `#10B981` | Hover / pressed state |
-| `--green-300` | `#6EE7B7` | Highlights, subtle glow |
-| `--green-900` | `#064E3B` | Chart fill tint, subtle backgrounds |
+| `--green-500` | `#22C55E` | Core brand, primary CTA fill |
+| `--green-600` | `#149141` | Hover / pressed state |
+| `--green-300` | `#86EFAC` | Highlights, subtle glow |
+| `--green-900` | `#14532D` | Chart fill tint, subtle backgrounds |
 
 ### Red — reserved exclusively for negative/loss data
 | Token | Hex | Role |
@@ -70,14 +70,16 @@ Red is never used decoratively. It reports a loss or a destructive action — no
 ### Neutrals — text hierarchy
 | Token | Hex | Role | Contrast on `--bg-base` |
 |---|---|---|---|
-| `--text-primary` | `#F5F7F6` | Headlines, key numbers | ~18.5:1 |
-| `--text-secondary` | `#A8B3AF` | Labels, supporting text, timestamps, captions | ~9:1 |
-| `--text-tertiary` | `#6B7570` | Decorative/demonstrative use only | ~4.1:1 |
-| `--border-subtle` | `#242C29` | Hairline dividers, card edges | — |
+| `--text-primary` | `#FFFFFF` | Headlines, key numbers | 19.9:1 |
+| `--text-secondary` | `#A1A1AA` | Labels, supporting text, timestamps, captions | 7.8:1 |
+| `--text-tertiary` | `#7D7D85` | Decorative/demonstrative use only | 4.9:1 |
+| `--border-subtle` | `#303034` | Hairline dividers, card edges | — |
 
-**Accessibility constraint (binding):** `--text-tertiary` measures only ~4.1:1 against dark backgrounds at small sizes — under the 4.5:1 AA floor for normal text. Never use it for meaningful small text (timestamps, table headers, captions, labels). Use `--text-secondary` (~9:1) for anything a user needs to reliably read. `--text-tertiary` is reserved for purely decorative or demonstrative use.
+**Accessibility constraint (binding):** `--text-tertiary` clears 4.5:1 against `--bg-base` alone (4.9:1) but falls to 4.2/3.7/3.4:1 on `--bg-surface`/`--bg-elevated`/`--bg-hover` — under the AA floor for normal text on every surface a card or modal actually sits on. Never use it for meaningful small text (timestamps, table headers, captions, labels). Use `--text-secondary` (6.0–7.8:1 across all four surfaces) for anything a user needs to reliably read. `--text-tertiary` is reserved for purely decorative or demonstrative use.
 
-**Non-text contrast constraint (binding, found in the 2026-07-14 audit):** `--border-subtle` measures only ~1.1–1.4:1 against every background token — nowhere near the 3:1 WCAG 1.4.11 floor for boundaries of essential UI components. It stays fine for structural/decorative dividers (card edges, table row lines) where spacing and background grouping carry the real signal, but it must never be the *only* boundary indicator on an interactive control. Use `--text-tertiary` (~3.4–4.1:1, aliased as `--role-border-interactive`) for button and input borders instead — this is not a new pattern, `design-system.html`'s own `.swatch:hover` already uses `--text-tertiary` as its stronger-emphasis border. Also note: the whole layered-lightness elevation model (`--bg-base` → `--bg-surface` → `--bg-elevated` → `--bg-hover`) is only ~1.1–1.2:1 fill-to-fill — surfaces are barely distinguishable by background alone, so borders and spacing are load-bearing for perceiving structure, not decorative extras. Never remove a card/panel border to "clean up" a layout; use spacing instead if a lighter feel is wanted.
+Its exact value is load-bearing: `--text-tertiary` doubles as `--role-border-interactive`, so it must also clear the 3:1 WCAG 1.4.11 floor for control boundaries on the *lightest* surface. The neutral ramp's natural zinc-500 (`#71717A`) measures 2.88:1 on `--bg-hover` and fails; `#7D7D85` is the nearest value clearing 3:1 everywhere. Do not round it back to a standard zinc step.
+
+**Non-text contrast constraint (binding, found in the 2026-07-14 audit):** `--border-subtle` measures only ~1.1–1.5:1 against every background token — nowhere near the 3:1 WCAG 1.4.11 floor for boundaries of essential UI components. It stays fine for structural/decorative dividers (card edges, table row lines) where spacing and background grouping carry the real signal, but it must never be the *only* boundary indicator on an interactive control. Use `--text-tertiary` (3.4–4.9:1, aliased as `--role-border-interactive`) for button and input borders instead — this is not a new pattern, `design-system.html`'s own `.swatch:hover` already uses `--text-tertiary` as its stronger-emphasis border. Also note: the whole layered-lightness elevation model (`--bg-base` → `--bg-surface` → `--bg-elevated` → `--bg-hover`) is only ~1.1–1.2:1 fill-to-fill — surfaces are barely distinguishable by background alone, so borders and spacing are load-bearing for perceiving structure, not decorative extras. Never remove a card/panel border to "clean up" a layout; use spacing instead if a lighter feel is wanted.
 
 ### Semantic accents — sparing, never competing with green
 | Token | Hex | Role |
@@ -140,7 +142,7 @@ Dense dashboards live or die on consistent rhythm — never introduce a spacing 
 ## 5. Layout & Composition
 
 - **Max content width:** 1180px container for documentation/marketing-style pages; dashboard app screens use full-bleed with a fixed sidebar/topbar and an inner content max-width appropriate to the module (holdings tables can run wider than card grids).
-- **Navigation:** sticky topbar, 64px height, blurred glass background (`rgba(10,14,13,0.86)` + `backdrop-filter: blur(10px)`), bottom hairline border. On product screens (not the documentation page), pair with icon-only primary navigation.
+- **Navigation:** sticky topbar, 64px height, blurred glass background (`rgba(9,9,11,0.86)` + `backdrop-filter: blur(10px)`), bottom hairline border. On product screens (not the documentation page), pair with icon-only primary navigation.
 - **Grids:** card rows use `repeat(auto-fill, minmax(150px,1fr))` for swatch/token grids, `1fr 1fr` two-up for holdings/chart pairs, `repeat(3,1fr)` for state triads — all collapsing to a single column at `max-width:760px`.
 - **Responsive breakpoints observed in source:** 760px (grid collapse, nav hides), 480px (container padding tightens, receipt card compresses). Extend this system to standard breakpoints (360 / 390–430 / 600–744 / 768–834 / 1024–1180 / 1280–1366 / 1440–1536 / 1920) when building new screens — the source only demonstrates two.
 - **Density:** this is a data product. Prioritize legible density over airy marketing whitespace once inside the app shell; reserve the most generous spacing for the top-level dashboard summary, tighten progressively as content becomes tabular.
@@ -148,7 +150,7 @@ Dense dashboards live or die on consistent rhythm — never introduce a spacing 
 ## 6. Components
 
 ### Buttons
-- **Primary** — `--green-500` fill, **`--bg-base` (dark) text — not white-on-green.** This is a deliberate, higher-contrast, more premium choice. Hover shifts fill to `--green-600`. Carries a faint green glow (`box-shadow: 0 0 24px rgba(52,211,153,0.08)`) reserved for primary CTAs only.
+- **Primary** — `--green-500` fill, **`--bg-base` (dark) text — not white-on-green.** This is a deliberate, higher-contrast, more premium choice. Hover shifts fill to `--green-600`. Carries a faint green glow (`box-shadow: 0 0 24px rgba(34,197,94,0.08)`) reserved for primary CTAs only.
 - **Secondary** — transparent fill, **`--text-tertiary` outline** (`--role-border-interactive` — not `--border-subtle`, which fails WCAG 1.4.11 at this default-state weight; see §2), `--text-primary` label. Hover fills with `--bg-hover`.
 - **Destructive** — `--red-500` outline only, **never filled**. Solid red is reserved for actual loss data, not UI chrome. Hover adds a faint `rgba(248,113,113,0.08)` wash.
 - **Disabled** — 40% opacity, no transform on press.
@@ -224,13 +226,13 @@ Every focus state uses the same `2px solid var(--role-focus-ring)` outline at `2
 
 ## 10. Light/Dark Mode Policy
 
-**DivPulse ships dark-only, by deliberate brand decision — not an oversight.** `brand-spec.md`'s positioning statement is explicit: dark canvas signals "serious tool," and every layered-lightness elevation rule (§6) depends on a dark base. No light-mode tokens, markup, or `prefers-color-scheme` handling exist anywhere in source evidence, and none should be invented speculatively.
+**PaidPrime ships dark-only, by deliberate brand decision — not an oversight.** `brand-spec.md`'s positioning statement is explicit: dark canvas signals "serious tool," and every layered-lightness elevation rule (§6) depends on a dark base. No light-mode tokens, markup, or `prefers-color-scheme` handling exist anywhere in source evidence, and none should be invented speculatively.
 
 If a light mode is ever requested, treat it as a new brand decision requiring the same evidence-gathering rigor as this package — not a mechanical token inversion. Do not ship one without that step. For reference, here is what would and wouldn't change:
 
-- **Would stay identical across modes:** `--green-500` (gain/CTA) and `--red-500` (loss) — these are semantic, not surface-dependent, and DivPulse's brand identity rests on this specific green.
+- **Would stay identical across modes:** `--green-500` (gain/CTA) and `--red-500` (loss) — these are semantic, not surface-dependent, and PaidPrime's brand identity rests on this specific green.
 - **Would need light counterparts:** every `--bg-*` and `--text-*` token (background/text inverts), plus the elevation model itself — layered lightness works because dark surfaces can only get *lighter*; a light mode would need a different depth cue (e.g. shadows, which source evidence explicitly avoids on dark).
-- **Would need re-verification, not reuse:** the `--text-tertiary` AA failure is specific to these dark hex values at these sizes — a light-mode neutral scale would need its own contrast audit, not an assumption that the same 4.1:1 gap applies.
+- **Would need re-verification, not reuse:** the `--text-tertiary` AA failure is specific to these dark hex values at these sizes — a light-mode neutral scale would need its own contrast audit, not an assumption that the same 3.4–4.9:1 gap applies.
 
 Until that work happens, `prefers-color-scheme: light` should be left unhandled (the app stays dark regardless of OS setting) rather than papered over with a partial/unverified light palette.
 
@@ -240,7 +242,7 @@ Reusable notes for anyone integrating this kit into a real codebase, distilled f
 
 - **Import order:** `colors_and_type.css` (or `kit/tokens.css` for the full set including spacing) → `kit/components.css` → `kit/interactions.js`. Component classes assume the custom properties already exist; loading order matters because CSS custom properties resolve at used-value time, not parse time, but undefined vars silently fall back to nothing.
 - **Two-tier tokens:** use `--role-*` (semantic) in new code, reach for raw `--green-500`-style tokens only when extending `kit/components.css` itself to keep it consistent with its existing style. See §2 "Token roles."
-- **JS is multi-instance safe:** `kit/interactions.js` scans for every `[data-receipt]` on the page and wires each independently (`DivPulseKit.initReceipts(root)`), so multiple receipt cards on one screen (see `ui_kits/app/alerts.html`) don't collide. Call `DivPulseKit.playReceiptEntrance(el)` directly when a new dividend notification is pushed into the DOM after page load, rather than re-running `initReceipts` on the whole document.
+- **JS is multi-instance safe:** `kit/interactions.js` scans for every `[data-receipt]` on the page and wires each independently (`PaidPrimeKit.initReceipts(root)`), so multiple receipt cards on one screen (see `ui_kits/app/alerts.html`) don't collide. Call `PaidPrimeKit.playReceiptEntrance(el)` directly when a new dividend notification is pushed into the DOM after page load, rather than re-running `initReceipts` on the whole document.
 - **Reduced motion is load-bearing, not optional:** both the receipt entrance and the count-up check `window.matchMedia('(prefers-reduced-motion: reduce)')` and render the end state instantly when true. Any new animated component must follow the same guard — see `kit/interactions.js` for the exact pattern to copy.
 - **Font loading:** `@import` in `colors_and_type.css`/`kit/tokens.css` is a Google Fonts CDN reference, not self-hosted — it blocks render until fetched. For production, replace with `<link rel="preload" as="font">` + self-hosted `.woff2` files and keep the same `--font-*` variable names so no component CSS needs to change.
 - **Extending components:** add a new component class in a way that only reads `--role-*` / raw tokens and reuses `--radius-control` / `--radius-card` and the `--sp-*` scale — never hardcode a new pixel or hex value. If a genuinely new color is needed, it does not exist in this brand yet; stop and treat it as a brand-spec update, not a CSS-only addition.
@@ -263,5 +265,5 @@ Do not do the following when generating with this system:
 - Do not introduce colors, radii, or spacing values outside the documented tokens in `colors_and_type.css` / `kit/tokens.css`.
 - Do not default to warm beige/peach/cream backgrounds — this is a dark-canvas system by design.
 - Do not ship a light theme by mechanically inverting tokens — `--green-500` (gain/CTA) and `--red-500` (loss) stay fixed across any future mode, and a light neutral scale needs its own contrast audit, not a copy of the dark one. See §10.
-- Do not use `--border-subtle` as the sole boundary indicator on an interactive control (buttons, inputs, icon buttons) — it measures ~1.1–1.4:1 against every background, failing WCAG 1.4.11's 3:1 floor. Use `--text-tertiary` / `--role-border-interactive` instead. `--border-subtle` remains correct for structural dividers (card edges, table rows).
+- Do not use `--border-subtle` as the sole boundary indicator on an interactive control (buttons, inputs, icon buttons) — it measures ~1.1–1.5:1 against every background, failing WCAG 1.4.11's 3:1 floor. Use `--text-tertiary` / `--role-border-interactive` instead. `--border-subtle` remains correct for structural dividers (card edges, table rows).
 - Do not set `outline: none` (or otherwise suppress focus indication) on a form control without adding a replacement focus style — every focusable element needs a visible `:focus-visible`/`:focus-within` treatment, no exceptions.

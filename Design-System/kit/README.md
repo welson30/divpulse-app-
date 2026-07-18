@@ -1,4 +1,4 @@
-# DivPulse System Kit
+# PaidPrime System Kit
 
 The reusable, implementation-ready package derived from `/design-system.html` and `/brand-spec.md`. This folder is what a developer imports — the root files remain the reference documentation and philosophy.
 
@@ -38,7 +38,7 @@ Mark the card with `data-receipt` and give the amount element `data-value` (a pl
 <button data-receipt-replay>Replay</button>
 ```
 
-Every `[data-receipt]` on the page plays its entrance once on load (e.g. when a new dividend notification is pushed into the DOM, call `DivPulseKit.playReceiptEntrance(el)` directly rather than waiting for the page-load pass).
+Every `[data-receipt]` on the page plays its entrance once on load (e.g. when a new dividend notification is pushed into the DOM, call `PaidPrimeKit.playReceiptEntrance(el)` directly rather than waiting for the page-load pass).
 
 ## Not included here (documentation-only, stays in `/design-system.html`)
 
@@ -46,7 +46,7 @@ Color swatches, the type specimen table, the icon-style demonstration grid, the 
 
 ## Known constraint
 
-`--text-tertiary` (#6B7570) fails WCAG AA (~4.1:1) at small sizes on these backgrounds. It's included in `tokens.css` for completeness but no component in `components.css` uses it for legible text — only `--text-secondary` (~9:1). Keep it that way unless the token itself changes.
+`--text-tertiary` (#7D7D85) fails WCAG AA at small sizes on every background except `--bg-base` (3.4–4.9:1 across the four surfaces). It's included in `tokens.css` for completeness but no component in `components.css` uses it for legible text — only `--text-secondary` (5.4–7.8:1). Keep it that way unless the token itself changes. Note the value is tuned for its second job as the interactive-control border (3:1 floor), so it is not a round zinc step — see `brand-spec.md` §Neutrals.
 
 ## Production note
 

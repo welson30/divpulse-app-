@@ -1,5 +1,5 @@
 /* ============================================================
-   DivPulse — Component Kit
+   PaidPrime — Component Kit
    Ported verbatim from Design-System/kit/components.css — preserved
    source, do not retrofit. If the design changes, update the
    Design-System package first, then re-copy here. Requires the
@@ -11,7 +11,7 @@
    .btn-secondary and .icon-btn use --text-tertiary (not
    --border-subtle) for their default border, fixing a WCAG 1.4.11
    non-text-contrast failure found in a 2026-07-14 audit —
-   --border-subtle measures only ~1.1-1.4:1 against these dark
+   --border-subtle measures only ~1.1-1.5:1 against these dark
    backgrounds, well under the 3:1 floor for essential
    interactive-control boundaries. --text-tertiary already appears
    in design-system.html as the .swatch:hover border color, so this
@@ -31,7 +31,7 @@
 .btn:active{ transform: translateY(1px); }
 .btn:focus-visible{ outline: 2px solid var(--green-500); outline-offset: 2px; }
 .btn:disabled{ opacity: 0.4; cursor: not-allowed; transform: none; }
-.btn-primary{ background: var(--green-500); color: var(--bg-base); box-shadow: 0 0 24px rgba(52,211,153,0.08); }
+.btn-primary{ background: var(--green-500); color: var(--bg-base); box-shadow: 0 0 24px rgba(34,197,94,0.08); }
 .btn-primary:hover{ background: var(--green-600); }
 .btn-secondary{ background: transparent; border-color: var(--text-tertiary); color: var(--text-primary); }
 .btn-secondary:hover{ background: var(--bg-hover); }

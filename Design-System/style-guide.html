@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DivPulse — Design &amp; Component Guide</title>
+  <title>PaidPrime — Design &amp; Component Guide</title>
   <style>
     /* ===========================================================
        Deck framework — DO NOT EDIT the rules in this <style> block.
@@ -20,14 +20,14 @@
            per page, by toggling every slide visible under @media print
        =========================================================== */
     :root {
-      /* SLOT: theme tokens — mirrors DivPulse's real palette in
+      /* SLOT: theme tokens — mirrors PaidPrime's real palette in
          kit/tokens.css so this document is itself on-brand. */
-      --bg: #0A0E0D;
-      --fg: #F5F7F6;
-      --muted: #A8B3AF;
-      --accent: #34D399;
-      --surface: #121816;
-      --shell: #0A0E0D;
+      --bg: #09090B;
+      --fg: #FFFFFF;
+      --muted: #A1A1AA;
+      --accent: #22C55E;
+      --surface: #1C1C1E;
+      --shell: #09090B;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -146,7 +146,7 @@
     }
   </style>
 
-  <!-- Real DivPulse tokens + components — this document renders with the
+  <!-- Real PaidPrime tokens + components — this document renders with the
        live, current (post-audit) kit, not a re-described mockup. -->
   <link rel="stylesheet" href="kit/tokens.css?v=2" />
   <link rel="stylesheet" href="kit/components.css?v=2" />
@@ -164,7 +164,7 @@
       margin-bottom: 44px; flex-shrink: 0;
     }
     .page-topbar .brandmark { display: flex; align-items: center; gap: 12px; }
-    .page-topbar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-500); box-shadow: 0 0 12px rgba(52,211,153,.5); }
+    .page-topbar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-500); box-shadow: 0 0 12px rgba(34,197,94,.5); }
     .page-topbar .brandmark span { font: 600 14px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-secondary); }
     .page-topbar .section-name { font: 14px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
     .page-content { flex: 1; min-height: 0; }
@@ -267,10 +267,10 @@
       <!-- 01 — COVER -->
       <section class="slide active s-cover" data-screen-label="01 Cover">
         <div class="cover-inner" style="padding-left: 120px;">
-          <div class="logo-slot" data-od-id="guide-logo-slot"><img src="assets/logo.svg" alt="DivPulse" width="88" height="88" style="display:block;width:88px;height:88px;object-fit:contain;"></div>
+          <div class="logo-slot" data-od-id="guide-logo-slot"><img src="assets/logo.svg" alt="PaidPrime" width="88" height="88" style="display:block;width:88px;height:88px;object-fit:contain;"></div>
           <div>
             <div class="kicker">Design System</div>
-            <h1 data-od-id="guide-cover-title">DivPulse</h1>
+            <h1 data-od-id="guide-cover-title">PaidPrime</h1>
           </div>
         </div>
         <div style="padding-left: 120px;">
@@ -287,13 +287,13 @@
       <!-- 02 — CONTENTS -->
       <section class="slide page" data-screen-label="02 Contents">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Contents</div>
         </div>
         <div class="page-content">
           <span class="eyebrow">Overview</span>
           <h2 class="page-title">What's in this guide</h2>
-          <p class="page-lede">A shareable summary of the DivPulse design system for handoff and review. The living, canonical source stays in the project package — <code>DESIGN.md</code>, <code>colors_and_type.css</code>, <code>kit/</code>, and <code>ui_kits/app/</code> — this document is a printable snapshot of it.</p>
+          <p class="page-lede">A shareable summary of the PaidPrime design system for handoff and review. The living, canonical source stays in the project package — <code>DESIGN.md</code>, <code>colors_and_type.css</code>, <code>kit/</code>, and <code>ui_kits/app/</code> — this document is a printable snapshot of it.</p>
           <div class="toc-grid">
             <div class="toc-item"><span class="n">03</span><div><div class="t">Positioning &amp; Product</div><div class="d">Who this is for, what it does, the three signals</div></div></div>
             <div class="toc-item"><span class="n">04</span><div><div class="t">Color — Backgrounds &amp; Green</div><div class="d">Layered depth, the primary brand green</div></div></div>
@@ -309,19 +309,19 @@
             <div class="toc-item"><span class="n">14</span><div><div class="t">Implementation &amp; Closing</div><div class="d">How to reuse this system</div></div></div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>02 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>02 / 14</span></div>
       </section>
 
       <!-- 03 — POSITIONING -->
       <section class="slide page" data-screen-label="03 Positioning">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Positioning &amp; Product</div>
         </div>
         <div class="page-content">
           <span class="eyebrow">01 — Theme &amp; Atmosphere</span>
           <h2 class="page-title">Quiet confidence</h2>
-          <p class="page-lede">DivPulse is a dark-theme dividend income dashboard for dividend investors — a deliberate third lane between spreadsheet-cold (Bloomberg-terminal density with no warmth) and consumer-cute (Robinhood-style confetti and mascot energy). Financial dashboards that go too far in either direction lose the user's trust.</p>
+          <p class="page-lede">PaidPrime is a dark-theme dividend income dashboard for dividend investors — a deliberate third lane between spreadsheet-cold (Bloomberg-terminal density with no warmth) and consumer-cute (Robinhood-style confetti and mascot energy). Financial dashboards that go too far in either direction lose the user's trust.</p>
           <div class="grid-3" style="margin-bottom:40px;">
             <div class="callout"><b>Dark canvas</b><br/>This is a serious tool, not a toy.</div>
             <div class="callout"><b>One restrained green</b><br/>Used only where it means something — confidence without shouting.</div>
@@ -334,13 +334,13 @@
             <div class="callout"><b>Dividend Alerts</b><br/>The payment feed. The "receipt" card is the one flourish in the system.</div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>03 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>03 / 14</span></div>
       </section>
 
       <!-- 04 — COLOR 1 -->
       <section class="slide page" data-screen-label="04 Color — Backgrounds & Green">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Color · 1 of 2</div>
         </div>
         <div class="page-content">
@@ -349,26 +349,26 @@
           <p class="page-lede">Layered depth instead of flat black; one growth green, used only where it means something. Hex values are canonical — do not substitute or reinterpret.</p>
           <div class="group-label">Backgrounds — never flat black</div>
           <div class="swatch-grid" style="margin-bottom:8px;">
-            <div class="swatch"><div class="fill" style="background:#0A0E0D;"></div><div class="info"><span class="name">bg-base</span><span class="hex">#0A0E0D</span><span class="role">Page canvas</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#121816;"></div><div class="info"><span class="name">bg-surface</span><span class="hex">#121816</span><span class="role">Cards, panels</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#1A211E;"></div><div class="info"><span class="name">bg-elevated</span><span class="hex">#1A211E</span><span class="role">Modals, dropdowns</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#1E2724;"></div><div class="info"><span class="name">bg-hover</span><span class="hex">#1E2724</span><span class="role">Hover state</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#09090B;"></div><div class="info"><span class="name">bg-base</span><span class="hex">#09090B</span><span class="role">Page canvas</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#1C1C1E;"></div><div class="info"><span class="name">bg-surface</span><span class="hex">#1C1C1E</span><span class="role">Cards, panels</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#252528;"></div><div class="info"><span class="name">bg-elevated</span><span class="hex">#252528</span><span class="role">Modals, dropdowns</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#2C2C30;"></div><div class="info"><span class="name">bg-hover</span><span class="hex">#2C2C30</span><span class="role">Hover state</span></div></div>
           </div>
           <div class="group-label">Primary green — brand / growth / positive</div>
           <div class="swatch-grid">
-            <div class="swatch"><div class="fill" style="background:#34D399;"></div><div class="info"><span class="name">green-500</span><span class="hex">#34D399</span><span class="role">Primary CTA, core brand</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#10B981;"></div><div class="info"><span class="name">green-600</span><span class="hex">#10B981</span><span class="role">Hover / pressed</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#6EE7B7;"></div><div class="info"><span class="name">green-300</span><span class="hex">#6EE7B7</span><span class="role">Highlights, glow</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#064E3B;"></div><div class="info"><span class="name">green-900</span><span class="hex">#064E3B</span><span class="role">Chart fill tint</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#22C55E;"></div><div class="info"><span class="name">green-500</span><span class="hex">#22C55E</span><span class="role">Primary CTA, core brand</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#149141;"></div><div class="info"><span class="name">green-600</span><span class="hex">#149141</span><span class="role">Hover / pressed</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#86EFAC;"></div><div class="info"><span class="name">green-300</span><span class="hex">#86EFAC</span><span class="role">Highlights, glow</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#14532D;"></div><div class="info"><span class="name">green-900</span><span class="hex">#14532D</span><span class="role">Chart fill tint</span></div></div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>04 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>04 / 14</span></div>
       </section>
 
       <!-- 05 — COLOR 2 -->
       <section class="slide page" data-screen-label="05 Color — Red, Neutrals & Semantic">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Color · 2 of 2</div>
         </div>
         <div class="page-content">
@@ -378,25 +378,25 @@
           <div class="swatch-grid" style="grid-template-columns:repeat(6,1fr); margin-bottom:8px;">
             <div class="swatch"><div class="fill" style="background:#F87171;"></div><div class="info"><span class="name">red-500</span><span class="hex">#F87171</span></div></div>
             <div class="swatch"><div class="fill" style="background:#450A0A;"></div><div class="info"><span class="name">red-900</span><span class="hex">#450A0A</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#F5F7F6;"></div><div class="info"><span class="name">text-primary</span><span class="hex">#F5F7F6</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#A8B3AF;"></div><div class="info"><span class="name">text-secondary</span><span class="hex">#A8B3AF</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#6B7570;"></div><div class="info"><span class="name">text-tertiary</span><span class="hex">#6B7570</span><span class="role">Decorative only</span></div></div>
-            <div class="swatch"><div class="fill" style="background:#242C29;"></div><div class="info"><span class="name">border-subtle</span><span class="hex">#242C29</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#FFFFFF;"></div><div class="info"><span class="name">text-primary</span><span class="hex">#FFFFFF</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#A1A1AA;"></div><div class="info"><span class="name">text-secondary</span><span class="hex">#A1A1AA</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#7D7D85;"></div><div class="info"><span class="name">text-tertiary</span><span class="hex">#7D7D85</span><span class="role">Decorative only</span></div></div>
+            <div class="swatch"><div class="fill" style="background:#303034;"></div><div class="info"><span class="name">border-subtle</span><span class="hex">#303034</span></div></div>
           </div>
           <div class="group-label">Semantic accents — sparing use</div>
           <div class="swatch-grid" style="grid-template-columns:repeat(2,1fr); margin-bottom: 28px;">
             <div class="swatch"><div class="fill" style="background:#60A5FA;"></div><div class="info"><span class="name">blue-info</span><span class="hex">#60A5FA</span></div></div>
             <div class="swatch"><div class="fill" style="background:#FBBF24;"></div><div class="info"><span class="name">amber-warning</span><span class="hex">#FBBF24</span></div></div>
           </div>
-          <div class="callout warn"><b>Contrast note —</b> <code>text-tertiary</code> measures ~4.1:1 on dark backgrounds (below the 4.5:1 AA text floor) and <code>border-subtle</code> measures ~1.1–1.4:1 (below the 3:1 non-text floor). Both are decorative-only — see page 12 for the full accessibility audit.</div>
+          <div class="callout warn"><b>Contrast note —</b> <code>text-tertiary</code> measures 3.4–4.9:1 across the four backgrounds — clearing the 4.5:1 AA text floor on <code>bg-base</code> alone, failing it on every other surface — and <code>border-subtle</code> measures ~1.1–1.5:1 (below the 3:1 non-text floor). Both are decorative-only — see page 12 for the full accessibility audit.</div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>05 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>05 / 14</span></div>
       </section>
 
       <!-- 06 — TYPOGRAPHY -->
       <section class="slide page" data-screen-label="06 Typography">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Typography</div>
         </div>
         <div class="page-content">
@@ -425,13 +425,13 @@
             </div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>06 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>06 / 14</span></div>
       </section>
 
       <!-- 07 — SPACING & RADIUS -->
       <section class="slide page" data-screen-label="07 Spacing & Radius">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Spacing &amp; Radius</div>
         </div>
         <div class="page-content">
@@ -460,13 +460,13 @@
             </div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>07 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>07 / 14</span></div>
       </section>
 
       <!-- 08 — BUTTONS & CONTROLS -->
       <section class="slide page" data-screen-label="08 Buttons & Controls">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Components · Buttons &amp; Controls</div>
         </div>
         <div class="page-content">
@@ -486,15 +486,15 @@
             <button class="icon-btn" aria-label="Settings"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="1.6"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="1.6"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="1.6"/></svg></button>
             <span class="text-small" style="align-self:center;">On small screens, label repositions above the icon rather than being removed.</span>
           </div>
-          <div class="callout"><b>Fixed in the 2026-07-14 audit —</b> button and icon-button borders use <code>--text-tertiary</code> (~3.4–4.1:1), not <code>--border-subtle</code> (~1.1–1.4:1), so default-state edges clear the WCAG 1.4.11 3:1 floor.</div>
+          <div class="callout"><b>Fixed in the 2026-07-14 audit —</b> button and icon-button borders use <code>--text-tertiary</code> (3.4–4.9:1), not <code>--border-subtle</code> (~1.1–1.5:1), so default-state edges clear the WCAG 1.4.11 3:1 floor.</div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>08 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>08 / 14</span></div>
       </section>
 
       <!-- 09 — CARDS & DATA -->
       <section class="slide page" data-screen-label="09 Cards & Data">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Components · Cards &amp; Data</div>
         </div>
         <div class="page-content">
@@ -528,13 +528,13 @@
           <div class="group-label">Status badges</div>
           <div class="icon-row"><span class="badge badge-info">New feature</span><span class="badge badge-warning">Trial ends in 3 days</span></div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>09 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>09 / 14</span></div>
       </section>
 
       <!-- 10 — CHARTS -->
       <section class="slide page" data-screen-label="10 Charts">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Components · Charts</div>
         </div>
         <div class="page-content">
@@ -545,38 +545,38 @@
             <div class="chart-card">
               <h3>Dividend calendar</h3>
               <svg viewBox="0 0 320 110" width="100%" height="130">
-                <line x1="0" y1="20" x2="320" y2="20" stroke="#242C29" stroke-width="1"/>
-                <line x1="0" y1="55" x2="320" y2="55" stroke="#242C29" stroke-width="1"/>
-                <line x1="0" y1="90" x2="320" y2="90" stroke="#242C29" stroke-width="1"/>
-                <rect x="10"  y="46" width="20" height="44" rx="2" fill="#34D399"/>
-                <rect x="50"  y="60" width="20" height="30" rx="2" fill="#064E3B"/>
-                <rect x="90"  y="30" width="20" height="60" rx="2" fill="#34D399"/>
-                <rect x="130" y="66" width="20" height="24" rx="2" fill="#064E3B"/>
-                <rect x="170" y="20" width="20" height="70" rx="2" fill="#34D399"/>
-                <rect x="210" y="70" width="20" height="20" rx="2" fill="#064E3B"/>
-                <rect x="250" y="40" width="20" height="50" rx="2" fill="#34D399"/>
-                <rect x="290" y="76" width="20" height="14" rx="2" fill="#064E3B"/>
+                <line x1="0" y1="20" x2="320" y2="20" stroke="#303034" stroke-width="1"/>
+                <line x1="0" y1="55" x2="320" y2="55" stroke="#303034" stroke-width="1"/>
+                <line x1="0" y1="90" x2="320" y2="90" stroke="#303034" stroke-width="1"/>
+                <rect x="10"  y="46" width="20" height="44" rx="2" fill="#22C55E"/>
+                <rect x="50"  y="60" width="20" height="30" rx="2" fill="#14532D"/>
+                <rect x="90"  y="30" width="20" height="60" rx="2" fill="#22C55E"/>
+                <rect x="130" y="66" width="20" height="24" rx="2" fill="#14532D"/>
+                <rect x="170" y="20" width="20" height="70" rx="2" fill="#22C55E"/>
+                <rect x="210" y="70" width="20" height="20" rx="2" fill="#14532D"/>
+                <rect x="250" y="40" width="20" height="50" rx="2" fill="#22C55E"/>
+                <rect x="290" y="76" width="20" height="14" rx="2" fill="#14532D"/>
               </svg>
               <p class="fig">Jan–Aug</p>
             </div>
             <div class="chart-card">
               <h3>Diversification</h3>
               <svg viewBox="0 0 120 120" width="140" height="140" style="display:block; margin:0 auto;">
-                <defs><linearGradient id="gGradGuide" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34D399" stop-opacity="0.9"/><stop offset="100%" stop-color="#34D399" stop-opacity="0.15"/></linearGradient></defs>
-                <circle cx="60" cy="60" r="46" fill="none" stroke="#242C29" stroke-width="14"/>
+                <defs><linearGradient id="gGradGuide" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22C55E" stop-opacity="0.9"/><stop offset="100%" stop-color="#22C55E" stop-opacity="0.15"/></linearGradient></defs>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#303034" stroke-width="14"/>
                 <circle cx="60" cy="60" r="46" fill="none" stroke="url(#gGradGuide)" stroke-width="14" stroke-dasharray="180 289" transform="rotate(-90 60 60)" stroke-linecap="round"/>
               </svg>
               <p class="fig" style="text-align:center;">Consumer staples · 62%</p>
             </div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>10 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>10 / 14</span></div>
       </section>
 
       <!-- 11 — STATES -->
       <section class="slide page" data-screen-label="11 States & Feedback">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Components · States &amp; Feedback</div>
         </div>
         <div class="page-content">
@@ -606,13 +606,13 @@
             </div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>11 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>11 / 14</span></div>
       </section>
 
       <!-- 12 — MOTION, VOICE & ACCESSIBILITY -->
       <section class="slide page" data-screen-label="12 Motion, Voice & Accessibility">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Motion, Voice &amp; Accessibility</div>
         </div>
         <div class="page-content">
@@ -632,23 +632,24 @@
               </table>
             </div>
             <div>
-              <div class="group-label">Accessibility audit (2026-07-14) — computed, not estimated</div>
+              <div class="group-label">Accessibility audit (recomputed 2026-07-17 for the revised palette) — computed, not estimated</div>
               <div class="contrast-mini" style="margin-bottom: 16px;">
-                <div class="item"><div class="ratio pass">9.0:1</div><div class="label">text-secondary / bg-base</div></div>
-                <div class="item"><div class="ratio fixed">4.1:1</div><div class="label">text-tertiary — decorative only</div></div>
+                <div class="item"><div class="ratio pass">7.8:1</div><div class="label">text-secondary / bg-base</div></div>
+                <div class="item"><div class="ratio fixed">3.4–4.9:1</div><div class="label">text-tertiary — decorative only, fails AA off bg-base</div></div>
                 <div class="item"><div class="ratio fixed">~1.3:1</div><div class="label">border-subtle on interactive controls — fixed</div></div>
               </div>
-              <div class="callout warn">Found: <code>border-subtle</code> failed WCAG 1.4.11 (~1.1–1.4:1) on <code>.btn-secondary</code> / <code>.icon-btn</code>, and <code>.search-field</code> had <code>outline:none</code> with no focus replacement (WCAG 2.4.7). Both fixed — see <code>context/provenance.md</code> for the full trail.</div>
+              <div class="callout warn">Found: <code>border-subtle</code> failed WCAG 1.4.11 (~1.1–1.5:1) on <code>.btn-secondary</code> / <code>.icon-btn</code>, and <code>.search-field</code> had <code>outline:none</code> with no focus replacement (WCAG 2.4.7). Both fixed — see <code>context/provenance.md</code> for the full trail.</div>
+              <div class="callout warn">Palette revision (2026-07-17): the neutral ramp's natural zinc-500 (<code>#71717A</code>) measured 2.88:1 on <code>--bg-hover</code>, failing the 3:1 floor for the control borders <code>--text-tertiary</code> also serves. Raised to <code>#7D7D85</code>, which clears 3:1 on all four surfaces. Do not round it back to a standard zinc step.</div>
             </div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>12 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>12 / 14</span></div>
       </section>
 
       <!-- 13 — APPLIED UI -->
       <section class="slide page" data-screen-label="13 Applied UI Overview">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Applied UI</div>
         </div>
         <div class="page-content">
@@ -673,13 +674,13 @@
             </div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide</span><span>13 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide</span><span>13 / 14</span></div>
       </section>
 
       <!-- 14 — IMPLEMENTATION & CLOSING -->
       <section class="slide page" data-screen-label="14 Implementation & Closing">
         <div class="page-topbar">
-          <div class="brandmark"><span class="dot"></span><span>DIVPULSE / DESIGN GUIDE</span></div>
+          <div class="brandmark"><span class="dot"></span><span>PAIDPRIME / DESIGN GUIDE</span></div>
           <div class="section-name">Implementation &amp; Closing</div>
         </div>
         <div class="page-content">
@@ -693,14 +694,14 @@
             </div>
             <div style="display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between;">
               <div>
-                <div class="logo-slot" style="margin-bottom:20px;"><img src="assets/logo.svg" alt="DivPulse" width="88" height="88" style="display:block;width:88px;height:88px;object-fit:contain;"></div>
+                <div class="logo-slot" style="margin-bottom:20px;"><img src="assets/logo.svg" alt="PaidPrime" width="88" height="88" style="display:block;width:88px;height:88px;object-fit:contain;"></div>
                 <p class="text-body" style="max-width:40ch;">This guide is generated from real evidence — <code>brand-spec.md</code>, <code>design-system.html</code>, and <code>kit/</code> — and kept in sync with the audited, current package.</p>
               </div>
-              <div class="text-small">DivPulse Design System · v1.1 · context/provenance.md has the full audit trail</div>
+              <div class="text-small">PaidPrime Design System · v1.1 · context/provenance.md has the full audit trail</div>
             </div>
           </div>
         </div>
-        <div class="page-footer"><span>DivPulse Design Guide — thank you</span><span>14 / 14</span></div>
+        <div class="page-footer"><span>PaidPrime Design Guide — thank you</span><span>14 / 14</span></div>
       </section>
 
     </div>

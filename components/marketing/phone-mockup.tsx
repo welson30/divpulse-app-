@@ -69,7 +69,7 @@ const MOBILE_SCALE = 0.82;
  * (dual-tone bezel, specular highlight, drop shadow with a soft green
  * bounce-light per the brand's CTA-glow rule) around a wallpaper + Dynamic
  * Island + notification stack. Content is the same receipt data used
- * elsewhere on the page; every accent color still resolves to DivPulse
+ * elsewhere on the page; every accent color still resolves to PaidPrime
  * tokens (--green-500 etc.), not new hex values — only the device chrome
  * itself (bezel/glass) uses true-black/neutral tones a real iPhone has.
  *
@@ -115,7 +115,7 @@ export function PhoneMockup({ className }: { className?: string }) {
           <div
             aria-hidden
             className="pointer-events-none absolute -inset-10 -z-10 rounded-full opacity-70 blur-3xl"
-            style={{ background: "radial-gradient(closest-side, rgba(52,211,153,0.16), transparent)" }}
+            style={{ background: "radial-gradient(closest-side, rgba(34, 197, 94,0.16), transparent)" }}
           />
 
           {/* titanium frame */}
@@ -145,7 +145,7 @@ export function PhoneMockup({ className }: { className?: string }) {
                 <div
                   aria-hidden
                   className="absolute inset-0 opacity-[0.35]"
-                  style={{ background: "radial-gradient(60% 40% at 82% 8%, rgba(52,211,153,0.22), transparent 70%)" }}
+                  style={{ background: "radial-gradient(60% 40% at 82% 8%, rgba(34, 197, 94,0.22), transparent 70%)" }}
                 />
                 {/* watermark brand mark, faint */}
                 {/* eslint-disable-next-line @next/next/no-img-element -- decorative local asset */}
@@ -196,7 +196,7 @@ export function PhoneMockup({ className }: { className?: string }) {
                     >
                       <div className="mb-[3px] flex items-center gap-1">
                         <NotificationGlyph />
-                        <span className="flex-1 font-sans text-[9px] font-medium text-white/40">DivPulse</span>
+                        <span className="flex-1 font-sans text-[9px] font-medium text-white/40">PaidPrime</span>
                         <span className="font-sans text-[8px] text-white/25">{n.when}</span>
                       </div>
                       <div className="mb-0.5 text-[10px] leading-tight font-bold text-white">{n.title}</div>
@@ -212,17 +212,17 @@ export function PhoneMockup({ className }: { className?: string }) {
                     0% {
                       opacity: 0;
                       transform: translateY(-18px) scale(0.92);
-                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 0 0 rgba(52,211,153,0);
+                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 0 0 rgba(34, 197, 94,0);
                     }
                     55% {
                       opacity: 1;
                       transform: translateY(2px) scale(1.015);
-                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 20px 2px rgba(52,211,153,0.28);
+                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 20px 2px rgba(34, 197, 94,0.28);
                     }
                     100% {
                       opacity: 1;
                       transform: translateY(0) scale(1);
-                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 0 0 rgba(52,211,153,0);
+                      box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 0 0 rgba(34, 197, 94,0);
                     }
                   }
                 `}</style>

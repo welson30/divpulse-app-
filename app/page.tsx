@@ -141,12 +141,12 @@ export default function Home() {
 
 function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border-subtle bg-[rgba(10,14,13,0.86)] backdrop-blur-[10px]">
+    <header className="sticky top-0 z-50 border-b border-border-subtle bg-[rgba(9,9,11,0.86)] backdrop-blur-[10px]">
       <div className="mx-auto flex h-16 w-full max-w-[1180px] items-center justify-between px-sp-3">
         <Link href="/" className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
           <img src="/logo.svg" alt="" className="h-7 w-7 rounded-[8px]" width={28} height={28} />
-          <span className="font-display text-[17px] font-semibold tracking-[-0.01em] text-text-primary">DivPulse</span>
+          <span className="font-display text-[17px] font-semibold tracking-[-0.01em] text-text-primary">Paid<span className="text-green-500">Prime</span></span>
         </Link>
         <nav aria-label="Primary" className="hidden items-center gap-sp-4 md:flex">
           {NAV_LINKS.map((link) => (
@@ -190,7 +190,7 @@ function Hero() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[220px]"
-        style={{ background: "linear-gradient(180deg, rgba(18,24,22,0.5), transparent)" }}
+        style={{ background: "linear-gradient(180deg, rgba(28,28,30,0.5), transparent)" }}
       />
       <div className="relative mx-auto grid w-full max-w-[1180px] gap-sp-6 px-sp-3 py-sp-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div className="flex flex-col items-start gap-sp-3">
@@ -208,7 +208,7 @@ function Hero() {
           </h1>
 
           <p className="max-w-lg text-pretty text-body text-text-secondary">
-            DivPulse watches every ticker you hold and sends a push, Telegram, or email alert the instant a dividend
+            PaidPrime watches every ticker you hold and sends a push, Telegram, or email alert the instant a dividend
             payment is detected — before your broker&rsquo;s app catches up.
           </p>
 
@@ -289,7 +289,7 @@ function TimingDifference() {
             <div className="relative flex items-center justify-between gap-sp-2 p-sp-3">
               <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-green-500" />
               <div className="pl-2">
-                <p className="text-[15px] font-medium text-text-primary">DivPulse tells you</p>
+                <p className="text-[15px] font-medium text-text-primary">PaidPrime tells you</p>
                 <p className="mt-0.5 text-xs text-text-secondary">Push · Telegram · Email</p>
               </div>
               <span className="font-mono text-lg font-semibold tabular-nums text-green-500">9:02 AM</span>
@@ -443,7 +443,7 @@ function Features() {
         <SectionHeading
           eyebrow="Everything included"
           title="Built for people who track income, not just price."
-          description="Price charts are everywhere. DivPulse is built around the number that actually pays your bills."
+          description="Price charts are everywhere. PaidPrime is built around the number that actually pays your bills."
           className="mb-sp-4"
         />
 
@@ -534,7 +534,7 @@ function Trust() {
       icon: IconShield,
       title: "No custody, ever",
       tag: "Your money",
-      body: "DivPulse is a tracker, not a broker. It never holds, touches, or routes your money — there is nothing here to withdraw.",
+      body: "PaidPrime is a tracker, not a broker. It never holds, touches, or routes your money — there is nothing here to withdraw.",
     },
     {
       icon: IconPlug,
@@ -556,7 +556,11 @@ function Trust() {
         <div className="flex flex-col items-start gap-sp-3 lg:sticky lg:top-24 lg:self-start">
           <SectionHeading
             eyebrow="Trust"
-            title="Access to see. Never access to move."
+            title={
+              <>
+                Access to see. <span className="text-green-500">Never access to move.</span>
+              </>
+            }
             description="Connecting a brokerage should feel boring. These four guarantees are why it can."
           />
           <a
@@ -607,12 +611,12 @@ function Pricing() {
               <div
                 className={`group relative flex h-full flex-col gap-sp-3 rounded-card border p-sp-4 transition-all duration-200 hover:-translate-y-1 ${
                   plan.featured
-                    ? "border-green-500/40 bg-surface-2 py-[40px] shadow-[0_0_32px_rgba(52,211,153,0.1)] md:scale-[1.04] hover:shadow-[0_0_48px_rgba(52,211,153,0.16)]"
+                    ? "border-green-500/40 bg-surface-2 py-[40px] shadow-[0_0_32px_rgba(34,197,94,0.1)] md:scale-[1.04] hover:shadow-[0_0_48px_rgba(34,197,94,0.16)]"
                     : "border-border-subtle bg-surface hover:border-border-interactive"
                 }`}
               >
                 {plan.featured ? (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-green-500 px-2.5 py-1 font-mono text-xs font-semibold whitespace-nowrap text-canvas shadow-[0_0_24px_rgba(52,211,153,0.35)]">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-green-500 px-2.5 py-1 font-mono text-xs font-semibold whitespace-nowrap text-canvas shadow-[0_0_24px_rgba(34,197,94,0.35)]">
                     Most popular
                   </span>
                 ) : null}
@@ -695,7 +699,7 @@ function FinalCta() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(60% 120% at 50% 100%, rgba(52,211,153,0.20) 0%, rgba(52,211,153,0) 70%), radial-gradient(70% 60% at 50% 0%, var(--bg-surface) 0%, transparent 100%)",
+              "radial-gradient(60% 120% at 50% 100%, rgba(34, 197, 94,0.20) 0%, rgba(34, 197, 94,0) 70%), radial-gradient(70% 60% at 50% 0%, var(--bg-surface) 0%, transparent 100%)",
           }}
         />
         <div className="relative flex flex-col items-center gap-sp-3 px-sp-3 py-sp-8 text-center md:py-[calc(var(--sp-8)+var(--sp-4))]">
@@ -753,7 +757,7 @@ function SiteFooter() {
           <Link href="/" className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
             <img src="/logo.svg" alt="" className="h-7 w-7 rounded-[8px]" width={28} height={28} />
-            <span className="font-display text-[17px] font-semibold tracking-[-0.01em] text-text-primary">DivPulse</span>
+            <span className="font-display text-[17px] font-semibold tracking-[-0.01em] text-text-primary">Paid<span className="text-green-500">Prime</span></span>
           </Link>
           <p className="max-w-[26ch] text-sm leading-relaxed text-text-secondary">
             The instant your dividend lands, you know — before your broker gets around to telling you.
@@ -780,7 +784,7 @@ function SiteFooter() {
 
       <div className="border-t border-border-subtle">
         <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-sp-2 px-sp-3 py-sp-3 sm:flex-row sm:items-center sm:justify-between">
-          <span className="font-mono text-xs text-text-secondary">© 2026 DivPulse. Not investment advice.</span>
+          <span className="font-mono text-xs text-text-secondary">© 2026 PaidPrime. Not investment advice.</span>
           <span className="font-mono text-xs text-text-secondary">Built for dividend investors, not day traders.</span>
         </div>
       </div>

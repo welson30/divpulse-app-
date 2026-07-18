@@ -1,4 +1,4 @@
-// Regenerates the DivPulse favicon/app-icon set from the master logo.
+// Regenerates the PaidPrime favicon/app-icon set from the master logo.
 // Source of truth: public/logo.png (1254x1254, solid brand-black background).
 // Run with: node scripts/generate-icons.mjs
 //
@@ -47,7 +47,7 @@ async function main() {
   // Apple touch icon — flattened, no transparency (Apple guidance)
   await sharp(sourcePng)
     .resize(180, 180)
-    .flatten({ background: "#040706" })
+    .flatten({ background: "#040405" })
     .png()
     .toFile(path.join(root, "app/apple-icon.png"));
   console.log("wrote app/apple-icon.png");
@@ -63,7 +63,7 @@ async function main() {
   }
 
   // PWA manifest icons — "maskable" variant, padded to a safe zone
-  const BG = "#0A0E0D"; // --bg-base
+  const BG = "#09090B"; // --bg-base
   for (const size of [192, 512]) {
     const inset = Math.round(size * 0.65);
     const logo = await sharp(sourcePng).resize(inset, inset).toBuffer();

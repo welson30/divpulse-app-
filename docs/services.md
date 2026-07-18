@@ -1,4 +1,4 @@
-# DivPulse — Services & Connections
+# PaidPrime — Services & Connections
 
 > **Technical Reference Document · July 2026**
 > All services a developer needs to connect for the SaaS Web platform to function completely. Each entry includes where to register, cost, and what it powers.
@@ -86,13 +86,13 @@
 
 ### How Collections Work
 
-DivPulse maintains an internal curated list mapping assets to categories (e.g. `JEPI → "High Yield"`, `O → "REITs"`). Prices and yields are fetched in real time via Yahoo Finance. Users configure nothing — Collections appear ready in the app on first launch.
+PaidPrime maintains an internal curated list mapping assets to categories (e.g. `JEPI → "High Yield"`, `O → "REITs"`). Prices and yields are fetched in real time via Yahoo Finance. Users configure nothing — Collections appear ready in the app on first launch.
 
 ### Calendar — Extra Events
 
 Fed (FOMC) meeting dates and quarterly earnings can be supplemented via:
 - **[Alpha Vantage](https://www.alphavantage.co)** (free tier) — for automated event data
-- A **static list maintained by DivPulse** — for events that don't change frequently
+- A **static list maintained by PaidPrime** — for events that don't change frequently
 
 ---
 
@@ -106,7 +106,7 @@ Fed (FOMC) meeting dates and quarterly earnings can be supplemented via:
 | **Register at** | [plaid.com/developers](https://plaid.com/developers) |
 | **Cost** | ~$0.30 per connected account / month |
 | **Supported brokers** | Fidelity, Schwab, Robinhood, IBKR, TD Ameritrade, Vanguard, Webull |
-| **How it works** | User authorizes read-only access once. DivPulse syncs holdings automatically — no manual input needed. |
+| **How it works** | User authorizes read-only access once. PaidPrime syncs holdings automatically — no manual input needed. |
 
 ### Brazilian & International Brokers (XP, Avenue, Nomad…)
 
@@ -115,7 +115,7 @@ Plaid does not support Brazilian brokers or most international brokers. Two fall
 | Method | Available On | How It Works |
 |---|---|---|
 | **Manual Entry** | All plans | User types ticker, number of shares, and broker name directly in the app. Works for any broker worldwide. |
-| **CSV / Excel Import** | Pro+ only | User exports their portfolio from the broker (XP, Avenue, and Nomad support Excel/CSV export), uploads to DivPulse, and assets are imported automatically. Not real-time, but significantly faster than manual entry. |
+| **CSV / Excel Import** | Pro+ only | User exports their portfolio from the broker (XP, Avenue, and Nomad support Excel/CSV export), uploads to PaidPrime, and assets are imported automatically. Not real-time, but significantly faster than manual entry. |
 
 ### Broker Sync by Plan
 
@@ -167,7 +167,7 @@ Plaid does not support Brazilian brokers or most international brokers. Two fall
 
 | Resource | URL |
 |---|---|
-| **Landing Page** | [landingpagedivpulse.netlify.app](https://landingpagedivpulse.netlify.app) |
+| **Landing Page (legacy prototype)** | [landingpagedivpulse.netlify.app](https://landingpagedivpulse.netlify.app) |
 | **SaaS Web Prototype** | [protopiposaasweb.netlify.app](https://protopiposaasweb.netlify.app) |
 
 > **Prototype tip:** Click **"Continue with Google"** on the prototype to access the full dashboard with all tabs unlocked.

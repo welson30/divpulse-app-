@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "DivPulse — Dividend Income Dashboard",
-    short_name: "DivPulse",
+    name: "PaidPrime — Dividend Income Dashboard",
+    short_name: "PaidPrime",
     description:
       "Track holdings, dividend calendars, portfolio diversification, and incoming dividend payments.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0A0E0D", // --bg-base
-    theme_color: "#064E3B", // --green-900
+    background_color: "#09090B", // --bg-base
+    theme_color: "#14532D", // --green-900
     icons: [
       {
         src: "/icons/manifest-192.png",
