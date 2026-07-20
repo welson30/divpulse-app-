@@ -1,11 +1,12 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 declare global {
   interface Window {
     OneSignalDeferred?: Array<(OneSignal: OneSignalSDK) => void>;
+    OneSignal?: OneSignalSDK;
   }
 }
 
@@ -20,40 +21,48 @@ type OneSignalSDK = {
   };
 };
 
+let initPromise: Promise<void> | null = null;
+
 /**
- * Loads the OneSignal Web SDK (official OneSignalDeferred pattern, not a
- * wrapper package — see PRD.md/services.md for the OneSignal choice) and
- * logs the signed-in Supabase user in as OneSignal's "external ID", so a
- * push can be targeted at a specific user via the REST API later
- * (lib/onesignal/send-push.ts) without needing to track OneSignal's own
- * player/subscription ID ourselves.
- *
- * TEMP: verbose console logging while diagnosing a silent-failure bug —
- * remove once push is confirmed working end-to-end.
+ * Initializes OneSignal exactly once and returns a promise every caller
+ * (this provider, the Enable-notifications button) can await — instead of
+ * relying on OneSignal's OneSignalDeferred array draining itself, which
+ * proved unreliable here: callbacks pushed after the SDK's one-time drain
+ * (a real risk with Next's afterInteractive script strategy + React 19
+ * effect timing) sit stranded forever with no error and no log. This
+ * makes initialization idempotent and awaitable from anywhere.
  */
-export function OneSignalProvider({ userId }: { userId: string }) {
-  useEffect(() => {
-    console.log("[OneSignal] provider mounted, queuing init for user", userId);
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    window.OneSignalDeferred.push(async (OneSignal) => {
-      console.log("[OneSignal] deferred callback firing — SDK object received", OneSignal);
-      try {
+function getOneSignal(): Promise<OneSignalSDK> {
+  if (!initPromise) {
+    initPromise = new Promise<void>((resolve) => {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async (OneSignal) => {
+        console.log("[OneSignal] SDK ready, calling init()");
         await OneSignal.init({
           appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!,
           allowLocalhostAsSecureOrigin: true,
         });
-        console.log("[OneSignal] init() resolved successfully");
-      } catch (err) {
-        console.error("[OneSignal] init() threw", err);
-        return;
-      }
-      try {
-        await OneSignal.login(userId);
-        console.log("[OneSignal] login() resolved successfully for user", userId);
-      } catch (err) {
-        console.error("[OneSignal] login() threw", err);
-      }
+        console.log("[OneSignal] init() resolved");
+        resolve();
+      });
     });
+  }
+  return initPromise.then(() => window.OneSignal!);
+}
+
+export function OneSignalProvider({ userId }: { userId: string }) {
+  const loggedInUserId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (loggedInUserId.current === userId) return;
+    loggedInUserId.current = userId;
+
+    getOneSignal()
+      .then(async (OneSignal) => {
+        await OneSignal.login(userId);
+        console.log("[OneSignal] login() resolved for user", userId);
+      })
+      .catch((err) => console.error("[OneSignal] init/login failed", err));
   }, [userId]);
 
   return (
@@ -66,3 +75,5 @@ export function OneSignalProvider({ userId }: { userId: string }) {
     />
   );
 }
+
+export { getOneSignal };

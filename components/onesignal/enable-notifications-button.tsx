@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { IconAlerts, IconCheck } from "@/components/marketing/icons";
+import { getOneSignal } from "@/components/onesignal/onesignal-provider";
 
 type PermissionState = "default" | "granted" | "denied" | "unsupported";
 
-// TEMP: verbose console logging while diagnosing a silent-failure bug —
-// remove once push is confirmed working end-to-end.
 export function EnableNotificationsButton() {
   const [state, setState] = useState<PermissionState>("default");
 
@@ -16,7 +15,6 @@ export function EnableNotificationsButton() {
       setState("unsupported");
       return;
     }
-    console.log("[EnableNotifications] mounted, current permission:", Notification.permission);
     setState(Notification.permission as PermissionState);
   }, []);
 
@@ -38,20 +36,14 @@ export function EnableNotificationsButton() {
       type="button"
       variant="secondary"
       className="h-9 gap-1.5 text-[13px]"
-      onClick={() => {
-        console.log("[EnableNotifications] button clicked, OneSignalDeferred queue length before push:", window.OneSignalDeferred?.length ?? "undefined (not yet initialized)");
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        window.OneSignalDeferred.push(async (OneSignal) => {
-          console.log("[EnableNotifications] deferred callback firing, calling requestPermission()");
-          try {
-            await OneSignal.Notifications.requestPermission();
-            console.log("[EnableNotifications] requestPermission() resolved, new browser permission:", Notification.permission);
-          } catch (err) {
-            console.error("[EnableNotifications] requestPermission() threw", err);
-          }
-          setState(Notification.permission as PermissionState);
-        });
-        console.log("[EnableNotifications] callback queued, OneSignalDeferred queue length after push:", window.OneSignalDeferred.length);
+      onClick={async () => {
+        try {
+          const OneSignal = await getOneSignal();
+          await OneSignal.Notifications.requestPermission();
+        } catch (err) {
+          console.error("[EnableNotifications] failed to request permission", err);
+        }
+        setState(Notification.permission as PermissionState);
       }}
     >
       <IconAlerts className="size-4" />
