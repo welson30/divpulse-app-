@@ -23,28 +23,21 @@ type OneSignalSDK = {
 
 const INIT_TIMEOUT_MS = 8000;
 
-let initPromise: Promise<OneSignalSDK> | null = null;
+// A single init() call is queued into OneSignalDeferred exactly once and
+// never retried — OneSignal itself throws "SDK already initialized" on a
+// second init() call, and that queued callback keeps running in the
+// background even after our own timeout gives up on it (there's no way
+// to cancel it). Resetting this promise on timeout and letting a later
+// caller re-queue a second init() is what caused
+// "SDK already initialized": the first (slow) init() eventually
+// succeeded in the background while a second one was already queued.
+// So: exactly one queued attempt, ever, whether it resolves fast, slow,
+// or never — callers race it against their own timeout instead.
+let queuedInit: Promise<OneSignalSDK> | null = null;
 
-/**
- * Initializes OneSignal exactly once and returns a promise every caller
- * (this provider, the Enable-notifications button) can await — instead of
- * relying on OneSignal's OneSignalDeferred array draining itself, which
- * proved unreliable: callbacks pushed after the SDK's one-time drain sit
- * stranded forever with no error and no log.
- *
- * Times out after INIT_TIMEOUT_MS and rejects, rather than hanging
- * silently forever — this is what makes ad-blocker interference (the SDK
- * script or its /sync/ endpoint getting blocked, which produces no JS
- * error, just a network request that never completes) surface as a real,
- * catchable failure instead of a dead button with no feedback.
- */
-function getOneSignal(): Promise<OneSignalSDK> {
-  if (!initPromise) {
-    initPromise = new Promise<OneSignalSDK>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error("onesignal-timeout"));
-      }, INIT_TIMEOUT_MS);
-
+function queueInitOnce(): Promise<OneSignalSDK> {
+  if (!queuedInit) {
+    queuedInit = new Promise<OneSignalSDK>((resolve, reject) => {
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       window.OneSignalDeferred.push(async (OneSignal) => {
         try {
@@ -52,22 +45,31 @@ function getOneSignal(): Promise<OneSignalSDK> {
             appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!,
             allowLocalhostAsSecureOrigin: true,
           });
-          clearTimeout(timer);
           resolve(OneSignal);
         } catch (err) {
-          clearTimeout(timer);
           reject(err);
         }
       });
-    }).catch((err) => {
-      // Let the next caller retry (e.g. after the user disables a
-      // blocker and clicks the button again) instead of caching a
-      // permanent failure.
-      initPromise = null;
-      throw err;
     });
   }
-  return initPromise;
+  return queuedInit;
+}
+
+/**
+ * Returns a promise that resolves with the initialized OneSignal SDK, or
+ * rejects after INIT_TIMEOUT_MS if it hasn't resolved yet — this timeout
+ * is per-call, not shared: if one caller times out, the single underlying
+ * queueInitOnce() attempt keeps running, and a later caller here can
+ * still pick up its eventual success instead of triggering a duplicate
+ * init() (see queueInitOnce's comment for why a duplicate is a real error
+ * with this SDK, not just wasted work).
+ */
+function getOneSignal(): Promise<OneSignalSDK> {
+  const init = queueInitOnce();
+  const timeout = new Promise<OneSignalSDK>((_, reject) => {
+    setTimeout(() => reject(new Error("onesignal-timeout")), INIT_TIMEOUT_MS);
+  });
+  return Promise.race([init, timeout]);
 }
 
 export function OneSignalProvider({ userId }: { userId: string }) {
