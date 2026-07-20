@@ -69,6 +69,28 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={cn("h-full", interTight.variable, inter.variable, jetbrainsMono.variable)}
     >
+      <head>
+        {/* OneSignal's own documented integration snippet, verbatim, in
+            <head> on every page — not injected later via next/script,
+            since OneSignal's setup instructions specifically call for
+            this placement and timing. components/onesignal/onesignal-provider.tsx's
+            getOneSignal() helper still awaits this same OneSignalDeferred
+            queue for login()/requestPermission() calls; it no longer
+            queues its own init() to avoid a duplicate init attempt. */}
+        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.OneSignalDeferred = window.OneSignalDeferred || [];
+              OneSignalDeferred.push(async function(OneSignal) {
+                await OneSignal.init({
+                  appId: "${process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID}",
+                });
+              });
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>
   );
