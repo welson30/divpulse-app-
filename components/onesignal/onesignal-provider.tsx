@@ -21,33 +21,53 @@ type OneSignalSDK = {
   };
 };
 
-let initPromise: Promise<void> | null = null;
+const INIT_TIMEOUT_MS = 8000;
+
+let initPromise: Promise<OneSignalSDK> | null = null;
 
 /**
  * Initializes OneSignal exactly once and returns a promise every caller
  * (this provider, the Enable-notifications button) can await — instead of
  * relying on OneSignal's OneSignalDeferred array draining itself, which
- * proved unreliable here: callbacks pushed after the SDK's one-time drain
- * (a real risk with Next's afterInteractive script strategy + React 19
- * effect timing) sit stranded forever with no error and no log. This
- * makes initialization idempotent and awaitable from anywhere.
+ * proved unreliable: callbacks pushed after the SDK's one-time drain sit
+ * stranded forever with no error and no log.
+ *
+ * Times out after INIT_TIMEOUT_MS and rejects, rather than hanging
+ * silently forever — this is what makes ad-blocker interference (the SDK
+ * script or its /sync/ endpoint getting blocked, which produces no JS
+ * error, just a network request that never completes) surface as a real,
+ * catchable failure instead of a dead button with no feedback.
  */
 function getOneSignal(): Promise<OneSignalSDK> {
   if (!initPromise) {
-    initPromise = new Promise<void>((resolve) => {
+    initPromise = new Promise<OneSignalSDK>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error("onesignal-timeout"));
+      }, INIT_TIMEOUT_MS);
+
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       window.OneSignalDeferred.push(async (OneSignal) => {
-        console.log("[OneSignal] SDK ready, calling init()");
-        await OneSignal.init({
-          appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!,
-          allowLocalhostAsSecureOrigin: true,
-        });
-        console.log("[OneSignal] init() resolved");
-        resolve();
+        try {
+          await OneSignal.init({
+            appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!,
+            allowLocalhostAsSecureOrigin: true,
+          });
+          clearTimeout(timer);
+          resolve(OneSignal);
+        } catch (err) {
+          clearTimeout(timer);
+          reject(err);
+        }
       });
+    }).catch((err) => {
+      // Let the next caller retry (e.g. after the user disables a
+      // blocker and clicks the button again) instead of caching a
+      // permanent failure.
+      initPromise = null;
+      throw err;
     });
   }
-  return initPromise.then(() => window.OneSignal!);
+  return initPromise;
 }
 
 export function OneSignalProvider({ userId }: { userId: string }) {
@@ -58,11 +78,13 @@ export function OneSignalProvider({ userId }: { userId: string }) {
     loggedInUserId.current = userId;
 
     getOneSignal()
-      .then(async (OneSignal) => {
-        await OneSignal.login(userId);
-        console.log("[OneSignal] login() resolved for user", userId);
-      })
-      .catch((err) => console.error("[OneSignal] init/login failed", err));
+      .then((OneSignal) => OneSignal.login(userId))
+      .catch(() => {
+        // Silent here — the Enable-notifications button surfaces the
+        // actual failure/timeout to the user when they try to act on it.
+        // A background init failure on page load shouldn't interrupt
+        // anyone who isn't trying to enable notifications right now.
+      });
   }, [userId]);
 
   return (
@@ -70,8 +92,6 @@ export function OneSignalProvider({ userId }: { userId: string }) {
       src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
       strategy="afterInteractive"
       defer
-      onLoad={() => console.log("[OneSignal] SDK script tag onLoad fired")}
-      onError={(e) => console.error("[OneSignal] SDK script tag onError fired", e)}
     />
   );
 }
