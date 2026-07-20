@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { IconAlerts, IconCheck } from "@/components/marketing/icons";
 import { getOneSignal } from "@/components/onesignal/onesignal-provider";
 
@@ -10,7 +11,7 @@ type PermissionState = "default" | "granted" | "denied" | "unsupported";
 export function EnableNotificationsButton() {
   const [state, setState] = useState<PermissionState>("default");
   const [busy, setBusy] = useState(false);
-  const [blocked, setBlocked] = useState(false);
+  const [blockedDialogOpen, setBlockedDialogOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("Notification" in window)) {
@@ -34,7 +35,7 @@ export function EnableNotificationsButton() {
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
+    <>
       <Button
         type="button"
         variant="secondary"
@@ -42,7 +43,6 @@ export function EnableNotificationsButton() {
         className="h-9 gap-1.5 text-[13px]"
         onClick={async () => {
           setBusy(true);
-          setBlocked(false);
           try {
             const OneSignal = await getOneSignal();
             await OneSignal.Notifications.requestPermission();
@@ -53,7 +53,7 @@ export function EnableNotificationsButton() {
             // page's perspective — no JS error, just a hung request, so
             // this is the one failure mode worth naming specifically to
             // the user rather than a generic "something went wrong".
-            setBlocked(true);
+            setBlockedDialogOpen(true);
             console.error("[EnableNotifications] failed to request permission", err);
           } finally {
             setBusy(false);
@@ -64,12 +64,21 @@ export function EnableNotificationsButton() {
         <IconAlerts className="size-4" />
         {busy ? "Enabling…" : "Enable notifications"}
       </Button>
-      {blocked ? (
-        <p className="max-w-[220px] text-right text-xs text-warning">
-          Couldn&rsquo;t reach the notification service. If you have an ad blocker or privacy extension, allow
-          onesignal.com and try again.
-        </p>
-      ) : null}
-    </div>
+
+      <Dialog open={blockedDialogOpen} onOpenChange={setBlockedDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Couldn&rsquo;t reach the notification service</DialogTitle>
+            <DialogDescription>
+              An ad blocker or privacy extension may be blocking onesignal.com. Allow it for this site, then try
+              again.
+            </DialogDescription>
+          </DialogHeader>
+          <Button type="button" className="h-10 w-full" onClick={() => setBlockedDialogOpen(false)}>
+            Got it
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
