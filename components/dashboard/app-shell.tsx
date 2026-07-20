@@ -2,19 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconBell } from "@/components/marketing/icons";
 import { signOut } from "@/app/(auth)/actions";
+import { EnableNotificationsButton } from "@/components/onesignal/enable-notifications-button";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "For You" },
   { href: "/holdings", label: "Holdings" },
+  { href: "/dividends", label: "Dividends" },
 ] as const;
 
 // Not-yet-built product routes, per ARCHITECTURE.md §6 — shown as inert
 // chrome (same treatment the marketing ProductTabs demo uses) so the shell
 // reads as the real app's nav, not a partial one, without linking to 404s.
-const COMING_LINKS = ["Dividends", "Calendar", "Collections", "Diversification", "Payments"];
+const COMING_LINKS = ["Calendar", "Collections", "Diversification", "Payments"];
 
 type AppShellProps = {
   email: string;
@@ -42,13 +43,7 @@ export function AppShell({ email, planLabel, children }: AppShellProps) {
             <span className="hidden rounded-full border border-border-subtle bg-surface px-2.5 py-1 font-mono text-[10px] font-semibold text-text-secondary sm:inline">
               {planLabel}
             </span>
-            <button
-              type="button"
-              aria-label="Notifications"
-              className="relative flex size-8 items-center justify-center rounded-full border border-border-subtle bg-surface text-text-secondary transition-colors hover:border-border-interactive"
-            >
-              <IconBell className="size-4" />
-            </button>
+            <EnableNotificationsButton />
             <div
               title={email}
               className="flex size-8 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(34,197,94,0.12)] font-mono text-[11px] font-bold text-green-500"

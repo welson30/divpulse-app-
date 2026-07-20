@@ -28,8 +28,14 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// NEXT_PUBLIC_SITE_URL should only be set in production (Vercel env vars)
+// — falls back to localhost so metadata/OG tags never point at the prod
+// domain during local dev. No NODE_ENV branching needed: this var simply
+// shouldn't exist in .env locally.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://paidprime.com"),
+  metadataBase: new URL(siteUrl),
   title: "PaidPrime — Know the moment you're paid",
   description:
     "Real-time dividend alerts by push, Telegram, and email — the moment a payment lands, before your broker's app tells you. Track holdings, payment calendars, and income goals. Free for 5 assets.",
@@ -37,7 +43,7 @@ export const metadata: Metadata = {
     title: "PaidPrime — Know the moment you're paid",
     description:
       "Real-time dividend alerts by push, Telegram, and email — before your broker's app tells you.",
-    url: "https://paidprime.com",
+    url: siteUrl,
     siteName: "PaidPrime",
     type: "website",
   },

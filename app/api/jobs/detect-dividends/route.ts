@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getDividendDataProvider } from "@/lib/dividend-data";
+import { sendDividendPush } from "@/lib/onesignal/send-push";
 
 export const maxDuration = 60;
 
@@ -20,9 +21,11 @@ export const maxDuration = 60;
  *      already-processed payment just violates the constraint and is
  *      skipped, never double-counted or double-notified)
  *
- * Notification sending (OneSignal/Telegram/email) is intentionally NOT
- * wired in yet — this pass only gets detection + persistence correct.
- * Wiring a notification channel is the next slice of work.
+ * Push (OneSignal) fires immediately after each successful
+ * dividend_payments insert — see lib/onesignal/send-push.ts. A push
+ * failure never rolls back the insert: the payments ledger is the source
+ * of truth, delivery is best-effort and retried by nothing (yet) if it
+ * fails. Telegram/email channels are not wired in yet.
  */
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -81,23 +84,41 @@ export async function GET(request: NextRequest) {
 
       for (const event of eventsPaidToday) {
         for (const holding of holdingsForTicker) {
-          const { error: insertError } = await supabase.from("dividend_payments").insert({
-            user_id: holding.user_id,
-            holding_id: holding.id,
-            dividend_event_id: event.id,
-            amount: holding.shares * event.amount_per_share,
-            pay_date: event.pay_date,
-          });
+          const amount = holding.shares * event.amount_per_share;
+
+          const { data: inserted, error: insertError } = await supabase
+            .from("dividend_payments")
+            .insert({
+              user_id: holding.user_id,
+              holding_id: holding.id,
+              dividend_event_id: event.id,
+              amount,
+              pay_date: event.pay_date,
+            })
+            .select("id")
+            .single();
 
           // 23505 = unique_violation — this payment was already recorded
           // by a prior run of this job. Expected on re-runs, not a
-          // failure; anything else is a real error worth surfacing.
-          if (insertError && insertError.code !== "23505") {
-            tickerErrors.push({ ticker, error: insertError.message });
+          // failure; anything else is a real error worth surfacing. Both
+          // cases: skip the push, since either nothing new happened or
+          // the row (and therefore the notified_at update target) doesn't
+          // exist to update.
+          if (insertError) {
+            if (insertError.code !== "23505") {
+              tickerErrors.push({ ticker, error: insertError.message });
+            }
             continue;
           }
-          if (!insertError) {
-            paymentsInserted += 1;
+
+          paymentsInserted += 1;
+
+          const { sent } = await sendDividendPush({ userId: holding.user_id, ticker, amount });
+          if (sent && inserted) {
+            await supabase
+              .from("dividend_payments")
+              .update({ notified_at: new Date().toISOString(), notified_channels: ["push"] })
+              .eq("id", inserted.id);
           }
         }
       }
