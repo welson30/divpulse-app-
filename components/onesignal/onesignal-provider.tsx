@@ -10,13 +10,22 @@ declare global {
 }
 
 // Minimal surface of OneSignal's Web SDK v16 we actually use — not the
-// full type surface, just what login()/requestPermission() need.
+// full type surface, just what login()/requestPermission() and real
+// subscription-state checks need.
 type OneSignalSDK = {
   init: (options: { appId: string; allowLocalhostAsSecureOrigin?: boolean }) => Promise<void>;
   login: (externalId: string) => Promise<void>;
   Notifications: {
     requestPermission: () => Promise<void>;
     permission: boolean;
+  };
+  User: {
+    PushSubscription: {
+      id: string | null | undefined;
+      optedIn: boolean;
+      addEventListener: (event: "change", handler: (event: unknown) => void) => void;
+      removeEventListener: (event: "change", handler: (event: unknown) => void) => void;
+    };
   };
 };
 
@@ -59,6 +68,20 @@ function getOneSignal(): Promise<OneSignalSDK> {
   return Promise.race([ready, timeout]);
 }
 
+/**
+ * True only once OneSignal reports a real, server-confirmed subscription
+ * (a non-null PushSubscription.id and optedIn === true) — NOT just
+ * browser Notification.permission === "granted". We hit a real bug where
+ * permission was granted locally but the server-side subscription create
+ * call failed (regional network issue between Pakistan and OneSignal's
+ * API — see conversation history), leaving the UI claiming "Notifications
+ * on" while OneSignal's dashboard showed 0 subscribers. This is the
+ * actual ground truth to gate the UI on instead.
+ */
+function isReallySubscribed(OneSignal: OneSignalSDK): boolean {
+  return Boolean(OneSignal.User.PushSubscription.id) && OneSignal.User.PushSubscription.optedIn === true;
+}
+
 export function OneSignalProvider({ userId }: { userId: string }) {
   const loggedInUserId = useRef<string | null>(null);
 
@@ -79,4 +102,5 @@ export function OneSignalProvider({ userId }: { userId: string }) {
   return null;
 }
 
-export { getOneSignal };
+export { getOneSignal, isReallySubscribed };
+export type { OneSignalSDK };
