@@ -10,12 +10,17 @@ const NAV_LINKS = [
   { href: "/dashboard", label: "For You" },
   { href: "/holdings", label: "Holdings" },
   { href: "/dividends", label: "Dividends" },
+  { href: "/calendar", label: "Calendar" },
+  { href: "/watchlist", label: "Watchlist" },
+  { href: "/diversification", label: "Diversification" },
 ] as const;
 
-// Not-yet-built product routes, per ARCHITECTURE.md §6 — shown as inert
-// chrome (same treatment the marketing ProductTabs demo uses) so the shell
-// reads as the real app's nav, not a partial one, without linking to 404s.
-const COMING_LINKS = ["Calendar", "Collections", "Diversification", "Payments"];
+// Not-yet-built product routes — still need external market-data APIs
+// (Collections needs live prices/yields; Payments needs Plaid/broker
+// sync) — shown as inert chrome (same treatment the marketing ProductTabs
+// demo uses) so the shell reads as the real app's nav, not a partial one,
+// without linking to 404s.
+const COMING_LINKS = ["Collections", "Payments"];
 
 type AppShellProps = {
   email: string;
@@ -44,12 +49,18 @@ export function AppShell({ email, planLabel, children }: AppShellProps) {
               {planLabel}
             </span>
             <EnableNotificationsButton />
-            <div
+            <Link
+              href="/settings"
               title={email}
-              className="flex size-8 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(34,197,94,0.12)] font-mono text-[11px] font-bold text-green-500"
+              className={cn(
+                "flex size-8 items-center justify-center rounded-full border font-mono text-[11px] font-bold transition-colors",
+                pathname === "/settings"
+                  ? "border-green-500/50 bg-[rgba(34,197,94,0.18)] text-green-500"
+                  : "border-green-500/30 bg-[rgba(34,197,94,0.12)] text-green-500 hover:border-green-500/50",
+              )}
             >
               {initials}
-            </div>
+            </Link>
             <form action={signOut}>
               <button
                 type="submit"
