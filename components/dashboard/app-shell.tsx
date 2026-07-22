@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
-import { EnableNotificationsButton } from "@/components/onesignal/enable-notifications-button";
+import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [

@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/dashboard/app-shell";
-import { OneSignalProvider } from "@/components/onesignal/onesignal-provider";
 
 const PLAN_LABELS: Record<string, string> = {
   free: "Free",
@@ -29,11 +28,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const planLabel = PLAN_LABELS[profile?.plan ?? "free"] ?? "Free";
 
   return (
-    <>
-      <OneSignalProvider userId={user.id} />
-      <AppShell email={user.email ?? ""} planLabel={planLabel}>
-        {children}
-      </AppShell>
-    </>
+    <AppShell email={user.email ?? ""} planLabel={planLabel}>
+      {children}
+    </AppShell>
   );
 }

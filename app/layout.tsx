@@ -69,38 +69,6 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={cn("h-full", interTight.variable, inter.variable, jetbrainsMono.variable)}
     >
-      <head>
-        {/* OneSignal's own documented "Custom Code" integration snippet, in
-            <head> on every page — not injected later via next/script,
-            since OneSignal's setup instructions specifically call for
-            this placement and timing. safari_web_id is required for Safari
-            push support once an app is configured as Custom Code (not
-            present when the app was still set to "Typical Site"). notifyButton
-            is explicitly disabled — we use our own EnableNotificationsButton
-            (components/onesignal/enable-notifications-button.tsx) styled to
-            the brand's design system instead of OneSignal's default floating
-            widget. components/onesignal/onesignal-provider.tsx's getOneSignal()
-            helper awaits this same OneSignalDeferred queue for
-            login()/requestPermission() calls; it no longer queues its own
-            init() to avoid a duplicate init attempt. */}
-        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.OneSignalDeferred = window.OneSignalDeferred || [];
-              OneSignalDeferred.push(async function(OneSignal) {
-                await OneSignal.init({
-                  appId: "${process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID}",
-                  safari_web_id: "web.onesignal.auto.52db6e33-5c43-4c7e-8893-c04dfe7146e4",
-                  notifyButton: {
-                    enable: false,
-                  },
-                });
-              });
-            `,
-          }}
-        />
-      </head>
       <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>
   );

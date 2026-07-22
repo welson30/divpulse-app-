@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getDividendDataProvider } from "@/lib/dividend-data";
-import { sendDividendPush } from "@/lib/onesignal/send-push";
+import { sendDividendPush } from "@/lib/firebase/admin";
 
 export const maxDuration = 60;
 
@@ -21,11 +21,20 @@ export const maxDuration = 60;
  *      already-processed payment just violates the constraint and is
  *      skipped, never double-counted or double-notified)
  *
- * Push (OneSignal) fires immediately after each successful
- * dividend_payments insert — see lib/onesignal/send-push.ts. A push
- * failure never rolls back the insert: the payments ledger is the source
- * of truth, delivery is best-effort and retried by nothing (yet) if it
- * fails. Telegram/email channels are not wired in yet.
+ * Push (Firebase Cloud Messaging, direct — see lib/firebase/admin.ts)
+ * fires immediately after each successful dividend_payments insert, to
+ * every device/browser the user has registered in push_subscriptions
+ * (there can be more than one). A push failure never rolls back the
+ * insert: the payments ledger is the source of truth, delivery is
+ * best-effort. Stale tokens (uninstalled/cleared site data) are pruned
+ * from push_subscriptions when FCM reports them as no longer registered.
+ * Telegram/email channels are not wired in yet.
+ *
+ * Replaces the earlier OneSignal integration, which could not complete a
+ * TLS handshake to api.onesignal.com from Pakistani networks — reproduced
+ * consistently across devices/browsers/ISPs while working fine from a US
+ * connection, so it was judged an infrastructure issue on OneSignal's
+ * Cloudflare zone rather than something fixable in application code.
  */
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -113,8 +122,22 @@ export async function GET(request: NextRequest) {
 
           paymentsInserted += 1;
 
-          const { sent } = await sendDividendPush({ userId: holding.user_id, ticker, amount });
-          if (sent && inserted) {
+          const { data: subscriptions } = await supabase
+            .from("push_subscriptions")
+            .select("id, fcm_token")
+            .eq("user_id", holding.user_id);
+
+          let anySent = false;
+          for (const subscription of subscriptions ?? []) {
+            const result = await sendDividendPush(subscription.fcm_token, ticker, amount);
+            if (result.sent) {
+              anySent = true;
+            } else if (result.staleToken) {
+              await supabase.from("push_subscriptions").delete().eq("id", subscription.id);
+            }
+          }
+
+          if (anySent && inserted) {
             await supabase
               .from("dividend_payments")
               .update({ notified_at: new Date().toISOString(), notified_channels: ["push"] })
