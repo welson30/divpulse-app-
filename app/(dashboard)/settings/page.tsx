@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-form";
 import { PushDevicesList, type PushDevice } from "@/components/dashboard/push-devices-list";
+import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
 
 export const metadata: Metadata = {
   title: "Settings — PaidPrime",
@@ -19,16 +20,18 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: devices }] = await Promise.all([
+  const [{ data: profile }, { data: devices }, { data: telegramLink }] = await Promise.all([
     supabase.from("profiles").select("display_name, currency, locale, plan").eq("id", user!.id).single(),
     supabase
       .from("push_subscriptions")
       .select("id, user_agent, created_at")
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false }),
+    supabase.from("telegram_links").select("chat_id").eq("user_id", user!.id).maybeSingle(),
   ]);
 
   const planLabel = PLAN_LABELS[profile?.plan ?? "free"] ?? "Free";
+  const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
 
   return (
     <div className="flex max-w-xl flex-col gap-sp-5">
@@ -62,6 +65,11 @@ export default async function SettingsPage() {
             </span>
           ) : null}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-sp-2">
+        <h2 className="text-h2 font-display font-medium text-text-primary">Telegram</h2>
+        <TelegramConnectCard isPro={isPro} isConnected={!!telegramLink?.chat_id} />
       </div>
 
       <div className="flex flex-col gap-sp-2">

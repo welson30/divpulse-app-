@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import { sendDividendPush } from "@/lib/firebase/admin";
+import { sendTelegramDividendAlert } from "@/lib/telegram/send";
 
 export const maxDuration = 60;
 
@@ -28,7 +29,13 @@ export const maxDuration = 60;
  * insert: the payments ledger is the source of truth, delivery is
  * best-effort. Stale tokens (uninstalled/cleared site data) are pruned
  * from push_subscriptions when FCM reports them as no longer registered.
- * Telegram/email channels are not wired in yet.
+ *
+ * Telegram (see lib/telegram/send.ts) fires alongside push, gated to
+ * Pro/Pro+ plans (checked server-side against profiles.plan — never
+ * trust a client-set flag for this) and only if the user has completed
+ * the /settings linking flow (telegram_links.chat_id is set). A chat
+ * Telegram reports as blocked/deleted clears chat_id so the next run
+ * doesn't keep failing against it. Email is not wired in yet.
  *
  * Replaces the earlier OneSignal integration, which could not complete a
  * TLS handshake to api.onesignal.com from Pakistani networks — reproduced
@@ -47,7 +54,7 @@ export async function GET(request: NextRequest) {
 
   const { data: holdings, error: holdingsError } = await supabase
     .from("holdings")
-    .select("id, user_id, ticker, shares");
+    .select("id, user_id, ticker, shares, broker_name");
 
   if (holdingsError) {
     return NextResponse.json({ error: holdingsError.message }, { status: 500 });
@@ -128,6 +135,8 @@ export async function GET(request: NextRequest) {
             .eq("user_id", holding.user_id);
 
           let anySent = false;
+          const channelsNotified: string[] = [];
+
           for (const subscription of subscriptions ?? []) {
             const result = await sendDividendPush(subscription.fcm_token, ticker, amount);
             if (result.sent) {
@@ -136,11 +145,37 @@ export async function GET(request: NextRequest) {
               await supabase.from("push_subscriptions").delete().eq("id", subscription.id);
             }
           }
+          if (anySent) channelsNotified.push("push");
 
-          if (anySent && inserted) {
+          // Telegram alerts are Pro/Pro+ only — the plan check happens
+          // here (server-side, via the service-role client) rather than
+          // trusting anything client-set, same reasoning as the Free-plan
+          // holdings cap (ARCHITECTURE.md §10).
+          const { data: profile } = await supabase.from("profiles").select("plan").eq("id", holding.user_id).single();
+          const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
+
+          if (isPro) {
+            const { data: telegramLink } = await supabase
+              .from("telegram_links")
+              .select("chat_id")
+              .eq("user_id", holding.user_id)
+              .not("chat_id", "is", null)
+              .maybeSingle();
+
+            if (telegramLink?.chat_id) {
+              const result = await sendTelegramDividendAlert(telegramLink.chat_id, ticker, amount, holding.broker_name ?? null);
+              if (result.sent) {
+                channelsNotified.push("telegram");
+              } else if (result.chatInvalid) {
+                await supabase.from("telegram_links").update({ chat_id: null, linked_at: null }).eq("user_id", holding.user_id);
+              }
+            }
+          }
+
+          if (channelsNotified.length > 0 && inserted) {
             await supabase
               .from("dividend_payments")
-              .update({ notified_at: new Date().toISOString(), notified_channels: ["push"] })
+              .update({ notified_at: new Date().toISOString(), notified_channels: channelsNotified })
               .eq("id", inserted.id);
           }
         }
