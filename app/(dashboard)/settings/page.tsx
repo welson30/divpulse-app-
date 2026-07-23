@@ -31,7 +31,12 @@ export default async function SettingsPage() {
   ]);
 
   const planLabel = PLAN_LABELS[profile?.plan ?? "free"] ?? "Free";
-  const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
+  // TODO(stripe): Telegram is a Pro/Pro+ feature (ARCHITECTURE.md §7) but
+  // the plan gate is disabled here so it can be tested pre-billing.
+  // Restore to `profile?.plan === "pro" || profile?.plan === "pro_plus"`
+  // once Stripe subscriptions are live. Must be re-enabled alongside the
+  // matching gate in app/api/jobs/detect-dividends/route.ts.
+  const isPro = true;
 
   return (
     <div className="flex max-w-xl flex-col gap-sp-5">

@@ -147,12 +147,15 @@ export async function GET(request: NextRequest) {
           }
           if (anySent) channelsNotified.push("push");
 
-          // Telegram alerts are Pro/Pro+ only — the plan check happens
-          // here (server-side, via the service-role client) rather than
-          // trusting anything client-set, same reasoning as the Free-plan
-          // holdings cap (ARCHITECTURE.md §10).
-          const { data: profile } = await supabase.from("profiles").select("plan").eq("id", holding.user_id).single();
-          const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
+          // Telegram alerts are Pro/Pro+ only (ARCHITECTURE.md §7) — the
+          // plan check normally happens here, server-side via the
+          // service-role client, same reasoning as the Free-plan holdings
+          // cap (ARCHITECTURE.md §10).
+          // TODO(stripe): gate disabled for pre-billing testing — restore
+          // to a `profiles.plan === "pro" || "pro_plus"` lookup once
+          // Stripe subscriptions are live. Matching gate is in
+          // app/(dashboard)/settings/page.tsx (isPro).
+          const isPro = true;
 
           if (isPro) {
             const { data: telegramLink } = await supabase
