@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-form";
 import { PushDevicesList, type PushDevice } from "@/components/dashboard/push-devices-list";
 import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
+import { BillingCard } from "@/components/dashboard/billing-card";
 
 export const metadata: Metadata = {
   title: "Settings — PaidPrime",
@@ -57,19 +58,7 @@ export default async function SettingsPage() {
 
       <div className="flex flex-col gap-sp-2">
         <h2 className="text-h2 font-display font-medium text-text-primary">Plan</h2>
-        <div className="flex items-center justify-between rounded-card border border-border-subtle bg-surface-2 p-sp-3">
-          <div>
-            <div className="font-mono text-sm font-semibold text-text-primary">{planLabel}</div>
-            <div className="text-xs text-text-secondary">
-              {profile?.plan === "free" ? "Up to 5 tracked assets, manual entry only" : "Unlimited manual tracking"}
-            </div>
-          </div>
-          {profile?.plan === "free" ? (
-            <span className="rounded-full border border-border-subtle px-2.5 py-1 font-mono text-[10px] text-text-secondary">
-              Billing coming soon
-            </span>
-          ) : null}
-        </div>
+        <BillingCard plan={(profile?.plan ?? "free") as "free" | "pro" | "pro_plus"} planLabel={planLabel} />
       </div>
 
       <div className="flex flex-col gap-sp-2">
