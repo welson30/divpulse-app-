@@ -11,12 +11,12 @@ importScripts("https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js
 importScripts("https://www.gstatic.com/firebasejs/12.16.0/firebase-messaging-compat.js");
 
 firebase.initializeApp({
-  apiKey: "AIzaSyCFh9G-xH_13QMBn5UbNoOg30Qo4G-SkJM",
-  authDomain: "paidprime-c38ee.firebaseapp.com",
-  projectId: "paidprime-c38ee",
-  storageBucket: "paidprime-c38ee.firebasestorage.app",
-  messagingSenderId: "982683368705",
-  appId: "1:982683368705:web:840306290c3a11121b6f00",
+  apiKey: "AIzaSyAMTq_T4q9FT7ssJsUrN1WON4s3HGXGIcg",
+  authDomain: "paidprime-e823b.firebaseapp.com",
+  projectId: "paidprime-e823b",
+  storageBucket: "paidprime-e823b.firebasestorage.app",
+  messagingSenderId: "168444830200",
+  appId: "1:168444830200:web:204801b85b76ec3577b60d",
 });
 
 const messaging = firebase.messaging();
