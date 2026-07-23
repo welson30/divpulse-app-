@@ -42,6 +42,31 @@ export async function addWatchlistItem(_prevState: WatchlistActionState, formDat
   return null;
 }
 
+/**
+ * Direct (non-formData) variant of addWatchlistItem, for one-click "Watch"
+ * buttons on the Collections page — mirrors removeWatchlistItem's shape
+ * below rather than routing through useActionState for a single button.
+ */
+export async function watchTicker(ticker: string, companyName: string | null) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const { error } = await supabase.from("watchlist_items").insert({
+    user_id: user.id,
+    ticker: ticker.toUpperCase(),
+    company_name: companyName,
+  });
+
+  // 23505 = unique_violation — already watched, nothing to do.
+  if (error && error.code !== "23505") return;
+
+  revalidatePath("/watchlist");
+}
+
 export async function removeWatchlistItem(itemId: string) {
   const supabase = await createClient();
   const {

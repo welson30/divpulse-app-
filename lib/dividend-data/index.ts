@@ -2,7 +2,7 @@ import "server-only";
 import { YahooFinanceProvider } from "./yahoo-finance";
 import type { DividendDataProvider } from "./types";
 
-export type { DividendEvent, DividendDataProvider } from "./types";
+export type { DividendEvent, DividendDataProvider, TickerQuote } from "./types";
 
 /**
  * The single call site every consumer (the detection job, any future

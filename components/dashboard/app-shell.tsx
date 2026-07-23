@@ -13,14 +13,14 @@ const NAV_LINKS = [
   { href: "/calendar", label: "Calendar" },
   { href: "/watchlist", label: "Watchlist" },
   { href: "/diversification", label: "Diversification" },
+  { href: "/collections", label: "Collections" },
 ] as const;
 
-// Not-yet-built product routes — still need external market-data APIs
-// (Collections needs live prices/yields; Payments needs Plaid/broker
-// sync) — shown as inert chrome (same treatment the marketing ProductTabs
-// demo uses) so the shell reads as the real app's nav, not a partial one,
-// without linking to 404s.
-const COMING_LINKS = ["Collections", "Payments"];
+// Not-yet-built product routes — still need external services (Payments
+// needs Stripe/billing) — shown as inert chrome (same treatment the
+// marketing ProductTabs demo uses) so the shell reads as the real app's
+// nav, not a partial one, without linking to 404s.
+const COMING_LINKS = ["Payments"];
 
 type AppShellProps = {
   email: string;
