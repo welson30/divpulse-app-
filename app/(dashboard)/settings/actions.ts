@@ -47,7 +47,10 @@ export async function removePushDevice(subscriptionId: string) {
 
 /**
  * Returns the deep link Settings should open for "Connect Telegram" —
- * t.me/PaidPrimeBot?start=<code>. Telegram passes the code through to the
+ * t.me/DivPulseWelson_bot?start=<code>. That's the bot's actual Telegram
+ * @username (verified via the Bot API's getMe) — its display name is
+ * "PaidPrimeBot", which is not the same thing as @PaidPrimeBot and does
+ * not resolve as a t.me link. Telegram passes the code through to the
  * bot as `/start <code>`, which the webhook (app/api/telegram/webhook)
  * uses to attribute the resulting chat_id to this user. Reuses any
  * existing unlinked code for this user instead of minting a new one on
@@ -82,7 +85,7 @@ export async function getTelegramLinkUrl(): Promise<{ url: string } | { error: s
     }
   }
 
-  return { url: `https://t.me/PaidPrimeBot?start=${code}` };
+  return { url: `https://t.me/DivPulseWelson_bot?start=${code}` };
 }
 
 export async function disconnectTelegram() {

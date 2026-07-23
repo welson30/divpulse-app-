@@ -9,7 +9,8 @@ type TelegramUpdate = {
 };
 
 /**
- * Telegram webhook — receives every update sent to @PaidPrimeBot.
+ * Telegram webhook — receives every update sent to @DivPulseWelson_bot
+ * (its display name is "PaidPrimeBot", but that's not the @username).
  * Registered against this URL via Telegram's setWebhook API once a public
  * HTTPS URL exists (not usable from localhost — see conversation history,
  * verification deferred to post-deploy same as FCM push).
