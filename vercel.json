@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/jobs/detect-dividends",
-      "schedule": "50 22 * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
