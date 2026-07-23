@@ -67,9 +67,20 @@ export async function GET(request: NextRequest) {
   let eventsUpserted = 0;
   let paymentsInserted = 0;
 
+  // TEMPORARY — end-to-end pipeline test scaffold, remove after verifying
+  // the Telegram send path. Only fires when the caller supplies BOTH the
+  // real CRON_SECRET (already required above) AND this exact header
+  // naming the ticker to inject a fake "paid today" event for — lets us
+  // exercise the job's real discover -> record-payment -> notify path
+  // without waiting for an actual dividend date or faking Yahoo's API.
+  const testInjectTicker = request.headers.get("x-test-inject-ticker");
+
   for (const ticker of tickers) {
     try {
       const events = await provider.fetchDividends(ticker);
+      if (ticker === testInjectTicker) {
+        events.push({ ticker, exDate: today, payDate: today, amountPerShare: 0.01 });
+      }
       if (events.length === 0) continue;
 
       const { data: upserted, error: upsertError } = await supabase
