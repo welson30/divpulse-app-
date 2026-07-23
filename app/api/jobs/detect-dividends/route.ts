@@ -66,6 +66,9 @@ export async function GET(request: NextRequest) {
   const tickerErrors: { ticker: string; error: string }[] = [];
   let eventsUpserted = 0;
   let paymentsInserted = 0;
+  // TEMPORARY — debug trail for the Telegram-send investigation, remove
+  // alongside the injection scaffold below.
+  const telegramDebug: unknown[] = [];
 
   // TEMPORARY — end-to-end pipeline test scaffold, remove after verifying
   // the Telegram send path. Only fires when the caller supplies BOTH the
@@ -169,7 +172,7 @@ export async function GET(request: NextRequest) {
           const isPro = true;
 
           if (isPro) {
-            const { data: telegramLink } = await supabase
+            const { data: telegramLink, error: telegramLinkError } = await supabase
               .from("telegram_links")
               .select("chat_id")
               .eq("user_id", holding.user_id)
@@ -178,11 +181,14 @@ export async function GET(request: NextRequest) {
 
             if (telegramLink?.chat_id) {
               const result = await sendTelegramDividendAlert(telegramLink.chat_id, ticker, amount, holding.broker_name ?? null);
+              telegramDebug.push({ userId: holding.user_id, chatId: telegramLink.chat_id, result });
               if (result.sent) {
                 channelsNotified.push("telegram");
               } else if (result.chatInvalid) {
                 await supabase.from("telegram_links").update({ chat_id: null, linked_at: null }).eq("user_id", holding.user_id);
               }
+            } else {
+              telegramDebug.push({ userId: holding.user_id, telegramLink, telegramLinkError });
             }
           }
 
@@ -204,5 +210,6 @@ export async function GET(request: NextRequest) {
     eventsUpserted,
     paymentsInserted,
     errors: tickerErrors,
+    telegramDebug,
   });
 }
