@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { watchTicker } from "@/app/(dashboard)/watchlist/actions";
 
 export type CollectionRow = {
@@ -56,19 +57,28 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
                   {formatYield(row.yieldPct)}
                 </td>
                 <td className="px-sp-3 py-3.5 text-right">
-                  <button
-                    type="button"
-                    disabled={isPending || isWatched}
-                    onClick={() =>
-                      startTransition(async () => {
-                        await watchTicker(row.ticker, null);
-                        setWatched((prev) => new Set(prev).add(row.ticker));
-                      })
-                    }
-                    className="font-sans text-xs text-text-secondary transition-colors hover:text-green-500 disabled:opacity-40"
-                  >
-                    {isWatched ? "Watching" : "Watch"}
-                  </button>
+                  {isWatched ? (
+                    <Link
+                      href="/watchlist"
+                      className="font-sans text-xs text-green-500 underline decoration-green-500/40 underline-offset-2 transition-colors hover:decoration-green-500"
+                    >
+                      Watching · view list
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() =>
+                        startTransition(async () => {
+                          await watchTicker(row.ticker, null);
+                          setWatched((prev) => new Set(prev).add(row.ticker));
+                        })
+                      }
+                      className="font-sans text-xs text-text-secondary transition-colors hover:text-green-500 disabled:opacity-40"
+                    >
+                      Watch
+                    </button>
+                  )}
                 </td>
               </tr>
             );

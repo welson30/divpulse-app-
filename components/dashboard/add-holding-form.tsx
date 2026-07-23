@@ -29,12 +29,16 @@ export function AddHoldingForm({ onSuccess }: { onSuccess?: () => void }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="companyName">Company name</Label>
+        <Label htmlFor="companyName">
+          Company name <span className="font-normal text-text-secondary">(optional)</span>
+        </Label>
         <Input id="companyName" name="companyName" placeholder="The Coca-Cola Company" className="h-11 px-3.5 text-[15px]" />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="brokerName">Broker</Label>
+        <Label htmlFor="brokerName">
+          Broker <span className="font-normal text-text-secondary">(optional)</span>
+        </Label>
         <Input id="brokerName" name="brokerName" placeholder="Fidelity" className="h-11 px-3.5 text-[15px]" />
       </div>
 

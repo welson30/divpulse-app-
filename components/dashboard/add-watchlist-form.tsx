@@ -23,7 +23,9 @@ export function AddWatchlistForm({ onSuccess }: { onSuccess?: () => void }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="companyName">Company name</Label>
+        <Label htmlFor="companyName">
+          Company name <span className="font-normal text-text-secondary">(optional)</span>
+        </Label>
         <Input id="companyName" name="companyName" placeholder="JPMorgan Equity Premium Income ETF" className="h-11 px-3.5 text-[15px]" />
       </div>
 
