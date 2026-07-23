@@ -15,7 +15,12 @@ export function EnableNotificationsButton() {
 
   // On mount, check for a REAL existing FCM token — not just
   // Notification.permission — since a token can be revoked/expired
-  // independently of the browser's stored permission choice.
+  // independently of the browser's stored permission choice. A token
+  // existing client-side doesn't prove the server has it on file (e.g. a
+  // prior savePushToken() call failed, or the token predates a Firebase
+  // project change) — re-saving it here makes "Notifications on" mean
+  // "the server actually has this token," not just "the browser does,"
+  // and self-heals any past save that silently didn't land.
   useEffect(() => {
     if (typeof window === "undefined" || !("Notification" in window)) {
       setState("unsupported");
@@ -28,8 +33,14 @@ export function EnableNotificationsButton() {
 
     let cancelled = false;
     getExistingPushToken()
-      .then((token) => {
-        if (!cancelled) setState(token ? "subscribed" : "idle");
+      .then(async (token) => {
+        if (cancelled) return;
+        if (!token) {
+          setState("idle");
+          return;
+        }
+        await savePushToken(token, navigator.userAgent);
+        if (!cancelled) setState("subscribed");
       })
       .catch(() => {
         if (!cancelled) setState("idle");
