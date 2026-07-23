@@ -16,6 +16,9 @@ import { getStripe, STRIPE_PRICE_IDS } from "@/lib/stripe/client";
  * Verifies Stripe's signature header before trusting any payload — this
  * is the actual authentication boundary for an endpoint that changes
  * what a user is billed for and what they can access.
+ *
+ * URL is /api/webhooks/stripe (not /api/stripe/webhook) to match the
+ * webhook URL the client already had registered in Stripe.
  */
 export async function POST(request: NextRequest) {
   const signature = request.headers.get("stripe-signature");
