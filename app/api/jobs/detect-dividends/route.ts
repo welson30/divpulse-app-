@@ -66,24 +66,10 @@ export async function GET(request: NextRequest) {
   const tickerErrors: { ticker: string; error: string }[] = [];
   let eventsUpserted = 0;
   let paymentsInserted = 0;
-  // TEMPORARY — debug trail for the Telegram-send investigation, remove
-  // alongside the injection scaffold below.
-  const telegramDebug: unknown[] = [];
-
-  // TEMPORARY — end-to-end pipeline test scaffold, remove after verifying
-  // the Telegram send path. Only fires when the caller supplies BOTH the
-  // real CRON_SECRET (already required above) AND this exact header
-  // naming the ticker to inject a fake "paid today" event for — lets us
-  // exercise the job's real discover -> record-payment -> notify path
-  // without waiting for an actual dividend date or faking Yahoo's API.
-  const testInjectTicker = request.headers.get("x-test-inject-ticker");
 
   for (const ticker of tickers) {
     try {
       const events = await provider.fetchDividends(ticker);
-      if (ticker === testInjectTicker) {
-        events.push({ ticker, exDate: today, payDate: today, amountPerShare: 0.01 });
-      }
       if (events.length === 0) continue;
 
       const { data: upserted, error: upsertError } = await supabase
@@ -162,17 +148,16 @@ export async function GET(request: NextRequest) {
           if (anySent) channelsNotified.push("push");
 
           // Telegram alerts are Pro/Pro+ only (ARCHITECTURE.md §7) — the
-          // plan check normally happens here, server-side via the
-          // service-role client, same reasoning as the Free-plan holdings
-          // cap (ARCHITECTURE.md §10).
-          // TODO(stripe): gate disabled for pre-billing testing — restore
-          // to a `profiles.plan === "pro" || "pro_plus"` lookup once
-          // Stripe subscriptions are live. Matching gate is in
+          // plan check happens here, server-side via the service-role
+          // client, same reasoning as the Free-plan holdings cap
+          // (ARCHITECTURE.md §10: never trust a client-visible flag alone
+          // for anything that gates a paid feature). Matching gate is in
           // app/(dashboard)/settings/page.tsx (isPro).
-          const isPro = true;
+          const { data: profile } = await supabase.from("profiles").select("plan").eq("id", holding.user_id).single();
+          const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
 
           if (isPro) {
-            const { data: telegramLink, error: telegramLinkError } = await supabase
+            const { data: telegramLink } = await supabase
               .from("telegram_links")
               .select("chat_id")
               .eq("user_id", holding.user_id)
@@ -181,14 +166,11 @@ export async function GET(request: NextRequest) {
 
             if (telegramLink?.chat_id) {
               const result = await sendTelegramDividendAlert(telegramLink.chat_id, ticker, amount, holding.broker_name ?? null);
-              telegramDebug.push({ userId: holding.user_id, chatId: telegramLink.chat_id, result });
               if (result.sent) {
                 channelsNotified.push("telegram");
               } else if (result.chatInvalid) {
                 await supabase.from("telegram_links").update({ chat_id: null, linked_at: null }).eq("user_id", holding.user_id);
               }
-            } else {
-              telegramDebug.push({ userId: holding.user_id, telegramLink, telegramLinkError });
             }
           }
 
@@ -210,6 +192,5 @@ export async function GET(request: NextRequest) {
     eventsUpserted,
     paymentsInserted,
     errors: tickerErrors,
-    telegramDebug,
   });
 }

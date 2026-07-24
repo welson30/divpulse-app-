@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe, STRIPE_PRICE_IDS } from "@/lib/stripe/client";
+import { sendPaymentConfirmationEmail } from "@/lib/resend/client";
 
 /**
  * Stripe webhook — the single source of truth sync point for billing
@@ -50,6 +51,15 @@ export async function POST(request: NextRequest) {
         typeof session.subscription === "string" ? session.subscription : session.subscription.id,
       );
       await syncSubscription(supabase, userId, subscription);
+
+      // Sent only here, not from customer.subscription.updated — that
+      // event also fires for routine renewals, which shouldn't re-send a
+      // "welcome to Pro" email every billing cycle.
+      const priceId = subscription.items.data[0]?.price.id;
+      const plan = planFromPriceId(priceId);
+      if (plan && session.customer_details?.email && session.amount_total != null) {
+        sendPaymentConfirmationEmail(session.customer_details.email, plan, session.amount_total).catch(() => {});
+      }
       break;
     }
 
