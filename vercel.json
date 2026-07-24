@@ -1,3 +1,1 @@
-{
-  "_comment": "Vercel Cron disabled while testing Supabase pg_cron as an alternative scheduler (Hobby plan's 1-hour execution window made timing hard to verify). Restore the crons array below to re-enable: { \"crons\": [{ \"path\": \"/api/jobs/detect-dividends\", \"schedule\": \"0 6 * * *\" }] }"
-}
+{}
