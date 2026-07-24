@@ -14,13 +14,8 @@ const NAV_LINKS = [
   { href: "/watchlist", label: "Watchlist" },
   { href: "/diversification", label: "Diversification" },
   { href: "/collections", label: "Collections" },
+  { href: "/goals", label: "Goals" },
 ] as const;
-
-// Not-yet-built product routes — still need external services (Payments
-// needs Stripe/billing) — shown as inert chrome (same treatment the
-// marketing ProductTabs demo uses) so the shell reads as the real app's
-// nav, not a partial one, without linking to 404s.
-const COMING_LINKS = ["Payments"];
 
 type AppShellProps = {
   email: string;
@@ -98,12 +93,6 @@ export function AppShell({ email, planLabel, children }: AppShellProps) {
               </Link>
             );
           })}
-          <span aria-hidden className="h-4 w-px shrink-0 bg-border-subtle" />
-          {COMING_LINKS.map((label) => (
-            <span key={label} className="shrink-0 py-3 font-sans text-[13px] text-text-secondary/40 whitespace-nowrap" aria-disabled>
-              {label}
-            </span>
-          ))}
         </nav>
       </header>
 
