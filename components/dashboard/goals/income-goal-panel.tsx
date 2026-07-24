@@ -39,40 +39,50 @@ export function IncomeGoalPanel({ currentMonthlyIncome, avgYieldPct, targetAmoun
 
   return (
     <div className="flex flex-col gap-sp-3">
-      <div className="grid gap-sp-2 sm:grid-cols-3">
-        <div className="rounded-card border border-green-500/30 bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Monthly income goal</div>
-          <div className="mt-1 font-mono text-xl font-bold text-text-primary">{hasGoal ? `$${targetAmount.toFixed(0)}` : "—"}</div>
-          {hasGoal ? (
-            <>
-              <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-border-subtle">
-                <div className="h-full rounded-full bg-green-500" style={{ width: `${progressPct}%` }} />
-              </div>
-              <div className="mt-1.5 text-xs text-text-secondary">
-                ${currentMonthlyIncome.toFixed(0)} of ${targetAmount.toFixed(0)} · <span className="text-green-500">{progressPct.toFixed(1)}%</span>
-              </div>
-            </>
-          ) : (
-            <div className="mt-1 text-xs text-text-secondary">Set a target below</div>
-          )}
-        </div>
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Time to goal</div>
-          <div className="mt-1 font-mono text-xl font-bold text-text-primary">
-            {monthsToGoal != null ? `~${(monthsToGoal / 12).toFixed(1)} yrs` : "—"}
+      {hasGoal ? (
+        <>
+          <div className="rounded-card border border-green-500/30 bg-surface p-sp-3">
+            <div className="flex items-baseline justify-between">
+              <div className="text-xs text-text-secondary">Monthly income goal</div>
+              <span className="font-semibold text-green-500">{progressPct.toFixed(1)}%</span>
+            </div>
+            <div className="mt-1 font-mono text-2xl font-bold text-text-primary">${targetAmount.toFixed(0)}/mo</div>
+            <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-border-subtle">
+              <div className="h-full rounded-full bg-green-500" style={{ width: `${progressPct}%` }} />
+            </div>
+            <div className="mt-1.5 text-xs text-text-secondary">
+              Currently earning ${currentMonthlyIncome.toFixed(0)}/mo of ${targetAmount.toFixed(0)} target
+            </div>
           </div>
-          <div className="mt-1 text-xs text-text-secondary">At current contribution rate</div>
-        </div>
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Capital needed</div>
-          <div className="mt-1 font-mono text-xl font-bold text-text-primary">
-            {capitalNeeded != null ? `~$${Math.round(capitalNeeded).toLocaleString()}` : "—"}
+
+          <div className="grid gap-sp-2 sm:grid-cols-2">
+            <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
+              <div className="text-xs text-text-secondary">Time to goal</div>
+              <div className="mt-1 font-mono text-xl font-bold text-text-primary">
+                {monthsToGoal != null ? `~${(monthsToGoal / 12).toFixed(1)} yrs` : "Add a monthly contribution"}
+              </div>
+              <div className="mt-1 text-xs text-text-secondary">At your current contribution rate</div>
+            </div>
+            <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
+              <div className="text-xs text-text-secondary">Capital needed</div>
+              <div className="mt-1 font-mono text-xl font-bold text-text-primary">
+                {capitalNeeded != null ? `~$${Math.round(capitalNeeded).toLocaleString()}` : "—"}
+              </div>
+              <div className="mt-1 text-xs text-text-secondary">At {avgYieldPct.toFixed(2)}% avg yield</div>
+            </div>
           </div>
-          <div className="mt-1 text-xs text-text-secondary">At {avgYieldPct.toFixed(2)}% avg yield</div>
+        </>
+      ) : (
+        <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-3 text-sm text-text-secondary">
+          You're currently earning <span className="font-semibold text-green-500">${currentMonthlyIncome.toFixed(0)}/mo</span> in
+          dividends. Set a target below to track your progress.
         </div>
-      </div>
+      )}
 
       <form action={formAction} className="rounded-card border border-border-subtle bg-surface p-sp-3">
+        <div className="mb-sp-2 text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
+          {hasGoal ? "Update goal" : "Set your goal"}
+        </div>
         <div className="grid gap-sp-2 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="targetAmount">Monthly income goal ($)</Label>

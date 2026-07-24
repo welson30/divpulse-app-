@@ -30,7 +30,8 @@ export function ReserveGoalPanel({ currentReserve, monthlyExpenses, monthsTarget
 
   return (
     <div className="flex flex-col gap-sp-3">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-text-secondary">Reserve target:</span>
         {MONTH_OPTIONS.map((months) => (
           <button
             key={months}
@@ -48,49 +49,47 @@ export function ReserveGoalPanel({ currentReserve, monthlyExpenses, monthsTarget
         ))}
       </div>
 
-      <div className="grid gap-sp-2 sm:grid-cols-4">
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Monthly expenses</div>
-          <div className="mt-1 font-mono text-lg font-bold text-text-primary">
-            {monthlyExpenses != null ? `$${monthlyExpenses.toFixed(0)}` : "—"}
-          </div>
-        </div>
-        <div className="rounded-card border border-green-500/30 bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Target ({selectedMonths} months)</div>
-          <div className="mt-1 font-mono text-lg font-bold text-green-500">{hasGoal ? `$${target.toFixed(0)}` : "—"}</div>
-        </div>
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Current reserve</div>
-          <div className="mt-1 font-mono text-lg font-bold text-green-500">${reserveAmount.toFixed(0)}</div>
-        </div>
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Current protection</div>
-          <div className="mt-1 font-mono text-lg font-bold text-text-primary">
-            {hasGoal ? `~${monthsOfProtection.toFixed(1)} mo` : "—"}
-          </div>
-        </div>
-      </div>
-
       {hasGoal ? (
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="mb-2 flex justify-between text-sm">
-            <span className="text-text-secondary">
-              ${reserveAmount.toFixed(0)} of ${target.toFixed(0)}
-            </span>
-            <span className="font-semibold text-green-500">{progressPct.toFixed(1)}%</span>
+        <>
+          <div className="rounded-card border border-green-500/30 bg-surface p-sp-3">
+            <div className="flex items-baseline justify-between">
+              <div className="text-xs text-text-secondary">
+                {selectedMonths}-month reserve · ${reserveAmount.toFixed(0)} of ${target.toFixed(0)}
+              </div>
+              <span className="font-semibold text-green-500">{progressPct.toFixed(1)}%</span>
+            </div>
+            <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-border-subtle">
+              <div className="h-full rounded-full bg-green-500" style={{ width: `${progressPct}%` }} />
+            </div>
+            <div className="mt-2 flex justify-between text-xs text-text-secondary">
+              <span>Still needed</span>
+              <span className="font-semibold text-warning">${stillNeeded.toFixed(0)}</span>
+            </div>
           </div>
-          <div className="mb-sp-2 h-2 overflow-hidden rounded-full bg-border-subtle">
-            <div className="h-full rounded-full bg-green-500" style={{ width: `${progressPct}%` }} />
+
+          <div className="grid gap-sp-2 sm:grid-cols-2">
+            <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
+              <div className="text-xs text-text-secondary">Monthly expenses</div>
+              <div className="mt-1 font-mono text-xl font-bold text-text-primary">${monthlyExpenses.toFixed(0)}</div>
+            </div>
+            <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
+              <div className="text-xs text-text-secondary">Current protection</div>
+              <div className="mt-1 font-mono text-xl font-bold text-text-primary">~{monthsOfProtection.toFixed(1)} mo</div>
+              <div className="mt-1 text-xs text-text-secondary">of expenses covered</div>
+            </div>
           </div>
-          <div className="flex justify-between border-t border-border-subtle py-2 text-sm">
-            <span className="text-text-secondary">Still needed</span>
-            <span className="font-semibold text-warning">${stillNeeded.toFixed(0)}</span>
-          </div>
+        </>
+      ) : (
+        <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-3 text-sm text-text-secondary">
+          Enter your monthly expenses and current savings below to see your {selectedMonths}-month reserve target.
         </div>
-      ) : null}
+      )}
 
       <form action={formAction} className="rounded-card border border-border-subtle bg-surface p-sp-3">
         <input type="hidden" name="monthsTarget" value={selectedMonths} />
+        <div className="mb-sp-2 text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
+          {hasGoal ? "Update goal" : "Set your goal"}
+        </div>
         <div className="grid gap-sp-2 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="monthlyExpenses">Monthly expenses ($)</Label>

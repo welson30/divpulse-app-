@@ -35,33 +35,45 @@ export function FreedomGoalPanel({ portfolioValue, avgYieldPct, targetAmount, mo
   return (
     <div className="flex flex-col gap-sp-3">
       <div className="grid gap-sp-3 md:grid-cols-2">
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="mb-sp-2 font-mono text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
-            Wealth projection
+        {hasGoal ? (
+          <div className="rounded-card border border-green-500/30 bg-surface p-sp-3">
+            <div className="mb-sp-2 font-mono text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
+              Wealth projection
+            </div>
+            <div className="flex justify-between border-b border-border-subtle py-2 text-sm">
+              <span className="text-text-secondary">Current portfolio</span>
+              <span className="font-semibold text-text-primary">${portfolioValue.toFixed(0)}</span>
+            </div>
+            <div className="flex justify-between border-b border-border-subtle py-2 text-sm">
+              <span className="text-text-secondary">Portfolio needed for freedom</span>
+              <span className="font-semibold text-text-primary">~${Math.round(targetAmount).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between border-b border-border-subtle py-2 text-sm">
+              <span className="text-text-secondary">At current contribution</span>
+              <span className="font-semibold text-green-500">
+                {yearsAtCurrentRate != null
+                  ? `${currentYear + Math.ceil(yearsAtCurrentRate)} (${yearsAtCurrentRate.toFixed(1)} yrs)`
+                  : "Add a monthly contribution"}
+              </span>
+            </div>
+            <div className="flex justify-between py-2 text-sm">
+              <span className="text-text-secondary">At 2× contribution</span>
+              <span className="font-semibold text-green-500">
+                {yearsAtDoubleRate != null ? `${currentYear + Math.ceil(yearsAtDoubleRate)} (${yearsAtDoubleRate.toFixed(1)} yrs)` : "—"}
+              </span>
+            </div>
           </div>
-          <div className="flex justify-between border-b border-border-subtle py-2 text-sm">
-            <span className="text-text-secondary">Current portfolio</span>
-            <span className="font-semibold text-text-primary">${portfolioValue.toFixed(0)}</span>
+        ) : (
+          <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-3 text-sm text-text-secondary">
+            Your current portfolio is worth <span className="font-semibold text-green-500">${portfolioValue.toFixed(0)}</span>. Set a
+            financial freedom target to see how long it'll take to get there.
           </div>
-          <div className="flex justify-between border-b border-border-subtle py-2 text-sm">
-            <span className="text-text-secondary">Portfolio needed for freedom</span>
-            <span className="font-semibold text-text-primary">{hasGoal ? `~$${Math.round(targetAmount).toLocaleString()}` : "—"}</span>
-          </div>
-          <div className="flex justify-between border-b border-border-subtle py-2 text-sm">
-            <span className="text-text-secondary">At current contribution</span>
-            <span className="font-semibold text-green-500">
-              {yearsAtCurrentRate != null ? `${currentYear + Math.ceil(yearsAtCurrentRate)} (${yearsAtCurrentRate.toFixed(1)} yrs)` : "—"}
-            </span>
-          </div>
-          <div className="flex justify-between py-2 text-sm">
-            <span className="text-text-secondary">At 2× contribution</span>
-            <span className="font-semibold text-green-500">
-              {yearsAtDoubleRate != null ? `${currentYear + Math.ceil(yearsAtDoubleRate)} (${yearsAtDoubleRate.toFixed(1)} yrs)` : "—"}
-            </span>
-          </div>
-        </div>
+        )}
 
         <form action={formAction} className="rounded-card border border-border-subtle bg-surface p-sp-3">
+          <div className="mb-sp-2 text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
+            {hasGoal ? "Update goal" : "Set your goal"}
+          </div>
           <div className="flex flex-col gap-sp-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="freedomTarget">Portfolio value for financial freedom ($)</Label>

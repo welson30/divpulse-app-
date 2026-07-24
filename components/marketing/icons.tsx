@@ -114,6 +114,32 @@ export function IconBell({ className }: IconProps) {
   return <IconAlerts className={className} />;
 }
 
+export function IconPalmTree({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M12 21V10" />
+      <path d="M12 10c0-3-2-5-5-5 0 3 2 5 5 5Z" />
+      <path d="M12 10c0-3 2-5 5-5 0 3-2 5-5 5Z" />
+      <path d="M12 12c0-4-3-6-7-6 0 4 3 6 7 6Z" />
+      <path d="M4 21h16" />
+    </svg>
+  );
+}
+
+export function IconBot({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <rect x="4" y="8" width="16" height="12" rx="3" />
+      <path d="M12 8V4" />
+      <circle cx="12" cy="3" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="14" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="14" r="1.2" fill="currentColor" stroke="none" />
+      <path d="M9 18h6" />
+      <path d="M2 12v3M22 12v3" />
+    </svg>
+  );
+}
+
 export function IconArrowRight({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
