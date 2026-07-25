@@ -45,13 +45,6 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <>
-          <div className="rounded-card border border-warning/25 bg-[rgba(251,191,36,0.08)] p-sp-3">
-            <p className="text-sm text-text-secondary">
-              Live prices and dividend detection aren&rsquo;t connected yet — this dashboard currently shows your
-              tracked positions only.
-            </p>
-          </div>
-
           <div className="flex flex-col gap-sp-2">
             <div className="flex items-center justify-between">
               <h2 className="text-h2 font-display font-medium text-text-primary">Recent holdings</h2>
