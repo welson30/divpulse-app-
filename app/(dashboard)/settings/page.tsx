@@ -4,6 +4,7 @@ import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-for
 import { PushDevicesList, type PushDevice } from "@/components/dashboard/push-devices-list";
 import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
 import { BillingCard } from "@/components/dashboard/billing-card";
+import { PlaidConnectCard } from "@/components/dashboard/plaid-connect-card";
 
 export const metadata: Metadata = {
   title: "Settings — PaidPrime",
@@ -21,7 +22,7 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: devices }, { data: telegramLink }] = await Promise.all([
+  const [{ data: profile }, { data: devices }, { data: telegramLink }, { data: brokerConnections }] = await Promise.all([
     supabase.from("profiles").select("display_name, currency, locale, plan").eq("id", user!.id).single(),
     supabase
       .from("push_subscriptions")
@@ -29,6 +30,11 @@ export default async function SettingsPage() {
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false }),
     supabase.from("telegram_links").select("chat_id").eq("user_id", user!.id).maybeSingle(),
+    supabase
+      .from("broker_connections")
+      .select("id, institution_name, status, last_synced_at")
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false }),
   ]);
 
   const planLabel = PLAN_LABELS[profile?.plan ?? "free"] ?? "Free";
@@ -37,6 +43,7 @@ export default async function SettingsPage() {
   // re-checks profiles.plan server-side before sending (never trust a
   // client-visible flag alone for anything that gates a paid feature).
   const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
+  const isProPlus = profile?.plan === "pro_plus";
 
   return (
     <div className="flex max-w-xl flex-col gap-sp-5">
@@ -58,6 +65,11 @@ export default async function SettingsPage() {
       <div className="flex flex-col gap-sp-2">
         <h2 className="text-h2 font-display font-medium text-text-primary">Plan</h2>
         <BillingCard plan={(profile?.plan ?? "free") as "free" | "pro" | "pro_plus"} planLabel={planLabel} />
+      </div>
+
+      <div className="flex flex-col gap-sp-2">
+        <h2 className="text-h2 font-display font-medium text-text-primary">Broker auto-sync</h2>
+        <PlaidConnectCard isProPlus={isProPlus} connections={brokerConnections ?? []} />
       </div>
 
       <div className="flex flex-col gap-sp-2">

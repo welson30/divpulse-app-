@@ -63,6 +63,59 @@ export async function addHolding(_prevState: HoldingActionState, formData: FormD
   return null;
 }
 
+export type CsvImportRow = { ticker: string; shares: number; brokerName: string | null };
+export type CsvImportResult = { imported: number } | { error: string };
+
+/**
+ * Inserts already-parsed CSV rows (lib/csv/parse-holdings.ts does the
+ * parsing client-side, for an instant preview before the user confirms —
+ * this action only handles the actual write, so the plan-gate check has
+ * one enforcement point regardless of how many rows are being imported).
+ *
+ * CSV import is Pro+ only (ARCHITECTURE.md §7) — checked server-side
+ * against profiles.plan, never a client-visible flag.
+ */
+export async function importHoldingsFromCsv(rows: CsvImportRow[]): Promise<CsvImportResult> {
+  if (rows.length === 0) {
+    return { error: "No valid rows to import." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Your session expired. Please sign in again." };
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
+  if (profile?.plan !== "pro_plus") {
+    return { error: "CSV import is a Pro+ feature. Upgrade in Settings to use it." };
+  }
+
+  const { error, count } = await supabase
+    .from("holdings")
+    .insert(
+      rows.map((row) => ({
+        user_id: user.id,
+        ticker: row.ticker,
+        shares: row.shares,
+        broker_name: row.brokerName,
+        source: "csv" as const,
+      })),
+      { count: "exact" },
+    );
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/holdings");
+  revalidatePath("/dashboard");
+  return { imported: count ?? rows.length };
+}
+
 export async function deleteHolding(holdingId: string) {
   const supabase = await createClient();
   const {

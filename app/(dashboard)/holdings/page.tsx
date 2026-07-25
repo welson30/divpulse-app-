@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { HoldingsTable, type Holding } from "@/components/dashboard/holdings-table";
 import { AddHoldingDialog } from "@/components/dashboard/add-holding-dialog";
+import { ImportCsvDialog } from "@/components/dashboard/import-csv-dialog";
 
 export const metadata: Metadata = {
   title: "Holdings — PaidPrime",
@@ -23,6 +24,7 @@ export default async function HoldingsPage() {
   ]);
 
   const isFree = (profile?.plan ?? "free") === "free";
+  const isProPlus = profile?.plan === "pro_plus";
   const count = holdings?.length ?? 0;
 
   return (
@@ -35,7 +37,10 @@ export default async function HoldingsPage() {
             {count} {count === 1 ? "asset" : "assets"} tracked{isFree ? ` · Free plan limit: 5` : ""}
           </p>
         </div>
-        <AddHoldingDialog />
+        <div className="flex gap-sp-2">
+          <ImportCsvDialog isProPlus={isProPlus} />
+          <AddHoldingDialog />
+        </div>
       </div>
 
       <HoldingsTable holdings={(holdings ?? []) as Holding[]} />
