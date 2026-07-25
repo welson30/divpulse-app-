@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { AiAdvisorPanel } from "@/components/dashboard/ai-advisor-panel";
 import { saveReserveGoal, type GoalActionState } from "@/app/(dashboard)/goals/actions";
 
 export type ReserveGoalPanelProps = {
@@ -17,7 +16,7 @@ export type ReserveGoalPanelProps = {
 
 const MONTH_OPTIONS = [3, 6, 12];
 
-export function ReserveGoalPanel({ currentReserve, monthlyExpenses, monthsTarget, isPro }: ReserveGoalPanelProps) {
+export function ReserveGoalPanel({ currentReserve, monthlyExpenses, monthsTarget }: ReserveGoalPanelProps) {
   const reserveAmount = currentReserve ?? 0;
   const [state, formAction, pending] = useActionState<GoalActionState, FormData>(saveReserveGoal, null);
   const [selectedMonths, setSelectedMonths] = useState(monthsTarget ?? 6);
@@ -128,15 +127,6 @@ export function ReserveGoalPanel({ currentReserve, monthlyExpenses, monthsTarget
           {pending ? "Saving…" : "Save goal"}
         </Button>
       </form>
-
-      <AiAdvisorPanel
-        isPro={isPro}
-        placeholder={
-          hasGoal
-            ? `You're ${progressPct.toFixed(1)}% toward your ${selectedMonths}-month reserve. Ask how to close the gap faster.`
-            : "Set your monthly expenses above to see your reserve target."
-        }
-      />
     </div>
   );
 }

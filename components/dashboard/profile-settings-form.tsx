@@ -9,12 +9,11 @@ import { updateProfile, type SettingsActionState } from "@/app/(dashboard)/setti
 
 type ProfileSettingsFormProps = {
   email: string;
-  displayName: string | null;
   currency: string;
   locale: string;
 };
 
-export function ProfileSettingsForm({ email, displayName, currency, locale }: ProfileSettingsFormProps) {
+export function ProfileSettingsForm({ email, currency, locale }: ProfileSettingsFormProps) {
   const [state, formAction, pending] = useActionState<SettingsActionState, FormData>(updateProfile, null);
 
   return (
@@ -24,18 +23,7 @@ export function ProfileSettingsForm({ email, displayName, currency, locale }: Pr
         <Input id="email" value={email} disabled className="h-11 px-3.5 text-[15px]" />
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="displayName">Display name</Label>
-        <Input
-          id="displayName"
-          name="displayName"
-          defaultValue={displayName ?? ""}
-          placeholder="Alex"
-          className="h-11 px-3.5 text-[15px]"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-sp-2">
+      <div className="grid gap-sp-2 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="currency">Currency</Label>
           <SelectNative id="currency" name="currency" defaultValue={currency}>
@@ -61,7 +49,7 @@ export function ProfileSettingsForm({ email, displayName, currency, locale }: Pr
       ) : null}
       {state && "success" in state ? <p className="text-sm text-green-500">Saved.</p> : null}
 
-      <Button type="submit" disabled={pending} className="h-11 self-start text-[15px]">
+      <Button type="submit" disabled={pending} className="h-10 self-start px-5 text-[13px]">
         {pending ? "Saving…" : "Save changes"}
       </Button>
     </form>

@@ -38,11 +38,11 @@ export function PushDevicesList({ devices }: { devices: PushDevice[] }) {
       {devices.map((device) => (
         <div
           key={device.id}
-          className="flex items-center justify-between gap-2 rounded-card border border-border-subtle bg-surface p-sp-2.5"
+          className="flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-surface-2 px-3.5 py-3"
         >
           <div className="min-w-0">
-            <div className="text-sm text-text-primary">{describeDevice(device.user_agent)}</div>
-            <div className="text-xs text-text-secondary">Added {formatDate(device.created_at)}</div>
+            <div className="text-sm font-medium text-text-primary">{describeDevice(device.user_agent)}</div>
+            <div className="mt-0.5 text-xs text-text-secondary">Added {formatDate(device.created_at)}</div>
           </div>
           <button
             type="button"

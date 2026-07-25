@@ -23,12 +23,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login");
   }
 
-  const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
+  const [{ data: profile }, { count: holdingCount }] = await Promise.all([
+    supabase.from("profiles").select("plan").eq("id", user.id).single(),
+    supabase.from("holdings").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+  ]);
 
   const planLabel = PLAN_LABELS[profile?.plan ?? "free"] ?? "Free";
+  const isFree = (profile?.plan ?? "free") === "free";
 
   return (
-    <AppShell email={user.email ?? ""} planLabel={planLabel}>
+    <AppShell email={user.email ?? ""} planLabel={planLabel} isFree={isFree} holdingCount={holdingCount ?? 0}>
       {children}
     </AppShell>
   );

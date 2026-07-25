@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/server";
 export type SettingsActionState = { error: string } | { success: true } | null;
 
 export async function updateProfile(_prevState: SettingsActionState, formData: FormData): Promise<SettingsActionState> {
-  const displayName = String(formData.get("displayName") ?? "").trim() || null;
   const currency = String(formData.get("currency") ?? "USD");
   const locale = String(formData.get("locale") ?? "en");
 
@@ -19,10 +18,7 @@ export async function updateProfile(_prevState: SettingsActionState, formData: F
     return { error: "Your session expired. Please sign in again." };
   }
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({ display_name: displayName, currency, locale })
-    .eq("id", user.id);
+  const { error } = await supabase.from("profiles").update({ currency, locale }).eq("id", user.id);
 
   if (error) {
     return { error: error.message };

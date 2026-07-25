@@ -4,7 +4,6 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AiAdvisorPanel } from "@/components/dashboard/ai-advisor-panel";
 import { saveIncomeGoal, type GoalActionState } from "@/app/(dashboard)/goals/actions";
 
 export type IncomeGoalPanelProps = {
@@ -15,7 +14,7 @@ export type IncomeGoalPanelProps = {
   isPro: boolean;
 };
 
-export function IncomeGoalPanel({ currentMonthlyIncome, avgYieldPct, targetAmount, monthlyContribution, isPro }: IncomeGoalPanelProps) {
+export function IncomeGoalPanel({ currentMonthlyIncome, avgYieldPct, targetAmount, monthlyContribution }: IncomeGoalPanelProps) {
   const [state, formAction, pending] = useActionState<GoalActionState, FormData>(saveIncomeGoal, null);
 
   const hasGoal = targetAmount != null && targetAmount > 0;
@@ -121,15 +120,6 @@ export function IncomeGoalPanel({ currentMonthlyIncome, avgYieldPct, targetAmoun
           {pending ? "Saving…" : "Save goal"}
         </Button>
       </form>
-
-      <AiAdvisorPanel
-        isPro={isPro}
-        placeholder={
-          hasGoal
-            ? `You're ${progressPct.toFixed(1)}% of the way to $${targetAmount.toFixed(0)}/mo. Ask what it'd take to get there faster.`
-            : "Set a monthly income goal above, then ask what it'd take to reach it."
-        }
-      />
     </div>
   );
 }

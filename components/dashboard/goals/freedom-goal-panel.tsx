@@ -4,7 +4,6 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AiAdvisorPanel } from "@/components/dashboard/ai-advisor-panel";
 import { saveFreedomGoal, type GoalActionState } from "@/app/(dashboard)/goals/actions";
 
 export type FreedomGoalPanelProps = {
@@ -21,7 +20,7 @@ function yearsToTarget(gap: number, monthlyContribution: number): number | null 
   return gap / (monthlyContribution * 12);
 }
 
-export function FreedomGoalPanel({ portfolioValue, avgYieldPct, targetAmount, monthlyContribution, isPro }: FreedomGoalPanelProps) {
+export function FreedomGoalPanel({ portfolioValue, avgYieldPct, targetAmount, monthlyContribution }: FreedomGoalPanelProps) {
   const [state, formAction, pending] = useActionState<GoalActionState, FormData>(saveFreedomGoal, null);
 
   const hasGoal = targetAmount != null && targetAmount > 0;
@@ -116,15 +115,6 @@ export function FreedomGoalPanel({ portfolioValue, avgYieldPct, targetAmount, mo
           </p>
         </form>
       </div>
-
-      <AiAdvisorPanel
-        isPro={isPro}
-        placeholder={
-          hasGoal
-            ? `At ${avgYieldPct.toFixed(2)}% yield, you need ~$${Math.round(targetAmount).toLocaleString()} to be financially free. Ask what it'd take to get there sooner.`
-            : "Set your financial freedom target above to see a real projection."
-        }
-      />
     </div>
   );
 }

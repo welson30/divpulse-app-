@@ -16,6 +16,26 @@ const PLAN_LABELS: Record<string, string> = {
   pro_plus: "Pro+",
 };
 
+function SettingsSection({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-card border border-border-subtle bg-surface p-sp-4">
+      <div className="mb-sp-3">
+        <h2 className="text-h2 font-display font-medium text-text-primary">{title}</h2>
+        {description ? <p className="mt-1 text-xs text-text-secondary">{description}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export default async function SettingsPage() {
   const supabase = await createClient();
   const {
@@ -23,7 +43,7 @@ export default async function SettingsPage() {
   } = await supabase.auth.getUser();
 
   const [{ data: profile }, { data: devices }, { data: telegramLink }, { data: brokerConnections }] = await Promise.all([
-    supabase.from("profiles").select("display_name, currency, locale, plan").eq("id", user!.id).single(),
+    supabase.from("profiles").select("currency, locale, plan").eq("id", user!.id).single(),
     supabase
       .from("push_subscriptions")
       .select("id, user_agent, created_at")
@@ -46,44 +66,31 @@ export default async function SettingsPage() {
   const isProPlus = profile?.plan === "pro_plus";
 
   return (
-    <div className="flex max-w-xl flex-col gap-sp-5">
+    <div className="flex max-w-2xl flex-col gap-sp-4">
       <div>
         <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Account</span>
         <h1 className="text-h1 font-display font-semibold text-text-primary">Settings</h1>
       </div>
 
-      <div className="flex flex-col gap-sp-2">
-        <h2 className="text-h2 font-display font-medium text-text-primary">Profile</h2>
-        <ProfileSettingsForm
-          email={user!.email ?? ""}
-          displayName={profile?.display_name ?? null}
-          currency={profile?.currency ?? "USD"}
-          locale={profile?.locale ?? "en"}
-        />
-      </div>
+      <SettingsSection title="Profile">
+        <ProfileSettingsForm email={user!.email ?? ""} currency={profile?.currency ?? "USD"} locale={profile?.locale ?? "en"} />
+      </SettingsSection>
 
-      <div className="flex flex-col gap-sp-2">
-        <h2 className="text-h2 font-display font-medium text-text-primary">Plan</h2>
+      <SettingsSection title="Plan">
         <BillingCard plan={(profile?.plan ?? "free") as "free" | "pro" | "pro_plus"} planLabel={planLabel} />
-      </div>
+      </SettingsSection>
 
-      <div className="flex flex-col gap-sp-2">
-        <h2 className="text-h2 font-display font-medium text-text-primary">Broker auto-sync</h2>
+      <SettingsSection title="Broker auto-sync" description="Connect a US broker via Plaid to sync holdings automatically.">
         <PlaidConnectCard isProPlus={isProPlus} connections={brokerConnections ?? []} />
-      </div>
+      </SettingsSection>
 
-      <div className="flex flex-col gap-sp-2">
-        <h2 className="text-h2 font-display font-medium text-text-primary">Telegram</h2>
+      <SettingsSection title="Telegram" description="Get a Telegram message the moment a dividend is detected.">
         <TelegramConnectCard isPro={isPro} isConnected={!!telegramLink?.chat_id} />
-      </div>
+      </SettingsSection>
 
-      <div className="flex flex-col gap-sp-2">
-        <h2 className="text-h2 font-display font-medium text-text-primary">Notification devices</h2>
-        <p className="-mt-1 text-xs text-text-secondary">
-          Devices registered to receive push alerts when a dividend is detected.
-        </p>
+      <SettingsSection title="Notification devices" description="Devices registered to receive push alerts when a dividend is detected.">
         <PushDevicesList devices={(devices ?? []) as PushDevice[]} />
-      </div>
+      </SettingsSection>
     </div>
   );
 }
