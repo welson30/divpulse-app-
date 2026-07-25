@@ -1,8 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getDividendDataProvider } from "@/lib/dividend-data";
-import { sendDividendPush } from "@/lib/firebase/admin";
-import { sendTelegramDividendAlert } from "@/lib/telegram/send";
+import { sendPush } from "@/lib/firebase/admin";
+import { sendTelegramMessage } from "@/lib/telegram/send";
+import { tickerAmountTemplate, balanceUpdateTemplate, brokerConfirmedTemplate } from "@/lib/notifications/templates";
+import { findBrokerConfirmedDeposit } from "@/lib/notifications/plaid-confirmation";
 
 export const maxDuration = 60;
 
@@ -36,6 +38,18 @@ export const maxDuration = 60;
  * the /settings linking flow (telegram_links.chat_id is set). A chat
  * Telegram reports as blocked/deleted clears chat_id so the next run
  * doesn't keep failing against it. Email is not wired in yet.
+ *
+ * Three notification templates (PRD §4 / ARCHITECTURE.md §3, see
+ * lib/notifications/templates.ts):
+ *   1. ticker + amount — the default, sent on every event unless #3 fires
+ *      instead.
+ *   2. total account balance update — a lifetime-dividend-income summary,
+ *      always sent as a second message alongside #1 or #3, never alone.
+ *   3. broker-confirmed payout — replaces #1 (not additive) when the user
+ *      has an active Plaid connection AND lib/notifications/
+ *      plaid-confirmation.ts finds a matching real transaction in their
+ *      linked account within the last few days. Falls back to #1 if no
+ *      Plaid connection exists or no matching transaction is found yet.
  *
  * Replaces the earlier OneSignal integration, which could not complete a
  * TLS handshake to api.onesignal.com from Pakistani networks — reproduced
@@ -129,6 +143,23 @@ export async function GET(request: NextRequest) {
 
           paymentsInserted += 1;
 
+          // Template 3 (broker-confirmed) replaces template 1 (ticker +
+          // amount) when a real matching transaction is found in a
+          // linked Plaid account; otherwise template 1 is the fallback.
+          // This check only ever returns true for Pro+ users with an
+          // active connection — see lib/notifications/plaid-confirmation.ts.
+          const brokerConfirmed = await findBrokerConfirmedDeposit(holding.user_id, ticker, amount);
+          const primaryTemplate = brokerConfirmed
+            ? brokerConfirmedTemplate(ticker, amount, holding.broker_name)
+            : tickerAmountTemplate(ticker, amount, holding.broker_name);
+
+          // Template 2 (lifetime balance update) is always a second,
+          // additional message — never sent standalone. Computed from
+          // dividend_payments including the row just inserted above.
+          const { data: allPayments } = await supabase.from("dividend_payments").select("amount").eq("user_id", holding.user_id);
+          const lifetimeTotal = (allPayments ?? []).reduce((sum, p) => sum + Number(p.amount), 0);
+          const balanceTemplate = balanceUpdateTemplate(lifetimeTotal);
+
           const { data: subscriptions } = await supabase
             .from("push_subscriptions")
             .select("id, fcm_token")
@@ -138,10 +169,11 @@ export async function GET(request: NextRequest) {
           const channelsNotified: string[] = [];
 
           for (const subscription of subscriptions ?? []) {
-            const result = await sendDividendPush(subscription.fcm_token, ticker, amount);
-            if (result.sent) {
+            const primaryResult = await sendPush(subscription.fcm_token, primaryTemplate.push.title, primaryTemplate.push.body);
+            if (primaryResult.sent) {
               anySent = true;
-            } else if (result.staleToken) {
+              await sendPush(subscription.fcm_token, balanceTemplate.push.title, balanceTemplate.push.body);
+            } else if (primaryResult.staleToken) {
               await supabase.from("push_subscriptions").delete().eq("id", subscription.id);
             }
           }
@@ -165,10 +197,11 @@ export async function GET(request: NextRequest) {
               .maybeSingle();
 
             if (telegramLink?.chat_id) {
-              const result = await sendTelegramDividendAlert(telegramLink.chat_id, ticker, amount, holding.broker_name ?? null);
-              if (result.sent) {
+              const primaryResult = await sendTelegramMessage(telegramLink.chat_id, primaryTemplate.telegram);
+              if (primaryResult.sent) {
                 channelsNotified.push("telegram");
-              } else if (result.chatInvalid) {
+                await sendTelegramMessage(telegramLink.chat_id, balanceTemplate.telegram);
+              } else if (primaryResult.chatInvalid) {
                 await supabase.from("telegram_links").update({ chat_id: null, linked_at: null }).eq("user_id", holding.user_id);
               }
             }

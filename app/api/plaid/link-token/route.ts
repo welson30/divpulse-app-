@@ -9,9 +9,13 @@ import { getPlaidClient } from "@/lib/plaid/client";
  * frontend hands this token to react-plaid-link's usePlaidLink hook,
  * which opens Plaid's hosted connection UI.
  *
- * Investments product only — this app needs holdings, not transactions
- * or balances, and requesting less scope than Plaid supports is both
- * cheaper and a smaller trust footprint.
+ * Investments + Transactions products. Investments powers the core
+ * holdings sync (lib/plaid/sync.ts); Transactions is requested so the
+ * "broker-confirmed payout" notification template
+ * (lib/notifications/plaid-confirmation.ts) can check whether a detected
+ * dividend actually shows up as a real deposit in the user's linked
+ * account, not just that Yahoo Finance says the company paid one.
+ * Balances is intentionally not requested — not used anywhere.
  */
 export async function POST() {
   const supabase = await createClient();
@@ -36,7 +40,7 @@ export async function POST() {
   const response = await plaid.linkTokenCreate({
     user: { client_user_id: user.id },
     client_name: "PaidPrime",
-    products: [Products.Investments],
+    products: [Products.Investments, Products.Transactions],
     country_codes: [CountryCode.Us],
     language: "en",
   });
