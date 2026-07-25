@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlaidClient } from "@/lib/plaid/client";
 import { encrypt } from "@/lib/crypto/encryption";
 import { syncHoldingsForConnection } from "@/lib/plaid/sync";
@@ -37,7 +38,12 @@ export async function POST(request: NextRequest) {
   const accessToken = exchangeResponse.data.access_token;
   const itemId = exchangeResponse.data.item_id;
 
-  const { data: connection, error } = await supabase
+  // broker_connections has no client-insert RLS policy by design (see
+  // the migration) — writes go through the service-role client only, so
+  // a compromised session token can't be used to plant a connection row
+  // pointing at an attacker-controlled encrypted access token.
+  const adminSupabase = createAdminClient();
+  const { data: connection, error } = await adminSupabase
     .from("broker_connections")
     .insert({
       user_id: user.id,
