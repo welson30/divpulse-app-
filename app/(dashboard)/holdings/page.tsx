@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
+import { resolveLogoUrl } from "@/lib/tickers/logo";
 import { HoldingsTable, type Holding } from "@/components/dashboard/holdings-table";
 import { AddHoldingDialog } from "@/components/dashboard/add-holding-dialog";
 import { ImportCsvDialog } from "@/components/dashboard/import-csv-dialog";
@@ -42,9 +43,11 @@ export default async function HoldingsPage() {
   const rows: Holding[] = (holdings ?? []).map((h) => {
     const quote = quotes.get(h.ticker.toUpperCase());
     const shares = Number(h.shares);
+    const name = quote?.name ?? h.company_name ?? null;
     return {
       ...h,
-      name: quote?.name ?? h.company_name ?? null,
+      name,
+      logoUrl: resolveLogoUrl(name),
       price: quote?.price ?? null,
       changePercent: quote?.changePercent ?? null,
       marketValue: quote?.price != null ? quote.price * shares : null,

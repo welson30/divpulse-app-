@@ -35,15 +35,31 @@ type SparklineProps = {
  * direction means here.
  */
 export function Sparkline({ points, id, changePercent, width = 88, height = 28, className }: SparklineProps) {
+  // Nothing to plot — a delisted ticker, an expired contract, or an
+  // instrument that simply isn't market-traded. A flat dashed baseline
+  // holds the column's shape and reads as "no series" rather than as a
+  // chart that failed to load.
   if (points.length < 2) {
     return (
-      <div
-        className={cn("flex items-center justify-center text-[10px] text-text-secondary", className)}
-        style={{ width, height }}
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        width={width}
+        height={height}
+        className={cn("shrink-0", className)}
         aria-hidden
+        focusable="false"
       >
-        —
-      </div>
+        <line
+          x1={0}
+          y1={height / 2}
+          x2={width}
+          y2={height / 2}
+          stroke="var(--border-subtle)"
+          strokeWidth={1.5}
+          strokeDasharray="3 3"
+          strokeLinecap="round"
+        />
+      </svg>
     );
   }
 

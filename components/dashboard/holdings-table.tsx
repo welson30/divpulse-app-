@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { RemoveHoldingDialog } from "@/components/dashboard/remove-holding-dialog";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
+import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import type { SparklinePoint } from "@/lib/dividend-data/types";
 
 export type Holding = {
@@ -14,6 +15,7 @@ export type Holding = {
   source: "manual" | "csv" | "plaid";
   /** Resolved from the live quote, falling back to whatever the user typed. */
   name?: string | null;
+  logoUrl?: string | null;
   price?: number | null;
   changePercent?: number | null;
   marketValue?: number | null;
@@ -57,15 +59,33 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
           </tr>
         </thead>
         <tbody>
-          {holdings.map((holding, i) => (
+          {holdings.map((holding, i) => {
+            // Delisted tickers, expired option contracts and non-traded
+            // instruments (collective trusts, some retirement portfolios)
+            // resolve to a name but carry no market data anywhere. Saying
+            // so beats printing four bare dashes, which reads as a
+            // failure rather than an accurate "there is nothing to show".
+            const hasMarketData = holding.price != null || (holding.sparkline?.length ?? 0) > 0;
+
+            return (
             <tr
               key={holding.id}
               className={`transition-colors hover:bg-surface-hover ${i === holdings.length - 1 ? "" : "border-b border-border-subtle"}`}
             >
               <td className="px-sp-3 py-3">
-                <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
-                <div className="mt-0.5 max-w-[220px] truncate text-xs text-text-secondary">
-                  {holding.name ?? holding.company_name ?? "—"}
+                <div className="flex items-center gap-2.5">
+                  <TickerLogo ticker={holding.ticker} logoUrl={holding.logoUrl} />
+                  <div className="min-w-0">
+                    <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
+                    <div className="mt-0.5 max-w-[220px] truncate text-xs text-text-secondary">
+                      {holding.name ?? holding.company_name ?? "—"}
+                    </div>
+                    {hasMarketData ? null : (
+                      <div className="mt-1 inline-flex items-center rounded-[5px] bg-surface-hover px-1.5 py-0.5 text-[10px] text-text-secondary">
+                        No market data
+                      </div>
+                    )}
+                  </div>
                 </div>
               </td>
               <td className="px-sp-3 py-3 text-[13px] text-text-secondary">{holding.broker_name ?? "—"}</td>
@@ -100,7 +120,8 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
                 </button>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
 
