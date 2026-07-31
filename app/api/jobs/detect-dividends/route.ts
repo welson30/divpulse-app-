@@ -9,6 +9,16 @@ import { findBrokerConfirmedDeposit } from "@/lib/notifications/plaid-confirmati
 export const maxDuration = 60;
 
 /**
+ * How far back a dividend_event's pay_date may be and still be eligible to
+ * produce a payment + notification. Sized to cover Yahoo's same-day
+ * publish lag (see the note below) plus a couple of skipped runs, while
+ * staying far short of the 365 days of history fetchDividends returns —
+ * widening this to "all history" would, on the very next run, insert a
+ * payment row for every past event and fire a notification for each one.
+ */
+const DETECTION_WINDOW_DAYS = 3;
+
+/**
  * The dividend detection job — ARCHITECTURE.md §9.1, the core value prop.
  * Triggered daily by Vercel Cron (see vercel.json), protected by
  * CRON_SECRET so only Vercel's own scheduler can invoke it.
@@ -17,12 +27,30 @@ export const maxDuration = 60;
  *   1. SELECT DISTINCT ticker FROM holdings
  *   2. For each ticker: fetch dividend data, upsert into dividend_events
  *      (unique on ticker+pay_date, so a re-fetch never duplicates a row)
- *   3. For each dividend_event paid today: for each holding on that
- *      ticker, insert a dividend_payments row (unique on
+ *   3. For each dividend_event whose pay_date falls inside the trailing
+ *      DETECTION_WINDOW_DAYS window: for each holding on that ticker,
+ *      insert a dividend_payments row (unique on
  *      holding_id+dividend_event_id — this constraint is what makes
  *      re-running the job safe; a second insert attempt for an
  *      already-processed payment just violates the constraint and is
  *      skipped, never double-counted or double-notified)
+ *
+ * Why a trailing window and not an exact `pay_date === today` match:
+ * Yahoo only publishes a dividend into its feed at the ex-date's market
+ * open — 13:30 UTC, verified directly against the chart endpoint's raw
+ * timestamps. An exact same-day match therefore only works if this job
+ * runs after 13:30 UTC on the day of the payout itself; any earlier run
+ * sees nothing, and by the next run `today` has rolled over so the event
+ * is skipped *permanently*. That was a live production bug: the job was
+ * scheduled at 06:00 UTC, 7.5 hours before the data could exist, so every
+ * payout was written to dividend_events (the calendar showed it fine) but
+ * never produced a payment row or a notification. Confirmed on
+ * 2026-07-31: five payouts dated 2026-07-30 carried fetched_at
+ * 2026-07-31T06:00Z — first seen a full day late — and the only payment
+ * rows in the database came from a manual 22:25 UTC run, never the cron.
+ * A trailing window absorbs both the publish lag and an occasional missed
+ * run, and staying bounded means a backlog of historical events can never
+ * stampede the notification channels.
  *
  * Push (Firebase Cloud Messaging, direct — see lib/firebase/admin.ts)
  * fires immediately after each successful dividend_payments insert, to
@@ -65,6 +93,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = createAdminClient();
   const today = new Date().toISOString().slice(0, 10);
+  const windowStart = new Date(Date.now() - DETECTION_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   const { data: holdings, error: holdingsError } = await supabase
     .from("holdings")
@@ -80,6 +109,7 @@ export async function GET(request: NextRequest) {
   const tickerErrors: { ticker: string; error: string }[] = [];
   let eventsUpserted = 0;
   let paymentsInserted = 0;
+  let notificationsRetried = 0;
 
   for (const ticker of tickers) {
     try {
@@ -107,12 +137,12 @@ export async function GET(request: NextRequest) {
 
       eventsUpserted += upserted?.length ?? 0;
 
-      const eventsPaidToday = (upserted ?? []).filter((e) => e.pay_date === today);
-      if (eventsPaidToday.length === 0) continue;
+      const eventsInWindow = (upserted ?? []).filter((e) => e.pay_date >= windowStart && e.pay_date <= today);
+      if (eventsInWindow.length === 0) continue;
 
       const holdingsForTicker = (holdings ?? []).filter((h) => h.ticker === ticker);
 
-      for (const event of eventsPaidToday) {
+      for (const event of eventsInWindow) {
         for (const holding of holdingsForTicker) {
           const amount = holding.shares * event.amount_per_share;
 
@@ -125,23 +155,42 @@ export async function GET(request: NextRequest) {
               amount,
               pay_date: event.pay_date,
             })
-            .select("id")
+            .select("id, notified_at")
             .single();
 
-          // 23505 = unique_violation — this payment was already recorded
-          // by a prior run of this job. Expected on re-runs, not a
-          // failure; anything else is a real error worth surfacing. Both
-          // cases: skip the push, since either nothing new happened or
-          // the row (and therefore the notified_at update target) doesn't
-          // exist to update.
+          let payment = inserted;
+
           if (insertError) {
+            // Anything other than a unique violation is a real failure.
             if (insertError.code !== "23505") {
               tickerErrors.push({ ticker, error: insertError.message });
+              continue;
             }
-            continue;
-          }
 
-          paymentsInserted += 1;
+            // 23505 = unique_violation — a previous run already recorded
+            // this payment. That is the expected path now that the
+            // detection window spans several days and therefore re-visits
+            // the same event on consecutive runs. It does NOT prove the
+            // notification was ever delivered though: a push/Telegram
+            // failure leaves notified_at null, and the old code bailed out
+            // here unconditionally, so such a payment could never be
+            // retried — the insert kept failing for the rest of time.
+            // Re-read the row and fall through to notify only when it
+            // genuinely never went out.
+            const { data: existing } = await supabase
+              .from("dividend_payments")
+              .select("id, notified_at")
+              .eq("holding_id", holding.id)
+              .eq("dividend_event_id", event.id)
+              .single();
+
+            if (!existing || existing.notified_at) continue;
+
+            payment = existing;
+            notificationsRetried += 1;
+          } else {
+            paymentsInserted += 1;
+          }
 
           // Template 3 (broker-confirmed) replaces template 1 (ticker +
           // amount) when a real matching transaction is found in a
@@ -207,11 +256,13 @@ export async function GET(request: NextRequest) {
             }
           }
 
-          if (channelsNotified.length > 0 && inserted) {
+          // Left null when every channel failed, which is what makes the
+          // next run pick this payment up again as a retry.
+          if (channelsNotified.length > 0 && payment) {
             await supabase
               .from("dividend_payments")
               .update({ notified_at: new Date().toISOString(), notified_channels: channelsNotified })
-              .eq("id", inserted.id);
+              .eq("id", payment.id);
           }
         }
       }
@@ -221,9 +272,11 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({
+    window: { start: windowStart, end: today },
     tickersChecked: tickers.length,
     eventsUpserted,
     paymentsInserted,
+    notificationsRetried,
     errors: tickerErrors,
   });
 }

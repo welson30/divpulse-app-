@@ -116,9 +116,15 @@ export class YahooFinanceProvider implements DividendDataProvider {
 
     const response = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; PaidPrimeBot/1.0)" },
-      // Dividend data doesn't need to be fresher than the daily cron
-      // cadence — avoids hammering the unofficial endpoint on retries.
-      next: { revalidate: 3600 },
+      // Deliberately uncached, unlike fetchQuote below. This is only ever
+      // called by the detection job (app/api/jobs/detect-dividends), which
+      // runs shortly after the 13:30 UTC market open specifically to catch
+      // dividends the moment Yahoo publishes them. A cached response taken
+      // even an hour earlier would be missing exactly the payout the run
+      // exists to find, silently re-creating the "detected a day late"
+      // bug the trailing window was added to fix. Once-a-day, ~20 tickers
+      // is nowhere near enough volume to need the cache.
+      cache: "no-store",
     });
 
     if (!response.ok) {
