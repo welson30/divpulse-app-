@@ -1,12 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TickerSearchCombobox } from "@/components/dashboard/ticker-search-combobox";
 import { addHolding, type HoldingActionState } from "@/app/(dashboard)/holdings/actions";
 
 export function AddHoldingForm({ onSuccess }: { onSuccess?: () => void }) {
+  const [ticker, setTicker] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [state, formAction, pending] = useActionState<HoldingActionState, FormData>(async (prevState, formData) => {
     const result = await addHolding(prevState, formData);
     if (!result) {
@@ -20,7 +23,15 @@ export function AddHoldingForm({ onSuccess }: { onSuccess?: () => void }) {
       <div className="grid grid-cols-2 gap-sp-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="ticker">Ticker</Label>
-          <Input id="ticker" name="ticker" placeholder="KO" required maxLength={10} className="h-11 px-3.5 text-[15px] uppercase" />
+          <TickerSearchCombobox
+            id="ticker"
+            name="ticker"
+            value={ticker}
+            onValueChange={setTicker}
+            onSelect={(result) => setCompanyName(result.name)}
+            placeholder="KO"
+            required
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="shares">Shares</Label>
@@ -32,7 +43,14 @@ export function AddHoldingForm({ onSuccess }: { onSuccess?: () => void }) {
         <Label htmlFor="companyName">
           Company name <span className="font-normal text-text-secondary">(optional)</span>
         </Label>
-        <Input id="companyName" name="companyName" placeholder="The Coca-Cola Company" className="h-11 px-3.5 text-[15px]" />
+        <Input
+          id="companyName"
+          name="companyName"
+          value={companyName}
+          onChange={(e) => setCompanyName(e.target.value)}
+          placeholder="The Coca-Cola Company"
+          className="h-11 px-3.5 text-[15px]"
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">

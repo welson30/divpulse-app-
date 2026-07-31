@@ -100,6 +100,8 @@ Not in the original feedback list, but it came directly out of the same review: 
 
 **Explainer tooltips.** Financial terms across the tables and stat cards carry a `?` (`InfoTip`) with plain-language copy — "52-week range", "Today", "1M", "Yield", "Value", annual income, income per day. Opens on hover, focus **and** click, so it works on touch as well as mouse, closes on Escape, and is wired via `aria-describedby`.
 
+Three follow-on bugs found through the client's own screenshots and fixed same-day: the bubble was clipping inside every table's `overflow-x-auto` wrapper (now renders through a React portal into `document.body`, escaping all ancestor overflow/stacking); the `?` glyph sat visibly off-centre because it inherited the table headers' `font-mono uppercase tracking-[0.06em]` (now resets font/tracking and uses `align-middle`); and it rendered an **empty bubble specifically on Dividends and Dashboard while working correctly on Holdings** — the copy object lived inside `info-tip.tsx`, a `"use client"` file, and a Server Component importing a non-component value from a client module gets a client reference rather than the real value, so `TIPS.exDate` silently read as `undefined` server-side. Moved the copy to `lib/tips.ts`, a plain module with no client boundary, importable identically from both.
+
 **Known limitation: no true profit/loss.** `holdings` stores no purchase price, so cost basis doesn't exist and real gain/loss cannot be computed. The dashboard shows **today's** change instead (portfolio value vs the sum of previous closes), which is real, correctly red/green, and what brokerage apps lead with. Showing lifetime P/L would require capturing a purchase price per holding — a schema and UI change, worth raising with the client.
 
 ## 4c. Dividend history table was unusable — FIXED 2026-07-31
@@ -107,6 +109,14 @@ Not in the original feedback list, but it came directly out of the same review: 
 Reported as "the table feels really off." It was rendering **every** event with no cap — 399 rows for the client's portfolio — and each row showed only a per-share figure like `$0.14`, which is meaningless without knowing the share count. Nothing told the user what they actually received.
 
 Rebuilt to show **Asset (logo + name) · Ex-date · Per share · Your shares · Your payout**, where payout is `shares × amount_per_share` in green — the number the user actually cares about. Capped at the 60 most recent with a "Most recent 60 of 399 payouts" caption, per-share widened to 4 decimals since weekly distributions are frequently sub-cent at 2, and `?` explainers added to "Ex-date" and "Per share".
+
+## 4d. Ticker autocomplete — DONE 2026-08-01
+
+The original ask, now built: typing "KO" or "coca" into the ticker field suggests "The Coca-Cola Company" and auto-fills the company name field on selection.
+
+Built on Yahoo's `/v1/finance/search` endpoint — no API key, already the app's data source, so no new vendor. Its raw results include option contracts and futures alongside real securities (searching "QDTE" returns 7 matches, 6 of them option contracts like "QDTE Dec 2026 19.000 put"); `lib/tickers/search.ts` filters to `EQUITY | ETF | MUTUALFUND` only. Verified against KO, coca, QDTE, vang, jpmorgan — all resolve correctly.
+
+`TickerSearchCombobox` (debounced 250ms, arrow-key navigable, click-outside to close) is hand-rolled rather than built on a combobox library — no such dependency exists in the project yet and this doesn't justify adding one. Wired into both `AddHoldingForm` and `AddWatchlistForm`, replacing the plain ticker input in each; doesn't block manual entry, so a ticker Yahoo's search doesn't surface still submits fine.
 
 ## 5. Dividends page — DONE 2026-07-31
 

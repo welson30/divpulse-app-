@@ -4,7 +4,8 @@ import { useTransition } from "react";
 import { removeWatchlistItem } from "@/app/(dashboard)/watchlist/actions";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
-import { InfoTip, TIPS } from "@/components/dashboard/info-tip";
+import { InfoTip } from "@/components/dashboard/info-tip";
+import { TIPS } from "@/lib/tips";
 import { RangeBar } from "@/components/dashboard/market-stats";
 import type { SparklinePoint } from "@/lib/dividend-data/types";
 

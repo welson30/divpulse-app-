@@ -1,12 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TickerSearchCombobox } from "@/components/dashboard/ticker-search-combobox";
 import { addWatchlistItem, type WatchlistActionState } from "@/app/(dashboard)/watchlist/actions";
 
 export function AddWatchlistForm({ onSuccess }: { onSuccess?: () => void }) {
+  const [ticker, setTicker] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [state, formAction, pending] = useActionState<WatchlistActionState, FormData>(async (prevState, formData) => {
     const result = await addWatchlistItem(prevState, formData);
     if (!result) {
@@ -19,14 +22,29 @@ export function AddWatchlistForm({ onSuccess }: { onSuccess?: () => void }) {
     <form action={formAction} className="flex flex-col gap-sp-3">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="ticker">Ticker</Label>
-        <Input id="ticker" name="ticker" placeholder="JEPI" required maxLength={10} className="h-11 px-3.5 text-[15px] uppercase" />
+        <TickerSearchCombobox
+          id="ticker"
+          name="ticker"
+          value={ticker}
+          onValueChange={setTicker}
+          onSelect={(result) => setCompanyName(result.name)}
+          placeholder="JEPI"
+          required
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="companyName">
           Company name <span className="font-normal text-text-secondary">(optional)</span>
         </Label>
-        <Input id="companyName" name="companyName" placeholder="JPMorgan Equity Premium Income ETF" className="h-11 px-3.5 text-[15px]" />
+        <Input
+          id="companyName"
+          name="companyName"
+          value={companyName}
+          onChange={(e) => setCompanyName(e.target.value)}
+          placeholder="JPMorgan Equity Premium Income ETF"
+          className="h-11 px-3.5 text-[15px]"
+        />
       </div>
 
       {state?.error ? (

@@ -6,7 +6,7 @@ import { enrichTickers } from "@/lib/tickers/enrich";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { MarketStateBadge, StatCard } from "@/components/dashboard/market-stats";
-import { TIPS } from "@/components/dashboard/info-tip";
+import { TIPS } from "@/lib/tips";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {

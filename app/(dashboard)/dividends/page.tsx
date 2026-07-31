@@ -4,7 +4,8 @@ import { enrichTickers } from "@/lib/tickers/enrich";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { StatCard } from "@/components/dashboard/market-stats";
-import { InfoTip, TIPS } from "@/components/dashboard/info-tip";
+import { InfoTip } from "@/components/dashboard/info-tip";
+import { TIPS } from "@/lib/tips";
 import { MonthlyIncomeChart, type MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
 
 export const metadata: Metadata = {
