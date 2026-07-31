@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { RemoveHoldingDialog } from "@/components/dashboard/remove-holding-dialog";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
@@ -122,8 +123,9 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
                 <button
                   type="button"
                   onClick={() => setPendingRemoval(holding)}
-                  className="font-sans text-xs text-text-secondary transition-colors hover:text-red-500"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1.5 font-sans text-xs font-medium text-text-secondary transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-500"
                 >
+                  <Trash2 className="size-3.5" />
                   Remove
                 </button>
               </td>

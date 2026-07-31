@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { Check, Loader2, Plus } from "lucide-react";
 import { watchTicker } from "@/app/(dashboard)/watchlist/actions";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
@@ -97,9 +98,10 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
                   {isWatched ? (
                     <Link
                       href="/watchlist"
-                      className="font-sans text-xs text-green-500 underline decoration-green-500/40 underline-offset-2 transition-colors hover:decoration-green-500"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1.5 font-sans text-xs font-semibold text-green-500 transition-colors hover:bg-green-500/20"
                     >
-                      Watching · view list
+                      <Check className="size-3.5" />
+                      Watching
                     </Link>
                   ) : (
                     <button
@@ -111,8 +113,9 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
                           setWatched((prev) => new Set(prev).add(row.ticker));
                         })
                       }
-                      className="font-sans text-xs text-text-secondary transition-colors hover:text-green-500 disabled:opacity-40"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border-interactive px-3 py-1.5 font-sans text-xs font-semibold text-text-primary transition-colors hover:border-green-500 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40"
                     >
+                      {isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3.5" />}
                       Watch
                     </button>
                   )}
