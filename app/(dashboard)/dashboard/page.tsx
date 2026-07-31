@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
+import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -57,7 +58,7 @@ export default async function DashboardPage() {
   const tickers = [...new Set(holdings.map((h) => h.ticker))];
   const provider = getDividendDataProvider();
 
-  const [quotes, { data: todayPayments }, { data: upcomingEvents }] = await Promise.all([
+  const [quotes, { data: todayPayments }, { data: upcomingEvents }, income] = await Promise.all([
     Promise.all(
       tickers.map(async (ticker) => {
         try {
@@ -79,25 +80,26 @@ export default async function DashboardPage() {
       .gt("pay_date", todayIso)
       .order("pay_date", { ascending: true })
       .limit(1),
+    computeTrailingIncome(supabase, holdings),
   ]);
 
   const quoteByTicker = new Map(tickers.map((ticker, i) => [ticker, quotes[i]]));
   const holdingById = new Map(holdings.map((h) => [h.id, h]));
 
+  // Quotes still supply price (that part of Yahoo's data is reliable), but
+  // income comes from recorded dividend history via computeTrailingIncome
+  // — see lib/dividend-data/income.ts for why the yield field can't be
+  // trusted for the ETFs this product tracks.
   let portfolioValue = 0;
-  let annualIncome = 0;
   for (const holding of holdings) {
     const quote = quoteByTicker.get(holding.ticker);
-    const shares = Number(holding.shares);
-    const value = quote?.price ? shares * quote.price : 0;
-    portfolioValue += value;
-    if (quote?.trailingAnnualDividendYield) {
-      annualIncome += value * quote.trailingAnnualDividendYield;
-    }
+    if (quote?.price) portfolioValue += Number(holding.shares) * quote.price;
   }
+
+  const annualIncome = income.annual;
+  const incomePerDay = income.daily;
+  const incomePerMonth = income.monthly;
   const avgYieldPct = portfolioValue > 0 ? (annualIncome / portfolioValue) * 100 : 0;
-  const incomePerDay = annualIncome / 365;
-  const incomePerMonth = annualIncome / 12;
 
   const todayTotal = (todayPayments ?? []).reduce((sum, p) => sum + Number(p.amount), 0);
 
@@ -134,7 +136,9 @@ export default async function DashboardPage() {
         <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
           <div className="text-xs text-text-secondary">Annual dividend income</div>
           <div className="mt-1 font-mono text-2xl font-bold text-text-primary">{formatCurrency(annualIncome)}</div>
-          <div className="mt-1 text-xs text-text-secondary">{avgYieldPct.toFixed(2)}% yield</div>
+          <div className="mt-1 text-xs text-text-secondary">
+            {avgYieldPct.toFixed(2)}% yield · trailing 12mo
+          </div>
         </div>
         <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
           <div className="text-xs text-text-secondary">Today&rsquo;s income</div>

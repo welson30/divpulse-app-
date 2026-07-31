@@ -31,7 +31,26 @@ This is an **estimate derived from Yahoo Finance's `trailingAnnualDividendYield`
 
 So `value * quote.trailingAnnualDividendYield` contributes **exactly $0** to his annual income for every share of QDTE he holds — one of his most active weekly payers. Not an approximation error, a hard zero. This is the precise mechanism behind "the app shows 27 cents/month when I actually get more than that every day."
 
-**Fix direction:** compute annual/monthly/daily income from **actual historical `dividend_events` data for his real holdings** (sum of `amount_per_share × shares` over the trailing 12 months per ticker, or an equivalent realized-income calculation), not from Yahoo's yield estimate. Yahoo's yield field can stay as a supplementary "estimated yield %" stat, but should not drive the headline income numbers.
+**FIXED 2026-07-31.** Income now comes from recorded `dividend_events` history — `shares × Σ(amount_per_share)` over the trailing 12 months — in a new shared helper, `lib/dividend-data/income.ts` (`computeTrailingIncome`). Yahoo is still used for **price** (that part of its data is fine); only the yield-derived income was replaced.
+
+Measured against his real portfolio the day of the fix:
+
+| | Annual | Monthly | Daily |
+|---|---|---|---|
+| Before (Yahoo yield) | $8.66 | $0.72 | $0.02 |
+| After (trailing 12mo) | **$123.20** | **$10.27** | **$0.34** |
+
+A 14× correction. Yahoo reported `0.00%` for **13 of his 15 tickers** — not just exotic funds; SCHD and JEPI are mainstream dividend ETFs and both returned zero. Only VOO (0.80%) and O (5.04%) had usable values, so the dashboard was effectively computing his whole income from two positions.
+
+Deliberate choices worth remembering:
+- **Trailing 12 months, not a forward projection.** Chosen for stability and because it's the industry-standard framing; it also handles quarterly payers correctly, whereas annualizing a shorter window makes them swing wildly depending on whether the window happens to catch a payment. The label reads "trailing 12mo" on the dashboard rather than implying a forward promise.
+- **Known caveat:** several of his weekly options-income ETFs have declining distributions (TSLY −32%, XDTE −36%, METW −35% vs their 12-month average), so TTM currently reads ~31% above his present run rate ($123.20 vs $93.70 annualized from the last 90 days). This is inherent to TTM, not an error. If he ever asks why the figure looks high relative to recent payments, that's the reason — and the alternative (recent-window annualization) was rejected as too unstable for quarterly holdings.
+- **Row-limit guard:** the helper caps its query at 5,000 event rows because a silently truncated PostgREST result would under-report income — the exact failure class being fixed. His portfolio returns 399.
+- `tickersWithoutHistory` is returned so genuine non-payers (PLUG, SPCX) can be surfaced rather than silently counted as zero.
+
+**Data cleanup done while validating this.** Auditing all 20 tickers in `dividend_events` against Yahoo turned up exactly one bad row: a KO dividend of `$0.01` dated `2026-07-23` that Yahoo has no record of (Yahoo shows 4 payouts totalling $2.08; we held 5 totalling $2.09). Likely a test seed or a value Yahoo briefly published and retracted — `dividend_events` only ever upserts, so anything recorded once persists even if the source later drops it. The row was deleted, cascading away the two `$0.10` payments it had generated; both belonged to internal test accounts (`shujaqurashi2172`, `hassangill9393`), never the client. KO now reconciles with Yahoo exactly.
+
+Automatic reconciliation was **deliberately not added**: deleting any stored event missing from Yahoo's current response would erase all history older than the rolling 365-day window, and a transient Yahoo outage could destroy real data. One bad row in 429 does not justify that risk.
 
 ## 3. "Today's income" / "Next payment" / notifications — confirmed root cause
 
