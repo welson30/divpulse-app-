@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { getDividendDataProvider } from "@/lib/dividend-data";
 import { HoldingsTable, type Holding } from "@/components/dashboard/holdings-table";
 import { AddHoldingDialog } from "@/components/dashboard/add-holding-dialog";
 import { ImportCsvDialog } from "@/components/dashboard/import-csv-dialog";
@@ -27,6 +28,30 @@ export default async function HoldingsPage() {
   const isProPlus = profile?.plan === "pro_plus";
   const count = holdings?.length ?? 0;
 
+  // Two batched requests cover the whole table regardless of how many
+  // holdings there are — see fetchQuotes/fetchSparklines in
+  // lib/dividend-data/yahoo-finance.ts. Failures degrade to a table
+  // without prices rather than breaking the page.
+  const tickers = [...new Set((holdings ?? []).map((h) => h.ticker))];
+  const provider = getDividendDataProvider();
+  const [quotes, sparklines] = await Promise.all([
+    provider.fetchQuotes(tickers).catch(() => new Map()),
+    provider.fetchSparklines(tickers, "1mo").catch(() => new Map()),
+  ]);
+
+  const rows: Holding[] = (holdings ?? []).map((h) => {
+    const quote = quotes.get(h.ticker.toUpperCase());
+    const shares = Number(h.shares);
+    return {
+      ...h,
+      name: quote?.name ?? h.company_name ?? null,
+      price: quote?.price ?? null,
+      changePercent: quote?.changePercent ?? null,
+      marketValue: quote?.price != null ? quote.price * shares : null,
+      sparkline: sparklines.get(h.ticker.toUpperCase()) ?? [],
+    };
+  });
+
   return (
     <div className="flex flex-col gap-sp-3">
       <div className="flex flex-wrap items-center justify-between gap-sp-2">
@@ -43,7 +68,7 @@ export default async function HoldingsPage() {
         </div>
       </div>
 
-      <HoldingsTable holdings={(holdings ?? []) as Holding[]} />
+      <HoldingsTable holdings={rows} />
     </div>
   );
 }

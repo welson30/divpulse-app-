@@ -1,5 +1,11 @@
 import "server-only";
-import type { DividendDataProvider, DividendEvent, TickerQuote } from "./types";
+import type {
+  DividendDataProvider,
+  DividendEvent,
+  SparklinePoint,
+  SparklineRange,
+  TickerQuote,
+} from "./types";
 
 // Unofficial endpoint — no API key, no published SLA, no documented rate
 // limits. This is the sole reason the DividendDataProvider interface
@@ -7,6 +13,12 @@ import type { DividendDataProvider, DividendEvent, TickerQuote } from "./types";
 // needs to change. See ARCHITECTURE.md §12.
 const CHART_ENDPOINT = "https://query1.finance.yahoo.com/v8/finance/chart";
 const QUOTE_SUMMARY_ENDPOINT = "https://query1.finance.yahoo.com/v10/finance/quoteSummary";
+// Batch endpoints — one request covers a whole portfolio. Both are
+// unofficial like the rest of this file; /v7/finance/quote additionally
+// requires the same crumb handshake quoteSummary does, /v8/finance/spark
+// does not.
+const BATCH_QUOTE_ENDPOINT = "https://query1.finance.yahoo.com/v7/finance/quote";
+const SPARK_ENDPOINT = "https://query1.finance.yahoo.com/v8/finance/spark";
 const CRUMB_COOKIE_ENDPOINT = "https://fc.yahoo.com";
 const CRUMB_ENDPOINT = "https://query1.finance.yahoo.com/v1/test/getcrumb";
 const USER_AGENT = "Mozilla/5.0 (compatible; PaidPrimeBot/1.0)";
@@ -70,6 +82,10 @@ type YahooChartResponse = {
           regularMarketPrice?: number;
           currency?: string;
           instrumentType?: string;
+          longName?: string;
+          shortName?: string;
+          chartPreviousClose?: number;
+          previousClose?: number;
         };
         events?: {
           dividends?: Record<
@@ -84,6 +100,36 @@ type YahooChartResponse = {
     ] | null;
     error: { code: string; description: string } | null;
   };
+};
+
+type YahooBatchQuoteResponse = {
+  quoteResponse?: {
+    result?: Array<{
+      symbol?: string;
+      regularMarketPrice?: number;
+      regularMarketChange?: number;
+      regularMarketChangePercent?: number;
+      currency?: string;
+      quoteType?: string;
+      shortName?: string;
+      longName?: string;
+      trailingAnnualDividendYield?: number;
+    }>;
+  };
+};
+
+/** The spark endpoint answers with an object keyed by ticker, not an array. */
+type YahooSparkResponse = Record<
+  string,
+  { symbol?: string; timestamp?: number[]; close?: (number | null)[] } | undefined
+>;
+
+const SPARK_INTERVALS: Record<SparklineRange, string> = {
+  "1d": "5m",
+  "5d": "15m",
+  "1mo": "1d",
+  "6mo": "1d",
+  "1y": "1d",
 };
 
 // chart's instrumentType differs from quoteSummary's quoteType casing/
@@ -190,13 +236,20 @@ export class YahooFinanceProvider implements DividendDataProvider {
       return null;
     }
 
+    const previousClose = meta.chartPreviousClose ?? meta.previousClose ?? null;
+    const price = meta.regularMarketPrice ?? null;
+    const change = price !== null && previousClose ? price - previousClose : null;
+
     const base: TickerQuote = {
       ticker: ticker.toUpperCase(),
-      price: meta.regularMarketPrice ?? null,
+      price,
       currency: meta.currency ?? null,
       sector: null,
       quoteType: meta.instrumentType ? (INSTRUMENT_TYPE_TO_QUOTE_TYPE[meta.instrumentType] ?? meta.instrumentType) : null,
       trailingAnnualDividendYield: null,
+      name: meta.longName ?? meta.shortName ?? null,
+      change,
+      changePercent: change !== null && previousClose ? (change / previousClose) * 100 : null,
     };
 
     for (const attempt of [false, true]) {
@@ -231,5 +284,104 @@ export class YahooFinanceProvider implements DividendDataProvider {
     }
 
     return base;
+  }
+
+  /**
+   * Price, day change and display name for many tickers in a single
+   * request. Unlike fetchQuote this does not attempt the quoteSummary
+   * enrichment step, so `sector` comes back null — callers that group by
+   * sector (the diversification page) still want per-ticker fetchQuote.
+   * Everything driving the holdings table (price, change, name) is
+   * present here.
+   *
+   * Note `trailingAnnualDividendYield` is carried through only for
+   * compatibility; it is not trustworthy for ETFs and must not be used to
+   * derive income — see lib/dividend-data/income.ts.
+   */
+  async fetchQuotes(tickers: string[]): Promise<Map<string, TickerQuote>> {
+    const result = new Map<string, TickerQuote>();
+    const symbols = [...new Set(tickers.map((t) => t.toUpperCase()))].filter(Boolean);
+    if (symbols.length === 0) return result;
+
+    for (const attempt of [false, true]) {
+      try {
+        const { crumb, cookie } = await getCrumb(attempt);
+        const url = new URL(BATCH_QUOTE_ENDPOINT);
+        url.searchParams.set("symbols", symbols.join(","));
+        url.searchParams.set("crumb", crumb);
+
+        const response = await fetch(url, {
+          headers: { "User-Agent": USER_AGENT, Cookie: cookie },
+          next: { revalidate: 300 },
+        });
+
+        if (response.status === 401 && !attempt) continue; // stale crumb, retry once
+        if (!response.ok) return result;
+
+        const data = (await response.json()) as YahooBatchQuoteResponse;
+        for (const quote of data.quoteResponse?.result ?? []) {
+          if (!quote.symbol) continue;
+          result.set(quote.symbol.toUpperCase(), {
+            ticker: quote.symbol.toUpperCase(),
+            price: quote.regularMarketPrice ?? null,
+            currency: quote.currency ?? null,
+            sector: null,
+            quoteType: quote.quoteType ? (INSTRUMENT_TYPE_TO_QUOTE_TYPE[quote.quoteType] ?? quote.quoteType) : null,
+            trailingAnnualDividendYield: quote.trailingAnnualDividendYield ?? null,
+            name: quote.longName ?? quote.shortName ?? null,
+            change: quote.regularMarketChange ?? null,
+            changePercent: quote.regularMarketChangePercent ?? null,
+          });
+        }
+        return result;
+      } catch {
+        return result; // a failed quote lookup degrades the UI, never breaks the page
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Closing-price series per ticker for sparklines, batched into one
+   * request. Yahoo's spark endpoint answers with an object keyed by
+   * ticker rather than an array, and pads gaps (holidays, halts) with
+   * nulls — those are dropped so consumers get a clean series.
+   */
+  async fetchSparklines(tickers: string[], range: SparklineRange = "1mo"): Promise<Map<string, SparklinePoint[]>> {
+    const result = new Map<string, SparklinePoint[]>();
+    const symbols = [...new Set(tickers.map((t) => t.toUpperCase()))].filter(Boolean);
+    if (symbols.length === 0) return result;
+
+    try {
+      const url = new URL(SPARK_ENDPOINT);
+      url.searchParams.set("symbols", symbols.join(","));
+      url.searchParams.set("range", range);
+      url.searchParams.set("interval", SPARK_INTERVALS[range]);
+
+      const response = await fetch(url, {
+        headers: { "User-Agent": USER_AGENT },
+        next: { revalidate: 300 },
+      });
+
+      if (!response.ok) return result;
+
+      const data = (await response.json()) as YahooSparkResponse;
+      for (const [symbol, series] of Object.entries(data)) {
+        const timestamps = series?.timestamp ?? [];
+        const closes = series?.close ?? [];
+        const points: SparklinePoint[] = [];
+        for (let i = 0; i < closes.length; i += 1) {
+          const close = closes[i];
+          const timestamp = timestamps[i];
+          if (close != null && timestamp != null) points.push({ t: timestamp, c: close });
+        }
+        if (points.length > 0) result.set(symbol.toUpperCase(), points);
+      }
+    } catch {
+      return result;
+    }
+
+    return result;
   }
 }
