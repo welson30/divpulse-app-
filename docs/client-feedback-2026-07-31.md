@@ -49,7 +49,7 @@ Production evidence gathered while diagnosing:
 
 **Fix applied:**
 1. Replaced the exact match with a bounded trailing window (`DETECTION_WINDOW_DAYS = 3`). Bounded deliberately: the DB holds 429 historical events, so an unbounded `pay_date <= today` would have inserted a payment row for every one and fired ~860 notifications on the next run.
-2. Rescheduled the cron `06:00 → 14:00 UTC` (`supabase/migrations/20260731000000_reschedule_dividend_detection.sql`) so payouts are caught the same day, ~30 min after Yahoo publishes, rather than 24 h late.
+2. Rescheduled the cron `06:00 → 14:00 UTC` (`supabase/migrations/20260731000000_reschedule_dividend_detection.sql`) so payouts are caught the same day, shortly after Yahoo publishes, rather than 24 h late — then immediately shifted again to **15:00 UTC** (`20260731010000_dst_safe_dividend_detection.sql`). pg_cron schedules in UTC while market open is fixed to 9:30 AM *local* ET, so 14:00 UTC sits 30 min after open in summer but 30 min *before* it in winter — which would have silently re-broken detection every November. 15:00 UTC clears open year-round (11:00 AM ET in summer, 10:00 AM ET in winter) and still lands in the client's morning.
 3. Made `fetchDividends` uncached (`cache: "no-store"`). It's called only by this job; a cached response taken an hour earlier would be missing exactly the payout the run exists to find, silently reintroducing the bug.
 4. Fixed a latent second bug found along the way: a payment whose notification failed left `notified_at` null and could **never** be retried, because the next run's insert hit the unique constraint and bailed out before the notify step. It now re-reads the row and retries delivery only if it never went out.
 
