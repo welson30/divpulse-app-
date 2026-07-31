@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { getDividendDataProvider } from "@/lib/dividend-data";
+import { enrichTickers } from "@/lib/tickers/enrich";
 import { CollectionTable, type CollectionRow } from "@/components/dashboard/collection-table";
 
 export const metadata: Metadata = {
@@ -29,18 +29,10 @@ export default async function CollectionsPage() {
     );
   }
 
-  const provider = getDividendDataProvider();
+  // Every ticker across every collection, enriched in two batched
+  // requests rather than one round trip per ticker.
   const allTickers = [...new Set(collections.flatMap((c) => c.collection_tickers.map((t) => t.ticker)))];
-  const quotes = await Promise.all(
-    allTickers.map(async (ticker) => {
-      try {
-        return await provider.fetchQuote(ticker);
-      } catch {
-        return null;
-      }
-    }),
-  );
-  const quoteByTicker = new Map(allTickers.map((ticker, i) => [ticker, quotes[i]]));
+  const enriched = await enrichTickers(allTickers);
 
   return (
     <div className="flex flex-col gap-sp-4">
@@ -56,12 +48,24 @@ export default async function CollectionsPage() {
         const rows: CollectionRow[] = [...collection.collection_tickers]
           .sort((a, b) => a.sort_order - b.sort_order)
           .map((t) => {
-            const quote = quoteByTicker.get(t.ticker);
+            const info = enriched.get(t.ticker.toUpperCase());
+            const quote = info?.quote;
+            // dividendYieldPercent arrives already as a percentage, while
+            // trailingAnnualDividendYield is a fraction — and the latter
+            // reads 0 for most funds, which is why it isn't preferred here.
+            const yieldPct =
+              quote?.dividendYieldPercent != null
+                ? quote.dividendYieldPercent / 100
+                : (quote?.trailingAnnualDividendYield ?? null);
             return {
               ticker: t.ticker,
               price: quote?.price ?? null,
               currency: quote?.currency ?? null,
-              yieldPct: quote?.trailingAnnualDividendYield ?? null,
+              yieldPct,
+              name: info?.name ?? null,
+              logoUrl: info?.logoUrl ?? null,
+              changePercent: quote?.changePercent ?? null,
+              sparkline: info?.sparkline ?? [],
             };
           });
 

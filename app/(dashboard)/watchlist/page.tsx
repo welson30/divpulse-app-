@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { enrichTickers } from "@/lib/tickers/enrich";
 import { WatchlistTable, type WatchlistItem } from "@/components/dashboard/watchlist-table";
 import { AddWatchlistDialog } from "@/components/dashboard/add-watchlist-dialog";
 
@@ -21,6 +22,21 @@ export default async function WatchlistPage() {
 
   const count = items?.length ?? 0;
 
+  const enriched = await enrichTickers((items ?? []).map((i) => i.ticker));
+  const rows: WatchlistItem[] = (items ?? []).map((item) => {
+    const info = enriched.get(item.ticker.toUpperCase());
+    return {
+      ...item,
+      name: info?.name ?? item.company_name ?? null,
+      logoUrl: info?.logoUrl ?? null,
+      price: info?.quote?.price ?? null,
+      changePercent: info?.quote?.changePercent ?? null,
+      sparkline: info?.sparkline ?? [],
+      fiftyTwoWeekLow: info?.quote?.fiftyTwoWeekLow ?? null,
+      fiftyTwoWeekHigh: info?.quote?.fiftyTwoWeekHigh ?? null,
+    };
+  });
+
   return (
     <div className="flex flex-col gap-sp-3">
       <div className="flex flex-wrap items-center justify-between gap-sp-2">
@@ -34,7 +50,7 @@ export default async function WatchlistPage() {
         <AddWatchlistDialog />
       </div>
 
-      <WatchlistTable items={(items ?? []) as WatchlistItem[]} />
+      <WatchlistTable items={rows} />
     </div>
   );
 }

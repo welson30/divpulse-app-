@@ -114,6 +114,21 @@ type YahooBatchQuoteResponse = {
       shortName?: string;
       longName?: string;
       trailingAnnualDividendYield?: number;
+      dividendYield?: number;
+      marketState?: string;
+      exchangeDataDelayedBy?: number;
+      fullExchangeName?: string;
+      regularMarketPreviousClose?: number;
+      regularMarketOpen?: number;
+      regularMarketDayLow?: number;
+      regularMarketDayHigh?: number;
+      regularMarketVolume?: number;
+      fiftyTwoWeekLow?: number;
+      fiftyTwoWeekHigh?: number;
+      fiftyTwoWeekChangePercent?: number;
+      fiftyDayAverage?: number;
+      twoHundredDayAverage?: number;
+      averageDailyVolume3Month?: number;
     }>;
   };
 };
@@ -247,9 +262,26 @@ export class YahooFinanceProvider implements DividendDataProvider {
       sector: null,
       quoteType: meta.instrumentType ? (INSTRUMENT_TYPE_TO_QUOTE_TYPE[meta.instrumentType] ?? meta.instrumentType) : null,
       trailingAnnualDividendYield: null,
+      dividendYieldPercent: null,
       name: meta.longName ?? meta.shortName ?? null,
       change,
       changePercent: change !== null && previousClose ? (change / previousClose) * 100 : null,
+      // The chart endpoint's meta carries none of the market-depth
+      // fields; callers needing those should use fetchQuotes.
+      marketState: null,
+      exchangeDelayMinutes: null,
+      exchangeName: null,
+      previousClose,
+      open: null,
+      dayLow: null,
+      dayHigh: null,
+      fiftyTwoWeekLow: null,
+      fiftyTwoWeekHigh: null,
+      fiftyTwoWeekChangePercent: null,
+      fiftyDayAverage: null,
+      twoHundredDayAverage: null,
+      volume: null,
+      averageVolume3Month: null,
     };
 
     for (const attempt of [false, true]) {
@@ -328,9 +360,24 @@ export class YahooFinanceProvider implements DividendDataProvider {
             sector: null,
             quoteType: quote.quoteType ? (INSTRUMENT_TYPE_TO_QUOTE_TYPE[quote.quoteType] ?? quote.quoteType) : null,
             trailingAnnualDividendYield: quote.trailingAnnualDividendYield ?? null,
+            dividendYieldPercent: quote.dividendYield ?? null,
             name: quote.longName ?? quote.shortName ?? null,
             change: quote.regularMarketChange ?? null,
             changePercent: quote.regularMarketChangePercent ?? null,
+            marketState: quote.marketState ?? null,
+            exchangeDelayMinutes: quote.exchangeDataDelayedBy ?? null,
+            exchangeName: quote.fullExchangeName ?? null,
+            previousClose: quote.regularMarketPreviousClose ?? null,
+            open: quote.regularMarketOpen ?? null,
+            dayLow: quote.regularMarketDayLow ?? null,
+            dayHigh: quote.regularMarketDayHigh ?? null,
+            fiftyTwoWeekLow: quote.fiftyTwoWeekLow ?? null,
+            fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh ?? null,
+            fiftyTwoWeekChangePercent: quote.fiftyTwoWeekChangePercent ?? null,
+            fiftyDayAverage: quote.fiftyDayAverage ?? null,
+            twoHundredDayAverage: quote.twoHundredDayAverage ?? null,
+            volume: quote.regularMarketVolume ?? null,
+            averageVolume3Month: quote.averageDailyVolume3Month ?? null,
           });
         }
         return result;

@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getDividendDataProvider } from "@/lib/dividend-data";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
+import { enrichTickers } from "@/lib/tickers/enrich";
+import { TickerLogo } from "@/components/dashboard/ticker-logo";
+import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
+import { MarketStateBadge, StatCard } from "@/components/dashboard/market-stats";
+import { TIPS } from "@/components/dashboard/info-tip";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -56,18 +60,9 @@ export default async function DashboardPage() {
   }
 
   const tickers = [...new Set(holdings.map((h) => h.ticker))];
-  const provider = getDividendDataProvider();
 
-  const [quotes, { data: todayPayments }, { data: upcomingEvents }, income] = await Promise.all([
-    Promise.all(
-      tickers.map(async (ticker) => {
-        try {
-          return await provider.fetchQuote(ticker);
-        } catch {
-          return null;
-        }
-      }),
-    ),
+  const [enriched, { data: todayPayments }, { data: upcomingEvents }, income] = await Promise.all([
+    enrichTickers(tickers),
     supabase
       .from("dividend_payments")
       .select("id, amount, holding_id")
@@ -83,18 +78,30 @@ export default async function DashboardPage() {
     computeTrailingIncome(supabase, holdings),
   ]);
 
-  const quoteByTicker = new Map(tickers.map((ticker, i) => [ticker, quotes[i]]));
   const holdingById = new Map(holdings.map((h) => [h.id, h]));
+  const infoFor = (ticker: string) => enriched.get(ticker.toUpperCase());
 
   // Quotes still supply price (that part of Yahoo's data is reliable), but
   // income comes from recorded dividend history via computeTrailingIncome
   // — see lib/dividend-data/income.ts for why the yield field can't be
   // trusted for the ETFs this product tracks.
+  // Day change is the only "profit/loss" this app can honestly compute:
+  // holdings carry no purchase price, so there is no cost basis to
+  // measure a real gain against. Today's move is real, and it's what
+  // brokerage apps lead with anyway.
   let portfolioValue = 0;
+  let portfolioPrevValue = 0;
   for (const holding of holdings) {
-    const quote = quoteByTicker.get(holding.ticker);
-    if (quote?.price) portfolioValue += Number(holding.shares) * quote.price;
+    const quote = infoFor(holding.ticker)?.quote;
+    const shares = Number(holding.shares);
+    if (quote?.price) portfolioValue += shares * quote.price;
+    if (quote?.previousClose) portfolioPrevValue += shares * quote.previousClose;
   }
+  const portfolioDayChange = portfolioPrevValue > 0 ? portfolioValue - portfolioPrevValue : null;
+  const portfolioDayChangePct =
+    portfolioPrevValue > 0 ? ((portfolioValue - portfolioPrevValue) / portfolioPrevValue) * 100 : null;
+
+  const marketQuote = [...enriched.values()].find((e) => e.quote?.marketState)?.quote ?? null;
 
   const annualIncome = income.annual;
   const incomePerDay = income.daily;
@@ -126,31 +133,39 @@ export default async function DashboardPage() {
             </>
           ) : null}
         </p>
+        <MarketStateBadge
+          marketState={marketQuote?.marketState}
+          delayMinutes={marketQuote?.exchangeDelayMinutes}
+          className="mt-1.5"
+        />
       </div>
 
       <div className="grid gap-sp-2 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Portfolio value</div>
-          <div className="mt-1 font-mono text-2xl font-bold text-text-primary">{formatCurrency(portfolioValue)}</div>
-        </div>
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Annual dividend income</div>
-          <div className="mt-1 font-mono text-2xl font-bold text-text-primary">{formatCurrency(annualIncome)}</div>
-          <div className="mt-1 text-xs text-text-secondary">
-            {avgYieldPct.toFixed(2)}% yield · trailing 12mo
-          </div>
-        </div>
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Today&rsquo;s income</div>
-          <div className={`mt-1 font-mono text-2xl font-bold ${todayTotal > 0 ? "text-green-500" : "text-text-primary"}`}>
-            {todayTotal > 0 ? `+${formatCurrency(todayTotal)}` : "$0.00"}
-          </div>
-        </div>
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-          <div className="text-xs text-text-secondary">Income per day</div>
-          <div className="mt-1 font-mono text-2xl font-bold text-text-primary">{formatCurrency(incomePerDay)}</div>
-          <div className="mt-1 text-xs text-text-secondary">{formatCurrency(incomePerMonth)}/month</div>
-        </div>
+        <StatCard
+          label="Portfolio value"
+          value={formatCurrency(portfolioValue)}
+          changeAmount={portfolioDayChange}
+          changePercent={portfolioDayChangePct}
+          tip={TIPS.portfolioValue}
+        />
+        <StatCard
+          label="Annual dividend income"
+          value={formatCurrency(annualIncome)}
+          sub={`${avgYieldPct.toFixed(2)}% yield · trailing 12mo`}
+          tip={TIPS.annualIncome}
+        />
+        <StatCard
+          label="Today's income"
+          value={todayTotal > 0 ? `+${formatCurrency(todayTotal)}` : "$0.00"}
+          sub={todayTotal > 0 ? `${todayPayments!.length} received today` : "Nothing detected yet today"}
+          className={todayTotal > 0 ? "border-green-500/25" : undefined}
+        />
+        <StatCard
+          label="Income per day"
+          value={formatCurrency(incomePerDay)}
+          sub={`${formatCurrency(incomePerMonth)}/month`}
+          tip={TIPS.incomePerDay}
+        />
       </div>
 
       <div className="grid gap-sp-3 lg:grid-cols-2">
@@ -170,9 +185,10 @@ export default async function DashboardPage() {
                     key={payment.id}
                     className={`flex items-center gap-3 px-4 py-3.5 ${i === todayPayments.length - 1 ? "" : "border-b border-border-subtle"}`}
                   >
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[rgba(34,197,94,0.1)] font-mono text-[11px] font-bold text-green-500">
-                      {holding?.ticker ?? "—"}
-                    </div>
+                    <TickerLogo
+                      ticker={holding?.ticker ?? "—"}
+                      logoUrl={holding ? infoFor(holding.ticker)?.logoUrl : null}
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-semibold text-text-primary">+{formatCurrency(Number(payment.amount))}</div>
                       <div className="truncate text-xs text-text-secondary">
@@ -196,9 +212,7 @@ export default async function DashboardPage() {
           {nextEvent && nextHolding ? (
             <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
               <div className="flex items-center gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[rgba(251,191,36,0.1)] font-mono text-[11px] font-bold text-warning">
-                  {nextEvent.ticker}
-                </div>
+                <TickerLogo ticker={nextEvent.ticker} logoUrl={infoFor(nextEvent.ticker)?.logoUrl} />
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-warning">
                     {formatCurrency(Number(nextEvent.amount_per_share) * Number(nextHolding.shares))} expected
@@ -228,14 +242,31 @@ export default async function DashboardPage() {
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             {holdings.slice(0, 6).map((holding) => {
-              const quote = quoteByTicker.get(holding.ticker);
-              const value = quote?.price ? Number(holding.shares) * quote.price : null;
+              const info = infoFor(holding.ticker);
+              const price = info?.quote?.price ?? null;
+              const value = price != null ? Number(holding.shares) * price : null;
               return (
-                <div key={holding.id} className="rounded-card border border-border-subtle bg-surface p-sp-3">
-                  <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
-                  <div className="mt-1 font-mono text-xs text-text-secondary">
-                    {holding.shares} shares{value != null ? ` · ${formatCurrency(value)}` : ""}
+                <div
+                  key={holding.id}
+                  className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
+                >
+                  <TickerLogo ticker={holding.ticker} logoUrl={info?.logoUrl} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</span>
+                      <ChangeBadge changePercent={info?.quote?.changePercent ?? null} className="text-xs" />
+                    </div>
+                    <div className="mt-0.5 truncate font-mono text-xs text-text-secondary">
+                      {holding.shares} shares{value != null ? ` · ${formatCurrency(value)}` : ""}
+                    </div>
                   </div>
+                  <Sparkline
+                    points={info?.sparkline ?? []}
+                    id={`dash-${holding.id}`}
+                    changePercent={info?.quote?.changePercent ?? null}
+                    width={56}
+                    height={22}
+                  />
                 </div>
               );
             })}

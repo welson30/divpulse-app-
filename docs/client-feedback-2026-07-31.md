@@ -82,7 +82,33 @@ Same core ask as the earlier design-system conversation, restated with a concret
 
 **Status:** this exact feature (`TickerSearchCombobox` + `TickerLogo`, backed by Finnhub search/logo lookup, wired into the add-holding form and the holdings table) was already designed and built in an earlier session. It was discarded when the `UI-Redesign` branch was deleted (per explicit instruction, uncommitted). **Needs to be rebuilt** — the earlier plan/approach is still valid and can be reused directly.
 
-## 5. Dividends page needs the "hero" income summary
+## 4b. Market data, charts and logos across the app — DONE 2026-07-31
+
+Not in the original feedback list, but it came directly out of the same review: the client is drawn to the red/green up-down charts trading apps use, and wanted logos and live figures everywhere rather than only on Holdings.
+
+**Data layer.** Two batched Yahoo endpoints replaced the per-ticker fetch loop: `/v7/finance/quote` (`fetchQuotes`) and `/v8/finance/spark` (`fetchSparklines`). Any page now costs **exactly two upstream requests regardless of ticker count** — Collections was previously issuing one round trip per ticker across every collection. `lib/tickers/enrich.ts` (`enrichTickers`) wraps both plus logo resolution so no page re-implements it. Measured: 15 tickers, both requests, 1364 ms, 15/15 quotes and 15/15 sparklines.
+
+**Logos without a logo API.** No provider returns ETF logos — Yahoo has no logo field, its `assetProfile.website` is null for every fund tested, and Finnhub is equity-only (its key was also removed from `.env`, so Finnhub is no longer used anywhere). Since a dividend portfolio is mostly ETFs, `lib/tickers/logo.ts` instead matches the issuer out of the fund's `longName` — which always leads with it — to a domain, and serves that domain's favicon. Pure function, no network call, no database. Coverage on the client's portfolio: **15/15**.
+
+**Components added:** `Sparkline` + `ChangeBadge`, `TickerLogo`, `RangeBar` (52-week position), `MarketStateBadge` ("Market open · Real-time"), `VolumeStat`, `StatCard`, `MonthlyIncomeChart`, `InfoTip`.
+
+**No charting library.** Sparklines and the income chart are hand-rolled SVG. recharts would have added ~7 MB and 11 transitive packages including Redux to draw polylines; raw SVG also keeps these server-rendered. If a full interactive chart with crosshair/candlesticks is ever wanted, TradingView's `lightweight-charts` (3 MB, 1 dep) is the pick.
+
+**Rolled out to:** Holdings (logo, name, price, day change, 1M sparkline, market value, portfolio total, market-state badge), Watchlist (all of the above plus the 52-week range bar), Collections (logo, name, price, change, sparkline), Dashboard (logos on payment tiles, Recent Holdings as mini cards with sparklines, stat cards with day-change colouring), Dividends (logos on both tables).
+
+**Second broken-yield bug found and fixed.** Collections was reading the same `trailingAnnualDividendYield` field as §2, so SCHD, JEPI and most ETFs displayed **0.00% yield**. It now uses Yahoo's `dividendYield`, which is accurate for the conventional payers Collections contains (SCHD 3.3% vs real 3.14%, JEPI 8.11% vs 7.97%, O 5.05% vs 5.09%). That field is documented in the type as **never** safe for income maths — it reports 2.04% for QDTE against a real ~47%.
+
+**Explainer tooltips.** Financial terms across the tables and stat cards carry a `?` (`InfoTip`) with plain-language copy — "52-week range", "Today", "1M", "Yield", "Value", annual income, income per day. Opens on hover, focus **and** click, so it works on touch as well as mouse, closes on Escape, and is wired via `aria-describedby`.
+
+**Known limitation: no true profit/loss.** `holdings` stores no purchase price, so cost basis doesn't exist and real gain/loss cannot be computed. The dashboard shows **today's** change instead (portfolio value vs the sum of previous closes), which is real, correctly red/green, and what brokerage apps lead with. Showing lifetime P/L would require capturing a purchase price per holding — a schema and UI change, worth raising with the client.
+
+## 4c. Dividend history table was unusable — FIXED 2026-07-31
+
+Reported as "the table feels really off." It was rendering **every** event with no cap — 399 rows for the client's portfolio — and each row showed only a per-share figure like `$0.14`, which is meaningless without knowing the share count. Nothing told the user what they actually received.
+
+Rebuilt to show **Asset (logo + name) · Ex-date · Per share · Your shares · Your payout**, where payout is `shares × amount_per_share` in green — the number the user actually cares about. Capped at the 60 most recent with a "Most recent 60 of 399 payouts" caption, per-share widened to 4 decimals since weekly distributions are frequently sub-cent at 2, and `?` explainers added to "Ex-date" and "Per share".
+
+## 5. Dividends page — DONE 2026-07-31
 
 He was explicit: "dividend is the heart of the app" — when you open Dividends, it should immediately show per-day / per-month / per-year income, prominently, the way the *marketing site's* demo (`components/marketing/product-tabs.tsx`'s `DividendsPanel`, which already has exactly this three-stat row) does. The **real** `app/(dashboard)/dividends/page.tsx` has no such summary today — it only has "Confirmed payments" and "Dividend history" tables, so the page currently reads as empty/pointless to him. Once #2/#3 above are fixed (real income numbers, working detection), add this summary row to the actual Dividends page using the corrected calculation.
 

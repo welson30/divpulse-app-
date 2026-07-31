@@ -36,31 +36,12 @@ type SparklineProps = {
  */
 export function Sparkline({ points, id, changePercent, width = 88, height = 28, className }: SparklineProps) {
   // Nothing to plot — a delisted ticker, an expired contract, or an
-  // instrument that simply isn't market-traded. A flat dashed baseline
-  // holds the column's shape and reads as "no series" rather than as a
-  // chart that failed to load.
+  // instrument that isn't market-traded. Reserve the space so the column
+  // keeps its width, but draw nothing: a dashed flatline reads as a chart
+  // that failed to load, and the row already carries a "No market data"
+  // label, so a second marker would just be noise.
   if (points.length < 2) {
-    return (
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        width={width}
-        height={height}
-        className={cn("shrink-0", className)}
-        aria-hidden
-        focusable="false"
-      >
-        <line
-          x1={0}
-          y1={height / 2}
-          x2={width}
-          y2={height / 2}
-          stroke="var(--border-subtle)"
-          strokeWidth={1.5}
-          strokeDasharray="3 3"
-          strokeLinecap="round"
-        />
-      </svg>
-    );
+    return <div aria-hidden className={cn("shrink-0", className)} style={{ width, height }} />;
   }
 
   const closes = points.map((p) => p.c);

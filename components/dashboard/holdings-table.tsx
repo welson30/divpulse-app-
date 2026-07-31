@@ -4,6 +4,7 @@ import { useState } from "react";
 import { RemoveHoldingDialog } from "@/components/dashboard/remove-holding-dialog";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
+import { InfoTip, TIPS } from "@/components/dashboard/info-tip";
 import type { SparklinePoint } from "@/lib/dividend-data/types";
 
 export type Holding = {
@@ -50,9 +51,15 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
             <th className={`${HEAD} text-left`}>Broker</th>
             <th className={`${HEAD} text-right`}>Shares</th>
             <th className={`${HEAD} text-right`}>Price</th>
-            <th className={`${HEAD} text-right`}>Today</th>
-            <th className={`${HEAD} text-center`}>1M</th>
-            <th className={`${HEAD} text-right`}>Value</th>
+            <th className={`${HEAD} text-right`}>
+              <span className="inline-flex items-center gap-1">Today <InfoTip label={TIPS.todayChange} /></span>
+            </th>
+            <th className={`${HEAD} text-center`}>
+              <span className="inline-flex items-center gap-1">1M <InfoTip label={TIPS.sparkline1M} /></span>
+            </th>
+            <th className={`${HEAD} text-right`}>
+              <span className="inline-flex items-center gap-1">Value <InfoTip label={TIPS.marketValue} /></span>
+            </th>
             <th className={`${HEAD} text-right`}>
               <span className="sr-only">Actions</span>
             </th>

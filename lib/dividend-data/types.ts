@@ -11,12 +11,41 @@ export type TickerQuote = {
   currency: string | null;
   sector: string | null;
   quoteType: string | null;
+  /** Fraction (0.0235 = 2.35%). Unreliable for ETFs — see lib/dividend-data/income.ts. */
   trailingAnnualDividendYield: number | null;
+  /**
+   * Yahoo's other yield field, already expressed as a percentage
+   * (2.4 = 2.4%) rather than a fraction. Populated far more often than
+   * trailingAnnualDividendYield and accurate for conventional payers,
+   * but still badly wrong for weekly option-income funds (it reports
+   * 2.04% for QDTE against a real ~47%). Fine for browsing curated
+   * collections; never use it to compute a user's actual income.
+   */
+  dividendYieldPercent: number | null;
   /** Display name, e.g. "Invesco NASDAQ 100 ETF" — a bare ticker like QQQM means nothing to most people. */
   name: string | null;
   /** Absolute and percentage move against the previous close; drives the red/green treatment. */
   change: number | null;
   changePercent: number | null;
+
+  // --- market-depth fields, populated by the batch endpoint only ---
+  /** "REGULAR" | "PRE" | "POST" | "CLOSED" | "PREPRE" | "POSTPOST" */
+  marketState: string | null;
+  /** 0 means the feed is real-time rather than delayed. */
+  exchangeDelayMinutes: number | null;
+  exchangeName: string | null;
+  previousClose: number | null;
+  open: number | null;
+  dayLow: number | null;
+  dayHigh: number | null;
+  fiftyTwoWeekLow: number | null;
+  fiftyTwoWeekHigh: number | null;
+  /** Move over the past year, as a percentage. */
+  fiftyTwoWeekChangePercent: number | null;
+  fiftyDayAverage: number | null;
+  twoHundredDayAverage: number | null;
+  volume: number | null;
+  averageVolume3Month: number | null;
 };
 
 /** One closing price on the sparkline series. `t` is a unix timestamp in seconds. */
