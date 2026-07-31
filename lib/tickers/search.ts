@@ -1,12 +1,14 @@
 "use server";
 
 import "server-only";
+import { resolveLogoUrl } from "./logo";
 
 export type TickerSearchResult = {
   ticker: string;
   name: string;
   exchange: string | null;
   quoteType: string | null;
+  logoUrl: string | null;
 };
 
 const SEARCH_ENDPOINT = "https://query1.finance.yahoo.com/v1/finance/search";
@@ -63,12 +65,19 @@ export async function searchTickers(query: string): Promise<TickerSearchResult[]
     return (data.quotes ?? [])
       .filter((q) => q.symbol && q.quoteType && ADDABLE_TYPES.has(q.quoteType))
       .slice(0, 6)
-      .map((q) => ({
-        ticker: q.symbol!.toUpperCase(),
-        name: q.longname ?? q.shortname ?? q.symbol!,
-        exchange: q.exchDisp ?? null,
-        quoteType: q.quoteType ?? null,
-      }));
+      .map((q) => {
+        const ticker = q.symbol!.toUpperCase();
+        const name = q.longname ?? q.shortname ?? q.symbol!;
+        return {
+          ticker,
+          name,
+          exchange: q.exchDisp ?? null,
+          quoteType: q.quoteType ?? null,
+          // Same resolution the rest of the app uses — still just a URL
+          // string, no extra request, so the dropdown doesn't slow down.
+          logoUrl: resolveLogoUrl(name, ticker),
+        };
+      });
   } catch {
     return []; // a failed search degrades to manual entry, never blocks the form
   }

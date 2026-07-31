@@ -118,35 +118,58 @@ Built on Yahoo's `/v1/finance/search` endpoint — no API key, already the app's
 
 `TickerSearchCombobox` (debounced 250ms, arrow-key navigable, click-outside to close) is hand-rolled rather than built on a combobox library — no such dependency exists in the project yet and this doesn't justify adding one. Wired into both `AddHoldingForm` and `AddWatchlistForm`, replacing the plain ticker input in each; doesn't block manual entry, so a ticker Yahoo's search doesn't surface still submits fine.
 
+**Logos added to the dropdown — DONE 2026-08-01.** The result list initially shipped as ticker/name/exchange text only — flagged as not matching the logo treatment already on Holdings/Watchlist/Collections. `TickerSearchResult` now carries a `logoUrl`, resolved the same way as everywhere else (`resolveLogoUrl` on the result's name, pure string match, no extra request), and each row renders it through the existing `TickerLogo` component (`size="sm"`). The exchange tag was also changed from bare text to a small rounded pill to match the pill styling used elsewhere this session.
+
+**Logo coverage gap found and fixed — DONE 2026-08-01.** Free-text search surfaces arbitrary tickers, not just the curated portfolio the static `NAME_TO_DOMAIN` list was built against — client screenshot showed Wayfair, Hotchkis & Wiley and others falling back to monograms. Two changes:
+- Expanded `NAME_TO_DOMAIN` with ~45 more ETF issuers and common dividend equities (Nuveen, Franklin, Hartford, Principal, ABBVie, Walmart, Costco, the major banks, etc.) — still zero network cost, same pure-function match.
+- Added [Logo.dev](https://www.logo.dev) as a second-choice source when the static match misses: `resolveLogoUrl(name, ticker)` now also builds an `img.logo.dev/ticker/{ticker}?...&fallback=404` URL. Chose Logo.dev after checking current options live — Clearbit's Logo API, the obvious first instinct, was **shut down in December 2025**. The free "no API key" alternative found (AllInvestView) requires a mandatory visible backlink on the page, which isn't appropriate for a paid product, so it was ruled out. Logo.dev needs a free publishable key (`NEXT_PUBLIC_LOGO_DEV_KEY` in `.env`, client obtained it directly) but explicitly covers "Stocks, ETFs, and funds" by ticker, 500K free requests/month, no card required.
+- `fallback=404` (instead of Logo.dev's own bundled monogram) lets `TickerLogo`'s new `onError` handler catch a genuine miss and drop to the app's own styled monogram — so every fallback in the app looks the same regardless of which source failed to resolve it, rather than mixing two different monogram styles.
+- **Attribution added.** Logo.dev's free tier requires commercial users (PaidPrime has paid plans) to show a visible "Logos provided by Logo.dev" link on a public production page. Added to the footer of the live coming-soon page (`app/page.tsx`) — the only publicly reachable page in production right now — and pre-emptively to the real marketing page's footer (`app/page1.tsx`) for whenever that's restored.
+- Verified live: `W` (Wayfair) and `KO` now resolve real logos via Logo.dev that previously showed monograms; genuinely obscure tickers (`ISNRW`, `HWO`) still 404 through Logo.dev too and correctly fall through to the monogram — expected, not a bug.
+- Added `baillie gifford` → `bailliegifford.com` to the static list after the client found `BGUS` (Baillie Gifford U.S. Equity Growth ETF) still showing a monogram — confirmed Logo.dev 404s on it too, so no source had it; a known, legitimate asset manager belongs in the curated list same as the others.
+
+**Regression introduced and fixed same day: broken-image flash.** Making `resolveLogoUrl` sometimes point at a URL that's *designed* to 404 (Logo.dev's `fallback=404`) meant `TickerLogo`'s `onError`-swap approach had a window where the browser's native broken-image icon rendered before React could react and drop to the monogram — never an issue before, since the old Google-favicon-only URLs essentially never failed to load. Fixed by restructuring `TickerLogo`: the monogram is now the permanent base layer, and the logo `<img>` sits on top starting at `opacity: 0`, only fading in on `onLoad`. A failing image never becomes visible at all — no flash, no broken-icon glyph, just the monogram that was already correct underneath the whole time.
+
 ## 5. Dividends page — DONE 2026-07-31
 
 He was explicit: "dividend is the heart of the app" — when you open Dividends, it should immediately show per-day / per-month / per-year income, prominently, the way the *marketing site's* demo (`components/marketing/product-tabs.tsx`'s `DividendsPanel`, which already has exactly this three-stat row) does. The **real** `app/(dashboard)/dividends/page.tsx` has no such summary today — it only has "Confirmed payments" and "Dividend history" tables, so the page currently reads as empty/pointless to him. Once #2/#3 above are fixed (real income numbers, working detection), add this summary row to the actual Dividends page using the corrected calculation.
 
-## 6. Collections — no search
+## 6. Collections — no search — DONE 2026-08-01
 
 He compared against a competitor that lets you search/browse any category or ticker. PaidPrime's Collections page only shows the fixed admin-curated list (`REITs`, `High Yield`, `BDCs` per `supabase/migrations/20260725000000_collections.sql`) with no way to look up anything outside it — confirmed, there's no search input anywhere in `collection-table.tsx` or `collections/page.tsx` today.
 
-**Fix direction:** add a search bar that queries tickers directly (reusing the Finnhub-backed search from #4) so users aren't limited to the curated list, independent of whatever the curated collections themselves show.
+**Fixed.** Added a free-text search box (`CollectionSearch`) above the curated lists on `/collections`, backed by a new server action (`searchCollectionTickers`, `app/(dashboard)/collections/actions.ts`) that reuses the same Yahoo search endpoint (`lib/tickers/search.ts`) and enrichment layer (`lib/tickers/enrich.ts`, so no page re-implements the price/logo/sparkline fetch) already built for #4's autocomplete. Debounced 300ms so it doesn't fire on every keystroke — only once typing pauses. Results render through the existing `CollectionTable`, independent of whatever the curated collections contain.
 
-## 7. Add-to-watchlist from Collections is over-restricted
+## 7. Add-to-watchlist from Collections is over-restricted — DONE 2026-08-01
 
 He can already add a curated collection ticker to his watchlist from the Collections page — that part works. But that quick-add is limited to only the tickers already shown in a collection; there's no free-text search to add *any* ticker to the watchlist from that flow. (The main `/watchlist` page's own add-holding form is not affected — it already has a normal ticker input, and will get the same autocomplete upgrade as #4/#6.)
+
+**Fixed as a side effect of #6.** `CollectionTable`'s per-row Watch button already called `watchTicker(ticker, companyName)` with no restriction to curated tickers — it just never received anything but curated rows before. Routing search results through the same table means free-text add-to-watchlist works with zero new logic, only the new search feeding it.
 
 ## 8. Diversification — deferred
 
 He called this "so-so" and explicitly deferred it to the designer's upcoming visual pass — no functional complaint here, just visual, so no action needed until Figma designs land.
+
+## 9. Remove / Watch button polish — DONE 2026-08-01
+
+Not from the original feedback list — a direct ask to make the row-action buttons on Holdings and Collections feel like "a premium trading app" rather than plain text links.
+
+- **Holdings — Remove** (`holdings-table.tsx`): was an unstyled text link (`hover:text-red-500`). Now a ghost pill — `Trash2` icon + label, transparent by default, fills red-tinted (`border-red-500/30 bg-red-500/10 text-red-500`) only on hover, so it carries no visual weight until the user is actually about to act on it.
+- **Collections — Watch/Watching** (`collection-table.tsx`): was a plain text link in both states. Unwatched is now an outlined pill with a `+` icon that fills green on hover, swapping to a spinner while the add is pending; watched is a solid green-tinted pill with a checkmark reading "Watching," linking to `/watchlist` — reads as a confirmed-state chip rather than an underlined link.
+
+**Not done:** Watchlist's own Remove button (`watchlist-table.tsx`) still uses the old plain-text style — it's pixel-identical to what Holdings had before this pass, but wasn't in scope for this ask. Worth the same treatment for consistency next time Watchlist comes up.
 
 ---
 
 ## Suggested sequencing
 
 **Fix now (functional, not blocked on the designer):**
-1. Dividend detection cron date-matching bug (#3) — highest impact, single root cause behind three separate symptoms he flagged (missing notifications, "today's income," calendar/dividends mismatch).
-2. Annual/monthly/daily income calculation (#2) — rebuild from real `dividend_events` history instead of Yahoo's trailing yield estimate.
-3. Rebuild `TickerSearchCombobox` + `TickerLogo` (#4) — already designed once, known-good approach.
-4. Collections search (#6), reusing the same ticker-search backend as #4.
-5. Dividends page income summary row (#5) — do after #2/#3 so it displays correct numbers from day one.
-6. Free-text add-to-watchlist from Collections (#7).
+1. ✅ Dividend detection cron date-matching bug (#3) — highest impact, single root cause behind three separate symptoms he flagged (missing notifications, "today's income," calendar/dividends mismatch).
+2. ✅ Annual/monthly/daily income calculation (#2) — rebuild from real `dividend_events` history instead of Yahoo's trailing yield estimate.
+3. ✅ Rebuild `TickerSearchCombobox` + `TickerLogo` (#4) — already designed once, known-good approach.
+4. ✅ Collections search (#6), reusing the same ticker-search backend as #4.
+5. ✅ Dividends page income summary row (#5) — do after #2/#3 so it displays correct numbers from day one.
+6. ✅ Free-text add-to-watchlist from Collections (#7).
 
 **Needs a decision from the client first:**
 - Calendar privacy filter (#1) — confirm whether it's a persistent setting or a session-only view toggle before building it.

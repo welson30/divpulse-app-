@@ -787,6 +787,15 @@ function SiteFooter() {
           <span className="font-mono text-xs text-text-secondary">© 2026 PaidPrime. Not investment advice.</span>
           <span className="font-mono text-xs text-text-secondary">Built for dividend investors, not day traders.</span>
         </div>
+        {/* Required attribution for Logo.dev's free tier (commercial use) — see lib/tickers/logo.ts */}
+        <div className="mx-auto w-full max-w-[1180px] px-sp-3 pb-sp-3 text-center sm:text-right">
+          <a
+            href="https://logo.dev"
+            className="font-mono text-[11px] text-text-secondary transition-colors hover:text-text-primary"
+          >
+            Logos provided by Logo.dev
+          </a>
+        </div>
       </div>
     </footer>
   );

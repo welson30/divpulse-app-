@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { searchTickers, type TickerSearchResult } from "@/lib/tickers/search";
+import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { cn } from "@/lib/utils";
 
 type TickerSearchComboboxProps = {
@@ -138,16 +139,19 @@ export function TickerSearchCombobox({
               onClick={() => pick(result)}
               onMouseEnter={() => setActiveIndex(i)}
               className={cn(
-                "flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors",
+                "flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors",
                 i === activeIndex ? "bg-surface-hover" : "hover:bg-surface-hover",
               )}
             >
-              <span className="min-w-0">
+              <TickerLogo ticker={result.ticker} logoUrl={result.logoUrl} size="sm" />
+              <span className="min-w-0 flex-1">
                 <span className="block font-mono text-sm font-semibold text-text-primary">{result.ticker}</span>
                 <span className="block truncate text-xs text-text-secondary">{result.name}</span>
               </span>
               {result.exchange ? (
-                <span className="shrink-0 font-mono text-[10px] text-text-tertiary">{result.exchange}</span>
+                <span className="shrink-0 rounded-full bg-surface-hover px-1.5 py-0.5 font-mono text-[10px] text-text-tertiary">
+                  {result.exchange}
+                </span>
               ) : null}
             </button>
           ))}

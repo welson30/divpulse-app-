@@ -176,11 +176,17 @@ export default function ComingSoonPage() {
           padding: "20px 40px",
           borderTop: "1px solid #1C1C1E",
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 6,
         }}>
           <p style={{ fontSize: 12, color: "#3F3F46", margin: 0 }}>
             &copy; {new Date().getFullYear()} PaidPrime. All rights reserved.
           </p>
+          {/* Required attribution for Logo.dev's free tier (commercial use) — see lib/tickers/logo.ts */}
+          <a href="https://logo.dev" style={{ fontSize: 11, color: "#3F3F46", textDecoration: "none" }}>
+            Logos provided by Logo.dev
+          </a>
         </footer>
 
       </main>

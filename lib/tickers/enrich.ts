@@ -46,7 +46,7 @@ export async function enrichTickers(
     result.set(symbol, {
       ticker: symbol,
       name,
-      logoUrl: resolveLogoUrl(name),
+      logoUrl: resolveLogoUrl(name, symbol),
       quote,
       sparkline,
       hasMarketData: quote?.price != null || sparkline.length > 0,
