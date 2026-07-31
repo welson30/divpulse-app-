@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { CollectionTable, type CollectionRow } from "@/components/dashboard/collection-table";
+import { CollectionSearch } from "@/components/dashboard/collection-search";
 
 export const metadata: Metadata = {
   title: "Collections — PaidPrime",
@@ -17,11 +18,12 @@ export default async function CollectionsPage() {
 
   if (!collections || collections.length === 0) {
     return (
-      <div className="flex flex-col gap-sp-3">
+      <div className="flex flex-col gap-sp-4">
         <div>
           <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Discover</span>
           <h1 className="text-h1 font-display font-semibold text-text-primary">Collections</h1>
         </div>
+        <CollectionSearch />
         <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-6 text-center">
           <p className="text-sm text-text-secondary">No collections curated yet.</p>
         </div>
@@ -43,6 +45,8 @@ export default async function CollectionsPage() {
           Curated groupings of dividend payers, with live prices and trailing yield.
         </p>
       </div>
+
+      <CollectionSearch />
 
       {collections.map((collection) => {
         const rows: CollectionRow[] = [...collection.collection_tickers]
