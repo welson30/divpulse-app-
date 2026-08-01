@@ -1,7 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getDividendDataProvider } from "@/lib/dividend-data";
-import { askAdvisor } from "@/lib/advisor/openai";
+import type { TickerQuote } from "@/lib/dividend-data/types";
+import { computeTrailingIncome } from "@/lib/dividend-data/income";
+import { estimateUpcomingPayments } from "@/lib/dividend-data/next-payment";
+import { askAdvisor, isAdvisorConfigured, MAX_HISTORY_TURNS, type AdvisorHolding, type AdvisorTurn } from "@/lib/advisor/openai";
 
 // ARCHITECTURE.md §12: "both candidate providers are pay-per-use ... a
 // per-plan rate limit is needed before this ships, not after." 10/day is
@@ -9,15 +13,34 @@ import { askAdvisor } from "@/lib/advisor/openai";
 // patterns are known.
 const DAILY_QUERY_LIMIT = 10;
 
+/** How far ahead to tell the advisor about — matches the dashboard's own horizon. */
+const UPCOMING_WINDOW_DAYS = 60;
+
+/** Sectors below this share of the portfolio are folded away rather than listed individually. */
+const MIN_SECTOR_PCT = 1;
+
 export async function POST(request: NextRequest) {
-  const { question } = (await request.json()) as { question?: string };
-  const trimmedQuestion = question?.trim();
+  const body = (await request.json()) as {
+    question?: string;
+    history?: AdvisorTurn[];
+    page?: string;
+  };
+  const trimmedQuestion = body.question?.trim();
 
   if (!trimmedQuestion) {
     return NextResponse.json({ error: "Ask a question first." }, { status: 400 });
   }
   if (trimmedQuestion.length > 500) {
     return NextResponse.json({ error: "Keep questions under 500 characters." }, { status: 400 });
+  }
+
+  // Checked before any auth/portfolio work: without a provider key every
+  // request is doomed, and saying so plainly beats a generic failure the
+  // user would keep retrying. 503, not 502 — nothing upstream is broken,
+  // this deployment just hasn't been configured yet.
+  if (!isAdvisorConfigured()) {
+    console.error("[advisor] OPENAI_API_KEY is not set — the advisor cannot answer any question until it is.");
+    return NextResponse.json({ error: "The AI Advisor isn't configured on this deployment yet." }, { status: 503 });
   }
 
   const supabase = await createClient();
@@ -38,9 +61,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "The AI Advisor is a Pro feature. Upgrade in Settings to use it." }, { status: 403 });
   }
 
+  // Rate limiting runs through the service-role client, as the
+  // ai_advisor_queries migration always intended ("written exclusively by
+  // ... the service-role client"). It previously used the request-scoped
+  // anon client, whose INSERT is rejected by RLS — that table grants only
+  // SELECT. The failure was silent (the insert result was never checked),
+  // so the log stayed empty, today's count was permanently 0, and the
+  // daily cap never once fired on a pay-per-query provider.
+  const admin = createAdminClient();
+
   const todayStart = new Date();
   todayStart.setUTCHours(0, 0, 0, 0);
-  const { count: queriesToday } = await supabase
+  const { count: queriesToday } = await admin
     .from("ai_advisor_queries")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
@@ -55,49 +87,120 @@ export async function POST(request: NextRequest) {
     supabase.from("goals").select("goal_type, target_amount, monthly_contribution").eq("user_id", user.id),
   ]);
 
+  const heldHoldings = holdings ?? [];
+  const distinctTickers = [...new Set(heldHoldings.map((h) => h.ticker))];
+
+  // One batched request for the whole portfolio rather than the previous
+  // per-ticker fetchQuote loop — same reasoning as lib/tickers/enrich.ts.
   const provider = getDividendDataProvider();
-  const distinctTickers = [...new Set((holdings ?? []).map((h) => h.ticker))];
-  const quotes = await Promise.all(
-    distinctTickers.map(async (ticker) => {
-      try {
-        return await provider.fetchQuote(ticker);
-      } catch {
-        return null;
-      }
-    }),
-  );
-  const quoteByTicker = new Map(distinctTickers.map((ticker, i) => [ticker, quotes[i]]));
+  const quoteByTicker: Map<string, TickerQuote> = distinctTickers.length
+    ? await provider.fetchQuotes(distinctTickers).catch(() => new Map<string, TickerQuote>())
+    : new Map();
+
+  const rangeStart = new Date().toISOString().slice(0, 10);
+  const rangeEnd = new Date(Date.now() + UPCOMING_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  // Income comes from recorded dividend history, never from Yahoo's
+  // trailingAnnualDividendYield. This route used to derive income from
+  // that field, which reads 0.00% for most of the ETFs this product
+  // exists to track — so the advisor was stating income roughly 14x too
+  // low while the system prompt instructed it to "ground your answer in
+  // those numbers." Wrong figures in confident prose are worse than a
+  // wrong stat card; see lib/dividend-data/income.ts for the full note.
+  const [income, upcoming] = await Promise.all([
+    computeTrailingIncome(supabase, heldHoldings),
+    distinctTickers.length ? estimateUpcomingPayments(supabase, distinctTickers, rangeStart, rangeEnd) : Promise.resolve([]),
+  ]);
+
+  const sharesByTicker = new Map<string, number>();
+  for (const holding of heldHoldings) {
+    sharesByTicker.set(holding.ticker, (sharesByTicker.get(holding.ticker) ?? 0) + Number(holding.shares));
+  }
 
   let portfolioValue = 0;
-  let annualIncome = 0;
-  for (const holding of holdings ?? []) {
-    const quote = quoteByTicker.get(holding.ticker);
-    const shares = Number(holding.shares);
-    const value = quote?.price ? shares * quote.price : 0;
-    portfolioValue += value;
-    if (quote?.trailingAnnualDividendYield) {
-      annualIncome += value * quote.trailingAnnualDividendYield;
+  const valueBySector = new Map<string, number>();
+  const advisorHoldings: AdvisorHolding[] = [];
+
+  for (const [ticker, shares] of sharesByTicker) {
+    const quote = quoteByTicker.get(ticker.toUpperCase()) ?? quoteByTicker.get(ticker);
+    const value = quote?.price ? shares * quote.price : null;
+    if (value != null) portfolioValue += value;
+
+    const sector = quote?.sector ?? quote?.quoteType ?? null;
+    if (value != null && sector) {
+      valueBySector.set(sector, (valueBySector.get(sector) ?? 0) + value);
     }
+
+    advisorHoldings.push({
+      ticker,
+      shares,
+      value,
+      annualIncome: income.perTicker.get(ticker) ?? 0,
+      sector,
+    });
   }
-  const avgYieldPct = portfolioValue > 0 ? (annualIncome / portfolioValue) * 100 : 0;
+
+  // Largest positions first — if the list is ever truncated for a very
+  // large portfolio, the meaningful ones survive.
+  advisorHoldings.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+
+  const sectors =
+    portfolioValue > 0
+      ? [...valueBySector.entries()]
+          .map(([sector, value]) => ({ sector, pct: (value / portfolioValue) * 100 }))
+          .filter((s) => s.pct >= MIN_SECTOR_PCT)
+          .sort((a, b) => b.pct - a.pct)
+      : [];
+
+  const avgYieldPct = portfolioValue > 0 ? (income.annual / portfolioValue) * 100 : 0;
+
+  const history = (Array.isArray(body.history) ? body.history : [])
+    .filter((turn) => (turn.role === "user" || turn.role === "assistant") && typeof turn.content === "string")
+    .slice(-MAX_HISTORY_TURNS)
+    .map((turn) => ({ role: turn.role, content: turn.content.slice(0, 2000) }));
 
   let answer: string;
   try {
-    answer = await askAdvisor(trimmedQuestion, {
-      portfolioValue,
-      monthlyIncome: annualIncome / 12,
-      avgYieldPct,
-      goals: (goals ?? []).map((g) => ({
-        type: g.goal_type,
-        targetAmount: Number(g.target_amount),
-        monthlyContribution: Number(g.monthly_contribution),
-      })),
-    });
+    answer = await askAdvisor(
+      trimmedQuestion,
+      {
+        portfolioValue,
+        monthlyIncome: income.monthly,
+        annualIncome: income.annual,
+        avgYieldPct,
+        holdings: advisorHoldings,
+        upcoming: upcoming.map((p) => ({
+          ticker: p.ticker,
+          payDate: p.payDate,
+          amount: p.amountPerShare * (sharesByTicker.get(p.ticker) ?? 0),
+          source: p.source,
+        })),
+        sectors,
+        goals: (goals ?? []).map((g) => ({
+          type: g.goal_type,
+          targetAmount: Number(g.target_amount),
+          monthlyContribution: Number(g.monthly_contribution),
+        })),
+        currentPage: typeof body.page === "string" ? body.page.slice(0, 40) : null,
+        tickersWithoutHistory: income.tickersWithoutHistory,
+      },
+      history,
+    );
   } catch (err) {
+    console.error("[advisor] provider call failed:", err);
     return NextResponse.json({ error: "The advisor is unavailable right now — try again shortly." }, { status: 502 });
   }
 
-  await supabase.from("ai_advisor_queries").insert({ user_id: user.id, prompt: trimmedQuestion, response: answer });
+  // Checked, not fire-and-forget: an unlogged query is an unmetered one,
+  // and silently dropping this write is exactly how the daily cap came to
+  // be inert. The answer is still returned — the user asked in good faith
+  // and the cost is already incurred — but the failure is surfaced.
+  const { error: logError } = await admin
+    .from("ai_advisor_queries")
+    .insert({ user_id: user.id, prompt: trimmedQuestion, response: answer });
+  if (logError) {
+    console.error("[advisor] failed to log query — daily rate limit is not being counted:", logError);
+  }
 
   return NextResponse.json({ answer });
 }

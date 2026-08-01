@@ -27,7 +27,13 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/60 backdrop-blur-sm",
+        // Literal rgba, not bg-black/60: app/globals.css resets the whole
+        // Tailwind color scale (`--color-*: initial`), so `black` is not a
+        // defined token and `bg-black/60` compiled to no CSS at all —
+        // leaving every dialog with a fully transparent scrim. Same class
+        // of bug as the `bg-blue-500` uses fixed earlier; matches the
+        // `bg-[rgba(34,197,94,…)]` tint pattern used elsewhere.
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm",
         className,
       )}
       {...props}

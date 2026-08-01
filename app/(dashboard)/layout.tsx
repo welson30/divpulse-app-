@@ -30,6 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const planLabel = PLAN_LABELS[profile?.plan ?? "free"] ?? "Free";
   const isFree = (profile?.plan ?? "free") === "free";
+  const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
 
   return (
     <AppShell
@@ -37,6 +38,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       displayName={profile?.display_name ?? null}
       planLabel={planLabel}
       isFree={isFree}
+      isPro={isPro}
       holdingCount={holdingCount ?? 0}
     >
       {children}

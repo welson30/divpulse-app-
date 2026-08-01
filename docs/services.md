@@ -159,7 +159,10 @@ Plaid does not support Brazilian brokers or most international brokers. Two fall
 | **Service** | OpenAI |
 | **Register at** | [platform.openai.com](https://platform.openai.com) |
 | **Cost** | Pay per use — ~$0.001 per query |
-| **Used for** | Answering natural language questions such as *"How much capital do I need to earn $1,000/month in dividends?"* inside the Goals and Diversification tabs |
+| **Env var** | `OPENAI_API_KEY` — **not currently set.** Without it every advisor request returns 503 and the assistant can't answer anything. |
+| **Model** | `gpt-4o-mini` (see `lib/advisor/openai.ts`) |
+| **Used for** | Answering natural language questions such as *"How much capital do I need to earn $1,000/month in dividends?"* — available from the floating advisor launcher on every dashboard page |
+| **Cost controls** | Pro/Pro+ only (server-side plan check), 500-char question cap, 8-turn history cap, and 10 questions/user/day counted from `ai_advisor_queries` |
 
 ---
 

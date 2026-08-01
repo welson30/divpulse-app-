@@ -1,17 +1,19 @@
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { BottomNav } from "@/components/dashboard/bottom-nav";
+import { AiAdvisorWidget } from "@/components/dashboard/ai-advisor-widget";
 
 type AppShellProps = {
   email: string;
   displayName: string | null;
   planLabel: string;
   isFree: boolean;
+  isPro: boolean;
   holdingCount: number;
   children: React.ReactNode;
 };
 
-export function AppShell({ email, displayName, planLabel, isFree, holdingCount, children }: AppShellProps) {
+export function AppShell({ email, displayName, planLabel, isFree, isPro, holdingCount, children }: AppShellProps) {
   return (
     <div className="fixed inset-0 flex overflow-hidden bg-canvas">
       {/* Desktop sidebar — always visible at lg+ */}
@@ -26,6 +28,11 @@ export function AppShell({ email, displayName, planLabel, isFree, holdingCount, 
 
       {/* Mobile bottom tab bar — replaces the sidebar below lg: */}
       <BottomNav planLabel={planLabel} isFree={isFree} holdingCount={holdingCount} className="lg:hidden" />
+
+      {/* Lives in the shell rather than per page so the conversation
+          survives client-side navigation. isPro only picks which panel
+          renders — the real gate is server-side in /api/advisor/query. */}
+      <AiAdvisorWidget isPro={isPro} />
     </div>
   );
 }

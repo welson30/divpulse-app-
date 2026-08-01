@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { IconGrowth, IconShield, IconPalmTree } from "@/components/marketing/icons";
-import { AiAdvisorPanel } from "@/components/dashboard/ai-advisor-panel";
 import { IncomeGoalPanel, type IncomeGoalPanelProps } from "@/components/dashboard/goals/income-goal-panel";
 import { ReserveGoalPanel, type ReserveGoalPanelProps } from "@/components/dashboard/goals/reserve-goal-panel";
 import { FreedomGoalPanel, type FreedomGoalPanelProps } from "@/components/dashboard/goals/freedom-goal-panel";
@@ -17,9 +16,9 @@ export type GoalTabKey = (typeof GOAL_TABS)[number]["key"];
 export type GoalsTabsProps = {
   isPro: boolean;
   active: GoalTabKey;
-  income: Omit<IncomeGoalPanelProps, "isPro"> & { placeholder: string };
-  reserve: Omit<ReserveGoalPanelProps, "isPro"> & { placeholder: string };
-  freedom: Omit<FreedomGoalPanelProps, "isPro"> & { placeholder: string };
+  income: Omit<IncomeGoalPanelProps, "isPro">;
+  reserve: Omit<ReserveGoalPanelProps, "isPro">;
+  freedom: Omit<FreedomGoalPanelProps, "isPro">;
 };
 
 /**
@@ -30,8 +29,6 @@ export type GoalsTabsProps = {
  * is a Server Component page underneath.
  */
 export function GoalsTabs({ isPro, active, income, reserve, freedom }: GoalsTabsProps) {
-  const placeholder = active === "income" ? income.placeholder : active === "reserve" ? reserve.placeholder : freedom.placeholder;
-
   return (
     <div className="flex flex-col gap-sp-3">
       <div className="flex gap-1 overflow-x-auto rounded-full border border-border-subtle bg-surface-2 p-1">
@@ -55,8 +52,6 @@ export function GoalsTabs({ isPro, active, income, reserve, freedom }: GoalsTabs
       {active === "income" ? <IncomeGoalPanel {...income} isPro={isPro} /> : null}
       {active === "reserve" ? <ReserveGoalPanel {...reserve} isPro={isPro} /> : null}
       {active === "freedom" ? <FreedomGoalPanel {...freedom} isPro={isPro} /> : null}
-
-      <AiAdvisorPanel isPro={isPro} placeholder={placeholder} />
     </div>
   );
 }

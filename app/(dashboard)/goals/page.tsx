@@ -88,24 +88,15 @@ export default async function GoalsPage({
 
   const incomeTarget = incomeGoal ? Number(incomeGoal.target_amount) : null;
   const incomeProgressPct = incomeTarget ? Math.min(100, (monthlyIncome / incomeTarget) * 100) : 0;
-  const incomePlaceholder = incomeTarget
-    ? `You're ${incomeProgressPct.toFixed(1)}% of the way to $${incomeTarget.toFixed(0)}/mo. Ask what it'd take to get there faster.`
-    : "Set a monthly income goal, then ask what it'd take to reach it.";
 
   const reserveMonthlyExpenses = reserveGoal ? Number(reserveGoal.monthly_expenses) : null;
   const reserveMonthsTarget = reserveGoal ? Number(reserveGoal.months_target) : 6;
   const reserveCurrentAmount = reserveGoal?.current_amount != null ? Number(reserveGoal.current_amount) : 0;
   const reserveTarget = reserveMonthlyExpenses ? reserveMonthlyExpenses * reserveMonthsTarget : null;
   const reserveProgressPct = reserveTarget ? Math.min(100, (reserveCurrentAmount / reserveTarget) * 100) : 0;
-  const reservePlaceholder = reserveTarget
-    ? `You're ${reserveProgressPct.toFixed(1)}% toward your ${reserveMonthsTarget}-month reserve. Ask how to close the gap faster.`
-    : "Set your monthly expenses, then ask about your reserve target.";
 
   const freedomTarget = freedomGoal ? Number(freedomGoal.target_amount) : null;
   const freedomProgressPct = freedomTarget ? Math.min(100, (portfolioValue / freedomTarget) * 100) : 0;
-  const freedomPlaceholder = freedomTarget
-    ? `At ${avgYieldPct.toFixed(2)}% yield, you need ~$${Math.round(freedomTarget).toLocaleString()} to be financially free. Ask what it'd take to get there sooner.`
-    : "Set your financial freedom target, then ask what it'd take to get there.";
 
   return (
     <div className="flex flex-col gap-sp-4">
@@ -165,20 +156,17 @@ export default async function GoalsPage({
           targetAmount: incomeTarget,
           monthlyContribution: incomeGoal ? Number(incomeGoal.monthly_contribution) : null,
           monthlySeries: monthlyIncomeSeries,
-          placeholder: incomePlaceholder,
         }}
         reserve={{
           currentReserve: reserveGoal?.current_amount != null ? Number(reserveGoal.current_amount) : null,
           monthlyExpenses: reserveMonthlyExpenses,
           monthsTarget: reserveGoal ? Number(reserveGoal.months_target) : null,
-          placeholder: reservePlaceholder,
         }}
         freedom={{
           portfolioValue,
           avgYieldPct,
           targetAmount: freedomTarget,
           monthlyContribution: freedomGoal ? Number(freedomGoal.monthly_contribution) : null,
-          placeholder: freedomPlaceholder,
         }}
       />
     </div>
