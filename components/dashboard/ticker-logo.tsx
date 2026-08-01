@@ -7,8 +7,16 @@ type TickerLogoProps = {
   ticker: string;
   /** Resolved server-side via lib/tickers/logo.ts; null falls back to a monogram. */
   logoUrl?: string | null;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   className?: string;
+};
+
+const SIZE_PX: Record<NonNullable<TickerLogoProps["size"]>, number> = { sm: 26, md: 36, lg: 64 };
+const MONOGRAM_CHARS: Record<NonNullable<TickerLogoProps["size"]>, number> = { sm: 2, md: 3, lg: 3 };
+const MONOGRAM_TEXT_CLASS: Record<NonNullable<TickerLogoProps["size"]>, string> = {
+  sm: "text-[9px]",
+  md: "text-[9px]",
+  lg: "text-lg",
 };
 
 /**
@@ -31,8 +39,8 @@ type TickerLogoProps = {
 export function TickerLogo({ ticker, logoUrl, size = "md", className }: TickerLogoProps) {
   const [loaded, setLoaded] = useState(false);
   const [broken, setBroken] = useState(false);
-  const px = size === "sm" ? 26 : 36;
-  const monogram = ticker.slice(0, size === "sm" ? 2 : 3).toUpperCase();
+  const px = SIZE_PX[size];
+  const monogram = ticker.slice(0, MONOGRAM_CHARS[size]).toUpperCase();
 
   return (
     <div
@@ -42,7 +50,10 @@ export function TickerLogo({ ticker, logoUrl, size = "md", className }: TickerLo
       )}
       style={{ width: px, height: px }}
     >
-      <span aria-hidden className="font-mono text-[9px] font-semibold tracking-tight text-text-secondary">
+      <span
+        aria-hidden
+        className={cn("font-mono font-semibold tracking-tight text-text-secondary", MONOGRAM_TEXT_CLASS[size])}
+      >
         {monogram}
       </span>
       {logoUrl && !broken ? (

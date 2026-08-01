@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
@@ -147,7 +148,7 @@ export default async function DividendsPage() {
               {topEarners.map(([ticker, amount]) => {
                 const share = income.annual > 0 ? (amount / income.annual) * 100 : 0;
                 return (
-                  <div key={ticker} className="flex items-center gap-2.5">
+                  <Link key={ticker} href={`/tickers/${ticker}`} className="flex items-center gap-2.5">
                     <TickerLogo ticker={ticker} logoUrl={logoFor(ticker)} size="sm" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-2">
@@ -160,7 +161,7 @@ export default async function DividendsPage() {
                         <div className="h-full rounded-full bg-green-500" style={{ width: `${share}%` }} />
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -194,16 +195,22 @@ export default async function DividendsPage() {
                 {payments!.map((payment, i) => (
                   <tr key={payment.id} className={i === payments!.length - 1 ? "" : "border-b border-border-subtle"}>
                     <td className="px-sp-3 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <TickerLogo
-                          ticker={holdingById.get(payment.holding_id)?.ticker ?? "—"}
-                          logoUrl={logoFor(holdingById.get(payment.holding_id)?.ticker)}
-                          size="sm"
-                        />
-                        <span className="font-mono text-sm font-semibold text-text-primary">
-                          {holdingById.get(payment.holding_id)?.ticker ?? "—"}
-                        </span>
-                      </div>
+                      {(() => {
+                        const paymentTicker = holdingById.get(payment.holding_id)?.ticker;
+                        const inner = (
+                          <>
+                            <TickerLogo ticker={paymentTicker ?? "—"} logoUrl={logoFor(paymentTicker)} size="sm" />
+                            <span className="font-mono text-sm font-semibold text-text-primary">{paymentTicker ?? "—"}</span>
+                          </>
+                        );
+                        return paymentTicker ? (
+                          <Link href={`/tickers/${paymentTicker}`} className="flex items-center gap-2.5">
+                            {inner}
+                          </Link>
+                        ) : (
+                          <div className="flex items-center gap-2.5">{inner}</div>
+                        );
+                      })()}
                     </td>
                     <td className="px-sp-3 py-3.5 text-[13px] text-text-secondary">{formatDate(payment.pay_date)}</td>
                     <td className="px-sp-3 py-3.5 text-right font-mono text-sm font-semibold tabular-nums text-green-500">
@@ -254,7 +261,7 @@ export default async function DividendsPage() {
                       className={`transition-colors hover:bg-surface-hover ${i === recentEvents.length - 1 ? "" : "border-b border-border-subtle"}`}
                     >
                       <td className="px-sp-3 py-3">
-                        <div className="flex items-center gap-2.5">
+                        <Link href={`/tickers/${event.ticker}`} className="flex items-center gap-2.5">
                           <TickerLogo ticker={event.ticker} logoUrl={logoFor(event.ticker)} size="sm" />
                           <div className="min-w-0">
                             <div className="font-mono text-sm font-semibold text-text-primary">{event.ticker}</div>
@@ -262,7 +269,7 @@ export default async function DividendsPage() {
                               {enriched.get(event.ticker.toUpperCase())?.name ?? ""}
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="px-sp-3 py-3 text-[13px] text-text-secondary">
                         {event.ex_date ? formatDate(event.ex_date) : "—"}

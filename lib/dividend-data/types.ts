@@ -46,12 +46,53 @@ export type TickerQuote = {
   twoHundredDayAverage: number | null;
   volume: number | null;
   averageVolume3Month: number | null;
+
+  // --- deep stats, populated only via fetchQuote's quoteSummary call.
+  // Single-company fundamentals — expect these null for most ETFs/funds,
+  // which is the common case for a dividend-focused portfolio, not an
+  // edge case. Never default a missing value to 0; render "—" instead. ---
+  marketCap: number | null;
+  trailingPE: number | null;
+  forwardPE: number | null;
+  /** Share of earnings paid out as dividends, as a fraction (0.65 = 65%). */
+  payoutRatio: number | null;
+  beta: number | null;
+  priceToBook: number | null;
+  /** Absolute $/share expected over the next year — distinct from the yield fields above. */
+  dividendRate: number | null;
+  exDividendDate: string | null;
+
+  // --- fund size / cost, populated by the batch endpoint, ETFs/funds only ---
+  /** Fund AUM in dollars — the fund-world equivalent of marketCap, absent for equities. */
+  netAssets: number | null;
+  /** Already a percentage (0.06 = 0.06%), not a fraction — format directly, don't multiply by 100. */
+  netExpenseRatio: number | null;
+
+  // --- extended-hours pricing, populated by the batch endpoint when
+  // hasPrePostMarketData is true. Only one side is ever populated at a
+  // time — post* during POST/POSTPOST market state, pre* during
+  // PRE/PREPRE — matching whichever session is currently active. ---
+  postMarketPrice: number | null;
+  postMarketChange: number | null;
+  postMarketChangePercent: number | null;
+  preMarketPrice: number | null;
+  preMarketChange: number | null;
+  preMarketChangePercent: number | null;
 };
 
 /** One closing price on the sparkline series. `t` is a unix timestamp in seconds. */
 export type SparklinePoint = { t: number; c: number };
 
 export type SparklineRange = "1d" | "5d" | "1mo" | "6mo" | "1y";
+
+/**
+ * Range for a full historical price chart (ticker detail page) — kept
+ * separate from SparklineRange rather than widening it, since 5y/max
+ * ranges aren't meaningful for a 24px inline list sparkline. The two
+ * concerns (decorative list sparkline vs. real historical chart) evolve
+ * independently on purpose.
+ */
+export type ChartRange = "1d" | "5d" | "1mo" | "3mo" | "6mo" | "1y" | "5y" | "max";
 
 /**
  * The interface every dividend data provider implements. Isolated so the
@@ -71,4 +112,6 @@ export interface DividendDataProvider {
   fetchQuotes(tickers: string[]): Promise<Map<string, TickerQuote>>;
   /** Batched closing-price series, keyed by ticker, for sparklines. */
   fetchSparklines(tickers: string[], range?: SparklineRange): Promise<Map<string, SparklinePoint[]>>;
+  /** Full-resolution price history for one ticker's detail-page chart. */
+  fetchPriceHistory(ticker: string, range: ChartRange): Promise<SparklinePoint[]>;
 }

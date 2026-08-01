@@ -1,5 +1,6 @@
 import "server-only";
 import type {
+  ChartRange,
   DividendDataProvider,
   DividendEvent,
   SparklinePoint,
@@ -66,6 +67,16 @@ type YahooQuoteSummaryResponse = {
             };
             summaryDetail?: {
               trailingAnnualDividendYield?: { raw?: number };
+              dividendRate?: { raw?: number };
+              payoutRatio?: { raw?: number };
+              exDividendDate?: { raw?: number }; // unix seconds
+            };
+            defaultKeyStatistics?: {
+              marketCap?: { raw?: number };
+              trailingPE?: { raw?: number };
+              forwardPE?: { raw?: number };
+              beta?: { raw?: number };
+              priceToBook?: { raw?: number };
             };
           },
         ]
@@ -95,6 +106,13 @@ type YahooChartResponse = {
               date: number; // unix seconds
             }
           >;
+        };
+        // Only present when the chart endpoint is called for price
+        // history (fetchPriceHistory) rather than fetchDividends/
+        // fetchQuote, which only read meta/events.
+        timestamp?: number[];
+        indicators?: {
+          quote?: [{ close?: (number | null)[] }];
         };
       },
     ] | null;
@@ -129,6 +147,18 @@ type YahooBatchQuoteResponse = {
       fiftyDayAverage?: number;
       twoHundredDayAverage?: number;
       averageDailyVolume3Month?: number;
+      // Fund-only — absent for equities (verified live against AAPL vs SCHD).
+      netAssets?: number;
+      // Already a percentage (0.06 = 0.06%), not a fraction.
+      netExpenseRatio?: number;
+      // Only the side matching the current session is ever present.
+      hasPrePostMarketData?: boolean;
+      postMarketPrice?: number;
+      postMarketChange?: number;
+      postMarketChangePercent?: number;
+      preMarketPrice?: number;
+      preMarketChange?: number;
+      preMarketChangePercent?: number;
     }>;
   };
 };
@@ -145,6 +175,20 @@ const SPARK_INTERVALS: Record<SparklineRange, string> = {
   "1mo": "1d",
   "6mo": "1d",
   "1y": "1d",
+};
+
+// Coarser granularity at longer ranges keeps point counts sane for a
+// real chart — 5y at daily resolution is ~1260 points, at weekly ~260;
+// "max" (which can span decades) goes monthly.
+const CHART_INTERVALS: Record<ChartRange, string> = {
+  "1d": "5m",
+  "5d": "15m",
+  "1mo": "1d",
+  "3mo": "1d",
+  "6mo": "1d",
+  "1y": "1d",
+  "5y": "1wk",
+  max: "1mo",
 };
 
 // chart's instrumentType differs from quoteSummary's quoteType casing/
@@ -282,13 +326,31 @@ export class YahooFinanceProvider implements DividendDataProvider {
       twoHundredDayAverage: null,
       volume: null,
       averageVolume3Month: null,
+      marketCap: null,
+      trailingPE: null,
+      forwardPE: null,
+      payoutRatio: null,
+      beta: null,
+      priceToBook: null,
+      dividendRate: null,
+      exDividendDate: null,
+      // Fund size/cost and extended-hours pricing both only come from
+      // fetchQuotes' batch endpoint — see the equivalent comment above.
+      netAssets: null,
+      netExpenseRatio: null,
+      postMarketPrice: null,
+      postMarketChange: null,
+      postMarketChangePercent: null,
+      preMarketPrice: null,
+      preMarketChange: null,
+      preMarketChangePercent: null,
     };
 
     for (const attempt of [false, true]) {
       try {
         const { crumb, cookie } = await getCrumb(attempt);
         const summaryUrl = new URL(`${QUOTE_SUMMARY_ENDPOINT}/${encodeURIComponent(ticker)}`);
-        summaryUrl.searchParams.set("modules", "summaryProfile,summaryDetail");
+        summaryUrl.searchParams.set("modules", "summaryProfile,summaryDetail,defaultKeyStatistics");
         summaryUrl.searchParams.set("crumb", crumb);
 
         const summaryResponse = await fetch(summaryUrl, {
@@ -308,6 +370,15 @@ export class YahooFinanceProvider implements DividendDataProvider {
         if (result) {
           base.sector = result.summaryProfile?.sector ?? null;
           base.trailingAnnualDividendYield = result.summaryDetail?.trailingAnnualDividendYield?.raw ?? null;
+          base.dividendRate = result.summaryDetail?.dividendRate?.raw ?? null;
+          base.payoutRatio = result.summaryDetail?.payoutRatio?.raw ?? null;
+          const exDivRaw = result.summaryDetail?.exDividendDate?.raw;
+          base.exDividendDate = exDivRaw != null ? new Date(exDivRaw * 1000).toISOString().slice(0, 10) : null;
+          base.marketCap = result.defaultKeyStatistics?.marketCap?.raw ?? null;
+          base.trailingPE = result.defaultKeyStatistics?.trailingPE?.raw ?? null;
+          base.forwardPE = result.defaultKeyStatistics?.forwardPE?.raw ?? null;
+          base.beta = result.defaultKeyStatistics?.beta?.raw ?? null;
+          base.priceToBook = result.defaultKeyStatistics?.priceToBook?.raw ?? null;
         }
         break;
       } catch {
@@ -378,6 +449,24 @@ export class YahooFinanceProvider implements DividendDataProvider {
             twoHundredDayAverage: quote.twoHundredDayAverage ?? null,
             volume: quote.regularMarketVolume ?? null,
             averageVolume3Month: quote.averageDailyVolume3Month ?? null,
+            // Deep stats only come from fetchQuote's quoteSummary call —
+            // this batch endpoint doesn't carry them.
+            marketCap: null,
+            trailingPE: null,
+            forwardPE: null,
+            payoutRatio: null,
+            beta: null,
+            priceToBook: null,
+            dividendRate: null,
+            exDividendDate: null,
+            netAssets: quote.netAssets ?? null,
+            netExpenseRatio: quote.netExpenseRatio ?? null,
+            postMarketPrice: quote.postMarketPrice ?? null,
+            postMarketChange: quote.postMarketChange ?? null,
+            postMarketChangePercent: quote.postMarketChangePercent ?? null,
+            preMarketPrice: quote.preMarketPrice ?? null,
+            preMarketChange: quote.preMarketChange ?? null,
+            preMarketChangePercent: quote.preMarketChangePercent ?? null,
           });
         }
         return result;
@@ -430,5 +519,44 @@ export class YahooFinanceProvider implements DividendDataProvider {
     }
 
     return result;
+  }
+
+  /**
+   * Full-resolution price history for a single ticker's detail-page
+   * chart. Hits the chart endpoint directly (same one fetchDividends/
+   * fetchQuote use) with an explicit `range`, rather than stretching the
+   * spark endpoint/SparklineRange beyond its decorative-list-sparkline
+   * scope. No crumb needed — the chart endpoint doesn't require one.
+   */
+  async fetchPriceHistory(ticker: string, range: ChartRange): Promise<SparklinePoint[]> {
+    try {
+      const url = new URL(`${CHART_ENDPOINT}/${encodeURIComponent(ticker)}`);
+      url.searchParams.set("range", range);
+      url.searchParams.set("interval", CHART_INTERVALS[range]);
+
+      const response = await fetch(url, {
+        headers: { "User-Agent": USER_AGENT },
+        next: { revalidate: range === "1d" || range === "5d" ? 300 : 3600 },
+      });
+
+      if (!response.ok) return [];
+
+      const data = (await response.json()) as YahooChartResponse;
+      if (data.chart.error) return [];
+
+      const result = data.chart.result?.[0];
+      const timestamps = result?.timestamp ?? [];
+      const closes = result?.indicators?.quote?.[0]?.close ?? [];
+
+      const points: SparklinePoint[] = [];
+      for (let i = 0; i < closes.length; i += 1) {
+        const close = closes[i];
+        const timestamp = timestamps[i];
+        if (close != null && timestamp != null) points.push({ t: timestamp, c: close });
+      }
+      return points;
+    } catch {
+      return []; // a failed history fetch renders an empty chart, never breaks the page
+    }
   }
 }

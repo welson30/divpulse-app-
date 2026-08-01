@@ -29,4 +29,12 @@ export const TIPS = {
     "The cut-off date. You must own the shares before this date to receive the upcoming dividend — buying on or after it means you miss that payment.",
   payDate: "The date the dividend money actually reaches your account.",
   perShare: "The dividend amount paid for each individual share you own.",
+  marketCap: "The total value of all outstanding shares — price × shares outstanding. A rough measure of size.",
+  peRatio:
+    "Price divided by earnings per share. Meaningful for individual stocks; usually blank for ETFs and funds, which don't report earnings the same way.",
+  payoutRatio:
+    "The share of earnings paid out as dividends. Over 100% means the company is paying out more than it currently earns.",
+  beta: "How much this security's price swings compared with the overall market. 1.0 tracks the market; higher means more volatile.",
+  dividendRate:
+    "The dollar amount of dividends expected per share over the next year, based on the most recent regular payment. Often blank for funds with irregular payouts.",
 } as const;

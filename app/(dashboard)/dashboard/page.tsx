@@ -180,11 +180,9 @@ export default async function DashboardPage() {
             <div className="overflow-hidden rounded-card border border-border-subtle bg-surface">
               {todayPayments.map((payment, i) => {
                 const holding = holdingById.get(payment.holding_id);
-                return (
-                  <div
-                    key={payment.id}
-                    className={`flex items-center gap-3 px-4 py-3.5 ${i === todayPayments.length - 1 ? "" : "border-b border-border-subtle"}`}
-                  >
+                const rowClassName = `flex items-center gap-3 px-4 py-3.5 ${i === todayPayments.length - 1 ? "" : "border-b border-border-subtle"}`;
+                const content = (
+                  <>
                     <TickerLogo
                       ticker={holding?.ticker ?? "—"}
                       logoUrl={holding ? infoFor(holding.ticker)?.logoUrl : null}
@@ -198,6 +196,19 @@ export default async function DashboardPage() {
                     <span className="shrink-0 rounded-md border border-green-500/30 bg-[rgba(34,197,94,0.1)] px-2 py-0.5 font-mono text-[10px] font-bold text-green-500">
                       Confirmed ✓
                     </span>
+                  </>
+                );
+                return holding ? (
+                  <Link
+                    key={payment.id}
+                    href={`/tickers/${holding.ticker}`}
+                    className={`${rowClassName} transition-colors hover:bg-surface-hover`}
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <div key={payment.id} className={rowClassName}>
+                    {content}
                   </div>
                 );
               })}
@@ -210,7 +221,10 @@ export default async function DashboardPage() {
 
           <h2 className="mt-sp-2 text-h2 font-display font-medium text-text-primary">Next payment</h2>
           {nextEvent && nextHolding ? (
-            <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
+            <Link
+              href={`/tickers/${nextEvent.ticker}`}
+              className="block rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
+            >
               <div className="flex items-center gap-3">
                 <TickerLogo ticker={nextEvent.ticker} logoUrl={infoFor(nextEvent.ticker)?.logoUrl} />
                 <div className="min-w-0 flex-1">
@@ -225,7 +239,7 @@ export default async function DashboardPage() {
                   {daysUntilNext === 0 ? "Today" : daysUntilNext === 1 ? "Tomorrow" : `In ${daysUntilNext} days`}
                 </span>
               </div>
-            </div>
+            </Link>
           ) : (
             <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-sm text-text-secondary">
               No upcoming payments detected yet for your holdings.
@@ -246,8 +260,9 @@ export default async function DashboardPage() {
               const price = info?.quote?.price ?? null;
               const value = price != null ? Number(holding.shares) * price : null;
               return (
-                <div
+                <Link
                   key={holding.id}
+                  href={`/tickers/${holding.ticker}`}
                   className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
                 >
                   <TickerLogo ticker={holding.ticker} logoUrl={info?.logoUrl} size="sm" />
@@ -267,7 +282,7 @@ export default async function DashboardPage() {
                     width={56}
                     height={22}
                   />
-                </div>
+                </Link>
               );
             })}
           </div>

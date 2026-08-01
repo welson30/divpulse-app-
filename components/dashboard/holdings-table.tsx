@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { RemoveHoldingDialog } from "@/components/dashboard/remove-holding-dialog";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
@@ -82,7 +83,7 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
               className={`transition-colors hover:bg-surface-hover ${i === holdings.length - 1 ? "" : "border-b border-border-subtle"}`}
             >
               <td className="px-sp-3 py-3">
-                <div className="flex items-center gap-2.5">
+                <Link href={`/tickers/${holding.ticker}`} className="flex items-center gap-2.5">
                   <TickerLogo ticker={holding.ticker} logoUrl={holding.logoUrl} />
                   <div className="min-w-0">
                     <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
@@ -95,7 +96,7 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
                       </div>
                     )}
                   </div>
-                </div>
+                </Link>
               </td>
               <td className="px-sp-3 py-3 text-[13px] text-text-secondary">{holding.broker_name ?? "—"}</td>
               <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">

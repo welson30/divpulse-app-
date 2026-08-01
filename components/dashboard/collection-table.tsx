@@ -68,13 +68,13 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
                 className={`transition-colors hover:bg-surface-hover ${i === rows.length - 1 ? "" : "border-b border-border-subtle"}`}
               >
                 <td className="px-sp-3 py-3">
-                  <div className="flex items-center gap-2.5">
+                  <Link href={`/tickers/${row.ticker}`} className="flex items-center gap-2.5">
                     <TickerLogo ticker={row.ticker} logoUrl={row.logoUrl} />
                     <div className="min-w-0">
                       <div className="font-mono text-sm font-semibold text-text-primary">{row.ticker}</div>
                       <div className="mt-0.5 max-w-[240px] truncate text-xs text-text-secondary">{row.name ?? "—"}</div>
                     </div>
-                  </div>
+                  </Link>
                 </td>
                 <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
                   {formatPrice(row.price, row.currency)}

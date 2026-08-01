@@ -7,9 +7,17 @@ import { Label } from "@/components/ui/label";
 import { TickerSearchCombobox } from "@/components/dashboard/ticker-search-combobox";
 import { addHolding, type HoldingActionState } from "@/app/(dashboard)/holdings/actions";
 
-export function AddHoldingForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [ticker, setTicker] = useState("");
-  const [companyName, setCompanyName] = useState("");
+export function AddHoldingForm({
+  onSuccess,
+  defaultTicker,
+  defaultCompanyName,
+}: {
+  onSuccess?: () => void;
+  defaultTicker?: string;
+  defaultCompanyName?: string;
+}) {
+  const [ticker, setTicker] = useState(defaultTicker ?? "");
+  const [companyName, setCompanyName] = useState(defaultCompanyName ?? "");
   const [state, formAction, pending] = useActionState<HoldingActionState, FormData>(async (prevState, formData) => {
     const result = await addHolding(prevState, formData);
     if (!result) {

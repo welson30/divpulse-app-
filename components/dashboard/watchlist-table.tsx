@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import Link from "next/link";
 import { removeWatchlistItem } from "@/app/(dashboard)/watchlist/actions";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
@@ -71,7 +72,7 @@ export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
               className={`transition-colors hover:bg-surface-hover ${i === items.length - 1 ? "" : "border-b border-border-subtle"}`}
             >
               <td className="px-sp-3 py-3">
-                <div className="flex items-center gap-2.5">
+                <Link href={`/tickers/${item.ticker}`} className="flex items-center gap-2.5">
                   <TickerLogo ticker={item.ticker} logoUrl={item.logoUrl} />
                   <div className="min-w-0">
                     <div className="font-mono text-sm font-semibold text-text-primary">{item.ticker}</div>
@@ -79,7 +80,7 @@ export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
                       {item.name ?? item.company_name ?? "—"}
                     </div>
                   </div>
-                </div>
+                </Link>
               </td>
               <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
                 {formatMoney(item.price)}
