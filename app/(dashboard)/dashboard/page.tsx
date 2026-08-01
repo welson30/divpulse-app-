@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Aperture, Calendar, ChevronRight, Clock, DollarSign, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { MarketStateBadge, StatCard } from "@/components/dashboard/market-stats";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 import { TIPS } from "@/lib/tips";
 import { Button } from "@/components/ui/button";
+import type { EnrichedTicker } from "@/lib/tickers/enrich";
+import type { SparklinePoint } from "@/lib/dividend-data/types";
 
 export const metadata: Metadata = {
   title: "For You — PaidPrime",
@@ -15,6 +19,43 @@ export const metadata: Metadata = {
 
 function formatCurrency(value: number) {
   return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+/**
+ * Index-aligned, shares-weighted sum of each holding's own real
+ * sparkline series — a genuine derived portfolio trend (same idea as
+ * summing portfolioValue itself), not a fabricated curve. Index-aligned
+ * rather than timestamp-matched because every holding's sparkline comes
+ * from the same batched Yahoo request (enrichTickers) at the same
+ * range/interval, so series line up point-for-point even when exact
+ * timestamps differ by a few seconds.
+ */
+function buildPortfolioSparkline(
+  holdings: { ticker: string; shares: number | string }[],
+  infoFor: (ticker: string) => EnrichedTicker | undefined,
+): SparklinePoint[] {
+  const series = holdings
+    .map((h) => ({ shares: Number(h.shares), points: infoFor(h.ticker)?.sparkline ?? [] }))
+    .filter((s) => s.points.length > 1);
+
+  if (series.length === 0) return [];
+
+  const longest = series.reduce((a, b) => (b.points.length > a.points.length ? b : a)).points;
+
+  const aggregate: SparklinePoint[] = [];
+  for (let i = 0; i < longest.length; i += 1) {
+    let total = 0;
+    let any = false;
+    for (const s of series) {
+      const point = s.points[i];
+      if (point) {
+        total += s.shares * point.c;
+        any = true;
+      }
+    }
+    if (any) aggregate.push({ t: longest[i]!.t, c: total });
+  }
+  return aggregate;
 }
 
 function greeting() {
@@ -102,6 +143,7 @@ export default async function DashboardPage() {
     portfolioPrevValue > 0 ? ((portfolioValue - portfolioPrevValue) / portfolioPrevValue) * 100 : null;
 
   const marketQuote = [...enriched.values()].find((e) => e.quote?.marketState)?.quote ?? null;
+  const portfolioSparkline = buildPortfolioSparkline(holdings, infoFor);
 
   const annualIncome = income.annual;
   const incomePerDay = income.daily;
@@ -118,60 +160,84 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-sp-4">
-      <div>
-        <h1 className="text-h1 font-display font-semibold text-text-primary">
-          {greeting()}, {firstName}
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          {today.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
-          {todayTotal > 0 ? (
-            <>
-              {" · "}
-              <span className="text-green-500">
-                {todayPayments!.length} {todayPayments!.length === 1 ? "dividend" : "dividends"} received today
-              </span>
-            </>
-          ) : null}
-        </p>
-        <MarketStateBadge
-          marketState={marketQuote?.marketState}
-          delayMinutes={marketQuote?.exchangeDelayMinutes}
-          className="mt-1.5"
-        />
+      <div className="relative">
+        <GreetingBackdrop />
+        <div className="relative z-10">
+          <h1 className="text-h1 font-display font-semibold text-text-primary">
+            {greeting()}, {firstName}
+          </h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            {today.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+            {todayTotal > 0 ? (
+              <>
+                {" · "}
+                <span className="text-green-500">
+                  {todayPayments!.length} {todayPayments!.length === 1 ? "dividend" : "dividends"} received today
+                </span>
+              </>
+            ) : null}
+          </p>
+          <MarketStateBadge
+            marketState={marketQuote?.marketState}
+            delayMinutes={marketQuote?.exchangeDelayMinutes}
+            className="mt-1.5"
+          />
+        </div>
       </div>
 
-      <div className="grid gap-sp-2 sm:grid-cols-2 lg:grid-cols-4">
+      {/*
+        Portfolio value is the hero stat on mobile — full width, with its
+        own sparkline — while the other three collapse into a compact
+        3-across row beneath it. `lg:contents` dissolves that wrapping div
+        at desktop width so all four become plain siblings of the outer
+        4-column grid, recreating the uniform row the desktop design uses,
+        without maintaining two separate layouts.
+      */}
+      <div className="grid grid-cols-1 gap-sp-2 lg:grid-cols-4">
         <StatCard
           label="Portfolio value"
           value={formatCurrency(portfolioValue)}
           changeAmount={portfolioDayChange}
           changePercent={portfolioDayChangePct}
           tip={TIPS.portfolioValue}
+          icon={TrendingUp}
+          sparkline={portfolioSparkline}
         />
-        <StatCard
-          label="Annual dividend income"
-          value={formatCurrency(annualIncome)}
-          sub={`${avgYieldPct.toFixed(2)}% yield · trailing 12mo`}
-          tip={TIPS.annualIncome}
-        />
-        <StatCard
-          label="Today's income"
-          value={todayTotal > 0 ? `+${formatCurrency(todayTotal)}` : "$0.00"}
-          sub={todayTotal > 0 ? `${todayPayments!.length} received today` : "Nothing detected yet today"}
-          className={todayTotal > 0 ? "border-green-500/25" : undefined}
-        />
-        <StatCard
-          label="Income per day"
-          value={formatCurrency(incomePerDay)}
-          sub={`${formatCurrency(incomePerMonth)}/month`}
-          tip={TIPS.incomePerDay}
-        />
+        <div className="grid grid-cols-3 gap-sp-2 lg:contents">
+          <StatCard
+            label="Annual dividend income"
+            value={formatCurrency(annualIncome)}
+            sub={`${avgYieldPct.toFixed(2)}% yield · trailing 12mo`}
+            tip={TIPS.annualIncome}
+            icon={DollarSign}
+            compact
+          />
+          <StatCard
+            label="Today's income"
+            value={todayTotal > 0 ? `+${formatCurrency(todayTotal)}` : "$0.00"}
+            sub={todayTotal > 0 ? `${todayPayments!.length} received today` : "Nothing detected yet today"}
+            className={todayTotal > 0 ? "border-green-500/25" : undefined}
+            icon={Calendar}
+            compact
+          />
+          <StatCard
+            label="Income per day"
+            value={formatCurrency(incomePerDay)}
+            sub={`${formatCurrency(incomePerMonth)}/month`}
+            tip={TIPS.incomePerDay}
+            icon={Aperture}
+            compact
+          />
+        </div>
       </div>
 
       <div className="grid gap-sp-3 lg:grid-cols-2">
         <div className="flex flex-col gap-sp-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-h2 font-display font-medium text-text-primary">Today&rsquo;s payments</h2>
+            <h2 className="flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
+              <Calendar className="size-4.5 text-text-secondary" aria-hidden />
+              Today&rsquo;s payments
+            </h2>
             <Link href="/dividends" className="font-mono text-xs text-green-500 hover:underline">
               See history
             </Link>
@@ -205,6 +271,7 @@ export default async function DashboardPage() {
                     className={`${rowClassName} transition-colors hover:bg-surface-hover`}
                   >
                     {content}
+                    <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
                   </Link>
                 ) : (
                   <div key={payment.id} className={rowClassName}>
@@ -214,18 +281,22 @@ export default async function DashboardPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-sm text-text-secondary">
+            <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-center text-sm text-text-secondary">
+              <Calendar className="size-6 text-text-tertiary" aria-hidden />
               No dividends detected yet today.
             </div>
           )}
 
-          <h2 className="mt-sp-2 text-h2 font-display font-medium text-text-primary">Next payment</h2>
+          <h2 className="mt-sp-2 flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
+            <Clock className="size-4.5 text-text-secondary" aria-hidden />
+            Next payment
+          </h2>
           {nextEvent && nextHolding ? (
             <Link
               href={`/tickers/${nextEvent.ticker}`}
-              className="block rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
+              className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <TickerLogo ticker={nextEvent.ticker} logoUrl={infoFor(nextEvent.ticker)?.logoUrl} />
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-warning">
@@ -239,9 +310,11 @@ export default async function DashboardPage() {
                   {daysUntilNext === 0 ? "Today" : daysUntilNext === 1 ? "Tomorrow" : `In ${daysUntilNext} days`}
                 </span>
               </div>
+              <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
             </Link>
           ) : (
-            <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-sm text-text-secondary">
+            <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-center text-sm text-text-secondary">
+              <Clock className="size-6 text-text-tertiary" aria-hidden />
               No upcoming payments detected yet for your holdings.
             </div>
           )}
@@ -254,7 +327,7 @@ export default async function DashboardPage() {
               View all →
             </Link>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
             {holdings.slice(0, 6).map((holding) => {
               const info = infoFor(holding.ticker);
               const price = info?.quote?.price ?? null;
@@ -282,6 +355,7 @@ export default async function DashboardPage() {
                     width={56}
                     height={22}
                   />
+                  <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
                 </Link>
               );
             })}

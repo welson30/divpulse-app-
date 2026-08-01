@@ -19,6 +19,8 @@ export function StatCard({
   changePercent,
   tip,
   sparkline,
+  icon: Icon,
+  compact = false,
   className,
 }: {
   label: string;
@@ -28,6 +30,17 @@ export function StatCard({
   changePercent?: number | null;
   tip?: string;
   sparkline?: SparklinePoint[];
+  /** Small circular chip in the top-right corner — optional, purely decorative. */
+  icon?: React.ComponentType<{ className?: string }>;
+  /**
+   * Tighter padding/type scale below `lg:`, full size from `lg:` up —
+   * for a tile that's cramped into a 3-across mobile row but sits in a
+   * normal 4-up grid at desktop width (dashboard's secondary stats).
+   * Baked in as responsive classes, not a flat size choice, since this
+   * is a single server-rendered class string that has to look right at
+   * every viewport, not something re-rendered per breakpoint.
+   */
+  compact?: boolean;
   className?: string;
 }) {
   const hasChange = changeAmount != null || changePercent != null;
@@ -37,27 +50,52 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-card border border-border-subtle bg-surface p-sp-3",
+        "relative overflow-hidden rounded-card border border-border-subtle bg-surface",
+        compact ? "p-sp-2 lg:p-sp-3" : "p-sp-3",
         hasChange && (isUp ? "border-green-500/25" : "border-red-500/25"),
         className,
       )}
     >
-      <div className="flex items-center gap-1.5">
-        <span className="text-xs text-text-secondary">{label}</span>
+      {Icon ? (
+        <span
+          className={cn(
+            "absolute top-sp-2 right-sp-2 flex items-center justify-center rounded-full bg-[rgba(34,197,94,0.12)] text-green-500",
+            compact ? "size-6 lg:size-7" : "size-7",
+          )}
+        >
+          <Icon className={compact ? "size-3 lg:size-3.5" : "size-3.5"} />
+        </span>
+      ) : null}
+
+      <div className={cn("flex items-center gap-1.5", Icon && "pr-8")}>
+        <span className={cn("text-text-secondary", compact ? "text-[11px] lg:text-xs" : "text-xs")}>{label}</span>
         {tip ? <InfoTip label={tip} /> : null}
       </div>
 
-      <div className="mt-1 font-mono text-2xl font-bold tracking-tight tabular-nums text-text-primary">{value}</div>
+      <div
+        className={cn(
+          "mt-1 font-mono font-bold tracking-tight tabular-nums text-text-primary",
+          compact ? "text-lg lg:text-2xl" : "text-2xl",
+        )}
+      >
+        {value}
+      </div>
 
       {hasChange ? (
-        <div className={cn("mt-1 flex items-center gap-1.5 font-mono text-xs tabular-nums", isUp ? "text-green-500" : "text-red-500")}>
+        <div
+          className={cn(
+            "mt-1 flex items-center gap-1.5 font-mono tabular-nums",
+            compact ? "text-[11px] lg:text-xs" : "text-xs",
+            isUp ? "text-green-500" : "text-red-500",
+          )}
+        >
           <span aria-hidden>{isUp ? "▲" : "▼"}</span>
           {changeAmount != null ? <span>${Math.abs(changeAmount).toFixed(2)}</span> : null}
           {changePercent != null ? <span>({signed(changePercent)}%)</span> : null}
-          <span className="text-text-secondary">today</span>
+          <span className={cn("text-text-secondary", compact && "hidden lg:inline")}>today</span>
         </div>
       ) : sub ? (
-        <div className="mt-1 text-xs text-text-secondary">{sub}</div>
+        <div className={cn("mt-1 text-text-secondary", compact ? "text-[11px] lg:text-xs" : "text-xs")}>{sub}</div>
       ) : null}
 
       {sparkline && sparkline.length > 1 ? (
