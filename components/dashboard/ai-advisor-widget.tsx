@@ -11,7 +11,15 @@ type AiAdvisorWidgetProps = {
   isPro: boolean;
 };
 
-type Message = { role: "user" | "assistant"; content: string };
+// Carries an id (not just role+content) so a streaming reply can be found
+// and appended to by identity rather than by "whatever's currently last in
+// the array" — the latter breaks if the user hits Clear while a response
+// is still streaming in.
+type Message = { id: string; role: "user" | "assistant"; content: string };
+
+function newId(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+}
 
 /**
  * Human-readable name for the page the user is looking at, sent as context
@@ -93,6 +101,11 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  // Id of the message currently being typed onto, or null before the first
+  // chunk of a reply has arrived. Drives both the blinking caret and the
+  // "Thinking…" bubble — the latter should disappear the moment real text
+  // starts streaming in, not stay parked alongside it.
+  const [streamingId, setStreamingId] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -111,8 +124,10 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
     }
   }
 
-  // Pin to the newest message as the conversation grows, including while
-  // the "Thinking…" bubble is showing.
+  // Pin to the newest message as the conversation grows — including while
+  // the "Thinking…" bubble is showing, and on every incoming chunk of a
+  // streaming reply (messages gets a new array reference each time, so
+  // this fires continuously as text streams in, not just once at the end).
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isPending]);
@@ -133,8 +148,8 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
   function ask(trimmed: string) {
     // Captured before the optimistic append so the model receives the
     // conversation as it stood when the question was asked.
-    const history = messages;
-    setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
+    const history = messages.map(({ role, content }) => ({ role, content }));
+    setMessages((prev) => [...prev, { id: newId(), role: "user", content: trimmed }]);
     setError(null);
 
     startTransition(async () => {
@@ -144,12 +159,52 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: trimmed, history, page: pageLabel }),
         });
-        const result = await response.json();
+
         if (!response.ok) {
+          // Every early-return in the route (auth/plan/rate-limit/config
+          // checks) still answers with plain JSON — only a successful
+          // call becomes a byte stream — so this path is unchanged from
+          // before streaming existed.
+          const result = await response.json().catch(() => ({}) as { error?: string });
           setError(result.error ?? "Something went wrong.");
           return;
         }
-        setMessages((prev) => [...prev, { role: "assistant", content: result.answer }]);
+
+        const reader = response.body?.getReader();
+        if (!reader) {
+          setError("Your browser doesn't support streaming responses.");
+          return;
+        }
+
+        const decoder = new TextDecoder();
+        const assistantId = newId();
+        let receivedAny = false;
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            if (!chunk) continue;
+
+            if (!receivedAny) {
+              receivedAny = true;
+              setStreamingId(assistantId);
+              setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: chunk }]);
+            } else {
+              // Matched by id, not array position — safe even if Clear
+              // emptied the array out from under an in-flight stream (the
+              // .map below then simply finds nothing and drops the chunk).
+              setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)));
+            }
+          }
+        } finally {
+          setStreamingId((current) => (current === assistantId ? null : current));
+        }
+
+        if (!receivedAny) {
+          setError("The advisor didn't return an answer — try again.");
+        }
       } catch {
         setError("Couldn't reach the advisor — check your connection and try again.");
       }
@@ -207,6 +262,12 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                 onClick={() => {
                   setMessages([]);
                   setError(null);
+                  // Doesn't stop the in-flight fetch — the reader loop's
+                  // id-matched update simply finds nothing to append to
+                  // once the array is empty — but a stale caret with no
+                  // visible message under it would look broken, so drop
+                  // the reference to it here.
+                  setStreamingId(null);
                 }}
                 className="rounded-full px-2.5 py-1 text-[11px] font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
               >
@@ -252,27 +313,30 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                       </div>
                     </div>
                   ) : (
-                    messages.map((message, i) =>
+                    messages.map((message) =>
                       message.role === "user" ? (
-                        <div key={i} className="flex justify-end">
+                        <div key={message.id} className="flex justify-end">
                           <p className="max-w-[85%] rounded-2xl rounded-tr-sm bg-surface-2 px-3.5 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap text-text-primary">
                             {message.content}
                           </p>
                         </div>
                       ) : (
-                        <div key={i} className="flex gap-2.5">
+                        <div key={message.id} className="flex gap-2.5">
                           <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[rgba(34,197,94,0.12)] text-green-500">
                             <IconBot className="size-3.5" />
                           </span>
                           <p className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[rgba(34,197,94,0.08)] px-3.5 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap text-text-primary">
                             {message.content}
+                            {message.id === streamingId ? (
+                              <span className="ml-0.5 inline-block h-3.5 w-0.5 translate-y-0.5 animate-pulse bg-green-500 align-middle" />
+                            ) : null}
                           </p>
                         </div>
                       ),
                     )
                   )}
 
-                  {isPending ? (
+                  {isPending && !streamingId ? (
                     <div className="flex gap-2.5">
                       <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[rgba(34,197,94,0.12)] text-green-500">
                         <IconBot className="size-3.5" />

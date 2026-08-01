@@ -122,8 +122,26 @@ export function isAdvisorConfigured(): boolean {
   return Boolean(process.env.OPENAI_API_KEY);
 }
 
-/** Single non-streaming chat completion — no SDK, matches this codebase's plain-fetch pattern for Telegram/Yahoo Finance. */
-export async function askAdvisor(question: string, context: AdvisorContext, history: AdvisorTurn[] = []): Promise<string> {
+/**
+ * Streams the answer as it's generated, one text delta at a time — the
+ * ChatGPT-style typing effect is real token streaming from OpenAI, not a
+ * client-side animation replayed over an already-complete string (which
+ * would only add latency: the whole answer would have to finish generating
+ * before a fake typewriter could even start). No SDK, matches this
+ * codebase's plain-fetch pattern for Telegram/Yahoo Finance — this just
+ * also has to parse OpenAI's SSE framing by hand.
+ *
+ * Nothing in the request executes until the first `.next()` call (that's
+ * how async generator functions work), so a caller can await the first
+ * chunk to confirm OpenAI actually accepted the request — and still choose
+ * an ordinary HTTP error status — before committing to a streamed response
+ * of its own.
+ */
+export async function* streamAdvisor(
+  question: string,
+  context: AdvisorContext,
+  history: AdvisorTurn[] = [],
+): AsyncGenerator<string, void, unknown> {
   if (!isAdvisorConfigured()) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
@@ -136,6 +154,7 @@ export async function askAdvisor(question: string, context: AdvisorContext, hist
     },
     body: JSON.stringify({
       model: MODEL,
+      stream: true,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "system", content: `User's current data:\n${buildContextSummary(context)}` },
@@ -146,15 +165,52 @@ export async function askAdvisor(question: string, context: AdvisorContext, hist
     }),
   });
 
-  if (!response.ok) {
-    const body = await response.text();
+  if (!response.ok || !response.body) {
+    const body = await response.text().catch(() => "");
     throw new Error(`OpenAI request failed: ${response.status} ${body}`);
   }
 
-  const data = await response.json();
-  const answer = data.choices?.[0]?.message?.content;
-  if (!answer) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  // SSE frames don't align with network chunk boundaries — a frame can
+  // arrive split across two reads, so any trailing partial line has to be
+  // held over rather than parsed early.
+  let buffer = "";
+  let receivedAnyContent = false;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data:")) continue;
+        const payload = trimmed.slice("data:".length).trim();
+        if (payload === "[DONE]") continue;
+
+        try {
+          const parsed = JSON.parse(payload);
+          const delta: unknown = parsed.choices?.[0]?.delta?.content;
+          if (typeof delta === "string" && delta.length > 0) {
+            receivedAnyContent = true;
+            yield delta;
+          }
+        } catch {
+          // A malformed or unexpectedly-split frame shouldn't take down
+          // the rest of an otherwise-good answer.
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  if (!receivedAnyContent) {
     throw new Error("OpenAI returned no answer");
   }
-  return answer;
 }

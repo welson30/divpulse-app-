@@ -44,7 +44,7 @@ The Brazilian-broker case is not incidental: the app prototype's topbar already 
 | Collections | Curated asset groupings (REITs, High Yield, BDCs…) with live prices/yields. Admin-curated, zero user setup. | All plans |
 | Watchlist | Assets tracked but not held. | All plans |
 | Goals & Financial Planning | Passive income targets, emergency reserve tracking, financial-freedom milestones. | All plans |
-| AI Advisor | Conversational assistant inside Goals/Diversification (e.g. "how much do I need to invest to earn $1,000/mo?"). | Pro feature (per services.md) |
+| AI Advisor | Conversational assistant reachable from a floating launcher on every dashboard page (e.g. "how much do I need to invest to earn $1,000/mo?"), aware of the page currently open. | Pro feature (per services.md) |
 | Settings | Account, notification preferences, subscription management, currency/language. | All plans |
 
 ### Subscription tiers
@@ -74,7 +74,7 @@ The Brazilian-broker case is not incidental: the app prototype's topbar already 
 | Broker sync (non-US) | CSV import / manual entry | No integration; Brazilian brokers (XP, Avenue, Nomad) unsupported by Plaid. |
 | Messaging | Telegram Bot API | Pro+; requires a per-user chat-linking flow (Section 9.4), not just the single owner chat ID currently in `.env`. |
 | Transactional email | Resend | Free to 3k emails/mo — welcome, password reset, payment confirmation. |
-| AI Advisor | **Conflicting spec** — PRD says Google Gemini Flash, `services.md` says OpenAI (~$0.001/query) | Unresolved — see Section 15 discrepancy #2. |
+| AI Advisor | PRD said Google Gemini Flash, `services.md` said OpenAI (~$0.001/query) | **Resolved: OpenAI `gpt-4o-mini`** — see Section 15 decision #2. |
 | Supplementary calendar data | Alpha Vantage (free tier) or a static PaidPrime-maintained list | For FOMC/earnings dates only, not core dividend data. |
 
 ---
@@ -104,7 +104,7 @@ SUPABASE                THIRD-PARTY SERVICES
                            • Telegram Bot API (Pro+ alerts)
                            • Resend (transactional email)
                            • Stripe (billing)
-                           • OpenAI / Gemini (AI Advisor)
+                           • OpenAI (AI Advisor)
                            • Alpha Vantage (FOMC/earnings)
 ```
 
@@ -126,9 +126,10 @@ Derived from `Prototype/app.html`'s sidebar (Main / Explore / Account sections) 
 | `app/(dashboard)/collections/page.tsx` → `/collections` | Collections | Authenticated | |
 | `app/(dashboard)/diversification/page.tsx` → `/diversification` | Diversification View | Authenticated | |
 | `app/(dashboard)/watchlist/page.tsx` → `/watchlist` | Watchlist | Authenticated | |
-| `app/(dashboard)/goals/page.tsx` → `/goals` | Goals & Financial Planning | Authenticated | Hosts the AI Advisor panel. |
+| `app/(dashboard)/goals/page.tsx` → `/goals` | Goals & Financial Planning | Authenticated | |
 | `app/(dashboard)/notifications/page.tsx` → `/notifications` | Notification preferences | Authenticated, Pro+ gated | Prototype badges this "PRO" in the sidebar. |
 | `app/(dashboard)/settings/page.tsx` → `/settings` | Account/plan/currency/language | Authenticated | |
+| `app/(dashboard)/layout.tsx` → `components/dashboard/app-shell.tsx` | App shell (sidebar/topbar/bottom nav) | Authenticated | Mounts `AiAdvisorWidget` — a floating launcher present on every route under `(dashboard)`, not scoped to one page, so the conversation survives client-side navigation. |
 | `app/api/**` | Route Handlers | Mixed | See Section 9. |
 | `app/manifest.ts`, `app/icon.svg`, etc. | PWA metadata | Public | **Already implemented** — see Section 14. |
 
@@ -154,7 +155,7 @@ No schema exists in code yet (Section 14). This is a proposed model derived from
 | `goals` | `id`, `user_id`, `goal_type (passive_income\|emergency_reserve\|financial_freedom)`, `target_amount`, `target_date`, `monthly_contribution` | |
 | `notification_preferences` | `user_id`, `push_enabled`, `telegram_chat_id (nullable)`, `telegram_enabled`, `email_enabled` | `telegram_chat_id` is per-user, captured via the linking flow in Section 9.4 — distinct from the single `TELEGRAM_OWNER_CHAT_ID` dev credential in `services.md`. |
 | `notification_log` | `id`, `user_id`, `channel`, `template`, `payload`, `sent_at`, `status` | Audit trail; backs the PRD's "no missed notifications on service restarts" reliability requirement (a restart replays from last-processed state instead of trusting in-memory queues). |
-| `ai_advisor_queries` | `id`, `user_id`, `prompt`, `response`, `created_at`, `cost_estimate` | Usage log for the pay-per-query AI provider — needed for cost control regardless of which provider wins (see discrepancy #2). |
+| `ai_advisor_queries` | `id`, `user_id`, `prompt`, `response`, `created_at` | Usage log for the pay-per-query OpenAI provider, and the sole source of truth for the daily rate limit. **Written only via the service-role client** — RLS grants users SELECT on their own rows and nothing else, so a request-scoped client's insert is rejected. |
 
 **Row-Level Security:** every user-scoped table needs Supabase RLS policies restricting reads/writes to `auth.uid() = user_id`. `dividend_events` and `collections`/`collection_tickers` are the exceptions — shared reference data, service-role-write-only, public read (or read via API only, per your data-exposure preference).
 
@@ -217,7 +218,7 @@ Reliability requirements from the PRD ("no missed notifications on service resta
 
 ### 9.6 AI Advisor
 
-- `POST /api/advisor/query` — server-side call to the chosen provider (resolve discrepancy #2 first), rate-limited per plan, logged to `ai_advisor_queries` for cost tracking
+- `POST /api/advisor/query` — server-side OpenAI call, Pro/Pro+ only (plan checked server-side against `profiles.plan`), rate-limited to 10 questions/user/day, logged to `ai_advisor_queries` via the service-role client for cost tracking. Accepts `{ question, history, page }`; context sent to the model is assembled in `lib/advisor/openai.ts`. Returns 503 when `OPENAI_API_KEY` is unset, 403 for non-Pro, 429 at the daily cap.
 
 ---
 
@@ -242,7 +243,7 @@ Reliability requirements from the PRD ("no missed notifications on service resta
 | 6 | Plaid | plaid.com/developers | ~$0.30/account/mo | US broker auto-sync (Pro+) |
 | 7 | Telegram Bot API | pre-configured | Free | Pro+ alerts |
 | 8 | Resend | resend.com | Free ≤3k emails/mo | Welcome, password reset, payment confirmation |
-| 9 | Gemini or OpenAI | — | Gemini free tier / OpenAI ~$0.001/query | AI Advisor — **provider unresolved, see discrepancy #2** |
+| 9 | OpenAI | platform.openai.com | ~$0.001/query (`gpt-4o-mini`) | AI Advisor — resolved, see Section 15 decision #2 |
 | — | Alpha Vantage | alphavantage.co | Free tier | Optional FOMC/earnings calendar overlay |
 
 Required environment variables (union of the above, names inferred from convention — confirm exact names when each integration is wired up):
@@ -262,7 +263,7 @@ PLAID_ENV
 TELEGRAM_BOT_TOKEN
 TELEGRAM_OWNER_CHAT_ID        # dev/admin alerts only, not per-user delivery
 RESEND_API_KEY
-GEMINI_API_KEY or OPENAI_API_KEY   # pending discrepancy #2
+OPENAI_API_KEY                 # AI Advisor; without it /api/advisor/query returns 503
 ALPHA_VANTAGE_API_KEY          # optional
 CRON_SECRET                    # protects /api/jobs/* from unauthenticated invocation
 ```
@@ -284,7 +285,7 @@ From PRD §8–9, plus risks surfaced during this synthesis:
 | No missed notifications on restart | Detection job must be idempotent/resumable (Section 9.1) — this is a correctness requirement, not just a nice-to-have. |
 | Not over-engineered for current scale | No message broker, no dedicated backend service, no multi-region setup in Phase 1 — Vercel + Supabase is sufficient until traffic says otherwise. |
 | **Risk (new):** Yahoo Finance is unofficial | No published SLA, rate limits, or ToS guarantee. The entire notification value proposition depends on this feed. Worth a documented fallback plan (e.g., a paid data provider swap-in point) even if not built in Phase 1 — isolate the data-fetch behind one module so swapping providers later doesn't touch the detection/notification logic. |
-| **Risk (new):** AI Advisor cost | Both candidate providers are pay-per-use or rate-limited free tier. `ai_advisor_queries` logging (Section 7) plus a per-plan rate limit is needed before this ships, not after. |
+| **Risk (resolved):** AI Advisor cost | OpenAI is pay-per-use, so unmetered access was a real exposure. Mitigated: `ai_advisor_queries` logging plus a 10/user/day cap (Section 9.6) — both must go through the service-role client, since the table's RLS grants users SELECT only. An earlier version logged via the request-scoped client, whose insert RLS silently rejected; the cap read that always-empty table and never fired. Fixed by switching the write to the service-role client and checking the insert's error. |
 
 Explicitly out of scope for Phase 1 (PRD §9): native mobile apps, real money movement/trading, full observability stack (distributed tracing/log aggregation), SEO/AEO/analytics/search console.
 
@@ -343,7 +344,7 @@ In short: the **foundation and design system are production-grade; the product i
 ### Developer decisions (engineering call, no client input needed)
 
 1. **Next.js version.** PRD §7 specifies Next.js 14; the actual scaffold is 16.2.10 (confirmed via `package.json`, and `AGENTS.md` explicitly warns this version has breaking API/convention changes from what most training data assumes). Keeping 16 — already invested, actively maintained.
-2. **AI Advisor provider — to be decided.** PRD §7 says Google Gemini Flash; `services.md` §9 says OpenAI. These aren't interchangeable (different SDKs, pricing models, and quality characteristics), but the choice doesn't change what the client sees, so it's an engineering decision to finalize before `/api/advisor/query` is written, not a client question.
+2. **AI Advisor provider — resolved as OpenAI.** PRD §7 said Google Gemini Flash; `services.md` §9 said OpenAI. Settled on **OpenAI `gpt-4o-mini`**, implemented in `lib/advisor/openai.ts`. Rationale: `services.md` is the document the client actually provisioned services against, and the integration is a single plain-`fetch` call with no SDK — the same pattern used for Telegram and Yahoo Finance — so it carries no dependency weight and stays swappable if cost ever justifies revisiting Gemini's free tier. Requires `OPENAI_API_KEY`; the route returns 503 and answers nothing until that is set.
 3. **Telegram delivery mechanism — resolved as per-user.** `services.md` only sets up a single owner chat ID; the PRD lists Telegram alerts as a per-subscriber Pro+ delivery channel alongside push and email. Confirmed user-facing: each subscriber links their own Telegram (deep link → `/start <code>` → webhook captures `chat_id`, per the linking flow in Section 9.4) rather than alerts routing through one shared/admin chat. This is the only mechanism that delivers real per-user alerts through the Bot API (a bot cannot message a user who hasn't first initiated contact), so it doesn't need to go to the client as an open choice.
 
 ### Needs client confirmation
@@ -362,6 +363,6 @@ A rough phase order, not a committed roadmap — reprioritize against actual cli
 4. **Billing** — Stripe Checkout/Portal/webhooks, plan gating enforcement.
 5. **Calendar, Diversification, Collections, Watchlist, Goals** — mostly read views over data already flowing from steps 2–3.
 6. **Pro+ features** — Plaid sync, CSV import, Telegram linking + alerts.
-7. **AI Advisor** — once the provider decision (discrepancy #2) is made.
+7. **AI Advisor** — built on OpenAI (decision #2 resolved); reachable from the floating launcher on every dashboard page. Blocked only on `OPENAI_API_KEY` being provisioned.
 8. **i18n** (if confirmed in scope) — should land as early as feasible once confirmed, since retrofitting is expensive; listed late here only because it's pending a scope decision.
 9. **Landing page** as its own route, polish pass, launch checklist (SEO/analytics — explicitly deferred per PRD §9, but worth a pre-launch pass).

@@ -5,7 +5,7 @@ import { getDividendDataProvider } from "@/lib/dividend-data";
 import type { TickerQuote } from "@/lib/dividend-data/types";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { estimateUpcomingPayments } from "@/lib/dividend-data/next-payment";
-import { askAdvisor, isAdvisorConfigured, MAX_HISTORY_TURNS, type AdvisorHolding, type AdvisorTurn } from "@/lib/advisor/openai";
+import { streamAdvisor, isAdvisorConfigured, MAX_HISTORY_TURNS, type AdvisorHolding, type AdvisorTurn } from "@/lib/advisor/openai";
 
 // ARCHITECTURE.md §12: "both candidate providers are pay-per-use ... a
 // per-plan rate limit is needed before this ships, not after." 10/day is
@@ -159,48 +159,98 @@ export async function POST(request: NextRequest) {
     .slice(-MAX_HISTORY_TURNS)
     .map((turn) => ({ role: turn.role, content: turn.content.slice(0, 2000) }));
 
-  let answer: string;
+  const generator = streamAdvisor(
+    trimmedQuestion,
+    {
+      portfolioValue,
+      monthlyIncome: income.monthly,
+      annualIncome: income.annual,
+      avgYieldPct,
+      holdings: advisorHoldings,
+      upcoming: upcoming.map((p) => ({
+        ticker: p.ticker,
+        payDate: p.payDate,
+        amount: p.amountPerShare * (sharesByTicker.get(p.ticker) ?? 0),
+        source: p.source,
+      })),
+      sectors,
+      goals: (goals ?? []).map((g) => ({
+        type: g.goal_type,
+        targetAmount: Number(g.target_amount),
+        monthlyContribution: Number(g.monthly_contribution),
+      })),
+      currentPage: typeof body.page === "string" ? body.page.slice(0, 40) : null,
+      tickersWithoutHistory: income.tickersWithoutHistory,
+    },
+    history,
+  );
+
+  // An async generator function body doesn't run until the first .next()
+  // call, so pulling one chunk here is what actually sends the request to
+  // OpenAI and lets a rejection (bad key, provider outage, empty answer)
+  // still come back as an ordinary JSON error with a real HTTP status —
+  // exactly like the old non-streaming version did. Only once that first
+  // chunk is in hand are we committed to a 200 streamed response.
+  let firstChunk: IteratorResult<string, void>;
   try {
-    answer = await askAdvisor(
-      trimmedQuestion,
-      {
-        portfolioValue,
-        monthlyIncome: income.monthly,
-        annualIncome: income.annual,
-        avgYieldPct,
-        holdings: advisorHoldings,
-        upcoming: upcoming.map((p) => ({
-          ticker: p.ticker,
-          payDate: p.payDate,
-          amount: p.amountPerShare * (sharesByTicker.get(p.ticker) ?? 0),
-          source: p.source,
-        })),
-        sectors,
-        goals: (goals ?? []).map((g) => ({
-          type: g.goal_type,
-          targetAmount: Number(g.target_amount),
-          monthlyContribution: Number(g.monthly_contribution),
-        })),
-        currentPage: typeof body.page === "string" ? body.page.slice(0, 40) : null,
-        tickersWithoutHistory: income.tickersWithoutHistory,
-      },
-      history,
-    );
+    firstChunk = await generator.next();
   } catch (err) {
     console.error("[advisor] provider call failed:", err);
     return NextResponse.json({ error: "The advisor is unavailable right now — try again shortly." }, { status: 502 });
   }
 
-  // Checked, not fire-and-forget: an unlogged query is an unmetered one,
-  // and silently dropping this write is exactly how the daily cap came to
-  // be inert. The answer is still returned — the user asked in good faith
-  // and the cost is already incurred — but the failure is surfaced.
-  const { error: logError } = await admin
-    .from("ai_advisor_queries")
-    .insert({ user_id: user.id, prompt: trimmedQuestion, response: answer });
-  if (logError) {
-    console.error("[advisor] failed to log query — daily rate limit is not being counted:", logError);
-  }
+  const encoder = new TextEncoder();
+  let fullAnswer = "";
 
-  return NextResponse.json({ answer });
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        if (!firstChunk.done) {
+          fullAnswer += firstChunk.value;
+          controller.enqueue(encoder.encode(firstChunk.value));
+        }
+        while (true) {
+          const { done, value } = await generator.next();
+          if (done) break;
+          fullAnswer += value;
+          controller.enqueue(encoder.encode(value));
+        }
+      } catch (err) {
+        // The HTTP status is already committed to 200 by this point (the
+        // headers went out with the first enqueue), so a mid-stream
+        // failure can't become an error response — the best that's left
+        // is a readable note appended to whatever text the user already
+        // saw, same as ChatGPT's own occasional cut-off streams.
+        console.error("[advisor] stream interrupted:", err);
+        controller.enqueue(encoder.encode("\n\n[Connection interrupted — please try again.]"));
+      } finally {
+        controller.close();
+
+        // Checked, not fire-and-forget: an unlogged query is an unmetered
+        // one, and silently dropping this write is exactly how the daily
+        // cap came to be inert before. Logged even for a partial/cut-off
+        // answer — the tokens were still spent.
+        if (fullAnswer) {
+          const { error: logError } = await admin
+            .from("ai_advisor_queries")
+            .insert({ user_id: user.id, prompt: trimmedQuestion, response: fullAnswer });
+          if (logError) {
+            console.error("[advisor] failed to log query — daily rate limit is not being counted:", logError);
+          }
+        }
+      }
+    },
+    cancel() {
+      // The client navigated away or aborted — stop pulling from OpenAI
+      // rather than paying for tokens nobody will read.
+      generator.return?.();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
 }
