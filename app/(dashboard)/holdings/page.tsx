@@ -5,6 +5,7 @@ import { MarketStateBadge } from "@/components/dashboard/market-stats";
 import { HoldingsTable, type Holding } from "@/components/dashboard/holdings-table";
 import { AddHoldingDialog } from "@/components/dashboard/add-holding-dialog";
 import { ImportCsvDialog } from "@/components/dashboard/import-csv-dialog";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 
 export const metadata: Metadata = {
   title: "Holdings — PaidPrime",
@@ -57,28 +58,31 @@ export default async function HoldingsPage() {
 
   return (
     <div className="min-w-0 flex flex-col gap-sp-3">
-      <div className="flex flex-wrap items-center justify-between gap-sp-2">
-        <div>
-          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
-          <h1 className="text-h1 font-display font-semibold text-text-primary">Holdings</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
-            <span>
-              {count} {count === 1 ? "asset" : "assets"} tracked{isFree ? ` · Free plan limit: 5` : ""}
-            </span>
-            {totalValue > 0 ? (
-              <span className="font-mono tabular-nums text-text-primary">
-                ${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      <div className="relative">
+        <GreetingBackdrop />
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-sp-2">
+          <div>
+            <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
+            <h1 className="text-h1 font-display font-semibold text-text-primary">Holdings</h1>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
+              <span>
+                {count} {count === 1 ? "asset" : "assets"} tracked{isFree ? ` · Free plan limit: 5` : ""}
               </span>
-            ) : null}
-            <MarketStateBadge
-              marketState={marketQuote?.marketState}
-              delayMinutes={marketQuote?.exchangeDelayMinutes}
-            />
+              {totalValue > 0 ? (
+                <span className="font-mono tabular-nums text-text-primary">
+                  ${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              ) : null}
+              <MarketStateBadge
+                marketState={marketQuote?.marketState}
+                delayMinutes={marketQuote?.exchangeDelayMinutes}
+              />
+            </div>
           </div>
-        </div>
-        <div className="flex gap-sp-2">
-          <ImportCsvDialog isProPlus={isProPlus} />
-          <AddHoldingDialog />
+          <div className="flex gap-sp-2">
+            <ImportCsvDialog isProPlus={isProPlus} />
+            <AddHoldingDialog />
+          </div>
         </div>
       </div>
 

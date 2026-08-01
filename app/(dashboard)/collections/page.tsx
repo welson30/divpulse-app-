@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { CollectionTable, type CollectionRow } from "@/components/dashboard/collection-table";
 import { CollectionSearch } from "@/components/dashboard/collection-search";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 
 export const metadata: Metadata = {
   title: "Collections — PaidPrime",
@@ -38,12 +39,15 @@ export default async function CollectionsPage() {
 
   return (
     <div className="min-w-0 flex flex-col gap-sp-4">
-      <div>
-        <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Discover</span>
-        <h1 className="text-h1 font-display font-semibold text-text-primary">Collections</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Curated groupings of dividend payers, with live prices and trailing yield.
-        </p>
+      <div className="relative">
+        <GreetingBackdrop />
+        <div className="relative z-10">
+          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Discover</span>
+          <h1 className="text-h1 font-display font-semibold text-text-primary">Collections</h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            Curated groupings of dividend payers, with live prices and trailing yield.
+          </p>
+        </div>
       </div>
 
       <CollectionSearch />

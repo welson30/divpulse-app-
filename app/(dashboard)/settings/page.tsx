@@ -6,6 +6,7 @@ import { EnableNotificationsButton } from "@/components/notifications/enable-not
 import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
 import { BillingCard } from "@/components/dashboard/billing-card";
 import { PlaidConnectCard } from "@/components/dashboard/plaid-connect-card";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 
 export const metadata: Metadata = {
   title: "Settings — PaidPrime",
@@ -68,9 +69,12 @@ export default async function SettingsPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-sp-4">
-      <div>
-        <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Account</span>
-        <h1 className="text-h1 font-display font-semibold text-text-primary">Settings</h1>
+      <div className="relative">
+        <GreetingBackdrop />
+        <div className="relative z-10">
+          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Account</span>
+          <h1 className="text-h1 font-display font-semibold text-text-primary">Settings</h1>
+        </div>
       </div>
 
       <SettingsSection title="Profile">

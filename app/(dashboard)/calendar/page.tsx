@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { CalendarGrid, type CalendarDayEvent } from "@/components/dashboard/calendar-grid";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 
 export const metadata: Metadata = {
   title: "Calendar — PaidPrime",
@@ -82,15 +83,18 @@ export default async function CalendarPage() {
 
   return (
     <div className="flex flex-col gap-sp-4">
-      <div>
-        <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
-        <h1 className="text-h1 font-display font-semibold text-text-primary">
-          {MONTH_NAMES[month - 1]} {year}
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          {paymentCount} dividend {paymentCount === 1 ? "payment" : "payments"} · {exDateCount}{" "}
-          {exDateCount === 1 ? "ex-date" : "ex-dates"}
-        </p>
+      <div className="relative">
+        <GreetingBackdrop />
+        <div className="relative z-10">
+          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
+          <h1 className="text-h1 font-display font-semibold text-text-primary">
+            {MONTH_NAMES[month - 1]} {year}
+          </h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            {paymentCount} dividend {paymentCount === 1 ? "payment" : "payments"} · {exDateCount}{" "}
+            {exDateCount === 1 ? "ex-date" : "ex-dates"}
+          </p>
+        </div>
       </div>
 
       <div className="rounded-card border border-border-subtle bg-surface p-sp-3">

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { WatchlistTable, type WatchlistItem } from "@/components/dashboard/watchlist-table";
 import { AddWatchlistDialog } from "@/components/dashboard/add-watchlist-dialog";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 
 export const metadata: Metadata = {
   title: "Watchlist — PaidPrime",
@@ -39,15 +40,18 @@ export default async function WatchlistPage() {
 
   return (
     <div className="min-w-0 flex flex-col gap-sp-3">
-      <div className="flex flex-wrap items-center justify-between gap-sp-2">
-        <div>
-          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
-          <h1 className="text-h1 font-display font-semibold text-text-primary">Watchlist</h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            {count} {count === 1 ? "ticker" : "tickers"} watched
-          </p>
+      <div className="relative">
+        <GreetingBackdrop />
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-sp-2">
+          <div>
+            <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
+            <h1 className="text-h1 font-display font-semibold text-text-primary">Watchlist</h1>
+            <p className="mt-1 text-sm text-text-secondary">
+              {count} {count === 1 ? "ticker" : "tickers"} watched
+            </p>
+          </div>
+          <AddWatchlistDialog />
         </div>
-        <AddWatchlistDialog />
       </div>
 
       <WatchlistTable items={rows} />

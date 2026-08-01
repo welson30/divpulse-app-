@@ -9,6 +9,7 @@ import { StatCard } from "@/components/dashboard/market-stats";
 import { InfoTip } from "@/components/dashboard/info-tip";
 import { TIPS } from "@/lib/tips";
 import { MonthlyIncomeChart, type MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 import type { SparklinePoint } from "@/lib/dividend-data/types";
 
 export const metadata: Metadata = {
@@ -145,11 +146,12 @@ export default async function DividendsPage() {
   return (
     <div className="flex flex-col gap-sp-4">
       <div className="flex flex-col gap-sp-3 lg:flex-row lg:items-stretch">
-        <div className="flex flex-1 items-start gap-sp-2">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-[rgba(34,197,94,0.12)] text-green-500">
+        <div className="relative flex flex-1 items-start gap-sp-2">
+          <GreetingBackdrop />
+          <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-[rgba(34,197,94,0.12)] text-green-500">
             <Sprout className="size-6" />
           </span>
-          <div className="min-w-0">
+          <div className="relative z-10 min-w-0">
             <h1 className="text-h1 font-display font-semibold text-text-primary">Dividends</h1>
             <p className="text-sm text-text-secondary">Steady income. Long-term wealth.</p>
             <p className="mt-1.5 flex items-center gap-1.5 text-xs text-text-secondary">

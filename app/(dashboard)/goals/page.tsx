@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import { GoalsTabs } from "@/components/dashboard/goals/goals-tabs";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 
 export const metadata: Metadata = {
   title: "Goals — PaidPrime",
@@ -91,12 +92,15 @@ export default async function GoalsPage() {
 
   return (
     <div className="flex flex-col gap-sp-4">
-      <div>
-        <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
-        <h1 className="text-h1 font-display font-semibold text-text-primary">Goals & Financial Planning</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Track your passive income, emergency reserve, and path to financial freedom.
-        </p>
+      <div className="relative">
+        <GreetingBackdrop />
+        <div className="relative z-10">
+          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
+          <h1 className="text-h1 font-display font-semibold text-text-primary">Goals & Financial Planning</h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            Track your passive income, emergency reserve, and path to financial freedom.
+          </p>
+        </div>
       </div>
 
       <GoalsTabs

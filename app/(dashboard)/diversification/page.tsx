@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import { DiversificationDonut } from "@/components/dashboard/diversification-donut";
+import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 
 export const metadata: Metadata = {
   title: "Diversification — PaidPrime",
@@ -86,12 +87,15 @@ export default async function DiversificationPage() {
 
   return (
     <div className="flex flex-col gap-sp-4">
-      <div>
-        <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
-        <h1 className="text-h1 font-display font-semibold text-text-primary">Diversification</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Weighted by dollar value — live price × shares held for each position.
-        </p>
+      <div className="relative">
+        <GreetingBackdrop />
+        <div className="relative z-10">
+          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
+          <h1 className="text-h1 font-display font-semibold text-text-primary">Diversification</h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            Weighted by dollar value — live price × shares held for each position.
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-sp-3 md:grid-cols-2">
