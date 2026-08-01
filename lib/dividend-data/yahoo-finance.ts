@@ -24,6 +24,23 @@ const CRUMB_COOKIE_ENDPOINT = "https://fc.yahoo.com";
 const CRUMB_ENDPOINT = "https://query1.finance.yahoo.com/v1/test/getcrumb";
 const USER_AGENT = "Mozilla/5.0 (compatible; PaidPrimeBot/1.0)";
 
+// /v8/finance/spark hard-rejects any request over 20 symbols with a 400
+// ("Number of symbols needs to be less than or equal to 20") — confirmed
+// live. Collections batches every ticker across every collection into one
+// call and crossed this the moment a 4th collection pushed the distinct
+// count to 30, silently blanking every sparkline on the page (a 400 makes
+// fetchSparklines return an empty map). Applying the same cap to
+// /v7/finance/quote defensively — same unofficial API family, no
+// documented limit to trust either way, and a portfolio or collection set
+// only grows over time.
+const MAX_BATCH_SYMBOLS = 20;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const batches: T[][] = [];
+  for (let i = 0; i < items.length; i += size) batches.push(items.slice(i, i + size));
+  return batches;
+}
+
 /**
  * quoteSummary (sector/yield data) requires a "crumb" token tied to a
  * session cookie — chart (prices/dividends) does not. Discovered when
@@ -406,72 +423,74 @@ export class YahooFinanceProvider implements DividendDataProvider {
     const symbols = [...new Set(tickers.map((t) => t.toUpperCase()))].filter(Boolean);
     if (symbols.length === 0) return result;
 
-    for (const attempt of [false, true]) {
-      try {
-        const { crumb, cookie } = await getCrumb(attempt);
-        const url = new URL(BATCH_QUOTE_ENDPOINT);
-        url.searchParams.set("symbols", symbols.join(","));
-        url.searchParams.set("crumb", crumb);
+    for (const batch of chunk(symbols, MAX_BATCH_SYMBOLS)) {
+      for (const attempt of [false, true]) {
+        try {
+          const { crumb, cookie } = await getCrumb(attempt);
+          const url = new URL(BATCH_QUOTE_ENDPOINT);
+          url.searchParams.set("symbols", batch.join(","));
+          url.searchParams.set("crumb", crumb);
 
-        const response = await fetch(url, {
-          headers: { "User-Agent": USER_AGENT, Cookie: cookie },
-          next: { revalidate: 300 },
-        });
-
-        if (response.status === 401 && !attempt) continue; // stale crumb, retry once
-        if (!response.ok) return result;
-
-        const data = (await response.json()) as YahooBatchQuoteResponse;
-        for (const quote of data.quoteResponse?.result ?? []) {
-          if (!quote.symbol) continue;
-          result.set(quote.symbol.toUpperCase(), {
-            ticker: quote.symbol.toUpperCase(),
-            price: quote.regularMarketPrice ?? null,
-            currency: quote.currency ?? null,
-            sector: null,
-            quoteType: quote.quoteType ? (INSTRUMENT_TYPE_TO_QUOTE_TYPE[quote.quoteType] ?? quote.quoteType) : null,
-            trailingAnnualDividendYield: quote.trailingAnnualDividendYield ?? null,
-            dividendYieldPercent: quote.dividendYield ?? null,
-            name: quote.longName ?? quote.shortName ?? null,
-            change: quote.regularMarketChange ?? null,
-            changePercent: quote.regularMarketChangePercent ?? null,
-            marketState: quote.marketState ?? null,
-            exchangeDelayMinutes: quote.exchangeDataDelayedBy ?? null,
-            exchangeName: quote.fullExchangeName ?? null,
-            previousClose: quote.regularMarketPreviousClose ?? null,
-            open: quote.regularMarketOpen ?? null,
-            dayLow: quote.regularMarketDayLow ?? null,
-            dayHigh: quote.regularMarketDayHigh ?? null,
-            fiftyTwoWeekLow: quote.fiftyTwoWeekLow ?? null,
-            fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh ?? null,
-            fiftyTwoWeekChangePercent: quote.fiftyTwoWeekChangePercent ?? null,
-            fiftyDayAverage: quote.fiftyDayAverage ?? null,
-            twoHundredDayAverage: quote.twoHundredDayAverage ?? null,
-            volume: quote.regularMarketVolume ?? null,
-            averageVolume3Month: quote.averageDailyVolume3Month ?? null,
-            // Deep stats only come from fetchQuote's quoteSummary call —
-            // this batch endpoint doesn't carry them.
-            marketCap: null,
-            trailingPE: null,
-            forwardPE: null,
-            payoutRatio: null,
-            beta: null,
-            priceToBook: null,
-            dividendRate: null,
-            exDividendDate: null,
-            netAssets: quote.netAssets ?? null,
-            netExpenseRatio: quote.netExpenseRatio ?? null,
-            postMarketPrice: quote.postMarketPrice ?? null,
-            postMarketChange: quote.postMarketChange ?? null,
-            postMarketChangePercent: quote.postMarketChangePercent ?? null,
-            preMarketPrice: quote.preMarketPrice ?? null,
-            preMarketChange: quote.preMarketChange ?? null,
-            preMarketChangePercent: quote.preMarketChangePercent ?? null,
+          const response = await fetch(url, {
+            headers: { "User-Agent": USER_AGENT, Cookie: cookie },
+            next: { revalidate: 300 },
           });
+
+          if (response.status === 401 && !attempt) continue; // stale crumb, retry once
+          if (!response.ok) break; // give up on this batch — other batches may still succeed
+
+          const data = (await response.json()) as YahooBatchQuoteResponse;
+          for (const quote of data.quoteResponse?.result ?? []) {
+            if (!quote.symbol) continue;
+            result.set(quote.symbol.toUpperCase(), {
+              ticker: quote.symbol.toUpperCase(),
+              price: quote.regularMarketPrice ?? null,
+              currency: quote.currency ?? null,
+              sector: null,
+              quoteType: quote.quoteType ? (INSTRUMENT_TYPE_TO_QUOTE_TYPE[quote.quoteType] ?? quote.quoteType) : null,
+              trailingAnnualDividendYield: quote.trailingAnnualDividendYield ?? null,
+              dividendYieldPercent: quote.dividendYield ?? null,
+              name: quote.longName ?? quote.shortName ?? null,
+              change: quote.regularMarketChange ?? null,
+              changePercent: quote.regularMarketChangePercent ?? null,
+              marketState: quote.marketState ?? null,
+              exchangeDelayMinutes: quote.exchangeDataDelayedBy ?? null,
+              exchangeName: quote.fullExchangeName ?? null,
+              previousClose: quote.regularMarketPreviousClose ?? null,
+              open: quote.regularMarketOpen ?? null,
+              dayLow: quote.regularMarketDayLow ?? null,
+              dayHigh: quote.regularMarketDayHigh ?? null,
+              fiftyTwoWeekLow: quote.fiftyTwoWeekLow ?? null,
+              fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh ?? null,
+              fiftyTwoWeekChangePercent: quote.fiftyTwoWeekChangePercent ?? null,
+              fiftyDayAverage: quote.fiftyDayAverage ?? null,
+              twoHundredDayAverage: quote.twoHundredDayAverage ?? null,
+              volume: quote.regularMarketVolume ?? null,
+              averageVolume3Month: quote.averageDailyVolume3Month ?? null,
+              // Deep stats only come from fetchQuote's quoteSummary call —
+              // this batch endpoint doesn't carry them.
+              marketCap: null,
+              trailingPE: null,
+              forwardPE: null,
+              payoutRatio: null,
+              beta: null,
+              priceToBook: null,
+              dividendRate: null,
+              exDividendDate: null,
+              netAssets: quote.netAssets ?? null,
+              netExpenseRatio: quote.netExpenseRatio ?? null,
+              postMarketPrice: quote.postMarketPrice ?? null,
+              postMarketChange: quote.postMarketChange ?? null,
+              postMarketChangePercent: quote.postMarketChangePercent ?? null,
+              preMarketPrice: quote.preMarketPrice ?? null,
+              preMarketChange: quote.preMarketChange ?? null,
+              preMarketChangePercent: quote.preMarketChangePercent ?? null,
+            });
+          }
+          break;
+        } catch {
+          break; // this batch failed — other batches may still succeed
         }
-        return result;
-      } catch {
-        return result; // a failed quote lookup degrades the UI, never breaks the page
       }
     }
 
@@ -489,33 +508,35 @@ export class YahooFinanceProvider implements DividendDataProvider {
     const symbols = [...new Set(tickers.map((t) => t.toUpperCase()))].filter(Boolean);
     if (symbols.length === 0) return result;
 
-    try {
-      const url = new URL(SPARK_ENDPOINT);
-      url.searchParams.set("symbols", symbols.join(","));
-      url.searchParams.set("range", range);
-      url.searchParams.set("interval", SPARK_INTERVALS[range]);
+    for (const batch of chunk(symbols, MAX_BATCH_SYMBOLS)) {
+      try {
+        const url = new URL(SPARK_ENDPOINT);
+        url.searchParams.set("symbols", batch.join(","));
+        url.searchParams.set("range", range);
+        url.searchParams.set("interval", SPARK_INTERVALS[range]);
 
-      const response = await fetch(url, {
-        headers: { "User-Agent": USER_AGENT },
-        next: { revalidate: 300 },
-      });
+        const response = await fetch(url, {
+          headers: { "User-Agent": USER_AGENT },
+          next: { revalidate: 300 },
+        });
 
-      if (!response.ok) return result;
+        if (!response.ok) continue; // this batch failed — other batches may still succeed
 
-      const data = (await response.json()) as YahooSparkResponse;
-      for (const [symbol, series] of Object.entries(data)) {
-        const timestamps = series?.timestamp ?? [];
-        const closes = series?.close ?? [];
-        const points: SparklinePoint[] = [];
-        for (let i = 0; i < closes.length; i += 1) {
-          const close = closes[i];
-          const timestamp = timestamps[i];
-          if (close != null && timestamp != null) points.push({ t: timestamp, c: close });
+        const data = (await response.json()) as YahooSparkResponse;
+        for (const [symbol, series] of Object.entries(data)) {
+          const timestamps = series?.timestamp ?? [];
+          const closes = series?.close ?? [];
+          const points: SparklinePoint[] = [];
+          for (let i = 0; i < closes.length; i += 1) {
+            const close = closes[i];
+            const timestamp = timestamps[i];
+            if (close != null && timestamp != null) points.push({ t: timestamp, c: close });
+          }
+          if (points.length > 0) result.set(symbol.toUpperCase(), points);
         }
-        if (points.length > 0) result.set(symbol.toUpperCase(), points);
+      } catch {
+        continue; // this batch failed — other batches may still succeed
       }
-    } catch {
-      return result;
     }
 
     return result;
