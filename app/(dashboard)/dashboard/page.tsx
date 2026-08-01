@@ -217,17 +217,17 @@ export default async function DashboardPage() {
             compact
           />
           <StatCard
-            label="Today's income"
-            value={todayTotal > 0 ? `+${formatCurrency(todayTotal)}` : "$0.00"}
-            sub={todayTotal > 0 ? `${todayPayments!.length} received today` : "Nothing detected yet today"}
-            className={todayTotal > 0 ? "border-green-500/25" : undefined}
+            label="Monthly dividend income"
+            value={formatCurrency(incomePerMonth)}
+            sub="trailing 12mo ÷ 12"
+            tip={TIPS.monthlyIncome}
             icon={Calendar}
             compact
           />
           <StatCard
             label="Income per day"
             value={formatCurrency(incomePerDay)}
-            sub={`${formatCurrency(incomePerMonth)}/month`}
+            sub="trailing 12mo ÷ 365"
             tip={TIPS.incomePerDay}
             icon={Aperture}
             compact

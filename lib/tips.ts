@@ -25,6 +25,7 @@ export const TIPS = {
     "What your holdings paid in dividends over the last 12 months. It's based on actual payment history, not a forecast, so it can differ from what you'll receive next year.",
   portfolioValue: "The current market value of everything you hold, using live share prices.",
   incomePerDay: "Your last 12 months of dividend income spread evenly across the year. An average, not a daily payment.",
+  monthlyIncome: "Your last 12 months of dividend income divided by 12. An average month, not what you're paid this specific month.",
   exDate:
     "The cut-off date. You must own the shares before this date to receive the upcoming dividend — buying on or after it means you miss that payment.",
   payDate: "The date the dividend money actually reaches your account.",
