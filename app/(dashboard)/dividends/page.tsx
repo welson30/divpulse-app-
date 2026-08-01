@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { isLinkableTicker } from "@/lib/tickers/validate";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
-import { computeTrailingIncome } from "@/lib/dividend-data/income";
+import { computeTrailingIncome, computeMonthlyIncomeSeries } from "@/lib/dividend-data/income";
 import { StatCard } from "@/components/dashboard/market-stats";
 import { InfoTip } from "@/components/dashboard/info-tip";
 import { TIPS } from "@/lib/tips";
@@ -72,29 +72,16 @@ export default async function DividendsPage() {
     sharesByTicker.set(h.ticker, (sharesByTicker.get(h.ticker) ?? 0) + Number(h.shares));
   }
 
-  // Last 12 months of income, bucketed by calendar month.
-  const monthly = new Map<string, number>();
   const now = new Date();
   const todayIso = now.toISOString().slice(0, 10);
-  for (let i = 11; i >= 0; i -= 1) {
-    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
-    monthly.set(d.toISOString().slice(0, 7), 0);
-  }
-  for (const event of events ?? []) {
-    const bucket = event.pay_date.slice(0, 7);
-    if (!monthly.has(bucket)) continue;
-    const shares = sharesByTicker.get(event.ticker) ?? 0;
-    monthly.set(bucket, (monthly.get(bucket) ?? 0) + Number(event.amount_per_share) * shares);
-  }
-  const monthlyEntries = [...monthly.entries()];
-  const monthlySeries: MonthlyIncomePoint[] = monthlyEntries.map(([month, total]) => ({
-    month,
-    label: new Date(`${month}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }),
-    total,
-  }));
+
+  // Last 12 months of income, bucketed by calendar month — shared with
+  // the Passive Income goal's own trend chart (lib/dividend-data/income.ts),
+  // so the two pages can't drift apart on the same real numbers.
+  const monthlySeries: MonthlyIncomePoint[] = await computeMonthlyIncomeSeries(supabase, holdings ?? []);
   // Same 12 real monthly totals, reshaped for the stat-card mini sparklines
   // — not a separate fabricated series.
-  const monthlySparkline: SparklinePoint[] = monthlyEntries.map(([month, total]) => ({
+  const monthlySparkline: SparklinePoint[] = monthlySeries.map(({ month, total }) => ({
     t: Math.floor(new Date(`${month}-01T00:00:00Z`).getTime() / 1000),
     c: total,
   }));
@@ -104,8 +91,8 @@ export default async function DividendsPage() {
   // payers with irregular cadence) — a wider window is stable enough to
   // say something honest. Hidden if there's too little history to be
   // meaningful rather than shown with a misleading swing.
-  const firstHalfTotal = monthlyEntries.slice(0, 6).reduce((sum, [, total]) => sum + total, 0);
-  const secondHalfTotal = monthlyEntries.slice(6).reduce((sum, [, total]) => sum + total, 0);
+  const firstHalfTotal = monthlySeries.slice(0, 6).reduce((sum, { total }) => sum + total, 0);
+  const secondHalfTotal = monthlySeries.slice(6).reduce((sum, { total }) => sum + total, 0);
   const growthPct = firstHalfTotal > 0 ? ((secondHalfTotal - firstHalfTotal) / firstHalfTotal) * 100 : null;
 
   // Which holdings actually generate the income.

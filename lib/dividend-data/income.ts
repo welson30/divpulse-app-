@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
 
 /**
  * Trailing-twelve-month window. Matches the range fetchDividends pulls
@@ -104,4 +105,56 @@ export async function computeTrailingIncome(
     perTicker,
     tickersWithoutHistory: tickers.filter((t) => !perShare.has(t)),
   };
+}
+
+/**
+ * Real dividend income bucketed by calendar month, for the trend charts
+ * on Dividends and the Passive Income goal — extracted here (rather than
+ * left inline, as it originally was on the Dividends page only) so both
+ * pages compute it identically instead of two copies drifting apart.
+ * Every point is a real recorded payout — no projection, no smoothing.
+ */
+export async function computeMonthlyIncomeSeries(
+  supabase: SupabaseClient,
+  holdings: IncomeHolding[],
+  months = 12,
+): Promise<MonthlyIncomePoint[]> {
+  const now = new Date();
+  const buckets = new Map<string, number>();
+  for (let i = months - 1; i >= 0; i -= 1) {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+    buckets.set(d.toISOString().slice(0, 7), 0);
+  }
+
+  const toPoints = () =>
+    [...buckets.entries()].map(([month, total]) => ({
+      month,
+      label: new Date(`${month}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }),
+      total,
+    }));
+
+  const tickers = [...new Set(holdings.map((h) => h.ticker))];
+  if (tickers.length === 0) return toPoints();
+
+  const sharesByTicker = new Map<string, number>();
+  for (const h of holdings) {
+    sharesByTicker.set(h.ticker, (sharesByTicker.get(h.ticker) ?? 0) + Number(h.shares));
+  }
+
+  const since = [...buckets.keys()][0] + "-01";
+  const { data: events } = await supabase
+    .from("dividend_events")
+    .select("ticker, pay_date, amount_per_share")
+    .in("ticker", tickers)
+    .gte("pay_date", since)
+    .limit(MAX_EVENT_ROWS);
+
+  for (const event of events ?? []) {
+    const bucket = event.pay_date.slice(0, 7);
+    if (!buckets.has(bucket)) continue;
+    const shares = sharesByTicker.get(event.ticker) ?? 0;
+    buckets.set(bucket, (buckets.get(bucket) ?? 0) + Number(event.amount_per_share) * shares);
+  }
+
+  return toPoints();
 }

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { InfoTip } from "@/components/dashboard/info-tip";
+import { TIPS } from "@/lib/tips";
 import { saveReserveGoal, type GoalActionState } from "@/app/(dashboard)/goals/actions";
 
 export type ReserveGoalPanelProps = {
@@ -52,8 +54,9 @@ export function ReserveGoalPanel({ currentReserve, monthlyExpenses, monthsTarget
         <>
           <div className="rounded-card border border-green-500/30 bg-surface p-sp-3">
             <div className="flex items-baseline justify-between">
-              <div className="text-xs text-text-secondary">
+              <div className="inline-flex items-center gap-1 text-xs text-text-secondary">
                 {selectedMonths}-month reserve · ${reserveAmount.toFixed(0)} of ${target.toFixed(0)}
+                <InfoTip label={TIPS.emergencyReserveGoal} />
               </div>
               <span className="font-semibold text-green-500">{progressPct.toFixed(1)}%</span>
             </div>
@@ -66,13 +69,15 @@ export function ReserveGoalPanel({ currentReserve, monthlyExpenses, monthsTarget
             </div>
           </div>
 
-          <div className="grid gap-sp-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-sp-2 sm:grid-cols-2">
             <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
               <div className="text-xs text-text-secondary">Monthly expenses</div>
               <div className="mt-1 font-mono text-xl font-bold text-text-primary">${monthlyExpenses.toFixed(0)}</div>
             </div>
             <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-              <div className="text-xs text-text-secondary">Current protection</div>
+              <div className="inline-flex items-center gap-1 text-xs text-text-secondary">
+                Current protection <InfoTip label={TIPS.currentProtection} />
+              </div>
               <div className="mt-1 font-mono text-xl font-bold text-text-primary">~{monthsOfProtection.toFixed(1)} mo</div>
               <div className="mt-1 text-xs text-text-secondary">of expenses covered</div>
             </div>
@@ -89,7 +94,7 @@ export function ReserveGoalPanel({ currentReserve, monthlyExpenses, monthsTarget
         <div className="mb-sp-2 text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
           {hasGoal ? "Update goal" : "Set your goal"}
         </div>
-        <div className="grid gap-sp-2 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-sp-2 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="monthlyExpenses">Monthly expenses ($)</Label>
             <Input

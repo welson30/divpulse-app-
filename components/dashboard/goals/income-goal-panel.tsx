@@ -4,6 +4,9 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { InfoTip } from "@/components/dashboard/info-tip";
+import { TIPS } from "@/lib/tips";
+import { MonthlyIncomeChart, type MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
 import { saveIncomeGoal, type GoalActionState } from "@/app/(dashboard)/goals/actions";
 
 export type IncomeGoalPanelProps = {
@@ -11,10 +14,17 @@ export type IncomeGoalPanelProps = {
   avgYieldPct: number;
   targetAmount: number | null;
   monthlyContribution: number | null;
+  monthlySeries: MonthlyIncomePoint[];
   isPro: boolean;
 };
 
-export function IncomeGoalPanel({ currentMonthlyIncome, avgYieldPct, targetAmount, monthlyContribution }: IncomeGoalPanelProps) {
+export function IncomeGoalPanel({
+  currentMonthlyIncome,
+  avgYieldPct,
+  targetAmount,
+  monthlyContribution,
+  monthlySeries,
+}: IncomeGoalPanelProps) {
   const [state, formAction, pending] = useActionState<GoalActionState, FormData>(saveIncomeGoal, null);
 
   const hasGoal = targetAmount != null && targetAmount > 0;
@@ -42,7 +52,9 @@ export function IncomeGoalPanel({ currentMonthlyIncome, avgYieldPct, targetAmoun
         <>
           <div className="rounded-card border border-green-500/30 bg-surface p-sp-3">
             <div className="flex items-baseline justify-between">
-              <div className="text-xs text-text-secondary">Monthly income goal</div>
+              <div className="inline-flex items-center gap-1 text-xs text-text-secondary">
+                Monthly income goal <InfoTip label={TIPS.passiveIncomeGoal} />
+              </div>
               <span className="font-semibold text-green-500">{progressPct.toFixed(1)}%</span>
             </div>
             <div className="mt-1 font-mono text-2xl font-bold text-text-primary">${targetAmount.toFixed(0)}/mo</div>
@@ -54,16 +66,20 @@ export function IncomeGoalPanel({ currentMonthlyIncome, avgYieldPct, targetAmoun
             </div>
           </div>
 
-          <div className="grid gap-sp-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-sp-2 sm:grid-cols-2">
             <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-              <div className="text-xs text-text-secondary">Time to goal</div>
+              <div className="inline-flex items-center gap-1 text-xs text-text-secondary">
+                Time to goal <InfoTip label={TIPS.goalTimeToGoal} />
+              </div>
               <div className="mt-1 font-mono text-xl font-bold text-text-primary">
                 {monthsToGoal != null ? `~${(monthsToGoal / 12).toFixed(1)} yrs` : "Add a monthly contribution"}
               </div>
               <div className="mt-1 text-xs text-text-secondary">At your current contribution rate</div>
             </div>
             <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-              <div className="text-xs text-text-secondary">Capital needed</div>
+              <div className="inline-flex items-center gap-1 text-xs text-text-secondary">
+                Capital needed <InfoTip label={TIPS.goalCapitalNeeded} />
+              </div>
               <div className="mt-1 font-mono text-xl font-bold text-text-primary">
                 {capitalNeeded != null ? `~$${Math.round(capitalNeeded).toLocaleString()}` : "—"}
               </div>
@@ -73,16 +89,23 @@ export function IncomeGoalPanel({ currentMonthlyIncome, avgYieldPct, targetAmoun
         </>
       ) : (
         <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-3 text-sm text-text-secondary">
-          You're currently earning <span className="font-semibold text-green-500">${currentMonthlyIncome.toFixed(0)}/mo</span> in
+          You&rsquo;re currently earning <span className="font-semibold text-green-500">${currentMonthlyIncome.toFixed(0)}/mo</span> in
           dividends. Set a target below to track your progress.
         </div>
       )}
+
+      <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
+        <div className="mb-sp-2 text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
+          Income trend (last 12 months)
+        </div>
+        <MonthlyIncomeChart data={monthlySeries} />
+      </div>
 
       <form action={formAction} className="rounded-card border border-border-subtle bg-surface p-sp-3">
         <div className="mb-sp-2 text-xs font-semibold tracking-[0.06em] text-text-secondary uppercase">
           {hasGoal ? "Update goal" : "Set your goal"}
         </div>
-        <div className="grid gap-sp-2 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-sp-2 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="targetAmount">Monthly income goal ($)</Label>
             <Input

@@ -40,4 +40,17 @@ export const TIPS = {
   beta: "How much this security's price swings compared with the overall market. 1.0 tracks the market; higher means more volatile.",
   dividendRate:
     "The dollar amount of dividends expected per share over the next year, based on the most recent regular payment. Often blank for funds with irregular payouts.",
+  passiveIncomeGoal:
+    "Progress toward a target monthly dividend income, based on your last 12 months of actual payments — not a forecast of next month.",
+  goalCapitalNeeded:
+    "How much invested capital it'd take to generate this monthly income at your portfolio's current average yield. Changes if your yield changes.",
+  goalTimeToGoal:
+    "A straight-line estimate: the dollar gap to your target, divided by your planned monthly contribution. Doesn't assume any investment growth along the way — a conservative estimate, not a guarantee.",
+  emergencyReserveGoal:
+    "A cash reserve sized to your own monthly expenses × however many months of runway you want — not derived from your investment portfolio, since a reserve should stay separate from money that's invested.",
+  currentProtection: "How many months of your own expenses your current reserve balance would cover if you stopped earning today.",
+  financialFreedomGoal:
+    "Progress toward a portfolio large enough that its dividend income alone could cover your living costs, based on your current holdings' value.",
+  freedomProjection:
+    "A straight-line estimate: the portfolio-value gap divided by your planned yearly contribution. Doesn't assume any price growth or reinvestment along the way, so it's a conservative (likely slower-than-reality) estimate.",
 } as const;

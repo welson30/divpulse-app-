@@ -1,14 +1,25 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Coins, Palmtree, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getDividendDataProvider } from "@/lib/dividend-data";
-import { GoalsTabs } from "@/components/dashboard/goals/goals-tabs";
+import { computeTrailingIncome, computeMonthlyIncomeSeries } from "@/lib/dividend-data/income";
+import { enrichTickers } from "@/lib/tickers/enrich";
+import { GoalsTabs, GOAL_TABS, type GoalTabKey } from "@/components/dashboard/goals/goals-tabs";
 import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
+import { StatCard } from "@/components/dashboard/market-stats";
 
 export const metadata: Metadata = {
   title: "Goals — PaidPrime",
 };
 
-export default async function GoalsPage() {
+export default async function GoalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab: tabParam } = await searchParams;
+  const activeTab: GoalTabKey = GOAL_TABS.some((t) => t.key === tabParam) ? (tabParam as GoalTabKey) : "income";
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -39,32 +50,37 @@ export default async function GoalsPage() {
     );
   }
 
-  const provider = getDividendDataProvider();
+  // Two batched requests cover the whole portfolio regardless of ticker
+  // count — see lib/tickers/enrich.ts — rather than one request per
+  // distinct ticker.
   const distinctTickers = [...new Set(holdings.map((h) => h.ticker))];
-  const quotes = await Promise.all(
-    distinctTickers.map(async (ticker) => {
-      try {
-        return await provider.fetchQuote(ticker);
-      } catch {
-        return null;
-      }
-    }),
-  );
-  const quoteByTicker = new Map(distinctTickers.map((ticker, i) => [ticker, quotes[i]]));
+  const enriched = await enrichTickers(distinctTickers);
 
   let portfolioValue = 0;
-  let annualIncome = 0;
   for (const holding of holdings) {
-    const quote = quoteByTicker.get(holding.ticker);
+    const quote = enriched.get(holding.ticker.toUpperCase())?.quote;
     const shares = Number(holding.shares);
-    const value = quote?.price ? shares * quote.price : 0;
-    portfolioValue += value;
-    if (quote?.trailingAnnualDividendYield) {
-      annualIncome += value * quote.trailingAnnualDividendYield;
-    }
+    // Fall back to raw share count for any ticker whose quote lookup
+    // failed, so one bad ticker doesn't understate the whole portfolio —
+    // same fallback diversification/page.tsx already uses.
+    portfolioValue += quote?.price ? shares * quote.price : shares;
   }
-  const avgYieldPct = portfolioValue > 0 ? (annualIncome / portfolioValue) * 100 : 0;
-  const monthlyIncome = annualIncome / 12;
+
+  // Income from recorded dividend history via computeTrailingIncome, not
+  // Yahoo's trailingAnnualDividendYield field — that field reads 0.00%
+  // for most of the weekly/monthly income ETFs and even mainstream ETFs
+  // (SCHD, JEPI) this app's real portfolios hold. This page used to
+  // compute income the old, wrong way independently of
+  // lib/dividend-data/income.ts, understating a real portfolio's income
+  // by 14x (verified live 2026-08-01: $0.72/mo shown vs. $10.24/mo
+  // actual) — the exact bug already found and fixed on Dashboard and
+  // Dividends, just never applied here too.
+  const income = await computeTrailingIncome(supabase, holdings);
+  const avgYieldPct = portfolioValue > 0 ? (income.annual / portfolioValue) * 100 : 0;
+  // Real trailing-12-month trend behind the Passive Income goal's progress
+  // — same numbers Dividends' own chart shows, not a separate series.
+  const monthlyIncomeSeries = await computeMonthlyIncomeSeries(supabase, holdings);
+  const monthlyIncome = income.monthly;
 
   const incomeGoal = goals?.find((g) => g.goal_type === "passive_income");
   const reserveGoal = goals?.find((g) => g.goal_type === "emergency_reserve");
@@ -86,6 +102,7 @@ export default async function GoalsPage() {
     : "Set your monthly expenses, then ask about your reserve target.";
 
   const freedomTarget = freedomGoal ? Number(freedomGoal.target_amount) : null;
+  const freedomProgressPct = freedomTarget ? Math.min(100, (portfolioValue / freedomTarget) * 100) : 0;
   const freedomPlaceholder = freedomTarget
     ? `At ${avgYieldPct.toFixed(2)}% yield, you need ~$${Math.round(freedomTarget).toLocaleString()} to be financially free. Ask what it'd take to get there sooner.`
     : "Set your financial freedom target, then ask what it'd take to get there.";
@@ -103,13 +120,51 @@ export default async function GoalsPage() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 gap-sp-2 sm:grid-cols-3">
+        <Link href="/goals?tab=income" className="block">
+          <StatCard
+            label="Passive Income"
+            value={incomeTarget ? `${incomeProgressPct.toFixed(0)}%` : "Not set"}
+            sub={incomeTarget ? `$${monthlyIncome.toFixed(0)}/mo of $${incomeTarget.toFixed(0)} goal` : "Set a monthly income goal"}
+            icon={Coins}
+            iconColor="green"
+            compact
+            className="transition-colors hover:border-green-500/40"
+          />
+        </Link>
+        <Link href="/goals?tab=reserve" className="block">
+          <StatCard
+            label="Emergency Reserve"
+            value={reserveTarget ? `${reserveProgressPct.toFixed(0)}%` : "Not set"}
+            sub={reserveTarget ? `$${reserveCurrentAmount.toFixed(0)} of $${reserveTarget.toFixed(0)} goal` : "Set your monthly expenses"}
+            icon={ShieldCheck}
+            iconColor="amber"
+            compact
+            className="transition-colors hover:border-green-500/40"
+          />
+        </Link>
+        <Link href="/goals?tab=freedom" className="block">
+          <StatCard
+            label="Financial Freedom"
+            value={freedomTarget ? `${freedomProgressPct.toFixed(0)}%` : "Not set"}
+            sub={freedomTarget ? `$${Math.round(portfolioValue).toLocaleString()} of $${Math.round(freedomTarget).toLocaleString()} goal` : "Set your freedom target"}
+            icon={Palmtree}
+            iconColor="blue"
+            compact
+            className="transition-colors hover:border-green-500/40"
+          />
+        </Link>
+      </div>
+
       <GoalsTabs
         isPro={isPro}
+        active={activeTab}
         income={{
           currentMonthlyIncome: monthlyIncome,
           avgYieldPct,
           targetAmount: incomeTarget,
           monthlyContribution: incomeGoal ? Number(incomeGoal.monthly_contribution) : null,
+          monthlySeries: monthlyIncomeSeries,
           placeholder: incomePlaceholder,
         }}
         reserve={{
