@@ -68,7 +68,7 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
               "group relative flex min-h-13.5 cursor-default flex-col gap-0.5 rounded-[6px] border p-1 text-[10px] transition-all duration-150 ease-out",
               !isInert && "hover:z-10 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)]",
               isToday
-                ? "border-blue-500 bg-blue-500/8 hover:border-blue-500/70 hover:bg-blue-500/14"
+                ? "border-info bg-info/8 hover:border-info/70 hover:bg-info/14"
                 : primaryKind === "pay"
                   ? "border-green-500/30 bg-[rgba(52,211,153,0.08)] hover:border-green-500/60 hover:bg-[rgba(52,211,153,0.14)]"
                   : primaryKind === "ex"
@@ -77,7 +77,7 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
             )}
           >
             <div className="flex items-center justify-between">
-              <span className={cn("font-mono", isToday ? "font-bold text-blue-500" : "text-text-secondary")}>{day}</span>
+              <span className={cn("font-mono", isToday ? "font-bold text-info" : "text-text-secondary")}>{day}</span>
               {events.length > 0 ? (
                 <span
                   className={cn(

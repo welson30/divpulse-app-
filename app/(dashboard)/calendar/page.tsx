@@ -189,7 +189,7 @@ export default async function CalendarPage({
             Ex-date
           </span>
           <span className="flex items-center gap-1.5 text-[11px] text-text-secondary">
-            <span aria-hidden className="size-2 rounded-full bg-blue-500" />
+            <span aria-hidden className="size-2 rounded-full bg-info" />
             Today
           </span>
         </div>

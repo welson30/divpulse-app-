@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import { Boxes, Crown, Factory, Gauge, Landmark, Layers, PieChart, Wallet } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
-import { DiversificationDonut } from "@/components/dashboard/diversification-donut";
+import { DiversificationDonut, type DonutSegment } from "@/components/dashboard/diversification-donut";
 import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
+import { StatCard } from "@/components/dashboard/market-stats";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Diversification — PaidPrime",
@@ -13,6 +17,37 @@ const ASSET_TYPE_LABELS: Record<string, string> = {
   ETF: "ETF",
   MUTUALFUND: "Mutual fund",
 };
+
+function BreakdownCard({
+  title,
+  icon: Icon,
+  chipClass,
+  segments,
+  noun,
+}: {
+  title: string;
+  icon: LucideIcon;
+  chipClass: string;
+  segments: DonutSegment[];
+  noun: string;
+}) {
+  return (
+    <div className="rounded-card border border-border-subtle bg-surface p-sp-4">
+      <div className="mb-sp-3 flex items-center gap-2.5">
+        <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-full", chipClass)}>
+          <Icon className="size-4" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-h2 font-display font-medium text-text-primary">{title}</h2>
+          <p className="text-xs text-text-secondary">
+            {segments.length} {segments.length === 1 ? noun : `${noun}s`}
+          </p>
+        </div>
+      </div>
+      <DiversificationDonut segments={segments} />
+    </div>
+  );
+}
 
 export default async function DiversificationPage() {
   const supabase = await createClient();
@@ -85,6 +120,16 @@ export default async function DiversificationPage() {
   const sectorSegments = toSegments(bySector);
   const assetTypeSegments = toSegments(byAssetType);
 
+  // Every figure below is a real aggregate over the positions just
+  // computed — no invented benchmarks or "ideal allocation" targets, just
+  // what the portfolio's own numbers say about how concentrated it is.
+  const portfolioValue = tickerSegments.reduce((sum, s) => sum + s.value, 0);
+  const topHolding = tickerSegments[0] ?? null;
+  const topHoldingPct = topHolding && portfolioValue > 0 ? (topHolding.value / portfolioValue) * 100 : 0;
+  const isConcentrated = topHoldingPct >= 30;
+  const isModerate = !isConcentrated && topHoldingPct >= 15;
+  const riskLabel = isConcentrated ? "Concentrated" : isModerate ? "Moderate" : "Diversified";
+
   return (
     <div className="flex flex-col gap-sp-4">
       <div className="relative">
@@ -98,26 +143,68 @@ export default async function DiversificationPage() {
         </div>
       </div>
 
-      <div className="grid gap-sp-3 md:grid-cols-2">
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-4">
-          <h2 className="mb-sp-3 text-h2 font-display font-medium text-text-primary">By holding</h2>
-          <DiversificationDonut segments={tickerSegments} />
-        </div>
+      <div className="grid grid-cols-2 items-start gap-sp-2 lg:grid-cols-4">
+        <StatCard
+          label="Total Positions"
+          value={String(distinctTickers.length)}
+          sub={`across ${byBroker.size} ${byBroker.size === 1 ? "broker" : "brokers"}`}
+          icon={Wallet}
+          compact
+        />
+        <StatCard
+          label="Sectors"
+          value={String(bySector.size)}
+          sub={`${byAssetType.size} asset ${byAssetType.size === 1 ? "type" : "types"}`}
+          icon={Layers}
+          iconColor="blue"
+          compact
+        />
+        <StatCard
+          label="Top Holding"
+          value={topHolding?.label ?? "—"}
+          sub={topHolding ? `${topHoldingPct.toFixed(1)}% of portfolio value` : undefined}
+          icon={Crown}
+          compact
+        />
+        <StatCard
+          label="Concentration"
+          value={riskLabel}
+          sub={topHolding ? `Top position ${topHoldingPct.toFixed(0)}% of value` : undefined}
+          icon={Gauge}
+          iconColor={isConcentrated || isModerate ? "amber" : "green"}
+          compact
+        />
+      </div>
 
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-4">
-          <h2 className="mb-sp-3 text-h2 font-display font-medium text-text-primary">By broker</h2>
-          <DiversificationDonut segments={brokerSegments} />
-        </div>
-
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-4">
-          <h2 className="mb-sp-3 text-h2 font-display font-medium text-text-primary">By sector</h2>
-          <DiversificationDonut segments={sectorSegments} />
-        </div>
-
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-4">
-          <h2 className="mb-sp-3 text-h2 font-display font-medium text-text-primary">By asset type</h2>
-          <DiversificationDonut segments={assetTypeSegments} />
-        </div>
+      <div className="grid items-start gap-sp-3 md:grid-cols-2">
+        <BreakdownCard
+          title="By holding"
+          icon={PieChart}
+          chipClass="bg-[rgba(34,197,94,0.12)] text-green-500"
+          segments={tickerSegments}
+          noun="position"
+        />
+        <BreakdownCard
+          title="By broker"
+          icon={Landmark}
+          chipClass="bg-info/12 text-info"
+          segments={brokerSegments}
+          noun="broker"
+        />
+        <BreakdownCard
+          title="By sector"
+          icon={Factory}
+          chipClass="bg-warning/12 text-warning"
+          segments={sectorSegments}
+          noun="sector"
+        />
+        <BreakdownCard
+          title="By asset type"
+          icon={Boxes}
+          chipClass="bg-surface-2 text-text-secondary"
+          segments={assetTypeSegments}
+          noun="asset type"
+        />
       </div>
 
       {pricesMissing ? (

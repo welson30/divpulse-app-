@@ -4,10 +4,10 @@ import type { LucideIcon } from "lucide-react";
 const CATEGORY_STYLES: Record<string, { icon: LucideIcon; chipClass: string }> = {
   "Real Estate": { icon: Building2, chipClass: "bg-[rgba(34,197,94,0.12)] text-green-500" },
   Income: { icon: Coins, chipClass: "bg-warning/12 text-warning" },
-  "Business Development": { icon: Briefcase, chipClass: "bg-blue-500/12 text-blue-500" },
+  "Business Development": { icon: Briefcase, chipClass: "bg-info/12 text-info" },
   "Dividend Growth": { icon: TrendingUp, chipClass: "bg-[rgba(34,197,94,0.12)] text-green-500" },
   Utilities: { icon: Zap, chipClass: "bg-warning/12 text-warning" },
-  Technology: { icon: Cpu, chipClass: "bg-blue-500/12 text-blue-500" },
+  Technology: { icon: Cpu, chipClass: "bg-info/12 text-info" },
 };
 const DEFAULT_CATEGORY_STYLE = { icon: Layers, chipClass: "bg-surface-2 text-text-secondary" };
 

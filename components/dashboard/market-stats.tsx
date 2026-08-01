@@ -14,7 +14,7 @@ import type { SparklinePoint } from "@/lib/dividend-data/types";
 const ICON_CHIP_COLORS = {
   green: "bg-[rgba(34,197,94,0.12)] text-green-500",
   amber: "bg-warning/12 text-warning",
-  blue: "bg-blue-500/12 text-blue-500",
+  blue: "bg-info/12 text-info",
 } as const;
 
 export function StatCard({
