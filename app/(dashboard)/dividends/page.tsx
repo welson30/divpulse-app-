@@ -75,6 +75,7 @@ export default async function DividendsPage() {
   // Last 12 months of income, bucketed by calendar month.
   const monthly = new Map<string, number>();
   const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
   for (let i = 11; i >= 0; i -= 1) {
     const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
     monthly.set(d.toISOString().slice(0, 7), 0);
@@ -115,10 +116,19 @@ export default async function DividendsPage() {
   const recentEvents = (events ?? []).slice(0, HISTORY_LIMIT);
   const totalEvents = (events ?? []).length;
 
-  // A confirmed dividend_payments row means the detection job actually
-  // caught and notified this payout; an event without one is real
-  // history Yahoo reports but this app hasn't confirmed landing yet —
-  // "Pending" vs "Paid" is a genuine status, not decoration.
+  // dividend_events holds Yahoo's full trailing history — often a year
+  // or more back, well before a holding was added or before the
+  // detection cron itself was fixed (it silently caught nothing until
+  // 2026-07-31 — see docs/client-feedback-2026-07-31.md §3). A row here
+  // having no matching dividend_payments confirmation just means this
+  // app wasn't around to notify about it in real time, not that the
+  // payment hasn't happened — confirmed live: 395 of 401 real historical
+  // events for a typical portfolio have no confirmation row. So "Paid"
+  // vs "Pending" is a calendar fact (has pay_date already passed?), not
+  // whether our own notification pipeline happened to catch it — a
+  // confirmed row is still preferred for the exact payout amount when
+  // one exists, since it reflects what was actually detected rather than
+  // a recomputed estimate.
   const paymentByTickerDate = new Map<string, { id: string; amount: number }>();
   for (const p of payments ?? []) {
     const ticker = holdingById.get(p.holding_id)?.ticker;
@@ -322,8 +332,12 @@ export default async function DividendsPage() {
                 {recentEvents.map((event, i) => {
                   const shares = sharesByTicker.get(event.ticker) ?? 0;
                   const matched = paymentByTickerDate.get(`${event.ticker}|${event.pay_date}`);
-                  const isPaid = matched != null;
-                  const payout = isPaid ? matched.amount : shares * Number(event.amount_per_share);
+                  // Status reflects the calendar, not our own notification
+                  // bookkeeping — see the comment on paymentByTickerDate
+                  // above. A confirmed row is still preferred for the
+                  // exact amount when one exists.
+                  const isPaid = event.pay_date <= todayIso;
+                  const payout = matched ? matched.amount : shares * Number(event.amount_per_share);
                   return (
                     <tr
                       key={event.id}
