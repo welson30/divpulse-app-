@@ -3,12 +3,14 @@ import Link from "next/link";
 import { Aperture, Calendar, ChevronRight, Clock, DollarSign, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
+import { estimateNextPayment } from "@/lib/dividend-data/next-payment";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { isLinkableTicker } from "@/lib/tickers/validate";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { MarketStateBadge, StatCard } from "@/components/dashboard/market-stats";
 import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
+import { InfoTip } from "@/components/dashboard/info-tip";
 import { TIPS } from "@/lib/tips";
 import { Button } from "@/components/ui/button";
 import type { EnrichedTicker } from "@/lib/tickers/enrich";
@@ -106,20 +108,14 @@ export default async function DashboardPage() {
 
   const tickers = [...new Set(holdings.map((h) => h.ticker))];
 
-  const [enriched, { data: todayPayments }, { data: upcomingEvents }, income] = await Promise.all([
+  const [enriched, { data: todayPayments }, nextPayment, income] = await Promise.all([
     enrichTickers(tickers),
     supabase
       .from("dividend_payments")
       .select("id, amount, holding_id")
       .eq("user_id", user!.id)
       .eq("pay_date", todayIso),
-    supabase
-      .from("dividend_events")
-      .select("ticker, pay_date, amount_per_share")
-      .in("ticker", tickers)
-      .gt("pay_date", todayIso)
-      .order("pay_date", { ascending: true })
-      .limit(1),
+    estimateNextPayment(supabase, tickers),
     computeTrailingIncome(supabase, holdings),
   ]);
 
@@ -156,10 +152,9 @@ export default async function DashboardPage() {
 
   const todayTotal = (todayPayments ?? []).reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const nextEvent = upcomingEvents?.[0];
-  const nextHolding = nextEvent ? holdings.find((h) => h.ticker === nextEvent.ticker) : null;
-  const daysUntilNext = nextEvent
-    ? Math.ceil((new Date(`${nextEvent.pay_date}T00:00:00Z`).getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  const nextHolding = nextPayment ? holdings.find((h) => h.ticker === nextPayment.ticker) : null;
+  const daysUntilNext = nextPayment
+    ? Math.ceil((new Date(`${nextPayment.payDate}T00:00:00Z`).getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
   return (
@@ -294,47 +289,50 @@ export default async function DashboardPage() {
           <h2 className="mt-sp-2 flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
             <Clock className="size-4.5 text-text-secondary" aria-hidden />
             Next payment
+            <InfoTip label={TIPS.nextPayment} />
           </h2>
-          {nextEvent && nextHolding ? (
-            isLinkableTicker(nextEvent.ticker) ? (
-              <Link
-                href={`/tickers/${nextEvent.ticker}`}
-                className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
-              >
+          {nextPayment && nextHolding ? (
+            (() => {
+              const isConfirmed = nextPayment.source === "confirmed";
+              const rowInner = (
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <TickerLogo ticker={nextEvent.ticker} logoUrl={infoFor(nextEvent.ticker)?.logoUrl} />
+                  <TickerLogo ticker={nextPayment.ticker} logoUrl={infoFor(nextPayment.ticker)?.logoUrl} />
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-warning">
-                      {formatCurrency(Number(nextEvent.amount_per_share) * Number(nextHolding.shares))} expected
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-sm font-semibold text-warning">
+                        {formatCurrency(nextPayment.amountPerShare * Number(nextHolding.shares))} expected
+                      </span>
+                      {isConfirmed ? (
+                        <span className="inline-flex items-center rounded-[5px] border border-green-500/30 bg-[rgba(34,197,94,0.1)] px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-[0.04em] text-green-500 uppercase">
+                          Confirmed
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-[5px] border border-dashed border-warning/40 bg-transparent px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-[0.04em] text-warning uppercase">
+                          Estimated
+                        </span>
+                      )}
                     </div>
                     <div className="truncate text-xs text-text-secondary">
-                      {nextHolding.company_name ?? nextEvent.ticker} · {nextHolding.broker_name ?? "Unspecified"}
+                      {nextHolding.company_name ?? nextPayment.ticker} · {nextHolding.broker_name ?? "Unspecified"}
                     </div>
                   </div>
                   <span className="shrink-0 rounded-md border border-warning/30 bg-[rgba(251,191,36,0.1)] px-2 py-0.5 font-mono text-[10px] font-bold text-warning">
                     {daysUntilNext === 0 ? "Today" : daysUntilNext === 1 ? "Tomorrow" : `In ${daysUntilNext} days`}
                   </span>
                 </div>
-                <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
-              </Link>
-            ) : (
-              <div className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface p-sp-3">
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <TickerLogo ticker={nextEvent.ticker} logoUrl={infoFor(nextEvent.ticker)?.logoUrl} />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-warning">
-                      {formatCurrency(Number(nextEvent.amount_per_share) * Number(nextHolding.shares))} expected
-                    </div>
-                    <div className="truncate text-xs text-text-secondary">
-                      {nextHolding.company_name ?? nextEvent.ticker} · {nextHolding.broker_name ?? "Unspecified"}
-                    </div>
-                  </div>
-                  <span className="shrink-0 rounded-md border border-warning/30 bg-[rgba(251,191,36,0.1)] px-2 py-0.5 font-mono text-[10px] font-bold text-warning">
-                    {daysUntilNext === 0 ? "Today" : daysUntilNext === 1 ? "Tomorrow" : `In ${daysUntilNext} days`}
-                  </span>
-                </div>
-              </div>
-            )
+              );
+              return isLinkableTicker(nextPayment.ticker) ? (
+                <Link
+                  href={`/tickers/${nextPayment.ticker}`}
+                  className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
+                >
+                  {rowInner}
+                  <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface p-sp-3">{rowInner}</div>
+              );
+            })()
           ) : (
             <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-center text-sm text-text-secondary">
               <Clock className="size-6 text-text-tertiary" aria-hidden />

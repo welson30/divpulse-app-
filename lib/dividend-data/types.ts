@@ -114,4 +114,14 @@ export interface DividendDataProvider {
   fetchSparklines(tickers: string[], range?: SparklineRange): Promise<Map<string, SparklinePoint[]>>;
   /** Full-resolution price history for one ticker's detail-page chart. */
   fetchPriceHistory(ticker: string, range: ChartRange): Promise<SparklinePoint[]>;
+  /**
+   * Yahoo's own announced next-dividend pay date (calendarEvents module),
+   * when it has one — reliable for large, closely-covered stocks (KO,
+   * MSFT, AAPL) but frequently absent for ETFs/funds (confirmed live
+   * against SCHD, JEPI and QDTE, which return nothing). Returns null
+   * whenever Yahoo has no date or the date isn't actually in the future;
+   * callers fall back to lib/dividend-data/next-payment.ts's cadence
+   * estimate in that case.
+   */
+  fetchNextDividendDate(ticker: string): Promise<string | null>;
 }

@@ -102,6 +102,13 @@ type YahooQuoteSummaryResponse = {
   };
 };
 
+type YahooCalendarEventsResponse = {
+  quoteSummary: {
+    result: [{ calendarEvents?: { dividendDate?: { raw?: number } } }] | null;
+    error: { code: string; description: string } | null;
+  };
+};
+
 type YahooChartResponse = {
   chart: {
     result: [
@@ -579,5 +586,43 @@ export class YahooFinanceProvider implements DividendDataProvider {
     } catch {
       return []; // a failed history fetch renders an empty chart, never breaks the page
     }
+  }
+
+  /**
+   * Yahoo's announced next-dividend pay date, via quoteSummary's
+   * calendarEvents module — needs the same crumb handshake fetchQuote's
+   * enrichment step uses. Verified live 2026-08-01: present and correctly
+   * future-dated for KO/O/MSFT, entirely absent for SCHD/JEPI/QDTE —
+   * expect null for most ETFs and funds, which is the common case for a
+   * dividend-focused portfolio, not a failure.
+   */
+  async fetchNextDividendDate(ticker: string): Promise<string | null> {
+    for (const attempt of [false, true]) {
+      try {
+        const { crumb, cookie } = await getCrumb(attempt);
+        const url = new URL(`${QUOTE_SUMMARY_ENDPOINT}/${encodeURIComponent(ticker)}`);
+        url.searchParams.set("modules", "calendarEvents");
+        url.searchParams.set("crumb", crumb);
+
+        const response = await fetch(url, {
+          headers: { "User-Agent": USER_AGENT, Cookie: cookie },
+          next: { revalidate: 3600 },
+        });
+
+        if (response.status === 401 && !attempt) continue; // retry once with a freshly-fetched crumb
+        if (!response.ok) return null;
+
+        const data = (await response.json()) as YahooCalendarEventsResponse;
+        const raw = data.quoteSummary.result?.[0]?.calendarEvents?.dividendDate?.raw;
+        if (raw == null) return null;
+
+        const payDate = new Date(raw * 1000).toISOString().slice(0, 10);
+        const today = new Date().toISOString().slice(0, 10);
+        return payDate > today ? payDate : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
   }
 }

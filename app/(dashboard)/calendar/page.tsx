@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Calendar, CalendarCheck, CalendarClock, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { Calendar, CalendarCheck, CalendarClock, ChevronLeft, ChevronRight, Clock, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { estimateUpcomingPayments } from "@/lib/dividend-data/next-payment";
 import { CalendarGrid, type CalendarDayEvent } from "@/components/dashboard/calendar-grid";
 import { CalendarMonthJump } from "@/components/dashboard/calendar-month-jump";
 import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 import { StatCard } from "@/components/dashboard/market-stats";
+import { TIPS } from "@/lib/tips";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -65,30 +67,35 @@ export default async function CalendarPage({
   const daysInMonth = new Date(year, month, 0).getDate();
   const monthEnd = `${year}-${String(month).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
 
-  const { data: events } =
+  const [{ data: events }, { data: todayEvents }, upcomingEstimates] =
     tickers.length > 0
-      ? await supabase
-          .from("dividend_events")
-          .select("ticker, ex_date, pay_date, amount_per_share")
-          .in("ticker", tickers)
-          .or(`and(pay_date.gte.${monthStart},pay_date.lte.${monthEnd}),and(ex_date.gte.${monthStart},ex_date.lte.${monthEnd})`)
-      : { data: [] };
-
-  // Scoped to the real today's date regardless of which month is being
-  // browsed — the month-scoped query above won't include today's row
-  // once the user navigates away from the current month.
-  const { data: todayEvents } =
-    tickers.length > 0
-      ? await supabase
-          .from("dividend_events")
-          .select("ticker, ex_date, pay_date")
-          .in("ticker", tickers)
-          .or(`pay_date.eq.${todayStr},ex_date.eq.${todayStr}`)
-      : { data: [] };
+      ? await Promise.all([
+          supabase
+            .from("dividend_events")
+            .select("ticker, ex_date, pay_date, amount_per_share")
+            .in("ticker", tickers)
+            .or(`and(pay_date.gte.${monthStart},pay_date.lte.${monthEnd}),and(ex_date.gte.${monthStart},ex_date.lte.${monthEnd})`),
+          // Scoped to the real today's date regardless of which month is
+          // being browsed — the month-scoped query above won't include
+          // today's row once the user navigates away from the current month.
+          supabase
+            .from("dividend_events")
+            .select("ticker, ex_date, pay_date")
+            .in("ticker", tickers)
+            .or(`pay_date.eq.${todayStr},ex_date.eq.${todayStr}`),
+          // dividend_events never carries a future pay_date (it's built
+          // purely from Yahoo's historical dividend data — confirmed
+          // live, zero exceptions), so anything after today has to be
+          // projected from each ticker's own payment cadence instead —
+          // see lib/dividend-data/next-payment.ts.
+          estimateUpcomingPayments(supabase, tickers, monthStart, monthEnd),
+        ])
+      : [{ data: [] }, { data: [] }, []];
 
   const eventsByDay = new Map<number, CalendarDayEvent[]>();
   let paymentCount = 0;
   let exDateCount = 0;
+  let estimatedCount = 0;
 
   for (const event of events ?? []) {
     if (event.pay_date) {
@@ -117,6 +124,30 @@ export default async function CalendarPage({
     }
   }
 
+  // dividend_events itself never has a future pay_date, so anything
+  // shown for a day after today comes from here instead — a real
+  // Yahoo-announced date folds into paymentCount like any other real
+  // payment, while a cadence-only guess stays separately counted and
+  // visually distinct (see calendar-grid.tsx's "estimated" kind).
+  for (const estimate of upcomingEstimates) {
+    const payDay = new Date(`${estimate.payDate}T00:00:00Z`);
+    if (payDay.getUTCFullYear() === year && payDay.getUTCMonth() + 1 === month) {
+      const day = payDay.getUTCDate();
+      const amount = estimate.amountPerShare.toFixed(2);
+      const label =
+        calendarPrivacyMode === "amount_only"
+          ? `$${amount}`
+          : calendarPrivacyMode === "ticker_only"
+            ? estimate.ticker
+            : `${estimate.ticker} $${amount}`;
+      const list = eventsByDay.get(day) ?? [];
+      list.push({ label, kind: estimate.source === "confirmed" ? "pay" : "estimated" });
+      eventsByDay.set(day, list);
+      if (estimate.source === "confirmed") paymentCount += 1;
+      else estimatedCount += 1;
+    }
+  }
+
   let todayCount = 0;
   for (const event of todayEvents ?? []) {
     if (event.pay_date === todayStr) todayCount += 1;
@@ -124,7 +155,7 @@ export default async function CalendarPage({
   }
 
   const todayLabel = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-  const isMonthEmpty = paymentCount === 0 && exDateCount === 0;
+  const isMonthEmpty = paymentCount === 0 && exDateCount === 0 && estimatedCount === 0;
 
   if (tickers.length === 0) {
     return (
@@ -164,6 +195,12 @@ export default async function CalendarPage({
             <p className="mt-1 text-sm text-text-secondary">
               {paymentCount} dividend {paymentCount === 1 ? "payment" : "payments"} • {exDateCount}{" "}
               {exDateCount === 1 ? "ex-date" : "ex-dates"}
+              {estimatedCount > 0 ? (
+                <>
+                  {" "}
+                  • {estimatedCount} estimated
+                </>
+              ) : null}
             </p>
           </div>
 
@@ -189,15 +226,28 @@ export default async function CalendarPage({
             Ex-date
           </span>
           <span className="flex items-center gap-1.5 text-[11px] text-text-secondary">
+            <span aria-hidden className="size-2 rounded-full border border-dashed border-green-500 bg-transparent" />
+            Estimated payment
+          </span>
+          <span className="flex items-center gap-1.5 text-[11px] text-text-secondary">
             <span aria-hidden className="size-2 rounded-full bg-info" />
             Today
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-sp-2">
+      <div className="grid grid-cols-2 gap-sp-2 lg:grid-cols-4">
         <StatCard label="Payments" value={String(paymentCount)} sub={`in ${MONTH_NAMES[month - 1]} ${year}`} icon={CalendarCheck} iconColor="green" compact />
         <StatCard label="Ex-dates" value={String(exDateCount)} sub={`in ${MONTH_NAMES[month - 1]} ${year}`} icon={CalendarClock} iconColor="amber" compact />
+        <StatCard
+          label="Estimated"
+          value={String(estimatedCount)}
+          sub={`in ${MONTH_NAMES[month - 1]} ${year}`}
+          tip={TIPS.nextPayment}
+          icon={Sparkles}
+          iconColor="amber"
+          compact
+        />
         <StatCard label="Today" value={String(todayCount)} sub={todayLabel} icon={Clock} iconColor="blue" compact />
       </div>
 
@@ -206,7 +256,8 @@ export default async function CalendarPage({
           <Calendar className="size-8 text-text-tertiary" aria-hidden />
           <p className="text-sm font-medium text-text-primary">No dividend activity</p>
           <p className="text-sm text-text-secondary">
-            There are no payments or ex-dates in {MONTH_NAMES[month - 1]} {year}. Enjoy the calm before the next income.
+            There are no payments, ex-dates or estimated payments in {MONTH_NAMES[month - 1]} {year}. Enjoy the calm before the
+            next income.
           </p>
         </div>
       ) : null}

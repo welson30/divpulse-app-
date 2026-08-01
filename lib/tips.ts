@@ -26,6 +26,8 @@ export const TIPS = {
   portfolioValue: "The current market value of everything you hold, using live share prices.",
   incomePerDay: "Your last 12 months of dividend income spread evenly across the year. An average, not a daily payment.",
   monthlyIncome: "Your last 12 months of dividend income divided by 12. An average month, not what you're paid this specific month.",
+  nextPayment:
+    "\"Confirmed\" means the company has an announced payment date. \"Estimated\" means we predicted it from that ticker's own payment history, since not every company publishes its next date in advance — the real date can land a few days off.",
   exDate:
     "The cut-off date. You must own the shares before this date to receive the upcoming dividend — buying on or after it means you miss that payment.",
   payDate: "The date the dividend money actually reaches your account.",

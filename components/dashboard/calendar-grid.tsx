@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 
 export type CalendarDayEvent = {
   label: string;
-  kind: "pay" | "ex";
+  /** "estimated" is a cadence-based guess (no real dividend_events row yet) — always rendered distinctly from a confirmed "pay". */
+  kind: "pay" | "ex" | "estimated";
 };
 
 export type CalendarGridProps = {
@@ -54,11 +55,13 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
         const day = i + 1;
         const events = eventsByDay.get(day) ?? [];
         const isToday = day === todayDay;
-        const primaryKind: "pay" | "ex" | null = events.some((e) => e.kind === "pay")
+        const primaryKind: "pay" | "ex" | "estimated" | null = events.some((e) => e.kind === "pay")
           ? "pay"
           : events.some((e) => e.kind === "ex")
             ? "ex"
-            : null;
+            : events.some((e) => e.kind === "estimated")
+              ? "estimated"
+              : null;
         const isInert = events.length === 0 && !isToday;
 
         return (
@@ -73,7 +76,9 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
                   ? "border-green-500/30 bg-[rgba(52,211,153,0.08)] hover:border-green-500/60 hover:bg-[rgba(52,211,153,0.14)]"
                   : primaryKind === "ex"
                     ? "border-warning/20 bg-[rgba(251,191,36,0.06)] hover:border-warning/50 hover:bg-[rgba(251,191,36,0.12)]"
-                    : "border-border-subtle bg-surface-2 hover:border-border-interactive",
+                    : primaryKind === "estimated"
+                      ? "border-dashed border-green-500/40 bg-transparent hover:border-green-500/60 hover:bg-[rgba(52,211,153,0.06)]"
+                      : "border-border-subtle bg-surface-2 hover:border-border-interactive",
             )}
           >
             <div className="flex items-center justify-between">
@@ -81,8 +86,12 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
               {events.length > 0 ? (
                 <span
                   className={cn(
-                    "flex size-3.5 items-center justify-center rounded-full text-[8px] font-bold text-white",
-                    primaryKind === "pay" ? "bg-green-500" : "bg-warning",
+                    "flex size-3.5 items-center justify-center rounded-full text-[8px] font-bold",
+                    primaryKind === "pay"
+                      ? "bg-green-500 text-white"
+                      : primaryKind === "ex"
+                        ? "bg-warning text-white"
+                        : "border border-dashed border-green-500/60 bg-transparent text-green-500",
                   )}
                 >
                   {events.length}
@@ -94,7 +103,11 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
                 key={idx}
                 className={cn(
                   "truncate rounded-[3px] px-1 py-0.5 text-[9px] transition-colors",
-                  event.kind === "pay" ? "bg-green-900/60 text-green-500" : "bg-warning/15 text-warning",
+                  event.kind === "pay"
+                    ? "bg-green-900/60 text-green-500"
+                    : event.kind === "ex"
+                      ? "bg-warning/15 text-warning"
+                      : "border border-dashed border-green-500/40 bg-transparent text-green-500",
                 )}
               >
                 {event.label}
