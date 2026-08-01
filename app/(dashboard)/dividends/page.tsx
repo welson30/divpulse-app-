@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BarChart3, Calendar, ChevronRight, CircleDollarSign, Coins, Sprout, Target, TrendingUp, Trophy, Wallet } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
+import { isLinkableTicker } from "@/lib/tickers/validate";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { StatCard } from "@/components/dashboard/market-stats";
@@ -259,10 +260,17 @@ export default async function DividendsPage() {
                     return (
                       <tr key={ticker} className={i === topEarners.length - 1 ? "" : "border-b border-border-subtle"}>
                         <td className="px-sp-3 py-2.5">
-                          <Link href={`/tickers/${ticker}`} className="flex items-center gap-2">
-                            <TickerLogo ticker={ticker} logoUrl={logoFor(ticker)} size="sm" />
-                            <span className="font-mono text-[13px] font-semibold text-text-primary">{ticker}</span>
-                          </Link>
+                          {isLinkableTicker(ticker) ? (
+                            <Link href={`/tickers/${ticker}`} className="flex items-center gap-2">
+                              <TickerLogo ticker={ticker} logoUrl={logoFor(ticker)} size="sm" />
+                              <span className="font-mono text-[13px] font-semibold text-text-primary">{ticker}</span>
+                            </Link>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <TickerLogo ticker={ticker} logoUrl={logoFor(ticker)} size="sm" />
+                              <span className="font-mono text-[13px] font-semibold text-text-primary">{ticker}</span>
+                            </div>
+                          )}
                         </td>
                         <td className="px-sp-3 py-2.5 text-right font-mono text-[13px] tabular-nums text-text-secondary">
                           {yieldPct != null ? `${yieldPct.toFixed(2)}%` : "—"}
@@ -322,15 +330,27 @@ export default async function DividendsPage() {
                       className={`transition-colors hover:bg-surface-hover ${i === recentEvents.length - 1 ? "" : "border-b border-border-subtle"}`}
                     >
                       <td className="px-sp-3 py-3">
-                        <Link href={`/tickers/${event.ticker}`} className="flex items-center gap-2.5">
-                          <TickerLogo ticker={event.ticker} logoUrl={logoFor(event.ticker)} size="sm" />
-                          <div className="min-w-0">
-                            <div className="font-mono text-sm font-semibold text-text-primary">{event.ticker}</div>
-                            <div className="mt-0.5 max-w-[200px] truncate text-xs text-text-secondary">
-                              {enriched.get(event.ticker.toUpperCase())?.name ?? ""}
+                        {isLinkableTicker(event.ticker) ? (
+                          <Link href={`/tickers/${event.ticker}`} className="flex items-center gap-2.5">
+                            <TickerLogo ticker={event.ticker} logoUrl={logoFor(event.ticker)} size="sm" />
+                            <div className="min-w-0">
+                              <div className="font-mono text-sm font-semibold text-text-primary">{event.ticker}</div>
+                              <div className="mt-0.5 max-w-50 truncate text-xs text-text-secondary">
+                                {enriched.get(event.ticker.toUpperCase())?.name ?? ""}
+                              </div>
+                            </div>
+                          </Link>
+                        ) : (
+                          <div className="flex items-center gap-2.5">
+                            <TickerLogo ticker={event.ticker} logoUrl={logoFor(event.ticker)} size="sm" />
+                            <div className="min-w-0">
+                              <div className="font-mono text-sm font-semibold text-text-primary">{event.ticker}</div>
+                              <div className="mt-0.5 max-w-50 truncate text-xs text-text-secondary">
+                                {enriched.get(event.ticker.toUpperCase())?.name ?? ""}
+                              </div>
                             </div>
                           </div>
-                        </Link>
+                        )}
                       </td>
                       <td className="px-sp-3 py-3 text-right font-mono text-sm font-semibold tabular-nums text-green-500">
                         {payout > 0 ? `+${formatMoney(payout)}` : "—"}

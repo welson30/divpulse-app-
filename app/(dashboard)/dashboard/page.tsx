@@ -4,6 +4,7 @@ import { Aperture, Calendar, ChevronRight, Clock, DollarSign, TrendingUp } from 
 import { createClient } from "@/lib/supabase/server";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { enrichTickers } from "@/lib/tickers/enrich";
+import { isLinkableTicker } from "@/lib/tickers/validate";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { MarketStateBadge, StatCard } from "@/components/dashboard/market-stats";
@@ -71,12 +72,15 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: holdings } = await supabase
-    .from("holdings")
-    .select("id, ticker, shares, broker_name, company_name")
-    .eq("user_id", user!.id);
+  const [{ data: holdings }, { data: profile }] = await Promise.all([
+    supabase.from("holdings").select("id, ticker, shares, broker_name, company_name").eq("user_id", user!.id),
+    supabase.from("profiles").select("display_name").eq("id", user!.id).single(),
+  ]);
 
-  const firstName = user?.email?.split("@")[0] ?? "there";
+  // Prefer the name the user actually set; only fall back to guessing one
+  // from their email when they haven't (display_name is a free-text field
+  // set in Settings — "Shuja Uddin" greets as "Shuja", the first word).
+  const firstName = profile?.display_name?.trim().split(/\s+/)[0] || user?.email?.split("@")[0] || "there";
   const today = new Date();
   const todayIso = today.toISOString().slice(0, 10);
 
@@ -264,7 +268,7 @@ export default async function DashboardPage() {
                     </span>
                   </>
                 );
-                return holding ? (
+                return holding && isLinkableTicker(holding.ticker) ? (
                   <Link
                     key={payment.id}
                     href={`/tickers/${holding.ticker}`}
@@ -292,26 +296,45 @@ export default async function DashboardPage() {
             Next payment
           </h2>
           {nextEvent && nextHolding ? (
-            <Link
-              href={`/tickers/${nextEvent.ticker}`}
-              className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
-            >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <TickerLogo ticker={nextEvent.ticker} logoUrl={infoFor(nextEvent.ticker)?.logoUrl} />
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-warning">
-                    {formatCurrency(Number(nextEvent.amount_per_share) * Number(nextHolding.shares))} expected
+            isLinkableTicker(nextEvent.ticker) ? (
+              <Link
+                href={`/tickers/${nextEvent.ticker}`}
+                className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <TickerLogo ticker={nextEvent.ticker} logoUrl={infoFor(nextEvent.ticker)?.logoUrl} />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold text-warning">
+                      {formatCurrency(Number(nextEvent.amount_per_share) * Number(nextHolding.shares))} expected
+                    </div>
+                    <div className="truncate text-xs text-text-secondary">
+                      {nextHolding.company_name ?? nextEvent.ticker} · {nextHolding.broker_name ?? "Unspecified"}
+                    </div>
                   </div>
-                  <div className="truncate text-xs text-text-secondary">
-                    {nextHolding.company_name ?? nextEvent.ticker} · {nextHolding.broker_name ?? "Unspecified"}
-                  </div>
+                  <span className="shrink-0 rounded-md border border-warning/30 bg-[rgba(251,191,36,0.1)] px-2 py-0.5 font-mono text-[10px] font-bold text-warning">
+                    {daysUntilNext === 0 ? "Today" : daysUntilNext === 1 ? "Tomorrow" : `In ${daysUntilNext} days`}
+                  </span>
                 </div>
-                <span className="shrink-0 rounded-md border border-warning/30 bg-[rgba(251,191,36,0.1)] px-2 py-0.5 font-mono text-[10px] font-bold text-warning">
-                  {daysUntilNext === 0 ? "Today" : daysUntilNext === 1 ? "Tomorrow" : `In ${daysUntilNext} days`}
-                </span>
+                <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3 rounded-card border border-border-subtle bg-surface p-sp-3">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <TickerLogo ticker={nextEvent.ticker} logoUrl={infoFor(nextEvent.ticker)?.logoUrl} />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold text-warning">
+                      {formatCurrency(Number(nextEvent.amount_per_share) * Number(nextHolding.shares))} expected
+                    </div>
+                    <div className="truncate text-xs text-text-secondary">
+                      {nextHolding.company_name ?? nextEvent.ticker} · {nextHolding.broker_name ?? "Unspecified"}
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-md border border-warning/30 bg-[rgba(251,191,36,0.1)] px-2 py-0.5 font-mono text-[10px] font-bold text-warning">
+                    {daysUntilNext === 0 ? "Today" : daysUntilNext === 1 ? "Tomorrow" : `In ${daysUntilNext} days`}
+                  </span>
+                </div>
               </div>
-              <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
-            </Link>
+            )
           ) : (
             <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-center text-sm text-text-secondary">
               <Clock className="size-6 text-text-tertiary" aria-hidden />
@@ -332,12 +355,9 @@ export default async function DashboardPage() {
               const info = infoFor(holding.ticker);
               const price = info?.quote?.price ?? null;
               const value = price != null ? Number(holding.shares) * price : null;
-              return (
-                <Link
-                  key={holding.id}
-                  href={`/tickers/${holding.ticker}`}
-                  className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
-                >
+              const linkable = isLinkableTicker(holding.ticker);
+              const rowInner = (
+                <>
                   <TickerLogo ticker={holding.ticker} logoUrl={info?.logoUrl} size="sm" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
@@ -355,8 +375,21 @@ export default async function DashboardPage() {
                     width={56}
                     height={22}
                   />
+                </>
+              );
+              return linkable ? (
+                <Link
+                  key={holding.id}
+                  href={`/tickers/${holding.ticker}`}
+                  className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3 transition-colors hover:bg-surface-hover"
+                >
+                  {rowInner}
                   <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
                 </Link>
+              ) : (
+                <div key={holding.id} className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3">
+                  {rowInner}
+                </div>
               );
             })}
           </div>

@@ -8,6 +8,7 @@ import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { InfoTip } from "@/components/dashboard/info-tip";
 import { TIPS } from "@/lib/tips";
+import { isLinkableTicker } from "@/lib/tickers/validate";
 import type { SparklinePoint } from "@/lib/dividend-data/types";
 
 export type Holding = {
@@ -49,7 +50,16 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
   // (collective trusts, some retirement portfolios) resolve to a name but
   // carry no market data anywhere. Saying so beats printing bare dashes,
   // which reads as a failure rather than an accurate "nothing to show".
-  const rows = holdings.map((h) => ({ ...h, hasMarketData: h.price != null || (h.sparkline?.length ?? 0) > 0 }));
+  // Plaid-synced accounts can carry options/futures positions whose OCC-
+  // format symbols (e.g. "NFLX180201C00355000") run well past the
+  // ticker-detail route's 10-character limit — linking to /tickers/[x]
+  // for those is a guaranteed 404, so they render as plain (non-clickable)
+  // rows instead, same treatment as "No market data" below.
+  const rows = holdings.map((h) => ({
+    ...h,
+    hasMarketData: h.price != null || (h.sparkline?.length ?? 0) > 0,
+    linkable: isLinkableTicker(h.ticker),
+  }));
 
   return (
     <>
@@ -57,12 +67,9 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
           scroll on a 375-430px phone no matter how it's tuned, so below
           `lg:` this is a different layout entirely, not a shrunk table. */}
       <div className="flex flex-col gap-2 lg:hidden">
-        {rows.map((holding) => (
-          <div
-            key={holding.id}
-            className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3"
-          >
-            <Link href={`/tickers/${holding.ticker}`} className="flex min-w-0 flex-1 items-center gap-2.5">
+        {rows.map((holding) => {
+          const rowInner = (
+            <>
               <TickerLogo ticker={holding.ticker} logoUrl={holding.logoUrl} size="sm" />
               <div className="min-w-0 flex-1">
                 <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
@@ -76,7 +83,20 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
                   </div>
                 )}
               </div>
-            </Link>
+            </>
+          );
+          return (
+          <div
+            key={holding.id}
+            className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3"
+          >
+            {holding.linkable ? (
+              <Link href={`/tickers/${holding.ticker}`} className="flex min-w-0 flex-1 items-center gap-2.5">
+                {rowInner}
+              </Link>
+            ) : (
+              <div className="flex min-w-0 flex-1 items-center gap-2.5">{rowInner}</div>
+            )}
             <div className="flex shrink-0 flex-col items-end gap-0.5">
               <span className="font-mono text-sm font-semibold tabular-nums text-text-primary">
                 {formatMoney(holding.marketValue)}
@@ -92,7 +112,8 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
               <Trash2 className="size-4" />
             </button>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Desktop: full table, every column. */}
@@ -119,26 +140,36 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((holding, i) => (
+            {rows.map((holding, i) => {
+              const rowInner = (
+                <>
+                  <TickerLogo ticker={holding.ticker} logoUrl={holding.logoUrl} />
+                  <div className="min-w-0">
+                    <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
+                    <div className="mt-0.5 max-w-55 truncate text-xs text-text-secondary">
+                      {holding.name ?? holding.company_name ?? "—"}
+                    </div>
+                    {holding.hasMarketData ? null : (
+                      <div className="mt-1 inline-flex items-center rounded-[5px] bg-surface-hover px-1.5 py-0.5 text-[10px] text-text-secondary">
+                        No market data
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+              return (
               <tr
                 key={holding.id}
                 className={`transition-colors hover:bg-surface-hover ${i === rows.length - 1 ? "" : "border-b border-border-subtle"}`}
               >
                 <td className="px-sp-3 py-3">
-                  <Link href={`/tickers/${holding.ticker}`} className="flex items-center gap-2.5">
-                    <TickerLogo ticker={holding.ticker} logoUrl={holding.logoUrl} />
-                    <div className="min-w-0">
-                      <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
-                      <div className="mt-0.5 max-w-55 truncate text-xs text-text-secondary">
-                        {holding.name ?? holding.company_name ?? "—"}
-                      </div>
-                      {holding.hasMarketData ? null : (
-                        <div className="mt-1 inline-flex items-center rounded-[5px] bg-surface-hover px-1.5 py-0.5 text-[10px] text-text-secondary">
-                          No market data
-                        </div>
-                      )}
-                    </div>
-                  </Link>
+                  {holding.linkable ? (
+                    <Link href={`/tickers/${holding.ticker}`} className="flex items-center gap-2.5">
+                      {rowInner}
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-2.5">{rowInner}</div>
+                  )}
                 </td>
                 <td className="px-sp-3 py-3 text-[13px] text-text-secondary">{holding.broker_name ?? "—"}</td>
                 <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
@@ -169,7 +200,8 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
                   </button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

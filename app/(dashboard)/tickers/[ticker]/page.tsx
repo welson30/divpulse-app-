@@ -4,15 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { resolveLogoUrl } from "@/lib/tickers/logo";
+import { isLinkableTicker } from "@/lib/tickers/validate";
 import type { TickerQuote } from "@/lib/dividend-data/types";
 import { TickerDetailHeader } from "@/components/dashboard/ticker-detail-header";
 import { TickerChartSection } from "@/components/dashboard/ticker-chart-section";
 import { KeyStatsGrid } from "@/components/dashboard/key-stats-grid";
 import { DividendHistoryTable, type DividendHistoryRow } from "@/components/dashboard/dividend-history-table";
 import { YourPositionCard, type PositionHolding } from "@/components/dashboard/your-position-card";
-
-// Matches the constraint TickerSearchCombobox already enforces (maxLength={10}).
-const TICKER_PATTERN = /^[A-Z0-9.\-]{1,10}$/;
 
 type TickerDetailPageProps = { params: Promise<{ ticker: string }> };
 
@@ -29,7 +27,7 @@ export default async function TickerDetailPage({ params }: TickerDetailPageProps
   // data for an otherwise well-formed ticker — an upstream outage or an
   // obscure/delisted symbol must render the page with dashes, not a 404,
   // matching the never-throw philosophy already in enrichTickers/fetchQuotes.
-  if (!TICKER_PATTERN.test(ticker)) {
+  if (!isLinkableTicker(ticker)) {
     notFound();
   }
 

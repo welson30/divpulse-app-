@@ -91,6 +91,13 @@ export default async function DiversificationPage() {
 
   const byTicker = new Map<string, number>();
   const byBroker = new Map<string, number>();
+  // broker_name is free text (typed once per holding, no autocomplete) —
+  // "Fidelity" and "fidelity" are the same broker to a human but different
+  // Map keys without this, silently splitting one broker into two slices.
+  // Grouped by a normalized key; brokerLabels keeps the first-seen casing
+  // as the display label so the chart still shows a name the user typed,
+  // not a forced-lowercase one.
+  const brokerLabels = new Map<string, string>();
   const bySector = new Map<string, number>();
   const byAssetType = new Map<string, number>();
 
@@ -102,8 +109,10 @@ export default async function DiversificationPage() {
     const value = quote?.price ? shares * quote.price : shares;
 
     byTicker.set(holding.ticker, (byTicker.get(holding.ticker) ?? 0) + value);
-    const broker = holding.broker_name?.trim() || "Unspecified";
-    byBroker.set(broker, (byBroker.get(broker) ?? 0) + value);
+    const brokerRaw = holding.broker_name?.trim() || "Unspecified";
+    const brokerKey = brokerRaw.toLowerCase();
+    byBroker.set(brokerKey, (byBroker.get(brokerKey) ?? 0) + value);
+    if (!brokerLabels.has(brokerKey)) brokerLabels.set(brokerKey, brokerRaw);
 
     const sector = quote?.sector || (quote?.quoteType ? (ASSET_TYPE_LABELS[quote.quoteType] ?? quote.quoteType) : "Unknown");
     bySector.set(sector, (bySector.get(sector) ?? 0) + value);
@@ -116,7 +125,7 @@ export default async function DiversificationPage() {
     [...map.entries()].sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }));
 
   const tickerSegments = toSegments(byTicker);
-  const brokerSegments = toSegments(byBroker);
+  const brokerSegments = toSegments(byBroker).map((seg) => ({ ...seg, label: brokerLabels.get(seg.label) ?? seg.label }));
   const sectorSegments = toSegments(bySector);
   const assetTypeSegments = toSegments(byAssetType);
 
