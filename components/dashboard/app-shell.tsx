@@ -12,7 +12,7 @@ type AppShellProps = {
 
 export function AppShell({ email, planLabel, isFree, holdingCount, children }: AppShellProps) {
   return (
-    <div className="flex h-screen overflow-hidden bg-canvas">
+    <div className="fixed inset-0 flex overflow-hidden bg-canvas">
       {/* Desktop sidebar — always visible at lg+ */}
       <Sidebar planLabel={planLabel} isFree={isFree} holdingCount={holdingCount} className="hidden lg:flex" />
 

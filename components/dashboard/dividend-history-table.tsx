@@ -49,7 +49,7 @@ export function DividendHistoryTable({ events, shares }: { events: DividendHisto
           Most recent {DISPLAY_LIMIT} of {events.length} payouts.
         </p>
       ) : null}
-      <div className="w-full overflow-x-auto rounded-card border border-border-subtle bg-surface">
+      <div className="w-full overflow-x-auto overflow-y-hidden rounded-card border border-border-subtle bg-surface">
         <table className="w-full min-w-[420px] border-collapse">
           <thead>
             <tr>

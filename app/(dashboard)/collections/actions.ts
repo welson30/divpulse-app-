@@ -2,6 +2,7 @@
 
 import { searchTickers } from "@/lib/tickers/search";
 import { enrichTickers } from "@/lib/tickers/enrich";
+import { getYieldPct } from "@/lib/tickers/yield";
 import type { CollectionRow } from "@/components/dashboard/collection-table";
 
 /**
@@ -19,19 +20,12 @@ export async function searchCollectionTickers(query: string): Promise<Collection
   return matches.map((match) => {
     const info = enriched.get(match.ticker);
     const quote = info?.quote;
-    // Same preference as the curated collections: dividendYieldPercent is
-    // accurate for conventional payers, trailingAnnualDividendYield reads
-    // 0 for most funds.
-    const yieldPct =
-      quote?.dividendYieldPercent != null
-        ? quote.dividendYieldPercent / 100
-        : (quote?.trailingAnnualDividendYield ?? null);
 
     return {
       ticker: match.ticker,
       price: quote?.price ?? null,
       currency: quote?.currency ?? null,
-      yieldPct,
+      yieldPct: getYieldPct(quote),
       name: info?.name ?? match.name,
       logoUrl: info?.logoUrl ?? null,
       changePercent: quote?.changePercent ?? null,

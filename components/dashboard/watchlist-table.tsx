@@ -80,7 +80,7 @@ export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
       </div>
 
       {/* Desktop: full table, every column. */}
-      <div className="hidden w-full overflow-x-auto rounded-card border border-border-subtle bg-surface lg:block">
+      <div className="hidden w-full overflow-x-auto overflow-y-hidden rounded-card border border-border-subtle bg-surface lg:block">
         <table className="w-full min-w-205 border-collapse">
           <thead>
             <tr>
