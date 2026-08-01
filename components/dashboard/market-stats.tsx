@@ -11,6 +11,12 @@ import type { SparklinePoint } from "@/lib/dividend-data/types";
  * loss rather than decoration. Cards without a delta stay neutral instead
  * of being tinted for visual interest.
  */
+const ICON_CHIP_COLORS = {
+  green: "bg-[rgba(34,197,94,0.12)] text-green-500",
+  amber: "bg-warning/12 text-warning",
+  blue: "bg-blue-500/12 text-blue-500",
+} as const;
+
 export function StatCard({
   label,
   value,
@@ -20,6 +26,7 @@ export function StatCard({
   tip,
   sparkline,
   icon: Icon,
+  iconColor = "green",
   compact = false,
   className,
 }: {
@@ -32,6 +39,8 @@ export function StatCard({
   sparkline?: SparklinePoint[];
   /** Small circular chip in the top-right corner — optional, purely decorative. */
   icon?: React.ComponentType<{ className?: string }>;
+  /** Chip tint — lets a row of cards for distinct concepts (e.g. payments/ex-dates/today) use distinct colors instead of all defaulting to green. */
+  iconColor?: keyof typeof ICON_CHIP_COLORS;
   /**
    * Tighter padding/type scale below `lg:`, full size from `lg:` up —
    * for a tile that's cramped into a 3-across mobile row but sits in a
@@ -68,7 +77,8 @@ export function StatCard({
       {Icon ? (
         <span
           className={cn(
-            "absolute flex items-center justify-center rounded-full bg-[rgba(34,197,94,0.12)] text-green-500",
+            "absolute flex items-center justify-center rounded-full",
+            ICON_CHIP_COLORS[iconColor],
             // A 3-across compact row (dashboard's secondary tiles, this
             // page's stat row) leaves ~65-100px of *content* width per
             // card after grid gaps and card padding on a 360px phone —

@@ -28,6 +28,29 @@ export async function updateProfile(_prevState: SettingsActionState, formData: F
   return { success: true };
 }
 
+export async function updateCalendarPrivacyMode(_prevState: SettingsActionState, formData: FormData): Promise<SettingsActionState> {
+  const calendarPrivacyMode = String(formData.get("calendarPrivacyMode") ?? "full");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Your session expired. Please sign in again." };
+  }
+
+  const { error } = await supabase.from("profiles").update({ calendar_privacy_mode: calendarPrivacyMode }).eq("id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/settings");
+  revalidatePath("/calendar");
+  return { success: true };
+}
+
 export async function removePushDevice(subscriptionId: string) {
   const supabase = await createClient();
   const {

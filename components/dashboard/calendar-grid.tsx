@@ -16,15 +16,29 @@ export type CalendarGridProps = {
   todayDay: number | null;
 };
 
-const WEEKDAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
+const WEEKDAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+function PadCell({ day }: { day: number }) {
+  return (
+    <div className="flex min-h-13.5 flex-col gap-0.5 rounded-[6px] border border-transparent p-1 text-[10px]">
+      <span className="font-mono text-text-tertiary/50">{day}</span>
+    </div>
+  );
+}
 
 /** Ported from the marketing site's product-tabs.tsx CalendarPanel demo, driven by real data instead of a fixture array. */
 export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGridProps) {
   const daysInMonth = new Date(year, month, 0).getDate();
-  // JS getDay(): 0=Sunday..6=Saturday. We want a Monday-first grid, so
-  // remap to 0=Monday..6=Sunday for the leading-blank-cell count.
-  const firstWeekdayJs = new Date(year, month - 1, 1).getDay();
-  const leadingBlanks = (firstWeekdayJs + 6) % 7;
+  // JS getDay(): 0=Sunday..6=Saturday — grid is Sunday-first, so this is
+  // used directly as the leading-pad-cell count, no remap needed.
+  const leadingBlanks = new Date(year, month - 1, 1).getDay();
+
+  const prevMonthDays = new Date(year, month - 1, 0).getDate();
+  const leadingPadDays = Array.from({ length: leadingBlanks }, (_, i) => prevMonthDays - leadingBlanks + i + 1);
+
+  const totalCells = leadingBlanks + daysInMonth;
+  const trailingBlanks = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  const trailingPadDays = Array.from({ length: trailingBlanks }, (_, i) => i + 1);
 
   return (
     <div className="grid grid-cols-7 gap-1">
@@ -33,8 +47,8 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
           {d}
         </div>
       ))}
-      {Array.from({ length: leadingBlanks }).map((_, i) => (
-        <div key={`pad-${i}`} />
+      {leadingPadDays.map((day, i) => (
+        <PadCell key={`lead-${i}`} day={day} />
       ))}
       {Array.from({ length: daysInMonth }).map((_, i) => {
         const day = i + 1;
@@ -51,10 +65,10 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
           <div
             key={day}
             className={cn(
-              "group relative flex min-h-[54px] cursor-default flex-col gap-0.5 rounded-[6px] border p-1 text-[10px] transition-all duration-150 ease-out",
+              "group relative flex min-h-13.5 cursor-default flex-col gap-0.5 rounded-[6px] border p-1 text-[10px] transition-all duration-150 ease-out",
               !isInert && "hover:z-10 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)]",
               isToday
-                ? "border-green-500 hover:shadow-[0_0_0_1px_var(--green-500),0_8px_20px_-8px_rgba(52,211,153,0.35)]"
+                ? "border-blue-500 bg-blue-500/8 hover:border-blue-500/70 hover:bg-blue-500/14"
                 : primaryKind === "pay"
                   ? "border-green-500/30 bg-[rgba(52,211,153,0.08)] hover:border-green-500/60 hover:bg-[rgba(52,211,153,0.14)]"
                   : primaryKind === "ex"
@@ -62,7 +76,19 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
                     : "border-border-subtle bg-surface-2 hover:border-border-interactive",
             )}
           >
-            <span className={cn("font-mono", isToday ? "font-bold text-green-500" : "text-text-secondary")}>{day}</span>
+            <div className="flex items-center justify-between">
+              <span className={cn("font-mono", isToday ? "font-bold text-blue-500" : "text-text-secondary")}>{day}</span>
+              {events.length > 0 ? (
+                <span
+                  className={cn(
+                    "flex size-3.5 items-center justify-center rounded-full text-[8px] font-bold text-white",
+                    primaryKind === "pay" ? "bg-green-500" : "bg-warning",
+                  )}
+                >
+                  {events.length}
+                </span>
+              ) : null}
+            </div>
             {events.map((event, idx) => (
               <span
                 key={idx}
@@ -77,6 +103,9 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
           </div>
         );
       })}
+      {trailingPadDays.map((day, i) => (
+        <PadCell key={`trail-${i}`} day={day} />
+      ))}
     </div>
   );
 }

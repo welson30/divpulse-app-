@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-form";
 import { PushDevicesList, type PushDevice } from "@/components/dashboard/push-devices-list";
 import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
+import { CalendarPrivacyForm } from "@/components/dashboard/calendar-privacy-form";
 import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
 import { BillingCard } from "@/components/dashboard/billing-card";
 import { PlaidConnectCard } from "@/components/dashboard/plaid-connect-card";
@@ -45,7 +46,7 @@ export default async function SettingsPage() {
   } = await supabase.auth.getUser();
 
   const [{ data: profile }, { data: devices }, { data: telegramLink }, { data: brokerConnections }] = await Promise.all([
-    supabase.from("profiles").select("currency, locale, plan").eq("id", user!.id).single(),
+    supabase.from("profiles").select("currency, locale, plan, calendar_privacy_mode").eq("id", user!.id).single(),
     supabase
       .from("push_subscriptions")
       .select("id, user_agent, created_at")
@@ -98,6 +99,13 @@ export default async function SettingsPage() {
           <EnableNotificationsButton />
         </div>
         <PushDevicesList devices={(devices ?? []) as PushDevice[]} />
+      </SettingsSection>
+
+      <SettingsSection
+        title="Calendar privacy"
+        description="Control what your dividend calendar shows — useful for recording demos without revealing your holdings."
+      >
+        <CalendarPrivacyForm calendarPrivacyMode={profile?.calendar_privacy_mode ?? "full"} />
       </SettingsSection>
     </div>
   );
