@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BarChart3, Calendar, ChevronRight, CircleDollarSign, Coins, Sprout, Target, TrendingUp, Trophy, Wallet } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
@@ -8,6 +9,7 @@ import { StatCard } from "@/components/dashboard/market-stats";
 import { InfoTip } from "@/components/dashboard/info-tip";
 import { TIPS } from "@/lib/tips";
 import { MonthlyIncomeChart, type MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
+import type { SparklinePoint } from "@/lib/dividend-data/types";
 
 export const metadata: Metadata = {
   title: "Dividends — PaidPrime",
@@ -20,6 +22,10 @@ function formatDate(dateStr: string) {
     year: "numeric",
     timeZone: "UTC",
   });
+}
+
+function formatMoney(value: number) {
+  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 const HISTORY_HEAD =
@@ -54,7 +60,6 @@ export default async function DividendsPage() {
   const enriched = await enrichTickers(tickers);
   const logoFor = (ticker: string | undefined) =>
     ticker ? (enriched.get(ticker.toUpperCase())?.logoUrl ?? null) : null;
-  const totalConfirmed = (payments ?? []).reduce((sum, p) => sum + Number(p.amount), 0);
 
   // The event list on its own is 400-odd rows of raw history; these turn
   // it into the numbers the page is actually for — what this portfolio
@@ -78,11 +83,27 @@ export default async function DividendsPage() {
     const shares = sharesByTicker.get(event.ticker) ?? 0;
     monthly.set(bucket, (monthly.get(bucket) ?? 0) + Number(event.amount_per_share) * shares);
   }
-  const monthlySeries: MonthlyIncomePoint[] = [...monthly.entries()].map(([month, total]) => ({
+  const monthlyEntries = [...monthly.entries()];
+  const monthlySeries: MonthlyIncomePoint[] = monthlyEntries.map(([month, total]) => ({
     month,
     label: new Date(`${month}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }),
     total,
   }));
+  // Same 12 real monthly totals, reshaped for the stat-card mini sparklines
+  // — not a separate fabricated series.
+  const monthlySparkline: SparklinePoint[] = monthlyEntries.map(([month, total]) => ({
+    t: Math.floor(new Date(`${month}-01T00:00:00Z`).getTime() / 1000),
+    c: total,
+  }));
+
+  // Real, derived growth signal: first half of the trailing-12mo window
+  // vs. the second half. Not "vs last month" (too noisy for weekly/monthly
+  // payers with irregular cadence) — a wider window is stable enough to
+  // say something honest. Hidden if there's too little history to be
+  // meaningful rather than shown with a misleading swing.
+  const firstHalfTotal = monthlyEntries.slice(0, 6).reduce((sum, [, total]) => sum + total, 0);
+  const secondHalfTotal = monthlyEntries.slice(6).reduce((sum, [, total]) => sum + total, 0);
+  const growthPct = firstHalfTotal > 0 ? ((secondHalfTotal - firstHalfTotal) / firstHalfTotal) * 100 : null;
 
   // Which holdings actually generate the income.
   // The raw event list runs to several hundred rows for a portfolio of
@@ -91,6 +112,16 @@ export default async function DividendsPage() {
   const HISTORY_LIMIT = 60;
   const recentEvents = (events ?? []).slice(0, HISTORY_LIMIT);
   const totalEvents = (events ?? []).length;
+
+  // A confirmed dividend_payments row means the detection job actually
+  // caught and notified this payout; an event without one is real
+  // history Yahoo reports but this app hasn't confirmed landing yet —
+  // "Pending" vs "Paid" is a genuine status, not decoration.
+  const paymentByTickerDate = new Map<string, { id: string; amount: number }>();
+  for (const p of payments ?? []) {
+    const ticker = holdingById.get(p.holding_id)?.ticker;
+    if (ticker) paymentByTickerDate.set(`${ticker}|${p.pay_date}`, { id: p.id, amount: Number(p.amount) });
+  }
 
   const topEarners = [...income.perTicker.entries()]
     .filter(([, amount]) => amount > 0)
@@ -113,148 +144,176 @@ export default async function DividendsPage() {
 
   return (
     <div className="flex flex-col gap-sp-4">
-      <div>
-        <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
-        <h1 className="text-h1 font-display font-semibold text-text-primary">Dividends</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          {(payments ?? []).length === 0
-            ? "No confirmed payments yet — detected payouts will appear here the day they land."
-            : `$${totalConfirmed.toFixed(2)} confirmed across ${payments!.length} ${payments!.length === 1 ? "payment" : "payments"}`}
-        </p>
-      </div>
-
-      <div className="grid gap-sp-2 sm:grid-cols-3">
-        <StatCard label="Per year" value={`$${income.annual.toFixed(2)}`} tip={TIPS.annualIncome} />
-        <StatCard label="Per month" value={`$${income.monthly.toFixed(2)}`} sub="12-month average" />
-        <StatCard label="Per day" value={`$${income.daily.toFixed(2)}`} tip={TIPS.incomePerDay} />
-      </div>
-
-      <div className="grid gap-sp-3 lg:grid-cols-[1.6fr_1fr]">
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-4">
-          <h2 className="mb-1 text-h2 font-display font-medium text-text-primary">Income by month</h2>
-          <p className="mb-sp-3 text-xs text-text-secondary">
-            Dividends paid over the last 12 months, at your current share counts.
-          </p>
-          <MonthlyIncomeChart data={monthlySeries} />
+      <div className="flex flex-col gap-sp-3 lg:flex-row lg:items-stretch">
+        <div className="flex flex-1 items-start gap-sp-2">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-[rgba(34,197,94,0.12)] text-green-500">
+            <Sprout className="size-6" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-h1 font-display font-semibold text-text-primary">Dividends</h1>
+            <p className="text-sm text-text-secondary">Steady income. Long-term wealth.</p>
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-text-secondary">
+              <Calendar className="size-3.5" aria-hidden />
+              {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+            </p>
+          </div>
         </div>
 
-        <div className="rounded-card border border-border-subtle bg-surface p-sp-4">
-          <h2 className="mb-1 text-h2 font-display font-medium text-text-primary">Top earners</h2>
-          <p className="mb-sp-3 text-xs text-text-secondary">Which holdings pay you the most.</p>
+        <Link
+          href="/goals"
+          className="flex items-center gap-3 rounded-card border border-green-500/20 bg-[rgba(34,197,94,0.06)] p-sp-3 transition-colors hover:bg-[rgba(34,197,94,0.1)] lg:w-75"
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[rgba(34,197,94,0.15)] text-green-500">
+            <Target className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-text-primary">Build passive income</div>
+            <div className="text-xs text-text-secondary">Set a target, track your progress</div>
+          </div>
+          <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-3 gap-sp-2">
+        <StatCard
+          label="Portfolio annual income"
+          value={formatMoney(income.annual)}
+          tip={TIPS.annualIncome}
+          icon={Coins}
+          sparkline={monthlySparkline}
+          compact
+        />
+        <StatCard
+          label="Monthly income"
+          value={formatMoney(income.monthly)}
+          sub="12-month average"
+          icon={Wallet}
+          sparkline={monthlySparkline}
+          compact
+        />
+        <StatCard
+          label="Daily income"
+          value={formatMoney(income.daily)}
+          tip={TIPS.incomePerDay}
+          icon={CircleDollarSign}
+          sparkline={monthlySparkline}
+          compact
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-sp-3 lg:grid-cols-[1.6fr_1fr]">
+        <div className="min-w-0 flex flex-col gap-sp-2 rounded-card border border-border-subtle bg-surface p-sp-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-sp-2 gap-y-1.5">
+            <h2 className="flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
+              <BarChart3 className="size-4.5 text-text-secondary" aria-hidden />
+              Income by month
+            </h2>
+            <span className="shrink-0 rounded-full border border-border-subtle px-2.5 py-1 font-mono text-[11px] text-text-secondary">
+              Last 12 months
+            </span>
+          </div>
+          <p className="-mt-1 text-xs text-text-secondary">Dividends paid over the last 12 months, at your current share counts.</p>
+          <MonthlyIncomeChart data={monthlySeries} />
+          {growthPct != null ? (
+            <div className="mt-1 flex items-center gap-2 rounded-card border border-green-500/20 bg-[rgba(34,197,94,0.06)] px-sp-3 py-2.5">
+              <TrendingUp className="size-4 shrink-0 text-green-500" aria-hidden />
+              <p className="text-xs text-text-secondary">
+                <span className="font-semibold text-text-primary">
+                  {growthPct >= 0 ? "Consistent growth" : "Income has slowed"} in dividend income
+                </span>
+                {" — "}
+                {growthPct >= 0 ? "+" : ""}
+                {growthPct.toFixed(0)}% {growthPct >= 0 ? "growth" : "change"} vs. the first half of the last 12 months
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="min-w-0 flex flex-col gap-sp-2 rounded-card border border-border-subtle bg-surface p-sp-4">
+          <div className="flex items-center justify-between gap-sp-2">
+            <h2 className="flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
+              <Trophy className="size-4.5 text-text-secondary" aria-hidden />
+              Top earners
+            </h2>
+          </div>
+          <p className="-mt-1 text-xs text-text-secondary">Which holdings pay you the most.</p>
           {topEarners.length === 0 ? (
             <p className="text-sm text-text-secondary">No dividend history yet for your holdings.</p>
           ) : (
-            <div className="flex flex-col gap-2.5">
-              {topEarners.map(([ticker, amount]) => {
-                const share = income.annual > 0 ? (amount / income.annual) * 100 : 0;
-                return (
-                  <Link key={ticker} href={`/tickers/${ticker}`} className="flex items-center gap-2.5">
-                    <TickerLogo ticker={ticker} logoUrl={logoFor(ticker)} size="sm" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="font-mono text-[13px] font-semibold text-text-primary">{ticker}</span>
-                        <span className="font-mono text-[13px] font-semibold tabular-nums text-green-500">
-                          ${amount.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="mt-1 h-1 overflow-hidden rounded-full bg-surface-hover">
-                        <div className="h-full rounded-full bg-green-500" style={{ width: `${share}%` }} />
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+            <div className="w-full overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className={`${HISTORY_HEAD} text-left`}>Company</th>
+                    <th className={`${HISTORY_HEAD} text-right`}>
+                      <span className="inline-flex items-center gap-1">Yield <InfoTip label={TIPS.dividendYield} /></span>
+                    </th>
+                    <th className={`${HISTORY_HEAD} text-right`}>Monthly</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topEarners.map(([ticker, amount], i) => {
+                    const yieldPct = enriched.get(ticker.toUpperCase())?.quote?.dividendYieldPercent ?? null;
+                    return (
+                      <tr key={ticker} className={i === topEarners.length - 1 ? "" : "border-b border-border-subtle"}>
+                        <td className="px-sp-3 py-2.5">
+                          <Link href={`/tickers/${ticker}`} className="flex items-center gap-2">
+                            <TickerLogo ticker={ticker} logoUrl={logoFor(ticker)} size="sm" />
+                            <span className="font-mono text-[13px] font-semibold text-text-primary">{ticker}</span>
+                          </Link>
+                        </td>
+                        <td className="px-sp-3 py-2.5 text-right font-mono text-[13px] tabular-nums text-text-secondary">
+                          {yieldPct != null ? `${yieldPct.toFixed(2)}%` : "—"}
+                        </td>
+                        <td className="px-sp-3 py-2.5 text-right font-mono text-[13px] font-semibold tabular-nums text-green-500">
+                          {formatMoney(amount / 12)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
       </div>
 
       <div className="flex flex-col gap-sp-2">
-        <h2 className="text-h2 font-display font-medium text-text-primary">Confirmed payments</h2>
-        {(payments ?? []).length === 0 ? (
-          <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-sm text-text-secondary">
-            Nothing detected yet. The daily check runs automatically — this fills in the moment a tracked holding pays.
-          </div>
-        ) : (
-          <div className="w-full overflow-x-auto rounded-card border border-border-subtle bg-surface">
-            <table className="w-full min-w-[420px] border-collapse">
-              <thead>
-                <tr>
-                  <th className="border-b border-border-subtle px-sp-3 py-3.5 text-left font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase">
-                    Ticker
-                  </th>
-                  <th className="border-b border-border-subtle px-sp-3 py-3.5 text-left font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase">
-                    Pay date
-                  </th>
-                  <th className="border-b border-border-subtle px-sp-3 py-3.5 text-right font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase">
-                    Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments!.map((payment, i) => (
-                  <tr key={payment.id} className={i === payments!.length - 1 ? "" : "border-b border-border-subtle"}>
-                    <td className="px-sp-3 py-3.5">
-                      {(() => {
-                        const paymentTicker = holdingById.get(payment.holding_id)?.ticker;
-                        const inner = (
-                          <>
-                            <TickerLogo ticker={paymentTicker ?? "—"} logoUrl={logoFor(paymentTicker)} size="sm" />
-                            <span className="font-mono text-sm font-semibold text-text-primary">{paymentTicker ?? "—"}</span>
-                          </>
-                        );
-                        return paymentTicker ? (
-                          <Link href={`/tickers/${paymentTicker}`} className="flex items-center gap-2.5">
-                            {inner}
-                          </Link>
-                        ) : (
-                          <div className="flex items-center gap-2.5">{inner}</div>
-                        );
-                      })()}
-                    </td>
-                    <td className="px-sp-3 py-3.5 text-[13px] text-text-secondary">{formatDate(payment.pay_date)}</td>
-                    <td className="px-sp-3 py-3.5 text-right font-mono text-sm font-semibold tabular-nums text-green-500">
-                      +${Number(payment.amount).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-sp-2">
-        <h2 className="text-h2 font-display font-medium text-text-primary">Dividend history</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
+            <Calendar className="size-4.5 text-text-secondary" aria-hidden />
+            Recent dividend payments
+          </h2>
+        </div>
         <p className="-mt-1 text-xs text-text-secondary">
           {totalEvents > HISTORY_LIMIT
             ? `Most recent ${HISTORY_LIMIT} of ${totalEvents} payouts for your tracked tickers.`
             : "Past payouts for your tracked tickers."}
         </p>
-        {(events ?? []).length === 0 ? (
+        {recentEvents.length === 0 ? (
           <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-sm text-text-secondary">
             No dividend history found yet for your tracked tickers.
           </div>
         ) : (
           <div className="w-full overflow-x-auto rounded-card border border-border-subtle bg-surface">
-            <table className="w-full min-w-[560px] border-collapse">
+            <table className="w-full min-w-160 border-collapse">
               <thead>
                 <tr>
-                  <th className={`${HISTORY_HEAD} text-left`}>Asset</th>
+                  <th className={`${HISTORY_HEAD} text-left`}>Company</th>
+                  <th className={`${HISTORY_HEAD} text-right`}>Amount</th>
                   <th className={`${HISTORY_HEAD} text-left`}>
                     <span className="inline-flex items-center gap-1">Ex-date <InfoTip label={TIPS.exDate} /></span>
                   </th>
-                  <th className={`${HISTORY_HEAD} text-right`}>
-                    <span className="inline-flex items-center gap-1">Per share <InfoTip label={TIPS.perShare} /></span>
-                  </th>
-                  <th className={`${HISTORY_HEAD} text-right`}>Your shares</th>
-                  <th className={`${HISTORY_HEAD} text-right`}>Your payout</th>
+                  <th className={`${HISTORY_HEAD} text-left`}>Payment date</th>
+                  <th className={`${HISTORY_HEAD} text-right`}>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {recentEvents.map((event, i) => {
                   const shares = sharesByTicker.get(event.ticker) ?? 0;
-                  const payout = Number(event.amount_per_share) * shares;
+                  const matched = paymentByTickerDate.get(`${event.ticker}|${event.pay_date}`);
+                  const isPaid = matched != null;
+                  const payout = isPaid ? matched.amount : shares * Number(event.amount_per_share);
                   return (
                     <tr
                       key={event.id}
@@ -271,17 +330,23 @@ export default async function DividendsPage() {
                           </div>
                         </Link>
                       </td>
+                      <td className="px-sp-3 py-3 text-right font-mono text-sm font-semibold tabular-nums text-green-500">
+                        {payout > 0 ? `+${formatMoney(payout)}` : "—"}
+                      </td>
                       <td className="px-sp-3 py-3 text-[13px] text-text-secondary">
                         {event.ex_date ? formatDate(event.ex_date) : "—"}
                       </td>
-                      <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-secondary">
-                        ${Number(event.amount_per_share).toFixed(4)}
-                      </td>
-                      <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-secondary">
-                        {shares || "—"}
-                      </td>
-                      <td className="px-sp-3 py-3 text-right font-mono text-sm font-semibold tabular-nums text-green-500">
-                        {payout > 0 ? `+$${payout.toFixed(2)}` : "—"}
+                      <td className="px-sp-3 py-3 text-[13px] text-text-secondary">{formatDate(event.pay_date)}</td>
+                      <td className="px-sp-3 py-3 text-right">
+                        <span
+                          className={`inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[10px] font-bold ${
+                            isPaid
+                              ? "border-green-500/30 bg-[rgba(34,197,94,0.1)] text-green-500"
+                              : "border-warning/30 bg-[rgba(251,191,36,0.1)] text-warning"
+                          }`}
+                        >
+                          {isPaid ? "Paid" : "Pending"}
+                        </span>
                       </td>
                     </tr>
                   );

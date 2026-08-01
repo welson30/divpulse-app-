@@ -35,7 +35,7 @@ export function MonthlyIncomeChart({ data, className }: { data: MonthlyIncomePoi
         </div>
         <div className="flex gap-1.5">
           {(data.length > 0 ? data : []).map((d) => (
-            <div key={d.month} className="flex-1 text-center font-mono text-[9px] text-text-tertiary">
+            <div key={d.month} className="min-w-0 flex-1 truncate text-center font-mono text-[9px] text-text-tertiary">
               {d.label}
             </div>
           ))}
@@ -69,7 +69,7 @@ export function MonthlyIncomeChart({ data, className }: { data: MonthlyIncomePoi
       </div>
       <div className="flex gap-1.5">
         {data.map((d) => (
-          <div key={d.month} className="flex-1 text-center font-mono text-[9px] text-text-secondary">
+          <div key={d.month} className="min-w-0 flex-1 truncate text-center font-mono text-[9px] text-text-secondary">
             {d.label}
           </div>
         ))}

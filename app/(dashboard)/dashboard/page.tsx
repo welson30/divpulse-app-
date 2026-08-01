@@ -231,8 +231,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-sp-3 lg:grid-cols-2">
-        <div className="flex flex-col gap-sp-2">
+      <div className="grid grid-cols-1 gap-sp-3 lg:grid-cols-2">
+        <div className="min-w-0 flex flex-col gap-sp-2">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
               <Calendar className="size-4.5 text-text-secondary" aria-hidden />
@@ -320,7 +320,7 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-sp-2">
+        <div className="min-w-0 flex flex-col gap-sp-2">
           <div className="flex items-center justify-between">
             <h2 className="text-h2 font-display font-medium text-text-primary">Recent holdings</h2>
             <Link href="/holdings" className="font-mono text-xs text-green-500 hover:underline">

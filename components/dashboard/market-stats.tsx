@@ -47,6 +47,15 @@ export function StatCard({
   const isUp = (changePercent ?? changeAmount ?? 0) >= 0;
   const signed = (n: number, digits = 2) => `${n >= 0 ? "+" : "−"}${Math.abs(n).toFixed(digits)}`;
 
+  // A flat series (e.g. a brand-new account with 12 real-but-all-zero
+  // months) would otherwise draw as a meaningless straight line — same
+  // problem as a truly empty one, just not caught by a length check.
+  // `sparkline` being passed at all (vs. omitted entirely) is what
+  // decides whether this slot renders something instead of nothing.
+  const hasSparkline = sparkline != null;
+  const hasMeaningfulSparkline =
+    hasSparkline && sparkline.length > 1 && sparkline.some((p) => p.c !== sparkline[0]!.c);
+
   return (
     <div
       className={cn(
@@ -59,15 +68,21 @@ export function StatCard({
       {Icon ? (
         <span
           className={cn(
-            "absolute top-sp-2 right-sp-2 flex items-center justify-center rounded-full bg-[rgba(34,197,94,0.12)] text-green-500",
-            compact ? "size-6 lg:size-7" : "size-7",
+            "absolute flex items-center justify-center rounded-full bg-[rgba(34,197,94,0.12)] text-green-500",
+            // A 3-across compact row (dashboard's secondary tiles, this
+            // page's stat row) leaves ~65-100px of *content* width per
+            // card after grid gaps and card padding on a 360px phone —
+            // the size-6/right-sp-2 chip alone was eating 40px of that,
+            // more than half. Smaller and closer to the corner below
+            // `lg:`, back to the original size once there's real room.
+            compact ? "top-1.5 right-1.5 size-4.5 lg:top-sp-2 lg:right-sp-2 lg:size-7" : "top-sp-2 right-sp-2 size-7",
           )}
         >
-          <Icon className={compact ? "size-3 lg:size-3.5" : "size-3.5"} />
+          <Icon className={compact ? "size-2.5 lg:size-3.5" : "size-3.5"} />
         </span>
       ) : null}
 
-      <div className={cn("flex items-center gap-1.5", Icon && "pr-8")}>
+      <div className={cn("flex items-center gap-1.5", Icon && (compact ? "pr-5 lg:pr-8" : "pr-8"))}>
         <span className={cn("text-text-secondary", compact ? "text-[11px] lg:text-xs" : "text-xs")}>{label}</span>
         {tip ? <InfoTip label={tip} /> : null}
       </div>
@@ -76,6 +91,11 @@ export function StatCard({
         className={cn(
           "mt-1 font-mono font-bold tracking-tight tabular-nums text-text-primary",
           compact ? "text-lg lg:text-2xl" : "text-2xl",
+          // The icon chip extends further down than just the label row
+          // above — a value like "$674.76" can reach far enough right to
+          // sit under it without this same reservation. Matches the
+          // chip's own compact-vs-full sizing above.
+          Icon && (compact ? "pr-5 lg:pr-8" : "pr-8"),
         )}
       >
         {value}
@@ -98,9 +118,13 @@ export function StatCard({
         <div className={cn("mt-1 text-text-secondary", compact ? "text-[11px] lg:text-xs" : "text-xs")}>{sub}</div>
       ) : null}
 
-      {sparkline && sparkline.length > 1 ? (
+      {hasSparkline ? (
         <div className="mt-2 -mb-1">
-          <Sparkline points={sparkline} id={`stat-${label.replace(/\s/g, "")}`} changePercent={changePercent} width={200} height={32} className="w-full" />
+          {hasMeaningfulSparkline ? (
+            <Sparkline points={sparkline} id={`stat-${label.replace(/\s/g, "")}`} changePercent={changePercent} width={200} height={32} className="w-full" />
+          ) : (
+            <div className="flex h-8 items-center justify-center font-mono text-[10px] text-text-tertiary">No trend data yet</div>
+          )}
         </div>
       ) : null}
     </div>
