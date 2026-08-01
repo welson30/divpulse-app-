@@ -35,14 +35,21 @@ const HEAD =
   "border-b border-border-subtle px-sp-3 py-3.5 font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase";
 
 export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [watched, setWatched] = useState<Set<string>>(new Set());
+  const [pendingTicker, setPendingTicker] = useState<string | null>(null);
 
-  const handleWatch = (ticker: string) =>
+  const handleWatch = (ticker: string) => {
+    setPendingTicker(ticker);
     startTransition(async () => {
-      await watchTicker(ticker, null);
-      setWatched((prev) => new Set(prev).add(ticker));
+      try {
+        await watchTicker(ticker, null);
+        setWatched((prev) => new Set(prev).add(ticker));
+      } finally {
+        setPendingTicker(null);
+      }
     });
+  };
 
   return (
     <>
@@ -81,12 +88,12 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
               ) : (
                 <button
                   type="button"
-                  disabled={isPending}
+                  disabled={pendingTicker === row.ticker}
                   onClick={() => handleWatch(row.ticker)}
                   aria-label="Watch"
                   className="flex shrink-0 items-center justify-center rounded-full border border-border-interactive p-1.5 text-text-primary transition-colors hover:border-green-500 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40"
                 >
-                  {isPending ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+                  {pendingTicker === row.ticker ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
                 </button>
               )}
             </div>
@@ -158,11 +165,11 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
                     ) : (
                       <button
                         type="button"
-                        disabled={isPending}
+                        disabled={pendingTicker === row.ticker}
                         onClick={() => handleWatch(row.ticker)}
                         className="inline-flex items-center gap-1.5 rounded-full border border-border-interactive px-3 py-1.5 font-sans text-xs font-semibold text-text-primary transition-colors hover:border-green-500 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40"
                       >
-                        {isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3.5" />}
+                        {pendingTicker === row.ticker ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3.5" />}
                         Watch
                       </button>
                     )}

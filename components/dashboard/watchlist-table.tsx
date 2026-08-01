@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { removeWatchlistItem } from "@/app/(dashboard)/watchlist/actions";
@@ -33,7 +33,19 @@ const HEAD =
   "border-b border-border-subtle px-sp-3 py-3.5 font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase";
 
 export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  const handleRemove = (id: string) => {
+    setPendingId(id);
+    startTransition(async () => {
+      try {
+        await removeWatchlistItem(id);
+      } finally {
+        setPendingId(null);
+      }
+    });
+  };
 
   if (items.length === 0) {
     return (
@@ -68,8 +80,8 @@ export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
             </div>
             <button
               type="button"
-              disabled={isPending}
-              onClick={() => startTransition(() => removeWatchlistItem(item.id))}
+              disabled={pendingId === item.id}
+              onClick={() => handleRemove(item.id)}
               aria-label="Remove"
               className="flex shrink-0 items-center justify-center rounded-full p-1.5 text-text-secondary transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:opacity-40"
             >
@@ -134,8 +146,8 @@ export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
                 <td className="px-sp-3 py-3 text-right">
                   <button
                     type="button"
-                    disabled={isPending}
-                    onClick={() => startTransition(() => removeWatchlistItem(item.id))}
+                    disabled={pendingId === item.id}
+                    onClick={() => handleRemove(item.id)}
                     className="font-sans text-xs text-text-secondary transition-colors hover:text-red-500 disabled:opacity-40"
                   >
                     Remove

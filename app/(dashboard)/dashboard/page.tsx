@@ -10,6 +10,7 @@ import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { MarketStateBadge, StatCard } from "@/components/dashboard/market-stats";
 import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
+import { PlaidConnectDialog } from "@/components/dashboard/plaid-connect-dialog";
 import { InfoTip } from "@/components/dashboard/info-tip";
 import { TIPS } from "@/lib/tips";
 import { Button } from "@/components/ui/button";
@@ -74,15 +75,21 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: holdings }, { data: profile }] = await Promise.all([
+  const [{ data: holdings }, { data: profile }, { data: brokerConnections }] = await Promise.all([
     supabase.from("holdings").select("id, ticker, shares, broker_name, company_name").eq("user_id", user!.id),
-    supabase.from("profiles").select("display_name").eq("id", user!.id).single(),
+    supabase.from("profiles").select("display_name, plan").eq("id", user!.id).single(),
+    supabase
+      .from("broker_connections")
+      .select("id, institution_name, status, last_synced_at")
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false }),
   ]);
 
   // Prefer the name the user actually set; only fall back to guessing one
   // from their email when they haven't (display_name is a free-text field
   // set in Settings — "Shuja Uddin" greets as "Shuja", the first word).
   const firstName = profile?.display_name?.trim().split(/\s+/)[0] || user?.email?.split("@")[0] || "there";
+  const isProPlus = profile?.plan === "pro_plus";
   const today = new Date();
   const todayIso = today.toISOString().slice(0, 10);
 
@@ -98,9 +105,12 @@ export default async function DashboardPage() {
           <p className="max-w-sm text-sm text-text-secondary">
             No holdings yet. Add a ticker to start tracking dividend income.
           </p>
-          <Button asChild className="h-10">
-            <Link href="/holdings">Add first holding</Link>
-          </Button>
+          <div className="flex flex-wrap items-center justify-center gap-sp-2">
+            <Button asChild className="h-10">
+              <Link href="/holdings">Add first holding</Link>
+            </Button>
+            <PlaidConnectDialog isProPlus={isProPlus} connections={brokerConnections ?? []} />
+          </div>
         </div>
       </div>
     );
