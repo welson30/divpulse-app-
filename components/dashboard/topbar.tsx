@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
-import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
 import { HeaderSearch } from "@/components/dashboard/header-search";
+import { NotificationBell, type RecentNotification } from "@/components/dashboard/notification-bell";
 import { IconSettings, IconLogOut } from "@/components/marketing/icons";
 import {
   DropdownMenu,
@@ -17,6 +17,8 @@ type TopbarProps = {
   email: string;
   displayName: string | null;
   planLabel: string;
+  notifications: RecentNotification[];
+  unreadNotificationCount: number;
 };
 
 /** "Shuja Uddin" -> "SU"; falls back to the first two letters of the email's local part when no display name is set. */
@@ -30,7 +32,7 @@ function getInitials(email: string, displayName: string | null) {
   return email.slice(0, 2).toUpperCase();
 }
 
-export function Topbar({ email, displayName, planLabel }: TopbarProps) {
+export function Topbar({ email, displayName, planLabel, notifications, unreadNotificationCount }: TopbarProps) {
   const initials = getInitials(email, displayName);
   const name = displayName?.trim() || email;
 
@@ -52,12 +54,7 @@ export function Topbar({ email, displayName, planLabel }: TopbarProps) {
           normally inside the icon cluster below. */}
       <div className="ml-auto flex items-center gap-1 lg:gap-3">
         <HeaderSearch />
-        <div className="lg:hidden">
-          <EnableNotificationsButton compact />
-        </div>
-        <div className="hidden lg:flex">
-          <EnableNotificationsButton />
-        </div>
+        <NotificationBell notifications={notifications} initialUnreadCount={unreadNotificationCount} />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

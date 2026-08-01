@@ -29,3 +29,35 @@ export async function savePushToken(fcmToken: string, userAgent: string): Promis
 
   return null;
 }
+
+/**
+ * Advances the bell dropdown's read cursor to now. Deliberately not
+ * followed by revalidatePath: the caller (NotificationBell) clears its own
+ * unread badge optimistically the instant the dropdown opens, and this
+ * runs from every page in (dashboard) via the shared layout — there's no
+ * single route to revalidate, and forcing one would refresh whatever page
+ * the user happens to be looking at just because they opened a dropdown.
+ * The persisted timestamp only needs to be correct by the next full
+ * navigation, which re-runs the layout's queries anyway.
+ */
+export async function markNotificationsSeen(): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Your session expired. Please sign in again." };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ notifications_last_seen_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return null;
+}

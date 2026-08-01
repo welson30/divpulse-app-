@@ -85,6 +85,31 @@ export async function updateCalendarPrivacyMode(_prevState: SettingsActionState,
   return { success: true };
 }
 
+export async function updateNotificationStyle(_prevState: SettingsActionState, formData: FormData): Promise<SettingsActionState> {
+  const notificationStyle = String(formData.get("notificationStyle") ?? "");
+  if (!["compact", "descriptive", "premium"].includes(notificationStyle)) {
+    return { error: "Invalid notification style." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Your session expired. Please sign in again." };
+  }
+
+  const { error } = await supabase.from("profiles").update({ notification_style: notificationStyle }).eq("id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/settings");
+  return { success: true };
+}
+
 export async function removePushDevice(subscriptionId: string) {
   const supabase = await createClient();
   const {

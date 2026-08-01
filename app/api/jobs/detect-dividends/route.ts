@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import { sendPush } from "@/lib/firebase/admin";
 import { sendTelegramMessage } from "@/lib/telegram/send";
-import { tickerAmountTemplate, balanceUpdateTemplate, brokerConfirmedTemplate } from "@/lib/notifications/templates";
+import { buildNotificationContent, type NotificationStyle } from "@/lib/notifications/templates";
 import { findBrokerConfirmedDeposit } from "@/lib/notifications/plaid-confirmation";
 
 export const maxDuration = 60;
@@ -67,17 +67,18 @@ const DETECTION_WINDOW_DAYS = 3;
  * Telegram reports as blocked/deleted clears chat_id so the next run
  * doesn't keep failing against it. Email is not wired in yet.
  *
- * Three notification templates (PRD §4 / ARCHITECTURE.md §3, see
- * lib/notifications/templates.ts):
- *   1. ticker + amount — the default, sent on every event unless #3 fires
- *      instead.
- *   2. total account balance update — a lifetime-dividend-income summary,
- *      always sent as a second message alongside #1 or #3, never alone.
- *   3. broker-confirmed payout — replaces #1 (not additive) when the user
- *      has an active Plaid connection AND lib/notifications/
- *      plaid-confirmation.ts finds a matching real transaction in their
- *      linked account within the last few days. Falls back to #1 if no
- *      Plaid connection exists or no matching transaction is found yet.
+ * Notification style (PRD §4 / ARCHITECTURE.md §3, see
+ * lib/notifications/templates.ts) is a per-user preference
+ * (profiles.notification_style, set from Settings > Notifications) rather
+ * than something this job decides — exactly one push and one Telegram
+ * message go out per detected payment, built by buildNotificationContent:
+ *   - compact — ticker + amount only.
+ *   - descriptive — confirms the money has landed, no broker named.
+ *   - premium — names the broker and shows a confirmed checkmark, but only
+ *     when the user has an active Plaid connection AND lib/notifications/
+ *     plaid-confirmation.ts finds a matching real transaction in their
+ *     linked account within the last few days. Degrades to descriptive
+ *     (never a fabricated confirmation) when no match exists yet.
  *
  * Replaces the earlier OneSignal integration, which could not complete a
  * TLS handshake to api.onesignal.com from Pakistani networks — reproduced
@@ -192,22 +193,37 @@ export async function GET(request: NextRequest) {
             paymentsInserted += 1;
           }
 
-          // Template 3 (broker-confirmed) replaces template 1 (ticker +
-          // amount) when a real matching transaction is found in a
-          // linked Plaid account; otherwise template 1 is the fallback.
-          // This check only ever returns true for Pro+ users with an
-          // active connection — see lib/notifications/plaid-confirmation.ts.
-          const brokerConfirmed = await findBrokerConfirmedDeposit(holding.user_id, ticker, amount);
-          const primaryTemplate = brokerConfirmed
-            ? brokerConfirmedTemplate(ticker, amount, holding.broker_name)
-            : tickerAmountTemplate(ticker, amount, holding.broker_name);
+          // Deliberately two independent queries, not one combined select.
+          // PostgREST fails the *entire* row when any requested column
+          // doesn't exist yet (verified live: `column
+          // profiles.notification_style does not exist` — a hard error,
+          // not a null field) — until migration 20260801070000 is applied,
+          // a combined query would return profile: null and silently take
+          // isPro down with it, stopping Telegram alerts for every Pro
+          // user. Splitting them means a not-yet-applied migration can
+          // only ever cost the new feature its default, never break the
+          // already-shipped one next to it.
+          const { data: planRow } = await supabase.from("profiles").select("plan").eq("id", holding.user_id).single();
+          const isPro = planRow?.plan === "pro" || planRow?.plan === "pro_plus";
 
-          // Template 2 (lifetime balance update) is always a second,
-          // additional message — never sent standalone. Computed from
-          // dividend_payments including the row just inserted above.
-          const { data: allPayments } = await supabase.from("dividend_payments").select("amount").eq("user_id", holding.user_id);
-          const lifetimeTotal = (allPayments ?? []).reduce((sum, p) => sum + Number(p.amount), 0);
-          const balanceTemplate = balanceUpdateTemplate(lifetimeTotal);
+          const { data: styleRow } = await supabase
+            .from("profiles")
+            .select("notification_style")
+            .eq("id", holding.user_id)
+            .single();
+          const notificationStyle = (styleRow?.notification_style as NotificationStyle) ?? "compact";
+
+          // Only ever true for Pro+ users with an active Plaid connection —
+          // see lib/notifications/plaid-confirmation.ts. buildNotificationContent
+          // degrades "premium" to the descriptive copy rather than fabricate
+          // a confirmation when this is false.
+          const brokerConfirmed = await findBrokerConfirmedDeposit(holding.user_id, ticker, amount);
+          const content = buildNotificationContent(notificationStyle, {
+            ticker,
+            amount,
+            brokerName: holding.broker_name,
+            brokerConfirmed,
+          });
 
           const { data: subscriptions } = await supabase
             .from("push_subscriptions")
@@ -218,11 +234,10 @@ export async function GET(request: NextRequest) {
           const channelsNotified: string[] = [];
 
           for (const subscription of subscriptions ?? []) {
-            const primaryResult = await sendPush(subscription.fcm_token, primaryTemplate.push.title, primaryTemplate.push.body);
-            if (primaryResult.sent) {
+            const result = await sendPush(subscription.fcm_token, content.push.title, content.push.body);
+            if (result.sent) {
               anySent = true;
-              await sendPush(subscription.fcm_token, balanceTemplate.push.title, balanceTemplate.push.body);
-            } else if (primaryResult.staleToken) {
+            } else if (result.staleToken) {
               await supabase.from("push_subscriptions").delete().eq("id", subscription.id);
             }
           }
@@ -234,9 +249,6 @@ export async function GET(request: NextRequest) {
           // (ARCHITECTURE.md §10: never trust a client-visible flag alone
           // for anything that gates a paid feature). Matching gate is in
           // app/(dashboard)/settings/page.tsx (isPro).
-          const { data: profile } = await supabase.from("profiles").select("plan").eq("id", holding.user_id).single();
-          const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
-
           if (isPro) {
             const { data: telegramLink } = await supabase
               .from("telegram_links")
@@ -246,11 +258,10 @@ export async function GET(request: NextRequest) {
               .maybeSingle();
 
             if (telegramLink?.chat_id) {
-              const primaryResult = await sendTelegramMessage(telegramLink.chat_id, primaryTemplate.telegram);
-              if (primaryResult.sent) {
+              const result = await sendTelegramMessage(telegramLink.chat_id, content.telegram);
+              if (result.sent) {
                 channelsNotified.push("telegram");
-                await sendTelegramMessage(telegramLink.chat_id, balanceTemplate.telegram);
-              } else if (primaryResult.chatInvalid) {
+              } else if (result.chatInvalid) {
                 await supabase.from("telegram_links").update({ chat_id: null, linked_at: null }).eq("user_id", holding.user_id);
               }
             }
