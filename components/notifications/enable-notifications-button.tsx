@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { IconAlerts, IconCheck } from "@/components/marketing/icons";
+import { IconAlerts, IconBell, IconCheck } from "@/components/marketing/icons";
 import { requestPushToken, getExistingPushToken } from "@/lib/firebase/client";
 import { savePushToken } from "@/app/(dashboard)/notifications/actions";
 
 type ButtonState = "checking" | "idle" | "enabling" | "subscribed" | "denied" | "unsupported";
 
-export function EnableNotificationsButton() {
+export function EnableNotificationsButton({ compact = false }: { compact?: boolean }) {
   const [state, setState] = useState<ButtonState>("checking");
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
 
@@ -59,6 +59,77 @@ export function EnableNotificationsButton() {
     return null;
   }
 
+  const handleEnable = async () => {
+    setState("enabling");
+    try {
+      // requestPushToken() only resolves with a non-null value once
+      // FCM has actually issued a registration token — unlike our
+      // earlier OneSignal integration, there's no separate
+      // "permission granted but server-side subscription still
+      // pending/failed" state to reconcile: a real token IS the
+      // confirmation.
+      const token = await requestPushToken();
+      if (!token) {
+        setErrorDialogOpen(true);
+        setState("idle");
+        return;
+      }
+
+      const result = await savePushToken(token, navigator.userAgent);
+      if (result?.error) {
+        setErrorDialogOpen(true);
+        setState("idle");
+        return;
+      }
+
+      setState("subscribed");
+    } catch (err) {
+      setErrorDialogOpen(true);
+      console.error("[EnableNotifications] failed to enable notifications", err);
+      setState("idle");
+    }
+  };
+
+  const errorDialog = (
+    <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Couldn&rsquo;t enable notifications</DialogTitle>
+          <DialogDescription>
+            Something blocked the request — an ad blocker or privacy extension can interfere with push
+            notifications. Try allowing this site, then try again.
+          </DialogDescription>
+        </DialogHeader>
+        <Button type="button" className="h-10 w-full" onClick={() => setErrorDialogOpen(false)}>
+          Got it
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+
+  if (compact) {
+    return (
+      <>
+        <button
+          type="button"
+          disabled={state === "enabling"}
+          onClick={state === "subscribed" ? undefined : handleEnable}
+          title={state === "subscribed" ? "Notifications on" : state === "enabling" ? "Enabling…" : "Enable notifications"}
+          className="relative flex size-8.5 shrink-0 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-surface-2 hover:text-text-primary"
+        >
+          <IconBell className="size-4.5" />
+          {state === "subscribed" ? (
+            <span aria-hidden className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-green-500 ring-2 ring-sidebar" />
+          ) : null}
+          <span className="sr-only">
+            {state === "subscribed" ? "Notifications on" : state === "enabling" ? "Enabling notifications" : "Enable notifications"}
+          </span>
+        </button>
+        {errorDialog}
+      </>
+    );
+  }
+
   if (state === "subscribed") {
     return (
       <span className="inline-flex items-center gap-1.5 font-mono text-xs text-green-500">
@@ -75,55 +146,13 @@ export function EnableNotificationsButton() {
         variant="secondary"
         disabled={state === "enabling"}
         className="h-9 gap-1.5 text-[13px]"
-        onClick={async () => {
-          setState("enabling");
-          try {
-            // requestPushToken() only resolves with a non-null value once
-            // FCM has actually issued a registration token — unlike our
-            // earlier OneSignal integration, there's no separate
-            // "permission granted but server-side subscription still
-            // pending/failed" state to reconcile: a real token IS the
-            // confirmation.
-            const token = await requestPushToken();
-            if (!token) {
-              setErrorDialogOpen(true);
-              setState("idle");
-              return;
-            }
-
-            const result = await savePushToken(token, navigator.userAgent);
-            if (result?.error) {
-              setErrorDialogOpen(true);
-              setState("idle");
-              return;
-            }
-
-            setState("subscribed");
-          } catch (err) {
-            setErrorDialogOpen(true);
-            console.error("[EnableNotifications] failed to enable notifications", err);
-            setState("idle");
-          }
-        }}
+        onClick={handleEnable}
       >
         <IconAlerts className="size-4" />
         {state === "enabling" ? "Enabling…" : "Enable notifications"}
       </Button>
 
-      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Couldn&rsquo;t enable notifications</DialogTitle>
-            <DialogDescription>
-              Something blocked the request — an ad blocker or privacy extension can interfere with push
-              notifications. Try allowing this site, then try again.
-            </DialogDescription>
-          </DialogHeader>
-          <Button type="button" className="h-10 w-full" onClick={() => setErrorDialogOpen(false)}>
-            Got it
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {errorDialog}
     </>
   );
 }

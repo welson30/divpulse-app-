@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { signOut } from "@/app/(auth)/actions";
+import { SidebarAccountFooter } from "@/components/dashboard/sidebar-account-footer";
 import {
   IconHome,
   IconHoldings,
@@ -14,10 +14,9 @@ import {
   IconWatchlist,
   IconGoals,
   IconSettings,
-  IconLogOut,
 } from "@/components/marketing/icons";
 
-const NAV_SECTIONS = [
+export const NAV_SECTIONS = [
   {
     label: "Main",
     links: [
@@ -97,30 +96,7 @@ export function Sidebar({ planLabel, isFree, holdingCount, className }: SidebarP
       </div>
 
       <div className="shrink-0 border-t border-sidebar-border p-2">
-        <div className="mb-2 rounded-lg border border-green-500/20 bg-[rgba(34,197,94,0.06)] px-3 py-2.5">
-          <div className="font-mono text-[9px] font-medium text-text-secondary">Current plan</div>
-          <div className="text-xs font-bold text-green-500">
-            {planLabel}
-            {isFree ? ` · ${holdingCount}/5 holdings` : ""}
-          </div>
-        </div>
-        {isFree ? (
-          <Link
-            href="/settings"
-            className="mb-2 block w-full rounded-md bg-green-500 py-2.5 text-center font-sans text-xs font-bold text-canvas transition-colors hover:bg-green-500/90"
-          >
-            Upgrade to Pro
-          </Link>
-        ) : null}
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-1.5 rounded-md py-2 text-center font-sans text-xs font-medium text-text-secondary transition-colors hover:bg-surface-2 hover:text-red-500"
-          >
-            <IconLogOut className="size-3.5" />
-            Sign out
-          </button>
-        </form>
+        <SidebarAccountFooter planLabel={planLabel} isFree={isFree} holdingCount={holdingCount} />
       </div>
     </nav>
   );

@@ -45,96 +45,134 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
     );
   }
 
-  return (
-    <div className="w-full overflow-x-auto rounded-card border border-border-subtle bg-surface">
-      <table className="w-full min-w-[860px] border-collapse">
-        <thead>
-          <tr>
-            <th className={`${HEAD} text-left`}>Holding</th>
-            <th className={`${HEAD} text-left`}>Broker</th>
-            <th className={`${HEAD} text-right`}>Shares</th>
-            <th className={`${HEAD} text-right`}>Price</th>
-            <th className={`${HEAD} text-right`}>
-              <span className="inline-flex items-center gap-1">Today <InfoTip label={TIPS.todayChange} /></span>
-            </th>
-            <th className={`${HEAD} text-center`}>
-              <span className="inline-flex items-center gap-1">1M <InfoTip label={TIPS.sparkline1M} /></span>
-            </th>
-            <th className={`${HEAD} text-right`}>
-              <span className="inline-flex items-center gap-1">Value <InfoTip label={TIPS.marketValue} /></span>
-            </th>
-            <th className={`${HEAD} text-right`}>
-              <span className="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {holdings.map((holding, i) => {
-            // Delisted tickers, expired option contracts and non-traded
-            // instruments (collective trusts, some retirement portfolios)
-            // resolve to a name but carry no market data anywhere. Saying
-            // so beats printing four bare dashes, which reads as a
-            // failure rather than an accurate "there is nothing to show".
-            const hasMarketData = holding.price != null || (holding.sparkline?.length ?? 0) > 0;
+  // Delisted tickers, expired option contracts and non-traded instruments
+  // (collective trusts, some retirement portfolios) resolve to a name but
+  // carry no market data anywhere. Saying so beats printing bare dashes,
+  // which reads as a failure rather than an accurate "nothing to show".
+  const rows = holdings.map((h) => ({ ...h, hasMarketData: h.price != null || (h.sparkline?.length ?? 0) > 0 }));
 
-            return (
-            <tr
-              key={holding.id}
-              className={`transition-colors hover:bg-surface-hover ${i === holdings.length - 1 ? "" : "border-b border-border-subtle"}`}
-            >
-              <td className="px-sp-3 py-3">
-                <Link href={`/tickers/${holding.ticker}`} className="flex items-center gap-2.5">
-                  <TickerLogo ticker={holding.ticker} logoUrl={holding.logoUrl} />
-                  <div className="min-w-0">
-                    <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
-                    <div className="mt-0.5 max-w-[220px] truncate text-xs text-text-secondary">
-                      {holding.name ?? holding.company_name ?? "—"}
-                    </div>
-                    {hasMarketData ? null : (
-                      <div className="mt-1 inline-flex items-center rounded-[5px] bg-surface-hover px-1.5 py-0.5 text-[10px] text-text-secondary">
-                        No market data
-                      </div>
-                    )}
+  return (
+    <>
+      {/* Mobile: a single-column row list — a wide table forces horizontal
+          scroll on a 375-430px phone no matter how it's tuned, so below
+          `lg:` this is a different layout entirely, not a shrunk table. */}
+      <div className="flex flex-col gap-2 lg:hidden">
+        {rows.map((holding) => (
+          <div
+            key={holding.id}
+            className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3"
+          >
+            <Link href={`/tickers/${holding.ticker}`} className="flex min-w-0 flex-1 items-center gap-2.5">
+              <TickerLogo ticker={holding.ticker} logoUrl={holding.logoUrl} size="sm" />
+              <div className="min-w-0 flex-1">
+                <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
+                {holding.hasMarketData ? (
+                  <div className="mt-0.5 truncate font-mono text-xs text-text-secondary">
+                    {holding.shares} sh · {formatMoney(holding.price)}
                   </div>
-                </Link>
-              </td>
-              <td className="px-sp-3 py-3 text-[13px] text-text-secondary">{holding.broker_name ?? "—"}</td>
-              <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
-                {holding.shares}
-              </td>
-              <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
-                {formatMoney(holding.price)}
-              </td>
-              <td className="px-sp-3 py-3 text-right text-sm">
-                <ChangeBadge changePercent={holding.changePercent ?? null} />
-              </td>
-              <td className="px-sp-3 py-3">
-                <div className="flex justify-center">
-                  <Sparkline
-                    points={holding.sparkline ?? []}
-                    id={holding.id}
-                    changePercent={holding.changePercent ?? null}
-                  />
-                </div>
-              </td>
-              <td className="px-sp-3 py-3 text-right font-mono text-sm font-semibold tabular-nums text-text-primary">
+                ) : (
+                  <div className="mt-1 inline-flex items-center rounded-[5px] bg-surface-hover px-1.5 py-0.5 text-[10px] text-text-secondary">
+                    No market data
+                  </div>
+                )}
+              </div>
+            </Link>
+            <div className="flex shrink-0 flex-col items-end gap-0.5">
+              <span className="font-mono text-sm font-semibold tabular-nums text-text-primary">
                 {formatMoney(holding.marketValue)}
-              </td>
-              <td className="px-sp-3 py-3 text-right">
-                <button
-                  type="button"
-                  onClick={() => setPendingRemoval(holding)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1.5 font-sans text-xs font-medium text-text-secondary transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-500"
-                >
-                  <Trash2 className="size-3.5" />
-                  Remove
-                </button>
-              </td>
+              </span>
+              <ChangeBadge changePercent={holding.changePercent ?? null} className="text-xs" />
+            </div>
+            <button
+              type="button"
+              onClick={() => setPendingRemoval(holding)}
+              aria-label="Remove"
+              className="flex shrink-0 items-center justify-center rounded-full p-1.5 text-text-secondary transition-colors hover:bg-red-500/10 hover:text-red-500"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: full table, every column. */}
+      <div className="hidden w-full overflow-x-auto rounded-card border border-border-subtle bg-surface lg:block">
+        <table className="w-full min-w-215 border-collapse">
+          <thead>
+            <tr>
+              <th className={`${HEAD} text-left`}>Holding</th>
+              <th className={`${HEAD} text-left`}>Broker</th>
+              <th className={`${HEAD} text-right`}>Shares</th>
+              <th className={`${HEAD} text-right`}>Price</th>
+              <th className={`${HEAD} text-right`}>
+                <span className="inline-flex items-center gap-1">Today <InfoTip label={TIPS.todayChange} /></span>
+              </th>
+              <th className={`${HEAD} text-center`}>
+                <span className="inline-flex items-center gap-1">1M <InfoTip label={TIPS.sparkline1M} /></span>
+              </th>
+              <th className={`${HEAD} text-right`}>
+                <span className="inline-flex items-center gap-1">Value <InfoTip label={TIPS.marketValue} /></span>
+              </th>
+              <th className={`${HEAD} text-right`}>
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
-            );
-          })}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((holding, i) => (
+              <tr
+                key={holding.id}
+                className={`transition-colors hover:bg-surface-hover ${i === rows.length - 1 ? "" : "border-b border-border-subtle"}`}
+              >
+                <td className="px-sp-3 py-3">
+                  <Link href={`/tickers/${holding.ticker}`} className="flex items-center gap-2.5">
+                    <TickerLogo ticker={holding.ticker} logoUrl={holding.logoUrl} />
+                    <div className="min-w-0">
+                      <div className="font-mono text-sm font-semibold text-text-primary">{holding.ticker}</div>
+                      <div className="mt-0.5 max-w-55 truncate text-xs text-text-secondary">
+                        {holding.name ?? holding.company_name ?? "—"}
+                      </div>
+                      {holding.hasMarketData ? null : (
+                        <div className="mt-1 inline-flex items-center rounded-[5px] bg-surface-hover px-1.5 py-0.5 text-[10px] text-text-secondary">
+                          No market data
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </td>
+                <td className="px-sp-3 py-3 text-[13px] text-text-secondary">{holding.broker_name ?? "—"}</td>
+                <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
+                  {holding.shares}
+                </td>
+                <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
+                  {formatMoney(holding.price)}
+                </td>
+                <td className="px-sp-3 py-3 text-right text-sm">
+                  <ChangeBadge changePercent={holding.changePercent ?? null} />
+                </td>
+                <td className="px-sp-3 py-3">
+                  <div className="flex justify-center">
+                    <Sparkline points={holding.sparkline ?? []} id={holding.id} changePercent={holding.changePercent ?? null} />
+                  </div>
+                </td>
+                <td className="px-sp-3 py-3 text-right font-mono text-sm font-semibold tabular-nums text-text-primary">
+                  {formatMoney(holding.marketValue)}
+                </td>
+                <td className="px-sp-3 py-3 text-right">
+                  <button
+                    type="button"
+                    onClick={() => setPendingRemoval(holding)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1.5 font-sans text-xs font-medium text-text-secondary transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-500"
+                  >
+                    <Trash2 className="size-3.5" />
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <RemoveHoldingDialog
         holdingId={pendingRemoval?.id ?? null}
@@ -143,6 +181,6 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
           if (!open) setPendingRemoval(null);
         }}
       />
-    </div>
+    </>
   );
 }

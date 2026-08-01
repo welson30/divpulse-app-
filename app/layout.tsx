@@ -56,6 +56,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#14532D",
   colorScheme: "dark",
+  // Lets env(safe-area-inset-*) resolve to the real iOS home-indicator
+  // height (instead of 0) once installed as the standalone PWA
+  // app/manifest.ts declares — needed for the fixed mobile bottom nav.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

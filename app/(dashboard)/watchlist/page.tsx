@@ -38,7 +38,7 @@ export default async function WatchlistPage() {
   });
 
   return (
-    <div className="flex flex-col gap-sp-3">
+    <div className="min-w-0 flex flex-col gap-sp-3">
       <div className="flex flex-wrap items-center justify-between gap-sp-2">
         <div>
           <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>

@@ -219,3 +219,13 @@ export function IconCheck({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconMore({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" className={className} aria-hidden>
+      <circle cx="5" cy="12" r="1.4" />
+      <circle cx="12" cy="12" r="1.4" />
+      <circle cx="19" cy="12" r="1.4" />
+    </svg>
+  );
+}

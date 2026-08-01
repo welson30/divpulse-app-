@@ -16,31 +16,28 @@ import {
 type TopbarProps = {
   email: string;
   planLabel: string;
-  onMenuClick?: () => void;
 };
 
-export function Topbar({ email, planLabel, onMenuClick }: TopbarProps) {
+export function Topbar({ email, planLabel }: TopbarProps) {
   const initials = email.slice(0, 2).toUpperCase();
 
   return (
     <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border-subtle bg-sidebar px-4 lg:px-6">
-      {onMenuClick ? (
-        <button
-          type="button"
-          onClick={onMenuClick}
-          className="flex size-8 shrink-0 items-center justify-center rounded-md text-text-secondary hover:bg-surface-2 lg:hidden"
-          aria-label="Open menu"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" className="size-5">
-            <line x1="4" y1="7" x2="20" y2="7" />
-            <line x1="4" y1="12" x2="20" y2="12" />
-            <line x1="4" y1="17" x2="20" y2="17" />
-          </svg>
-        </button>
-      ) : null}
+      <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
+        <img src="/logo.svg" alt="" className="size-7 rounded-md" width={28} height={28} />
+        <span className="font-display text-[15px] font-extrabold tracking-[-0.01em] text-sidebar-foreground">
+          Paid<span className="text-green-500">Prime</span>
+        </span>
+      </Link>
 
       <div className="ml-auto flex items-center gap-2">
-        <EnableNotificationsButton />
+        <div className="lg:hidden">
+          <EnableNotificationsButton compact />
+        </div>
+        <div className="hidden lg:flex">
+          <EnableNotificationsButton />
+        </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

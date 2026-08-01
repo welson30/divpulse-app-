@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-form";
 import { PushDevicesList, type PushDevice } from "@/components/dashboard/push-devices-list";
+import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
 import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
 import { BillingCard } from "@/components/dashboard/billing-card";
 import { PlaidConnectCard } from "@/components/dashboard/plaid-connect-card";
@@ -88,7 +89,10 @@ export default async function SettingsPage() {
         <TelegramConnectCard isPro={isPro} isConnected={!!telegramLink?.chat_id} />
       </SettingsSection>
 
-      <SettingsSection title="Notification devices" description="Devices registered to receive push alerts when a dividend is detected.">
+      <SettingsSection title="Push notifications" description="Get a push alert on this device the moment a dividend is detected.">
+        <div className="mb-sp-3">
+          <EnableNotificationsButton />
+        </div>
         <PushDevicesList devices={(devices ?? []) as PushDevice[]} />
       </SettingsSection>
     </div>

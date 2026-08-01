@@ -37,7 +37,7 @@ export default async function CollectionsPage() {
   const enriched = await enrichTickers(allTickers);
 
   return (
-    <div className="flex flex-col gap-sp-4">
+    <div className="min-w-0 flex flex-col gap-sp-4">
       <div>
         <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Discover</span>
         <h1 className="text-h1 font-display font-semibold text-text-primary">Collections</h1>
@@ -74,7 +74,7 @@ export default async function CollectionsPage() {
           });
 
         return (
-          <div key={collection.id} className="flex flex-col gap-sp-2">
+          <div key={collection.id} className="min-w-0 flex flex-col gap-sp-2">
             <div>
               <h2 className="text-h2 font-display font-medium text-text-primary">{collection.name}</h2>
               {collection.description ? (

@@ -28,7 +28,7 @@ export function PushDevicesList({ devices }: { devices: PushDevice[] }) {
   if (devices.length === 0) {
     return (
       <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-3 text-sm text-text-secondary">
-        No devices registered yet. Use &ldquo;Enable notifications&rdquo; from the dashboard to add this one.
+        No devices registered yet. Use &ldquo;Enable notifications&rdquo; above to add this one.
       </div>
     );
   }
