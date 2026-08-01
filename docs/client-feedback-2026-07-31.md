@@ -191,6 +191,30 @@ Concrete changes made from the spec, on existing tokens: mobile section order co
 
 **Phase 2, deferred with the client's sign-off, not silently cut:** candlestick/volume-bar chart modes, custom OHLC crosshair tooltip, sector/peer comparison, analyst ratings, news, earnings calendar (no data source today for any of these), cost-basis/lifetime P/L (same "`holdings` stores no purchase price" schema gap flagged in §4b), price alerts, shareable `?range=` deep links.
 
+## 11. Dashboard redesign — DONE 2026-08-01
+
+Not from the original list — a direct ask to redesign the main dashboard to match a supplied mockup. Icon chips added to stat cards; layout restructured to a hero stat (Portfolio value, full width) plus a 3-across compact row (Annual income / Today's income / Income per day); a decorative background wave added behind the greeting header (ambient design texture only, explicitly not real data, per the client's own call — ruled out using a real portfolio sparkline there); chevron affordances added to every clickable row; icons added to empty states (Today's payments / Next payment). Root-cause fix along the way: the two-column `lg:grid-cols-2` split near the bottom of the page had no explicit `grid-cols-1` at the base breakpoint, so nothing clamped its children to viewport width on mobile — same bug class as §15 below, just at the CSS grid-track level instead of a wide table.
+
+## 12. Dividends page redesign — DONE 2026-08-01
+
+Same pass, applied to `/dividends` per a matching mockup. Added a Goals cross-link promo card, a real month-over-month growth-insight banner (computed from actual monthly totals, not fabricated), restyled Top Earners as a proper table (Yield/Monthly columns), unified the previously-separate "Confirmed payments" and "Dividend history" tables into one Paid/Pending table, and changed the stat row to always show 3 compact cards (matching the dashboard's pattern) instead of reflowing. Same root-cause grid-track overflow fix as #11 applied here too (`lg:grid-cols-[1.6fr_1fr]` was missing its base `grid-cols-1`).
+
+## 13. Mobile header + bottom navbar — DONE 2026-08-01
+
+Replaced the hamburger-menu-and-off-canvas-drawer mobile nav with the pattern from the client's mockup: a slim top header (brand mark, a compact icon-only notifications bell reusing the real push-permission control, avatar) and a persistent 5-tab bottom bar (For You / Holdings / Dividends / Calendar / More). "More" opens a new bottom sheet holding Collections, Diversification, Watchlist, Goals, Settings, plan status and sign-out — reads from the same nav data the desktop sidebar uses so the two can't drift apart. Desktop sidebar/topbar are unchanged. Added `viewportFit: "cover"` to the root viewport config so the bottom bar clears the iOS home indicator correctly once installed as the PWA the manifest already declares.
+
+## 14. Push notifications toggle added to Settings — DONE 2026-08-01
+
+Settings' "Notification devices" section (now "Push notifications") got the same real Enable-notifications control already in the topbar, placed above the device list — so notifications can be turned on from Settings directly, not just discovered via the header bell, with per-device removal (the "off" side) right below it.
+
+## 15. Holdings / Watchlist / Collections — mobile horizontal-scroll fix — DONE 2026-08-01
+
+Reported directly: "a lot of horizontal and vertical scroll" on Holdings on mobile. Root cause: all three still used the original wide `<table>` layout (720–860px minimum width) with only `overflow-x-auto` as mobile handling — on a 375–430px phone that meant swiping the table sideways just to see Price/Value, with only the ticker column visible on load. Fixed by giving each table a genuine mobile layout: a single-column row list (logo/ticker/name on the left, price and change stacked on the right, a compact icon action button) below `lg:`, with the full multi-column table preserved unchanged at `lg:` and up for desktop.
+
+## 16. Decorative background wave rolled out to every page header — DONE 2026-08-01
+
+The ambient background graph behind the Dashboard's greeting is now behind the header on every other main page — Holdings, Watchlist, Collections, Calendar, Goals, Diversification, Settings, and Dividends (there, scoped to just the title block, not the Goals promo card beside it, so it doesn't clash with that card's own tint). Deliberately **not** added to the per-ticker detail page — it already has a real price chart directly beneath its header, and the decorative wave would compete with actual data rather than read as ambient texture.
+
 ---
 
 ## Suggested sequencing
