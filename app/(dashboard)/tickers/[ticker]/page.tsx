@@ -128,7 +128,7 @@ export default async function TickerDetailPage({ params }: TickerDetailPageProps
   }));
 
   return (
-    <div className="flex flex-col gap-sp-4">
+    <div className="flex flex-col gap-sp-2 lg:gap-sp-4">
       <TickerDetailHeader quote={quote} logoUrl={logoUrl} isWatched={isWatched} />
 
       {/*
@@ -141,7 +141,7 @@ export default async function TickerDetailPage({ params }: TickerDetailPageProps
         sequence; explicit col/row-start recreates the same two-column
         split as before once there's room for it at `lg:`.
       */}
-      <div className="grid grid-cols-1 gap-sp-3 lg:grid-cols-[1.6fr_1fr]">
+      <div className="grid grid-cols-1 gap-sp-2 lg:grid-cols-[1.6fr_1fr] lg:gap-sp-3">
         <div className="order-1 lg:order-0 lg:col-start-1 lg:row-start-1">
           <TickerChartSection
             ticker={ticker}
@@ -153,7 +153,7 @@ export default async function TickerDetailPage({ params }: TickerDetailPageProps
         </div>
 
         {isHeld ? (
-          <div className="order-2 border-t border-border-subtle pt-sp-3 lg:order-0 lg:col-start-2 lg:row-start-1 lg:border-t-0 lg:pt-0">
+          <div className="order-2 border-t border-border-subtle pt-sp-2 lg:order-0 lg:col-start-2 lg:row-start-1 lg:border-t-0 lg:pt-0">
             <YourPositionCard
               holdings={positionHoldings}
               price={quote.price}

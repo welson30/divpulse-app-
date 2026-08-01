@@ -78,12 +78,12 @@ export function TickerChartSection({ ticker, initialRange, initialPoints, isUp, 
   }, []);
 
   return (
-    <div className="flex flex-col gap-sp-2 rounded-card border border-border-subtle bg-surface p-sp-3 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.35)]">
+    <div className="flex flex-col gap-sp-2 lg:rounded-card lg:border lg:border-border-subtle lg:bg-surface lg:p-sp-3 lg:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.35)]">
       <div className="flex items-center justify-between gap-sp-2">
         <RangeSwitcher active={range} onChange={handleRangeChange} disabled={isPending} />
       </div>
       <div
-        className={`h-[42dvh] max-h-[380px] min-h-[220px] sm:h-[320px] lg:h-[400px] ${isPending ? "opacity-60" : ""} transition-opacity`}
+        className={`h-[36dvh] max-h-[380px] min-h-[180px] sm:h-[42dvh] sm:min-h-[220px] lg:h-[400px] ${isPending ? "opacity-60" : ""} transition-opacity`}
       >
         {points.length >= 2 ? (
           <PriceChart points={points} isUp={isUp} />

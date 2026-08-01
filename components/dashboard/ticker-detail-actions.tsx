@@ -23,13 +23,13 @@ export function TickerDetailActions({ ticker, companyName, initiallyWatched }: T
   const [watched, setWatched] = useState(initiallyWatched);
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+    <div className="flex items-center gap-1.5">
       {watched ? (
         <Link
           href="/watchlist"
-          className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-3.5 font-sans text-sm font-semibold text-green-500 transition-all duration-150 active:scale-[0.97] hover:bg-green-500/20"
+          className="inline-flex h-8 items-center justify-center gap-1 rounded-full border border-green-500/30 bg-green-500/10 px-2.5 font-sans text-xs font-semibold text-green-500 transition-all active:scale-[0.97] hover:bg-green-500/20 lg:h-11 lg:gap-1.5 lg:px-3.5 lg:text-sm"
         >
-          <Star className="size-4" fill="currentColor" />
+          <Star className="size-3.5 lg:size-4" fill="currentColor" />
           Watching
         </Link>
       ) : (
@@ -42,9 +42,9 @@ export function TickerDetailActions({ ticker, companyName, initiallyWatched }: T
               setWatched(true);
             })
           }
-          className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border border-border-interactive px-3.5 font-sans text-sm font-semibold text-text-primary transition-all duration-150 active:scale-[0.97] hover:border-green-500 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40"
+          className="inline-flex h-8 items-center justify-center gap-1 rounded-full border border-border-interactive px-2.5 font-sans text-xs font-semibold text-text-primary transition-all active:scale-[0.97] hover:border-green-500 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40 lg:h-11 lg:gap-1.5 lg:px-3.5 lg:text-sm"
         >
-          {isPending ? <Loader2 className="size-4 animate-spin" /> : <Star className="size-4" />}
+          {isPending ? <Loader2 className="size-3.5 animate-spin lg:size-4" /> : <Star className="size-3.5 lg:size-4" />}
           Watchlist
         </button>
       )}
@@ -53,7 +53,7 @@ export function TickerDetailActions({ ticker, companyName, initiallyWatched }: T
         defaultTicker={ticker}
         defaultCompanyName={companyName ?? ""}
         trigger={
-          <Button className="h-11 rounded-full text-sm transition-transform duration-150 active:scale-[0.97]">
+          <Button className="h-8 rounded-full px-2.5 text-xs transition-transform active:scale-[0.97] lg:h-11 lg:px-4 lg:text-sm">
             Add to holdings
           </Button>
         }

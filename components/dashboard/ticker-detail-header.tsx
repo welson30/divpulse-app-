@@ -73,7 +73,7 @@ export function TickerDetailHeader({
   const extendedIsUp = (extendedChangePercent ?? extendedChange ?? 0) >= 0;
 
   return (
-    <div className="flex flex-col gap-sp-3 rounded-card border border-border-subtle bg-surface p-sp-4 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.35)]">
+    <div className="flex flex-col gap-sp-2 px-0 py-0 lg:gap-sp-3 lg:rounded-card lg:border lg:border-border-subtle lg:bg-surface lg:p-sp-4 lg:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.35)]">
       <div className="flex flex-wrap items-start justify-between gap-sp-3">
         <div className="flex min-w-0 items-center gap-sp-2">
           <TickerLogo ticker={quote.ticker} logoUrl={logoUrl} size="lg" />

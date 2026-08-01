@@ -45,7 +45,7 @@ export function YourPositionCard({
   return (
     <div className="flex flex-col gap-sp-2">
       <h2 className="text-h2 font-display font-medium text-text-primary">Your position</h2>
-      <div className="grid grid-cols-1 gap-sp-2 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-sp-2">
         <StatCard label="Shares" value={totalShares.toLocaleString("en-US")} />
         <StatCard label="Market value" value={formatMoney(marketValue)} changeAmount={changeAmount} changePercent={changePercent} />
         <StatCard label="Trailing 12mo income" value={formatMoney(trailingIncome)} tip={TIPS.annualIncome} />

@@ -40,7 +40,7 @@ export function TickerQuickStats({ quote }: { quote: TickerQuote }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-x-sp-3 gap-y-sp-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-3 gap-x-sp-2 gap-y-sp-2 sm:gap-x-sp-3 lg:grid-cols-6">
       {cells.map((cell) => (
         <div key={cell.label} className="flex flex-col gap-0.5">
           <span className="inline-flex items-center gap-1 text-xs text-text-secondary">
