@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
+import { HeaderSearch } from "@/components/dashboard/header-search";
 import { IconSettings, IconLogOut } from "@/components/marketing/icons";
 import {
   DropdownMenu,
@@ -10,19 +11,31 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 
 type TopbarProps = {
   email: string;
+  displayName: string | null;
   planLabel: string;
 };
 
-export function Topbar({ email, planLabel }: TopbarProps) {
-  const initials = email.slice(0, 2).toUpperCase();
+/** "Shuja Uddin" -> "SU"; falls back to the first two letters of the email's local part when no display name is set. */
+function getInitials(email: string, displayName: string | null) {
+  if (displayName?.trim()) {
+    const parts = displayName.trim().split(/\s+/);
+    const first = parts[0]?.[0] ?? "";
+    const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
+    return `${first}${last}`.toUpperCase() || email.slice(0, 2).toUpperCase();
+  }
+  return email.slice(0, 2).toUpperCase();
+}
+
+export function Topbar({ email, displayName, planLabel }: TopbarProps) {
+  const initials = getInitials(email, displayName);
+  const name = displayName?.trim() || email;
 
   return (
-    <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border-subtle bg-sidebar px-4 lg:px-6">
+    <header className="relative flex h-13 shrink-0 items-center gap-3 border-b border-border-subtle bg-sidebar px-4 lg:px-6">
       <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
         {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
         <img src="/logo.svg" alt="" className="size-7 rounded-md" width={28} height={28} />
@@ -31,7 +44,14 @@ export function Topbar({ email, planLabel }: TopbarProps) {
         </span>
       </Link>
 
-      <div className="ml-auto flex items-center gap-2">
+      {/* One HeaderSearch instance, not two — it owns the palette's
+          open/query state and its single <Dialog>, so rendering it twice
+          (once per breakpoint) would double both. Its desktop trigger is
+          absolutely positioned to sit centered in the header regardless
+          of the logo/icon-cluster's widths; its mobile trigger flows
+          normally inside the icon cluster below. */}
+      <div className="ml-auto flex items-center gap-1 lg:gap-3">
+        <HeaderSearch />
         <div className="lg:hidden">
           <EnableNotificationsButton compact />
         </div>
@@ -43,31 +63,44 @@ export function Topbar({ email, planLabel }: TopbarProps) {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex size-[34px] shrink-0 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(34,197,94,0.12)] font-mono text-[11px] font-bold text-green-500 transition-colors hover:border-green-500/50"
-              title={email}
+              className="flex size-8.5 shrink-0 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(34,197,94,0.12)] font-mono text-[11px] font-bold text-green-500 transition-colors hover:border-green-500/50"
+              title={name}
             >
               {initials}
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{email}</DropdownMenuLabel>
-            <div className="px-2.5 pb-1.5 text-xs text-green-500">{planLabel} plan</div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/settings">
-                <IconSettings className="size-3.5" />
-                Settings
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <form action={signOut} className="w-full">
-              <DropdownMenuItem asChild variant="destructive">
-                <button type="submit" className="w-full">
-                  <IconLogOut className="size-3.5" />
-                  Sign out
-                </button>
+          <DropdownMenuContent align="end" className="min-w-60 p-0">
+            <div className="flex items-center gap-2.5 p-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(34,197,94,0.12)] font-mono text-xs font-bold text-green-500">
+                {initials}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold text-text-primary">{name}</div>
+                <div className="truncate text-xs text-text-secondary">{email}</div>
+              </div>
+            </div>
+            <div className="px-3 pb-2.5">
+              <span className="inline-flex items-center rounded-full bg-[rgba(34,197,94,0.12)] px-2 py-0.5 font-mono text-[10px] font-semibold tracking-[0.04em] text-green-500 uppercase">
+                {planLabel} plan
+              </span>
+            </div>
+            <DropdownMenuSeparator className="mx-0" />
+            <div className="p-1">
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <IconSettings className="size-3.5" />
+                  Settings
+                </Link>
               </DropdownMenuItem>
-            </form>
+              <form action={signOut}>
+                <DropdownMenuItem asChild variant="destructive">
+                  <button type="submit" className="w-full">
+                    <IconLogOut className="size-3.5" />
+                    Sign out
+                  </button>
+                </DropdownMenuItem>
+              </form>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

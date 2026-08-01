@@ -8,10 +8,12 @@ import { AddHoldingForm } from "@/components/dashboard/add-holding-form";
 export function AddHoldingDialog({
   defaultTicker,
   defaultCompanyName,
+  defaultBroker,
   trigger,
 }: {
   defaultTicker?: string;
   defaultCompanyName?: string;
+  defaultBroker?: string;
   /** Custom trigger button — defaults to the plain "Add holding" button used on /holdings. */
   trigger?: React.ReactNode;
 }) {
@@ -25,7 +27,12 @@ export function AddHoldingDialog({
           <DialogTitle>Add a holding</DialogTitle>
           <DialogDescription>Track a position manually — ticker, shares, and where it&apos;s held.</DialogDescription>
         </DialogHeader>
-        <AddHoldingForm onSuccess={() => setOpen(false)} defaultTicker={defaultTicker} defaultCompanyName={defaultCompanyName} />
+        <AddHoldingForm
+          onSuccess={() => setOpen(false)}
+          defaultTicker={defaultTicker}
+          defaultCompanyName={defaultCompanyName}
+          defaultBroker={defaultBroker}
+        />
       </DialogContent>
     </Dialog>
   );

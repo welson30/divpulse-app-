@@ -23,7 +23,7 @@ export default async function HoldingsPage() {
       .select("id, ticker, company_name, broker_name, shares, source")
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false }),
-    supabase.from("profiles").select("plan").eq("id", user!.id).single(),
+    supabase.from("profiles").select("plan, default_broker_name").eq("id", user!.id).single(),
   ]);
 
   const isFree = (profile?.plan ?? "free") === "free";
@@ -81,7 +81,7 @@ export default async function HoldingsPage() {
           </div>
           <div className="flex gap-sp-2">
             <ImportCsvDialog isProPlus={isProPlus} />
-            <AddHoldingDialog />
+            <AddHoldingDialog defaultBroker={profile?.default_broker_name ?? undefined} />
           </div>
         </div>
       </div>

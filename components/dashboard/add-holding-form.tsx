@@ -11,10 +11,12 @@ export function AddHoldingForm({
   onSuccess,
   defaultTicker,
   defaultCompanyName,
+  defaultBroker,
 }: {
   onSuccess?: () => void;
   defaultTicker?: string;
   defaultCompanyName?: string;
+  defaultBroker?: string;
 }) {
   const [ticker, setTicker] = useState(defaultTicker ?? "");
   const [companyName, setCompanyName] = useState(defaultCompanyName ?? "");
@@ -65,7 +67,13 @@ export function AddHoldingForm({
         <Label htmlFor="brokerName">
           Broker <span className="font-normal text-text-secondary">(optional)</span>
         </Label>
-        <Input id="brokerName" name="brokerName" placeholder="Fidelity" className="h-11 px-3.5 text-[15px]" />
+        <Input
+          id="brokerName"
+          name="brokerName"
+          defaultValue={defaultBroker}
+          placeholder="Fidelity"
+          className="h-11 px-3.5 text-[15px]"
+        />
       </div>
 
       {state?.error ? (

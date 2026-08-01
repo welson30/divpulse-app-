@@ -54,10 +54,12 @@ export function TickerDetailHeader({
   quote,
   logoUrl,
   isWatched,
+  defaultBroker,
 }: {
   quote: TickerQuote;
   logoUrl: string | null;
   isWatched: boolean;
+  defaultBroker?: string;
 }) {
   const isUp = (quote.changePercent ?? quote.change ?? 0) >= 0;
   const hasChange = quote.change != null || quote.changePercent != null;
@@ -88,7 +90,12 @@ export function TickerDetailHeader({
           </div>
         </div>
 
-        <TickerDetailActions ticker={quote.ticker} companyName={quote.name} initiallyWatched={isWatched} />
+        <TickerDetailActions
+          ticker={quote.ticker}
+          companyName={quote.name}
+          initiallyWatched={isWatched}
+          defaultBroker={defaultBroker}
+        />
       </div>
 
       <div className="flex flex-col gap-1">

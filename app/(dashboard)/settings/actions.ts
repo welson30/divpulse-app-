@@ -6,8 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 export type SettingsActionState = { error: string } | { success: true } | null;
 
 export async function updateProfile(_prevState: SettingsActionState, formData: FormData): Promise<SettingsActionState> {
-  const currency = String(formData.get("currency") ?? "USD");
-  const locale = String(formData.get("locale") ?? "en");
+  // Optional — blank clears it back to the email-derived fallback the UI
+  // already shows everywhere display_name is null.
+  const displayName = String(formData.get("displayName") ?? "").trim();
+  const defaultBroker = String(formData.get("defaultBroker") ?? "").trim();
 
   const supabase = await createClient();
   const {
@@ -18,13 +20,45 @@ export async function updateProfile(_prevState: SettingsActionState, formData: F
     return { error: "Your session expired. Please sign in again." };
   }
 
-  const { error } = await supabase.from("profiles").update({ currency, locale }).eq("id", user.id);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ display_name: displayName || null, default_broker_name: defaultBroker || null })
+    .eq("id", user.id);
 
   if (error) {
     return { error: error.message };
   }
 
   revalidatePath("/settings");
+  return { success: true };
+}
+
+export async function changePassword(_prevState: SettingsActionState, formData: FormData): Promise<SettingsActionState> {
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (password.length < 8) {
+    return { error: "Password must be at least 8 characters." };
+  }
+  if (password !== confirmPassword) {
+    return { error: "Passwords don't match." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Your session expired. Please sign in again." };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { error: error.message };
+  }
+
   return { success: true };
 }
 

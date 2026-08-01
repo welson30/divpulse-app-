@@ -24,7 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   const [{ data: profile }, { count: holdingCount }] = await Promise.all([
-    supabase.from("profiles").select("plan").eq("id", user.id).single(),
+    supabase.from("profiles").select("plan, display_name").eq("id", user.id).single(),
     supabase.from("holdings").select("id", { count: "exact", head: true }).eq("user_id", user.id),
   ]);
 
@@ -32,7 +32,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isFree = (profile?.plan ?? "free") === "free";
 
   return (
-    <AppShell email={user.email ?? ""} planLabel={planLabel} isFree={isFree} holdingCount={holdingCount ?? 0}>
+    <AppShell
+      email={user.email ?? ""}
+      displayName={profile?.display_name ?? null}
+      planLabel={planLabel}
+      isFree={isFree}
+      holdingCount={holdingCount ?? 0}
+    >
       {children}
     </AppShell>
   );

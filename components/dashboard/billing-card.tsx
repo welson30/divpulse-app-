@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ChevronRight, Crown, Sparkles } from "lucide-react";
 
 type BillingCardProps = {
   plan: "free" | "pro" | "pro_plus";
@@ -10,6 +11,7 @@ type BillingCardProps = {
 export function BillingCard({ plan, planLabel }: BillingCardProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const isFree = plan === "free";
 
   function startCheckout(targetPlan: "pro" | "pro_plus") {
     startTransition(async () => {
@@ -43,24 +45,36 @@ export function BillingCard({ plan, planLabel }: BillingCardProps) {
 
   return (
     <div className="flex flex-col gap-sp-2">
-      <div className="flex items-center justify-between rounded-card border border-border-subtle bg-surface-2 p-sp-3">
-        <div>
-          <div className="font-mono text-sm font-semibold text-text-primary">{planLabel}</div>
-          <div className="text-xs text-text-secondary">
-            {plan === "free" ? "Up to 5 tracked assets, manual entry only" : "Unlimited manual tracking"}
+      {isFree ? (
+        <div className="flex items-center gap-sp-3 rounded-card border border-border-subtle bg-surface-2 p-sp-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface text-text-secondary">
+            <Sparkles className="size-4" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="font-mono text-sm font-semibold text-text-primary">{planLabel}</div>
+            <div className="text-xs text-text-secondary">Up to 5 tracked assets, manual entry only</div>
           </div>
         </div>
-        {plan !== "free" ? (
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={openPortal}
-            className="shrink-0 rounded-control border border-border-interactive px-3 py-1.5 font-sans text-xs font-medium text-text-primary transition-colors hover:border-green-500 disabled:opacity-40"
-          >
+      ) : (
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={openPortal}
+          className="flex w-full items-center gap-sp-3 rounded-card border border-green-500/20 bg-surface-2 p-sp-3 text-left transition-colors hover:border-green-500/40 disabled:opacity-60"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[rgba(34,197,94,0.12)] text-green-500">
+            <Crown className="size-4" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="font-mono text-sm font-semibold text-text-primary">You&rsquo;re on {planLabel}</div>
+            <div className="text-xs text-text-secondary">Unlimited manual tracking</div>
+          </div>
+          <span className="shrink-0 font-sans text-xs font-medium text-text-secondary">
             {isPending ? "Opening…" : "Manage billing"}
-          </button>
-        ) : null}
-      </div>
+          </span>
+          <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
+        </button>
+      )}
 
       {error ? (
         <p role="alert" className="text-xs text-red-500">
@@ -68,7 +82,7 @@ export function BillingCard({ plan, planLabel }: BillingCardProps) {
         </p>
       ) : null}
 
-      {plan === "free" ? (
+      {isFree ? (
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"

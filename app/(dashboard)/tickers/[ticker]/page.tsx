@@ -40,7 +40,7 @@ export default async function TickerDetailPage({ params }: TickerDetailPageProps
 
   const provider = getDividendDataProvider();
 
-  const [quoteDetail, quotesMap, priceHistory, holdingsResult, watchlistResult, dividendResult] = await Promise.all([
+  const [quoteDetail, quotesMap, priceHistory, holdingsResult, watchlistResult, dividendResult, profileResult] = await Promise.all([
     provider.fetchQuote(ticker),
     provider.fetchQuotes([ticker]),
     provider.fetchPriceHistory(ticker, "6mo"),
@@ -52,6 +52,7 @@ export default async function TickerDetailPage({ params }: TickerDetailPageProps
       .eq("ticker", ticker)
       .order("pay_date", { ascending: false })
       .limit(500),
+    supabase.from("profiles").select("default_broker_name").eq("id", user!.id).single(),
   ]);
 
   const depthQuote = quotesMap.get(ticker) ?? null;
@@ -129,7 +130,12 @@ export default async function TickerDetailPage({ params }: TickerDetailPageProps
 
   return (
     <div className="flex flex-col gap-sp-2 lg:gap-sp-4">
-      <TickerDetailHeader quote={quote} logoUrl={logoUrl} isWatched={isWatched} />
+      <TickerDetailHeader
+        quote={quote}
+        logoUrl={logoUrl}
+        isWatched={isWatched}
+        defaultBroker={profileResult.data?.default_broker_name ?? undefined}
+      />
 
       {/*
         A single grid with explicit per-item placement, not two flex-col

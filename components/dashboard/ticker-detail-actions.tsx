@@ -11,6 +11,7 @@ type TickerDetailActionsProps = {
   ticker: string;
   companyName: string | null;
   initiallyWatched: boolean;
+  defaultBroker?: string;
 };
 
 /**
@@ -18,7 +19,7 @@ type TickerDetailActionsProps = {
  * row action, reused here rather than reinvented — plus "Add to holdings"
  * opening the same dialog used on /holdings, pre-filled with this ticker.
  */
-export function TickerDetailActions({ ticker, companyName, initiallyWatched }: TickerDetailActionsProps) {
+export function TickerDetailActions({ ticker, companyName, initiallyWatched, defaultBroker }: TickerDetailActionsProps) {
   const [isPending, startTransition] = useTransition();
   const [watched, setWatched] = useState(initiallyWatched);
 
@@ -52,6 +53,7 @@ export function TickerDetailActions({ ticker, companyName, initiallyWatched }: T
       <AddHoldingDialog
         defaultTicker={ticker}
         defaultCompanyName={companyName ?? ""}
+        defaultBroker={defaultBroker}
         trigger={
           <Button className="h-8 rounded-full px-2.5 text-xs transition-transform active:scale-[0.97] lg:h-11 lg:px-4 lg:text-sm">
             Add to holdings
