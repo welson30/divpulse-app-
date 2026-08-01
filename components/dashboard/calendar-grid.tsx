@@ -6,6 +6,8 @@ export type CalendarDayEvent = {
   label: string;
   /** "estimated" is a cadence-based guess (no real dividend_events row yet) — always rendered distinctly from a confirmed "pay". */
   kind: "pay" | "ex" | "estimated";
+  /** Actual dollars this event contributes to the day — undefined for ex-dates (no dollar value) and whenever the "ticker only" privacy mode hides amounts. */
+  amount?: number;
 };
 
 export type CalendarGridProps = {
@@ -63,6 +65,11 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
               ? "estimated"
               : null;
         const isInert = events.length === 0 && !isToday;
+        // Only worth a total once there's more than one dollar figure to
+        // add up — a single event already shows its own amount above.
+        const dollarEvents = events.filter((e) => e.amount != null);
+        const dayTotal = dollarEvents.reduce((sum, e) => sum + e.amount!, 0);
+        const totalHasEstimate = dollarEvents.some((e) => e.kind === "estimated");
 
         return (
           <div
@@ -113,6 +120,18 @@ export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGri
                 {event.label}
               </span>
             ))}
+            {dollarEvents.length > 1 ? (
+              <span
+                className={cn(
+                  "mt-auto truncate rounded-[3px] px-1 py-0.5 text-[9px] font-bold",
+                  totalHasEstimate
+                    ? "border border-dashed border-green-500/50 text-green-500"
+                    : "bg-green-500/20 text-green-500",
+                )}
+              >
+                {totalHasEstimate ? "~" : ""}${dayTotal.toFixed(2)} total
+              </span>
+            ) : null}
           </div>
         );
       })}

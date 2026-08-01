@@ -57,11 +57,18 @@ export default async function CalendarPage({
   } = await supabase.auth.getUser();
 
   const [{ data: holdings }, { data: profile }] = await Promise.all([
-    supabase.from("holdings").select("ticker").eq("user_id", user!.id),
+    supabase.from("holdings").select("ticker, shares").eq("user_id", user!.id),
     supabase.from("profiles").select("calendar_privacy_mode").eq("id", user!.id).single(),
   ]);
   const tickers = [...new Set((holdings ?? []).map((h) => h.ticker))];
   const calendarPrivacyMode = profile?.calendar_privacy_mode ?? "full";
+  // A ticker can be held more than once (different brokers) — sum shares
+  // across every holding row for that ticker, same pattern dividends/page.tsx
+  // already uses for its own income math.
+  const sharesByTicker = new Map<string, number>();
+  for (const h of holdings ?? []) {
+    sharesByTicker.set(h.ticker, (sharesByTicker.get(h.ticker) ?? 0) + Number(h.shares));
+  }
 
   const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -102,11 +109,15 @@ export default async function CalendarPage({
       const payDay = new Date(`${event.pay_date}T00:00:00Z`);
       if (payDay.getUTCFullYear() === year && payDay.getUTCMonth() + 1 === month) {
         const day = payDay.getUTCDate();
-        const amount = Number(event.amount_per_share).toFixed(2);
+        // Actual dollars received (shares × per-share rate) — not the bare
+        // per-share rate itself, which reads as a real amount but usually
+        // isn't one (e.g. "$0.21" for a position paying $21 on 100 shares).
+        const totalAmount = Number(event.amount_per_share) * (sharesByTicker.get(event.ticker) ?? 0);
+        const amount = totalAmount.toFixed(2);
         const label =
           calendarPrivacyMode === "amount_only" ? `$${amount}` : calendarPrivacyMode === "ticker_only" ? event.ticker : `${event.ticker} $${amount}`;
         const list = eventsByDay.get(day) ?? [];
-        list.push({ label, kind: "pay" });
+        list.push({ label, kind: "pay", amount: calendarPrivacyMode === "ticker_only" ? undefined : totalAmount });
         eventsByDay.set(day, list);
         paymentCount += 1;
       }
@@ -133,7 +144,8 @@ export default async function CalendarPage({
     const payDay = new Date(`${estimate.payDate}T00:00:00Z`);
     if (payDay.getUTCFullYear() === year && payDay.getUTCMonth() + 1 === month) {
       const day = payDay.getUTCDate();
-      const amount = estimate.amountPerShare.toFixed(2);
+      const totalAmount = estimate.amountPerShare * (sharesByTicker.get(estimate.ticker) ?? 0);
+      const amount = totalAmount.toFixed(2);
       const label =
         calendarPrivacyMode === "amount_only"
           ? `$${amount}`
@@ -141,7 +153,11 @@ export default async function CalendarPage({
             ? estimate.ticker
             : `${estimate.ticker} $${amount}`;
       const list = eventsByDay.get(day) ?? [];
-      list.push({ label, kind: estimate.source === "confirmed" ? "pay" : "estimated" });
+      list.push({
+        label,
+        kind: estimate.source === "confirmed" ? "pay" : "estimated",
+        amount: calendarPrivacyMode === "ticker_only" ? undefined : totalAmount,
+      });
       eventsByDay.set(day, list);
       if (estimate.source === "confirmed") paymentCount += 1;
       else estimatedCount += 1;
