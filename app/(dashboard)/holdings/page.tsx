@@ -5,6 +5,7 @@ import { MarketStateBadge } from "@/components/dashboard/market-stats";
 import { HoldingsTable, type Holding } from "@/components/dashboard/holdings-table";
 import { AddHoldingDialog } from "@/components/dashboard/add-holding-dialog";
 import { ImportCsvDialog } from "@/components/dashboard/import-csv-dialog";
+import { PlaidConnectDialog } from "@/components/dashboard/plaid-connect-dialog";
 import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 
 export const metadata: Metadata = {
@@ -17,13 +18,18 @@ export default async function HoldingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: holdings }, { data: profile }] = await Promise.all([
+  const [{ data: holdings }, { data: profile }, { data: brokerConnections }] = await Promise.all([
     supabase
       .from("holdings")
       .select("id, ticker, company_name, broker_name, shares, source")
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false }),
     supabase.from("profiles").select("plan, default_broker_name").eq("id", user!.id).single(),
+    supabase
+      .from("broker_connections")
+      .select("id, institution_name, status, last_synced_at")
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false }),
   ]);
 
   const isFree = (profile?.plan ?? "free") === "free";
@@ -79,7 +85,8 @@ export default async function HoldingsPage() {
               />
             </div>
           </div>
-          <div className="flex gap-sp-2">
+          <div className="flex flex-wrap gap-sp-2">
+            <PlaidConnectDialog isProPlus={isProPlus} connections={brokerConnections ?? []} />
             <ImportCsvDialog isProPlus={isProPlus} />
             <AddHoldingDialog defaultBroker={profile?.default_broker_name ?? undefined} />
           </div>
