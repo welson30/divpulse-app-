@@ -1,4 +1,18 @@
-import { Briefcase, Building2, Coins, Cpu, Layers, TrendingUp, Zap } from "lucide-react";
+import {
+  Briefcase,
+  Building2,
+  CircleDollarSign,
+  Coins,
+  Cpu,
+  Factory,
+  Fuel,
+  HeartPulse,
+  Landmark,
+  Layers,
+  ShoppingCart,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const CATEGORY_STYLES: Record<string, { icon: LucideIcon; chipClass: string }> = {
@@ -8,6 +22,12 @@ const CATEGORY_STYLES: Record<string, { icon: LucideIcon; chipClass: string }> =
   "Dividend Growth": { icon: TrendingUp, chipClass: "bg-[rgba(34,197,94,0.12)] text-green-500" },
   Utilities: { icon: Zap, chipClass: "bg-warning/12 text-warning" },
   Technology: { icon: Cpu, chipClass: "bg-info/12 text-info" },
+  "Options Income": { icon: CircleDollarSign, chipClass: "bg-[rgba(34,197,94,0.12)] text-green-500" },
+  Healthcare: { icon: HeartPulse, chipClass: "bg-info/12 text-info" },
+  Financials: { icon: Landmark, chipClass: "bg-[rgba(34,197,94,0.12)] text-green-500" },
+  Energy: { icon: Fuel, chipClass: "bg-warning/12 text-warning" },
+  "Consumer Staples": { icon: ShoppingCart, chipClass: "bg-info/12 text-info" },
+  Industrials: { icon: Factory, chipClass: "bg-warning/12 text-warning" },
 };
 const DEFAULT_CATEGORY_STYLE = { icon: Layers, chipClass: "bg-surface-2 text-text-secondary" };
 
