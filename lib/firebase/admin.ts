@@ -26,6 +26,14 @@ type SendPushResult = { sent: boolean; error?: string; staleToken?: boolean };
  * replaces OneSignal after its Web SDK couldn't complete a TLS handshake
  * to api.onesignal.com from Pakistani networks).
  *
+ * Data-only payload, deliberately with no top-level `notification` field:
+ * FCM auto-displays a system notification for any message that carries
+ * one, in addition to public/firebase-messaging-sw.js's own
+ * onBackgroundMessage handler also calling showNotification() — together
+ * that showed every push twice. A data-only message never triggers FCM's
+ * auto-display, so onBackgroundMessage is the only thing that ever shows
+ * it. All values must be strings for FCM's data payload.
+ *
  * Returns { sent: false, staleToken: true } on FCM's
  * "registration-token-not-registered" error so the caller can prune the
  * dead row from push_subscriptions (the token becomes invalid when a user
@@ -35,11 +43,10 @@ export async function sendPush(fcmToken: string, title: string, body: string): P
   try {
     await getMessaging(getFirebaseAdminApp()).send({
       token: fcmToken,
-      notification: { title, body },
-      webpush: {
-        fcmOptions: {
-          link: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.paidprime.com",
-        },
+      data: {
+        title,
+        body,
+        link: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.paidprime.com",
       },
     });
     return { sent: true };

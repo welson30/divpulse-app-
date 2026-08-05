@@ -74,8 +74,10 @@ export async function onForegroundPush(handler: (payload: { title?: string; body
   if (!(await isSupported())) return () => {};
 
   const messaging: Messaging = getMessaging(getFirebaseApp());
+  // Data-only payload (see lib/firebase/admin.ts's sendPush) — read from
+  // payload.data, not payload.notification.
   const unsubscribe = onMessage(messaging, (payload) => {
-    handler({ title: payload.notification?.title, body: payload.notification?.body });
+    handler({ title: payload.data?.title, body: payload.data?.body });
   });
   return unsubscribe;
 }
