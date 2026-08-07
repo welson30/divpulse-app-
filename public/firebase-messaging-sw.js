@@ -19,6 +19,25 @@ firebase.initializeApp({
   appId: "1:168444830200:web:204801b85b76ec3577b60d",
 });
 
+// Without these, a browser keeps the OLD service worker active for every
+// tab that already has it registered, until all of them are fully closed
+// — for a bookmarked/PWA-style app that can be days. The push payload
+// just changed shape (data-only, no top-level `notification` field — see
+// lib/firebase/admin.ts's sendPush), so anyone still running the old SW
+// reads payload.notification?.title/body, both now undefined: one
+// notification instead of two, but with a blank body and the generic
+// "PaidPrime" title instead of the real content. skipWaiting +
+// clients.claim make a newly-fetched SW take over on the very next
+// registration check instead of waiting for every open tab to close,
+// closing that window for this and any future SW change.
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
 const messaging = firebase.messaging();
 
 // Data-only payload (see lib/firebase/admin.ts's sendPush) — a
