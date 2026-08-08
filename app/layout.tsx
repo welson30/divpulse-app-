@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Funnel_Display, Inter, Inter_Tight, JetBrains_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +25,21 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   weight: "variable",
+  display: "swap",
+});
+
+// Marketing landing (Figma Paid Prime SaaS) — Outfit body + Funnel Display headlines
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: "variable",
+  display: "swap",
+});
+
+const funnelDisplay = Funnel_Display({
+  variable: "--font-funnel-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -71,7 +86,14 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={cn("h-full", interTight.variable, inter.variable, jetbrainsMono.variable)}
+      className={cn(
+        "h-full",
+        interTight.variable,
+        inter.variable,
+        jetbrainsMono.variable,
+        outfit.variable,
+        funnelDisplay.variable,
+      )}
     >
       <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>

@@ -425,3 +425,358 @@ details.faq-item[open]::details-content {
     @apply font-sans;
   }
 }
+
+/* ============================================================
+   Marketing landing — Figma "Paid Prime SaaS" homepage tokens
+   Scoped under .pp-landing so dashboard / app chrome stay on the
+   existing green brand system above.
+   ============================================================ */
+.pp-landing {
+  --pp-bg: #0b0c0e;
+  --pp-surface: #121417;
+  --pp-surface-2: #16191d;
+  --pp-blue: #4c82f7;
+  --pp-blue-deep: #16233d;
+  --pp-green: #3fbf87;
+  --pp-green-deep: #10261e;
+  --pp-text: #f2f4f7;
+  --pp-muted: #99a1ac;
+  --pp-muted-2: #6c737f;
+  --pp-border: #22262c;
+  --pp-border-2: #2e343b;
+  --pp-font-display: var(--font-funnel-display), "Funnel Display", system-ui, sans-serif;
+  --pp-font-body: var(--font-outfit), Outfit, system-ui, sans-serif;
+  background: var(--pp-bg);
+  color: var(--pp-text);
+  font-family: var(--pp-font-body);
+}
+
+.pp-landing .pp-display {
+  font-family: var(--pp-font-display);
+}
+
+@keyframes pp-float-a {
+  0%,
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-4deg) translateY(-6px);
+  }
+}
+
+@keyframes pp-float-b {
+  0%,
+  100% {
+    transform: rotate(3deg) translateY(0);
+  }
+  50% {
+    transform: rotate(3deg) translateY(5px);
+  }
+}
+
+@keyframes pp-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pp-landing .pp-float-a {
+  animation: pp-float-a 5.5s ease-in-out infinite;
+}
+
+.pp-landing .pp-float-b {
+  animation: pp-float-b 6.2s ease-in-out infinite;
+}
+
+.pp-landing .pp-fade-up {
+  animation: pp-fade-up 0.7s ease-out both;
+}
+
+.pp-landing .pp-fade-up-delay {
+  animation: pp-fade-up 0.7s ease-out 0.12s both;
+}
+
+.pp-landing .pp-fade-up-delay-2 {
+  animation: pp-fade-up 0.7s ease-out 0.22s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-landing .pp-float-a,
+  .pp-landing .pp-float-b,
+  .pp-landing .pp-fade-up,
+  .pp-landing .pp-fade-up-delay,
+  .pp-landing .pp-fade-up-delay-2 {
+    animation: none;
+  }
+}
+
+/* ---- Hero layout: mobile → tablet → desktop (Figma 1440) ---- */
+.pp-hero-section {
+  /* Figma Section 1:7 = 1196.7px on desktop */
+  position: relative;
+  overflow: visible;
+  border-bottom: 1px solid #22262c;
+}
+
+.pp-hero-shell {
+  position: relative;
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1440px;
+  padding: 40px 16px 0;
+}
+
+.pp-hero-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 40px;
+  width: 100%;
+  overflow: visible;
+}
+
+.pp-hero-copy {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.pp-hero-title {
+  margin: 0;
+  width: 100%;
+  font-size: clamp(34px, 8vw, 48px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: #f2f4f7;
+}
+
+.pp-hero-desc {
+  margin: 0;
+  width: 100%;
+  max-width: 38rem;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #99a1ac;
+}
+
+.pp-hero-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pp-hero-pill {
+  border: 1px solid #22262c;
+  border-radius: 9999px;
+  background: #121417;
+  padding: 6.6px 15.8px 8.1px;
+  font-size: 14px;
+  line-height: 23.1px;
+  white-space: nowrap;
+  color: #99a1ac;
+}
+
+.pp-hero-phone {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+}
+
+.pp-hero-phone-frame {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  overflow: visible;
+  background: transparent;
+}
+
+.pp-hero-stats {
+  position: relative;
+  margin: 40px auto 0;
+  width: 100%;
+  max-width: 1440px;
+  padding: 0 16px 48px;
+}
+
+.pp-hero-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  overflow: hidden;
+  margin-inline: auto;
+  max-width: 1224px;
+  border: 1px solid #22262c;
+  border-radius: 18px;
+  background: #22262c;
+}
+
+@media (min-width: 640px) {
+  .pp-hero-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .pp-hero-shell {
+    padding: 56px 32px 0;
+  }
+
+  .pp-hero-title {
+    font-size: clamp(42px, 5vw, 56px);
+  }
+
+  .pp-hero-desc {
+    font-size: 18px;
+    line-height: 1.55;
+  }
+
+  .pp-hero-phone-frame {
+    max-width: 480px;
+  }
+
+  .pp-hero-stats {
+    margin-top: 48px;
+    padding: 0 32px 56px;
+  }
+}
+
+/*
+ * Desktop — Figma Homepage 1440
+ * Screenshot refs: Header 1440×96.8 | Section 1440×1196.7
+ * Header is ABOVE section (not inside it). Combined first paint ≈ 1293.5px.
+ */
+@media (min-width: 1200px) {
+  .pp-site-header {
+    height: 96.8px;
+    min-height: 96.8px;
+    max-height: 96.8px;
+  }
+
+  .pp-hero-section {
+    height: 1196.7px;
+    min-height: 1196.7px;
+    max-height: 1196.7px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pp-hero-shell {
+    box-sizing: border-box;
+    flex: 0 0 899px;
+    height: 899px;
+    min-height: 899px;
+    padding: 96px 108px 112px;
+  }
+
+  .pp-hero-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 64px;
+    height: 691px;
+    min-height: 691px;
+  }
+
+  .pp-hero-copy {
+    width: 609px;
+    flex-shrink: 0;
+    gap: 27.1px;
+  }
+
+  .pp-hero-title {
+    font-size: 63.4px;
+    line-height: 64.63px;
+    letter-spacing: -2.534px;
+  }
+
+  .pp-hero-desc {
+    max-width: 609px;
+    font-size: 21.6px;
+    line-height: 34.56px;
+  }
+
+  .pp-hero-pills {
+    gap: 10px 9.8px;
+  }
+
+  .pp-hero-phone {
+    /* Figma 1:26 layout box */
+    width: 551px;
+    height: 691px;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+  }
+
+  .pp-hero-phone-frame {
+    position: relative;
+    width: 551px;
+    max-width: none;
+    height: 691px;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .pp-hero-stats {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: stretch;
+    margin-top: 0;
+    padding: 0 108px 64px;
+  }
+
+  .pp-hero-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+    height: 233px;
+    min-height: 233px;
+  }
+}
+
+/* ---- Hero phone — Figma 1:26 (551×691), 4× PNG transparent ---- */
+.pp-phone-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 420px;
+  margin-inline: auto;
+  background: transparent;
+}
+
+@media (min-width: 1200px) {
+  .pp-phone-img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* Trimmed 4× export @1x — visual bounds with float overhangs */
+    width: 621.5px;
+    max-width: none;
+    height: 655px;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    background: transparent;
+  }
+}
+
+@media (max-width: 1199px) {
+  .pp-phone-img {
+    max-width: min(420px, 90vw);
+  }
+}
