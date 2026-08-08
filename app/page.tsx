@@ -11,6 +11,7 @@ import { NotificationTemplatesSection } from "@/components/marketing/notificatio
 import { PortfolioOverviewSection } from "@/components/marketing/portfolio-overview-section";
 import { PricingSection } from "@/components/marketing/pricing-section";
 import { ProductSection } from "@/components/marketing/product-section";
+import { SiteFooter } from "@/components/marketing/site-footer";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { UpcomingPaymentsSection } from "@/components/marketing/upcoming-payments-section";
 import { WaitlistSection } from "@/components/marketing/waitlist-section";
@@ -38,6 +39,7 @@ export default function HomePage() {
         Section 1:2112 = pricing
         Section 1:2031 = FAQ (placed after pricing)
         Section 1:2089 = waitlist CTA
+        Footer 1:2337
       */}
       <SiteHeader />
       <main>
@@ -58,6 +60,7 @@ export default function HomePage() {
         <FaqSection />
         <WaitlistSection />
       </main>
+      <SiteFooter />
     </div>
   );
 }
