@@ -39,10 +39,10 @@ export function DividendAlertsSection() {
   return (
     <section
       id="dividend-alerts"
-      className="relative border-b border-[#22262c] bg-[rgba(18,20,23,0.4)] min-[1200px]:min-h-[1063.04px]"
+      className="relative border-b border-[#22262c] bg-[rgba(18,20,23,0.4)]"
       aria-labelledby="alerts-heading"
     >
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center gap-8 px-4 py-14 sm:gap-10 sm:px-6 sm:py-16 min-[1200px]:box-border min-[1200px]:min-h-[1063.04px] min-[1200px]:gap-16 min-[1200px]:px-[108px] min-[1200px]:py-[128px]">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center gap-8 px-4 py-14 sm:gap-10 sm:px-6 sm:py-16 min-[1200px]:box-border min-[1200px]:gap-16 min-[1200px]:px-[108px] min-[1200px]:py-[128px]">
         <Reveal className="flex w-full max-w-[860px] flex-col items-center gap-4 text-center sm:gap-5 min-[1200px]:gap-[23px]">
           <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#2e343b] bg-[#16191d] px-3.5 py-1.5 text-[11px] font-medium leading-snug tracking-[1.6px] text-[#4c82f7] uppercase sm:gap-2.5 sm:px-[15.8px] sm:pt-[7.2px] sm:pb-[7.8px] sm:text-[13px] sm:leading-[21.45px] sm:tracking-[2.08px]">
             <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
