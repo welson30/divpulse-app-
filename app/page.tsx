@@ -8,6 +8,7 @@ import { GoalsSection } from "@/components/marketing/goals-section";
 import { HeroSection } from "@/components/marketing/hero-section";
 import { NotificationTemplatesSection } from "@/components/marketing/notification-templates-section";
 import { PortfolioOverviewSection } from "@/components/marketing/portfolio-overview-section";
+import { PricingSection } from "@/components/marketing/pricing-section";
 import { ProductSection } from "@/components/marketing/product-section";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { UpcomingPaymentsSection } from "@/components/marketing/upcoming-payments-section";
@@ -32,6 +33,7 @@ export default function HomePage() {
         Section 1:1707 = AI advisor
         Section 1:1799 = analytics
         Section 1:1944 = goals
+        Section 1:2112 = pricing
       */}
       <SiteHeader />
       <main>
@@ -48,6 +50,7 @@ export default function HomePage() {
         <AiAdvisorSection />
         <AnalyticsSection />
         <GoalsSection />
+        <PricingSection />
       </main>
     </div>
   );
