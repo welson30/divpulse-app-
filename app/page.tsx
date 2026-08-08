@@ -7,6 +7,7 @@ import { NotificationTemplatesSection } from "@/components/marketing/notificatio
 import { PortfolioOverviewSection } from "@/components/marketing/portfolio-overview-section";
 import { ProductSection } from "@/components/marketing/product-section";
 import { SiteHeader } from "@/components/marketing/site-header";
+import { UpcomingPaymentsSection } from "@/components/marketing/upcoming-payments-section";
 
 export default function HomePage() {
   return (
@@ -22,6 +23,7 @@ export default function HomePage() {
         Section 1:1033 = 602.94px (diversification)
         Section 1:1153 = 1147.45px (dividend calendar)
         Section 1:1346 = portfolio overview
+        Section 1:1457 = upcoming payments
       */}
       <SiteHeader />
       <main>
@@ -33,6 +35,7 @@ export default function HomePage() {
         <DiversificationSection />
         <DividendCalendarSection />
         <PortfolioOverviewSection />
+        <UpcomingPaymentsSection />
       </main>
     </div>
   );
