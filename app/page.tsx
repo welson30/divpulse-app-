@@ -13,6 +13,7 @@ import { PricingSection } from "@/components/marketing/pricing-section";
 import { ProductSection } from "@/components/marketing/product-section";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { UpcomingPaymentsSection } from "@/components/marketing/upcoming-payments-section";
+import { WaitlistSection } from "@/components/marketing/waitlist-section";
 import { WatchlistSection } from "@/components/marketing/watchlist-section";
 
 export default function HomePage() {
@@ -36,6 +37,7 @@ export default function HomePage() {
         Section 1:1944 = goals
         Section 1:2112 = pricing
         Section 1:2031 = FAQ (placed after pricing)
+        Section 1:2089 = waitlist CTA
       */}
       <SiteHeader />
       <main>
@@ -54,6 +56,7 @@ export default function HomePage() {
         <GoalsSection />
         <PricingSection />
         <FaqSection />
+        <WaitlistSection />
       </main>
     </div>
   );
