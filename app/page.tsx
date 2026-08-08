@@ -1,3 +1,4 @@
+import { AiAdvisorSection } from "@/components/marketing/ai-advisor-section";
 import { BrokerConnectionsSection } from "@/components/marketing/broker-connections-section";
 import { DiversificationSection } from "@/components/marketing/diversification-section";
 import { DividendAlertsSection } from "@/components/marketing/dividend-alerts-section";
@@ -26,6 +27,7 @@ export default function HomePage() {
         Section 1:1346 = portfolio overview
         Section 1:1457 = upcoming payments
         Section 1:1591 = watchlist
+        Section 1:1707 = AI advisor
       */}
       <SiteHeader />
       <main>
@@ -39,6 +41,7 @@ export default function HomePage() {
         <PortfolioOverviewSection />
         <UpcomingPaymentsSection />
         <WatchlistSection />
+        <AiAdvisorSection />
       </main>
     </div>
   );
