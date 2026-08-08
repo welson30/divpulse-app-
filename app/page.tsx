@@ -4,6 +4,7 @@ import { BrokerConnectionsSection } from "@/components/marketing/broker-connecti
 import { DiversificationSection } from "@/components/marketing/diversification-section";
 import { DividendAlertsSection } from "@/components/marketing/dividend-alerts-section";
 import { DividendCalendarSection } from "@/components/marketing/dividend-calendar-section";
+import { GoalsSection } from "@/components/marketing/goals-section";
 import { HeroSection } from "@/components/marketing/hero-section";
 import { NotificationTemplatesSection } from "@/components/marketing/notification-templates-section";
 import { PortfolioOverviewSection } from "@/components/marketing/portfolio-overview-section";
@@ -30,6 +31,7 @@ export default function HomePage() {
         Section 1:1591 = watchlist
         Section 1:1707 = AI advisor
         Section 1:1799 = analytics
+        Section 1:1944 = goals
       */}
       <SiteHeader />
       <main>
@@ -45,6 +47,7 @@ export default function HomePage() {
         <WatchlistSection />
         <AiAdvisorSection />
         <AnalyticsSection />
+        <GoalsSection />
       </main>
     </div>
   );
