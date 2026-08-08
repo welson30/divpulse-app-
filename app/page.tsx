@@ -2,6 +2,7 @@ import { BrokerConnectionsSection } from "@/components/marketing/broker-connecti
 import { DividendAlertsSection } from "@/components/marketing/dividend-alerts-section";
 import { HeroSection } from "@/components/marketing/hero-section";
 import { NotificationTemplatesSection } from "@/components/marketing/notification-templates-section";
+import { ProductSection } from "@/components/marketing/product-section";
 import { SiteHeader } from "@/components/marketing/site-header";
 
 export default function HomePage() {
@@ -14,6 +15,7 @@ export default function HomePage() {
         Section 1:347 = 977.64px (broker connections)
         Section 1:411 = 1063.04px (dividend alerts)
         Section 1:509 = 1296.95px (notification templates)
+        Section 1:752 = 1038.54px (product dashboard)
       */}
       <SiteHeader />
       <main>
@@ -21,6 +23,7 @@ export default function HomePage() {
         <BrokerConnectionsSection />
         <DividendAlertsSection />
         <NotificationTemplatesSection />
+        <ProductSection />
       </main>
     </div>
   );

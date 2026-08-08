@@ -23,16 +23,15 @@ const TEMPLATES = [
 
 /**
  * Figma Homepage section 1:509 — Notification templates (1440 × 1296.95).
- * Phones: 276×600, columns 280, gap 136, header→phones 64, phone→title 32.
  */
 export function NotificationTemplatesSection() {
   return (
     <section
-      id="product"
+      id="notification-templates"
       className="relative border-b border-[#22262c] bg-[#0b0c0e]"
       aria-labelledby="templates-heading"
     >
-      <div className="mx-auto box-border flex w-full max-w-[1440px] flex-col items-center gap-10 px-4 py-14 sm:gap-12 sm:px-8 sm:py-16 min-[1200px]:gap-16 min-[1200px]:px-[60px] min-[1200px]:py-[128px]">
+      <div className="mx-auto box-border flex w-full max-w-[1440px] flex-col items-center gap-10 px-4 py-14 sm:gap-12 sm:px-8 sm:py-16 min-[1200px]:gap-16 min-[1200px]:px-[60px] min-[1200px]:pt-[128px] min-[1200px]:pb-16">
         <Reveal className="mx-auto flex w-full max-w-[860px] flex-col items-center gap-4 text-center sm:gap-5 min-[1200px]:gap-[23.3px]">
           <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#2e343b] bg-[#16191d] px-3.5 py-1.5 text-[11px] font-medium leading-snug tracking-[1.6px] text-[#4c82f7] uppercase sm:gap-2.5 sm:px-[15.8px] sm:pt-[7.2px] sm:pb-[7.8px] sm:text-[13px] sm:leading-[21.45px] sm:tracking-[2.08px]">
             <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
@@ -54,25 +53,25 @@ export function NotificationTemplatesSection() {
         </Reveal>
 
         <Reveal delayMs={80} className="mx-auto w-full max-w-[1320px]">
-          <ul className="m-0 mx-auto flex list-none flex-col items-center gap-12 p-0 sm:gap-14 min-[1200px]:w-full min-[1200px]:flex-row min-[1200px]:items-start min-[1200px]:justify-center min-[1200px]:gap-[220px]">
+          <ul className="m-0 mx-auto flex list-none flex-col items-center gap-12 p-0 sm:gap-14 min-[1200px]:w-full min-[1200px]:flex-row min-[1200px]:items-start min-[1200px]:justify-center min-[1200px]:gap-[180px]">
             {TEMPLATES.map((template) => (
               <li
                 key={template.title}
-                className="flex w-full max-w-[300px] flex-col items-center min-[1200px]:w-[290px] min-[1200px]:max-w-[290px] min-[1200px]:shrink-0"
+                className="flex w-full max-w-[300px] flex-col items-center min-[1200px]:w-[280px] min-[1200px]:max-w-[280px] min-[1200px]:shrink-0"
               >
-                <div className="relative w-[min(280px,85vw)] shrink-0 overflow-visible min-[1200px]:w-[280px]">
+                <div className="relative w-[min(276px,85vw)] shrink-0 min-[1200px]:w-[276px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`${template.phone}?v=7`}
+                    src={`${template.phone}?v=9`}
                     alt={template.phoneAlt}
-                    width={292}
-                    height={668}
-                    className="pointer-events-none block h-auto w-full select-none"
+                    width={296}
+                    height={630}
+                    className="pointer-events-none block h-auto w-full select-none shadow-[0px_40px_90px_-30px_rgba(0,0,0,0.85)]"
                     draggable={false}
                   />
                 </div>
 
-                <h3 className="pp-display m-0 pt-6 text-center text-[22px] leading-[36.3px] font-semibold tracking-[-0.44px] text-[#f2f4f7]">
+                <h3 className="pp-display m-0 pt-8 text-center text-[22px] leading-[36.3px] font-semibold tracking-[-0.44px] text-[#f2f4f7]">
                   {template.title}
                 </h3>
 
