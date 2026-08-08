@@ -8,6 +8,8 @@ type StatCountUpProps = {
   suffix?: string;
   /** Insert thousands separators (e.g. 38,400). */
   commas?: boolean;
+  /** Decimal places to show (e.g. 2 → 61.20). */
+  decimals?: number;
   durationMs?: number;
   className?: string;
 };
@@ -16,7 +18,13 @@ function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-function formatValue(n: number, commas: boolean) {
+function formatValue(n: number, commas: boolean, decimals: number) {
+  if (decimals > 0) {
+    const fixed = n.toFixed(decimals);
+    if (!commas) return fixed;
+    const [intPart, frac] = fixed.split(".");
+    return `${Number(intPart).toLocaleString("en-US")}.${frac}`;
+  }
   const rounded = Math.round(n);
   return commas ? rounded.toLocaleString("en-US") : String(rounded);
 }
@@ -31,6 +39,7 @@ export function StatCountUp({
   prefix = "",
   suffix = "",
   commas = false,
+  decimals = 0,
   durationMs = 1400,
   className,
 }: StatCountUpProps) {
@@ -96,7 +105,7 @@ export function StatCountUp({
   return (
     <span ref={ref} className={className}>
       {prefix}
-      {formatValue(value, commas)}
+      {formatValue(value, commas, decimals)}
       {suffix}
     </span>
   );
