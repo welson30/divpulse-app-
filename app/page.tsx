@@ -8,6 +8,7 @@ import { PortfolioOverviewSection } from "@/components/marketing/portfolio-overv
 import { ProductSection } from "@/components/marketing/product-section";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { UpcomingPaymentsSection } from "@/components/marketing/upcoming-payments-section";
+import { WatchlistSection } from "@/components/marketing/watchlist-section";
 
 export default function HomePage() {
   return (
@@ -24,6 +25,7 @@ export default function HomePage() {
         Section 1:1153 = 1147.45px (dividend calendar)
         Section 1:1346 = portfolio overview
         Section 1:1457 = upcoming payments
+        Section 1:1591 = watchlist
       */}
       <SiteHeader />
       <main>
@@ -36,6 +38,7 @@ export default function HomePage() {
         <DividendCalendarSection />
         <PortfolioOverviewSection />
         <UpcomingPaymentsSection />
+        <WatchlistSection />
       </main>
     </div>
   );
