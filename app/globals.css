@@ -663,12 +663,6 @@ details.faq-item[open]::details-content {
  * Header is ABOVE section (not inside it). Combined first paint ≈ 1293.5px.
  */
 @media (min-width: 1200px) {
-  .pp-site-header {
-    height: 96.8px;
-    min-height: 96.8px;
-    max-height: 96.8px;
-  }
-
   .pp-hero-section {
     height: 1196.7px;
     min-height: 1196.7px;

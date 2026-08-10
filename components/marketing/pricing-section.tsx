@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRef, type CSSProperties, type MouseEvent } from "react";
+import { PrimaryCta } from "@/components/marketing/primary-cta";
 import { Reveal } from "@/components/marketing/reveal";
 
 type FeatureValue = { type: "text"; label: string } | { type: "check" } | { type: "dash" };
@@ -177,28 +178,37 @@ function PlanCard({ plan }: { plan: Plan }) {
           {plan.description}
         </p>
 
-        <Link
-          href={plan.href}
-          className={`mt-8 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[18px] text-[17px] font-semibold transition-[background-color,border-color,box-shadow,transform] duration-200 ${
-            plan.featured
-              ? "bg-[#4c82f7] text-white shadow-[0px_16px_40px_-16px_#4c82f7] hover:brightness-110"
-              : "border border-[#2e343b] bg-[#16191d] text-[#f2f4f7] hover:border-[#4c82f7]/60 hover:bg-[#1a1f26]"
-          }`}
-        >
-          {plan.cta}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={
-              plan.featured
-                ? "/marketing/pricing/icon-arrow-white.svg"
-                : "/marketing/pricing/icon-arrow.svg"
-            }
-            alt=""
-            width={18}
-            height={18}
-            className="size-[18px] transition-transform duration-200 group-hover:translate-x-0.5"
-          />
-        </Link>
+        {plan.featured ? (
+          <PrimaryCta
+            href={plan.href}
+            className="mt-8 h-14 w-full rounded-[18px] text-[17px]"
+          >
+            {plan.cta}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/marketing/pricing/icon-arrow-white.svg"
+              alt=""
+              width={18}
+              height={18}
+              className="size-[18px] transition-transform duration-200 group-hover:translate-x-0.5"
+            />
+          </PrimaryCta>
+        ) : (
+          <Link
+            href={plan.href}
+            className="mt-8 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[18px] border border-[#2e343b] bg-[#16191d] text-[17px] font-semibold text-[#f2f4f7] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-[#4c82f7]/60 hover:bg-[#1a1f26] hover:-translate-y-0.5"
+          >
+            {plan.cta}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/marketing/pricing/icon-arrow.svg"
+              alt=""
+              width={18}
+              height={18}
+              className="size-[18px] transition-transform duration-200 group-hover:translate-x-0.5"
+            />
+          </Link>
+        )}
 
         <ul className="m-0 mt-9 flex list-none flex-col gap-4 border-t border-[#22262c] p-0 pt-7">
           {plan.features.map((feature) => (

@@ -1,3 +1,4 @@
+import { PrimaryCta } from "@/components/marketing/primary-cta";
 import { Reveal } from "@/components/marketing/reveal";
 
 /**
@@ -47,9 +48,9 @@ export function WaitlistSection() {
               placeholder="you@email.com"
               className="box-border h-12 w-full min-w-0 flex-1 rounded-[10px] border border-[#2e343b] bg-[#0b0c0e] px-[15.8px] text-[14.5px] text-[#f2f4f7] outline-none placeholder:text-[#6c737f] transition-colors focus:border-[#4c82f7]/60"
             />
-            <button
+            <PrimaryCta
               type="submit"
-              className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-[10px] bg-[#4c82f7] px-6 text-[14.5px] leading-[24px] font-medium whitespace-nowrap text-white transition-[filter] hover:brightness-110"
+              className="h-12 shrink-0 rounded-[10px] px-6 text-[14.5px] leading-[24px] font-medium whitespace-nowrap"
             >
               Get Started Free
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -58,9 +59,9 @@ export function WaitlistSection() {
                 alt=""
                 width={16}
                 height={16}
-                className="size-4"
+                className="size-4 transition-transform duration-200 group-hover:translate-x-0.5"
               />
-            </button>
+            </PrimaryCta>
           </form>
 
           <p className="m-0 text-[12.5px] leading-[20.63px] font-normal text-[#6c737f]">

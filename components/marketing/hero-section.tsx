@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HeroPhone } from "@/components/marketing/hero-phone";
+import { PrimaryCta } from "@/components/marketing/primary-cta";
 import { StatCountUp } from "@/components/marketing/stat-count-up";
 
 const FEATURE_PILLS = [
@@ -100,9 +101,10 @@ export function HeroSection() {
             </p>
 
             <div className="pp-fade-up-delay-2 flex flex-wrap items-center gap-3 pt-[9px] sm:gap-4">
-              <Link
+              <PrimaryCta
                 href="/signup"
-                className="relative inline-flex h-12 items-center justify-center gap-2.5 rounded-[18px] bg-[#4c82f7] px-6 text-[16px] font-semibold text-white shadow-[0px_20px_50px_-18px_#4c82f7] transition-[filter] hover:brightness-110 sm:h-14 sm:px-8 sm:text-[17px] min-[1200px]:h-16 min-[1200px]:px-9 min-[1200px]:text-[19px]"
+                contentClassName="gap-2.5"
+                className="h-12 rounded-[18px] px-6 text-[16px] sm:h-14 sm:px-8 sm:text-[17px] min-[1200px]:h-16 min-[1200px]:px-9 min-[1200px]:text-[19px] shadow-[0px_20px_50px_-18px_#4c82f7]"
               >
                 Get Started Free
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -111,9 +113,9 @@ export function HeroSection() {
                   alt=""
                   width={21}
                   height={21}
-                  className="size-4 sm:size-[21px]"
+                  className="size-4 sm:size-[21px] transition-transform duration-200 group-hover:translate-x-0.5"
                 />
-              </Link>
+              </PrimaryCta>
               <Link
                 href="#how-it-works"
                 className="inline-flex h-12 items-center justify-center gap-2.5 rounded-[18px] border border-[#2e343b] bg-[#16191d] px-6 text-[16px] font-semibold text-[#f2f4f7] transition-colors hover:border-[#4c82f7]/50 sm:h-14 sm:px-8 sm:text-[17px] min-[1200px]:h-16 min-[1200px]:px-9 min-[1200px]:text-[19px]"
