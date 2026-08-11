@@ -56,7 +56,7 @@ export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
   {
     label: "Insight",
     links: [
-      { href: "/collections", label: "Analytics", Icon: IconAnalytics },
+      { href: "/analytics", label: "Analytics", Icon: IconAnalytics },
       { href: "/holdings", label: "Performance", Icon: IconAnalytics },
       { href: "/goals", label: "Goals", Icon: IconGoals },
       { href: "#", label: "AI Advisor", Icon: IconAdvisor, action: "advisor" },

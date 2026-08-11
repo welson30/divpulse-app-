@@ -10,6 +10,7 @@ const PROTECTED_PREFIXES = [
   "/upcoming",
   "/history",
   "/collections",
+  "/analytics",
   "/diversification",
   "/watchlist",
   "/goals",
