@@ -60,6 +60,7 @@ export async function addHolding(_prevState: HoldingActionState, formData: FormD
 
   revalidatePath("/holdings");
   revalidatePath("/dashboard");
+  revalidatePath("/performance");
   return null;
 }
 
@@ -113,6 +114,7 @@ export async function importHoldingsFromCsv(rows: CsvImportRow[]): Promise<CsvIm
 
   revalidatePath("/holdings");
   revalidatePath("/dashboard");
+  revalidatePath("/performance");
   return { imported: count ?? rows.length };
 }
 
@@ -130,4 +132,5 @@ export async function deleteHolding(holdingId: string) {
 
   revalidatePath("/holdings");
   revalidatePath("/dashboard");
+  revalidatePath("/performance");
 }

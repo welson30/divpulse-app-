@@ -19,6 +19,26 @@ export async function saveIncomeGoal(_prevState: GoalActionState, formData: Form
   return upsertGoal("passive_income", { target_amount: targetAmount, monthly_contribution: monthlyContribution });
 }
 
+export async function saveAnnualIncomeGoal(
+  _prevState: GoalActionState,
+  formData: FormData,
+): Promise<GoalActionState> {
+  const annual = Number(formData.get("targetAmount"));
+  const monthlyContribution = Number(formData.get("monthlyContribution") ?? 0);
+
+  if (!Number.isFinite(annual) || annual <= 0) {
+    return { error: "Enter an annual income goal greater than $0." };
+  }
+  if (!Number.isFinite(monthlyContribution) || monthlyContribution < 0) {
+    return { error: "Monthly contribution can't be negative." };
+  }
+
+  return upsertGoal("passive_income", {
+    target_amount: annual / 12,
+    monthly_contribution: monthlyContribution,
+  });
+}
+
 export async function saveReserveGoal(_prevState: GoalActionState, formData: FormData): Promise<GoalActionState> {
   const monthlyExpenses = Number(formData.get("monthlyExpenses"));
   const monthsTarget = Number(formData.get("monthsTarget"));
@@ -39,6 +59,23 @@ export async function saveReserveGoal(_prevState: GoalActionState, formData: For
     monthly_expenses: monthlyExpenses,
     months_target: monthsTarget,
     current_amount: currentAmount,
+  });
+}
+
+export async function saveFiExpenses(_prevState: GoalActionState, formData: FormData): Promise<GoalActionState> {
+  const monthlyExpenses = Number(formData.get("monthlyExpenses"));
+  const monthsTarget = Number(formData.get("monthsTarget") || 6);
+  const currentAmount = Number(formData.get("currentAmount") || 0);
+
+  if (!Number.isFinite(monthlyExpenses) || monthlyExpenses <= 0) {
+    return { error: "Enter your monthly expenses." };
+  }
+
+  return upsertGoal("emergency_reserve", {
+    target_amount: monthlyExpenses * (Number.isFinite(monthsTarget) && monthsTarget > 0 ? monthsTarget : 6),
+    monthly_expenses: monthlyExpenses,
+    months_target: Number.isFinite(monthsTarget) && monthsTarget > 0 ? monthsTarget : 6,
+    current_amount: Number.isFinite(currentAmount) && currentAmount >= 0 ? currentAmount : 0,
   });
 }
 
