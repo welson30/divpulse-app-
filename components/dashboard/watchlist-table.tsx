@@ -2,35 +2,52 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
 import { removeWatchlistItem } from "@/app/(dashboard)/watchlist/actions";
-import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
-import { TickerLogo } from "@/components/dashboard/ticker-logo";
-import { InfoTip } from "@/components/dashboard/info-tip";
-import { TIPS } from "@/lib/tips";
-import { RangeBar } from "@/components/dashboard/market-stats";
+import { Sparkline } from "@/components/dashboard/sparkline";
+import { FigmaIcon } from "@/components/dashboard/figma-icon";
+import { isLinkableTicker } from "@/lib/tickers/validate";
+import { cn } from "@/lib/utils";
 import type { SparklinePoint } from "@/lib/dividend-data/types";
 
 export type WatchlistItem = {
   id: string;
   ticker: string;
-  company_name: string | null;
-  name?: string | null;
-  logoUrl?: string | null;
-  price?: number | null;
-  changePercent?: number | null;
-  sparkline?: SparklinePoint[];
-  fiftyTwoWeekLow?: number | null;
-  fiftyTwoWeekHigh?: number | null;
+  name: string | null;
+  price: number | null;
+  yieldPct: number | null;
+  nextExDate: string | null;
+  sparkline: SparklinePoint[];
 };
 
-function formatMoney(value: number | null | undefined) {
+const COLS =
+  "grid-cols-[minmax(10rem,1.6fr)_minmax(5rem,0.7fr)_minmax(5.5rem,0.8fr)_minmax(6rem,0.9fr)_minmax(7rem,0.9fr)_2.75rem]";
+
+function formatMoney(value: number | null) {
   if (value == null) return "—";
   return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-const HEAD =
-  "border-b border-border-subtle px-sp-3 py-3.5 font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase";
+function formatYield(value: number | null) {
+  if (value == null) return null;
+  return `${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+}
+
+function formatExDate(iso: string | null) {
+  if (!iso) return "—";
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function trendChange(points: SparklinePoint[]) {
+  if (points.length < 2) return null;
+  const first = points[0]!.c;
+  const last = points[points.length - 1]!.c;
+  if (first === 0) return last >= first ? 0 : -1;
+  return ((last - first) / first) * 100;
+}
 
 export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
   const [, startTransition] = useTransition();
@@ -49,115 +66,159 @@ export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-6 text-center">
-        <p className="text-sm text-text-secondary">
-          Nothing watched yet. Add a ticker you&rsquo;re considering — no need to own it first.
-        </p>
+      <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-[13px] leading-[21.45px] text-[#99a1ac]">
+        Nothing watched yet. Add a ticker you&rsquo;re considering — no need to own it first.
       </div>
     );
   }
 
+  const countLabel = `${items.length} ${items.length === 1 ? "symbol" : "symbols"}`;
+
   return (
-    <>
-      {/* Mobile: a single-column row list — a wide table forces horizontal
-          scroll on a 375-430px phone no matter how it's tuned, so below
-          `lg:` this is a different layout entirely, not a shrunk table. */}
-      <div className="flex flex-col gap-2 lg:hidden">
+    <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
+      <div className="border-b border-[#22262c] px-6 py-5">
+        <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
+          Watched tickers
+        </h2>
+        <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{countLabel}</p>
+      </div>
+
+      <div className="flex flex-col gap-px lg:hidden">
         {items.map((item) => (
-          <div key={item.id} className="flex items-center gap-2.5 rounded-card border border-border-subtle bg-surface p-sp-3">
-            <Link href={`/tickers/${item.ticker}`} className="flex min-w-0 flex-1 items-center gap-2.5">
-              <TickerLogo ticker={item.ticker} logoUrl={item.logoUrl} size="sm" />
-              <div className="min-w-0 flex-1">
-                <div className="font-mono text-sm font-semibold text-text-primary">{item.ticker}</div>
-                <div className="mt-0.5 truncate font-mono text-xs text-text-secondary">
-                  {item.name ?? item.company_name ?? "—"}
-                </div>
-              </div>
-            </Link>
-            <div className="flex shrink-0 flex-col items-end gap-0.5">
-              <span className="font-mono text-sm font-semibold tabular-nums text-text-primary">{formatMoney(item.price)}</span>
-              <ChangeBadge changePercent={item.changePercent ?? null} className="text-xs" />
-            </div>
-            <button
-              type="button"
-              disabled={pendingId === item.id}
-              onClick={() => handleRemove(item.id)}
-              aria-label="Remove"
-              className="flex shrink-0 items-center justify-center rounded-full p-1.5 text-text-secondary transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:opacity-40"
-            >
-              <Trash2 className="size-4" />
-            </button>
-          </div>
+          <WatchlistMobileRow
+            key={item.id}
+            item={item}
+            pending={pendingId === item.id}
+            onRemove={() => handleRemove(item.id)}
+          />
         ))}
       </div>
 
-      {/* Desktop: full table, every column. */}
-      <div className="hidden w-full overflow-x-auto overflow-y-hidden rounded-card border border-border-subtle bg-surface lg:block">
-        <table className="w-full min-w-205 border-collapse">
-          <thead>
-            <tr>
-              <th className={`${HEAD} text-left`}>Asset</th>
-              <th className={`${HEAD} text-right`}>Price</th>
-              <th className={`${HEAD} text-right`}>
-                <span className="inline-flex items-center gap-1">Today <InfoTip label={TIPS.todayChange} /></span>
-              </th>
-              <th className={`${HEAD} text-center`}>
-                <span className="inline-flex items-center gap-1">1M <InfoTip label={TIPS.sparkline1M} /></span>
-              </th>
-              <th className={`${HEAD} text-left`}>
-                <span className="inline-flex items-center gap-1">52-week range <InfoTip label={TIPS.fiftyTwoWeek} /></span>
-              </th>
-              <th className={`${HEAD} text-right`}>
-                <span className="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, i) => (
-              <tr
-                key={item.id}
-                className={`transition-colors hover:bg-surface-hover ${i === items.length - 1 ? "" : "border-b border-border-subtle"}`}
-              >
-                <td className="px-sp-3 py-3">
-                  <Link href={`/tickers/${item.ticker}`} className="flex items-center gap-2.5">
-                    <TickerLogo ticker={item.ticker} logoUrl={item.logoUrl} />
-                    <div className="min-w-0">
-                      <div className="font-mono text-sm font-semibold text-text-primary">{item.ticker}</div>
-                      <div className="mt-0.5 max-w-55 truncate text-xs text-text-secondary">
-                        {item.name ?? item.company_name ?? "—"}
-                      </div>
-                    </div>
-                  </Link>
-                </td>
-                <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
-                  {formatMoney(item.price)}
-                </td>
-                <td className="px-sp-3 py-3 text-right text-sm">
-                  <ChangeBadge changePercent={item.changePercent ?? null} />
-                </td>
-                <td className="px-sp-3 py-3">
-                  <div className="flex justify-center">
-                    <Sparkline points={item.sparkline ?? []} id={`wl-${item.id}`} changePercent={item.changePercent ?? null} />
-                  </div>
-                </td>
-                <td className="px-sp-3 py-3">
-                  <RangeBar low={item.fiftyTwoWeekLow} high={item.fiftyTwoWeekHigh} current={item.price} className="min-w-30" />
-                </td>
-                <td className="px-sp-3 py-3 text-right">
-                  <button
-                    type="button"
-                    disabled={pendingId === item.id}
-                    onClick={() => handleRemove(item.id)}
-                    className="font-sans text-xs text-text-secondary transition-colors hover:text-red-500 disabled:opacity-40"
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="hidden overflow-x-auto lg:block">
+        <div className={cn("grid min-w-[820px] border-b border-[#22262c]", COLS)}>
+          {["Company", "Price", "Yield", "Next ex-date", "30-day trend", ""].map((label) => (
+            <div
+              key={label || "actions"}
+              className="px-4 py-3 text-[11px] font-medium tracking-[1.54px] text-[#6c737f] uppercase first:px-6"
+            >
+              {label}
+            </div>
+          ))}
+        </div>
+        {items.map((item, index) => {
+          const yieldLabel = formatYield(item.yieldPct);
+          const tickerNode = isLinkableTicker(item.ticker) ? (
+            <Link href={`/tickers/${item.ticker}`} className="hover:underline">
+              {item.ticker}
+            </Link>
+          ) : (
+            item.ticker
+          );
+          return (
+            <div
+              key={item.id}
+              className={cn(
+                "grid min-w-[820px] items-center",
+                COLS,
+                index < items.length - 1 && "border-b border-[#22262c]",
+              )}
+            >
+              <div className="px-6 py-4">
+                <p className="text-[14px] leading-[23.1px] font-medium text-[#f2f4f7]">{tickerNode}</p>
+                <p className="truncate text-[12px] leading-[19.8px] text-[#6c737f]">{item.name ?? "—"}</p>
+              </div>
+              <div className="px-4 text-[14px] leading-[23.1px] tracking-[-0.28px] text-[#f2f4f7]">
+                {formatMoney(item.price)}
+              </div>
+              <div className="px-4">
+                {yieldLabel ? (
+                  <span className="inline-flex rounded-[8px] border border-[rgba(63,191,135,0.3)] bg-[#10261e] px-2 py-[4px] text-[11px] tracking-[1.1px] text-[#3fbf87] uppercase">
+                    {yieldLabel}
+                  </span>
+                ) : (
+                  <span className="text-[14px] text-[#6c737f]">—</span>
+                )}
+              </div>
+              <div className="px-4 text-[13px] leading-[21.45px] tracking-[-0.26px] text-[#99a1ac]">
+                {formatExDate(item.nextExDate)}
+              </div>
+              <div className="px-4 py-3">
+                <Sparkline
+                  points={item.sparkline}
+                  id={`wl-${item.id}`}
+                  changePercent={trendChange(item.sparkline)}
+                  width={112}
+                  height={32}
+                />
+              </div>
+              <div className="flex justify-end pr-4">
+                <button
+                  type="button"
+                  disabled={pendingId === item.id}
+                  onClick={() => handleRemove(item.id)}
+                  aria-label={`Remove ${item.ticker}`}
+                  className="flex size-8 items-center justify-center rounded-[10px] text-[#6c737f] transition-colors hover:bg-[#16191d] hover:text-[#f2f4f7] disabled:opacity-40"
+                >
+                  <FigmaIcon src="/marketing/dashboard/icon-trash-15.svg" className="size-[15px]" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
-    </>
+    </section>
+  );
+}
+
+function WatchlistMobileRow({
+  item,
+  pending,
+  onRemove,
+}: {
+  item: WatchlistItem;
+  pending: boolean;
+  onRemove: () => void;
+}) {
+  const yieldLabel = formatYield(item.yieldPct);
+  const tickerNode = isLinkableTicker(item.ticker) ? (
+    <Link href={`/tickers/${item.ticker}`} className="hover:underline">
+      {item.ticker}
+    </Link>
+  ) : (
+    item.ticker
+  );
+
+  return (
+    <div className="flex items-start gap-3 border-b border-[#22262c] px-5 py-4 last:border-b-0">
+      <div className="min-w-0 flex-1">
+        <p className="text-[14px] font-medium text-[#f2f4f7]">{tickerNode}</p>
+        <p className="truncate text-[12px] text-[#6c737f]">{item.name ?? "—"}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-[#99a1ac]">
+          <span className="text-[#f2f4f7]">{formatMoney(item.price)}</span>
+          {yieldLabel ? (
+            <span className="rounded-[8px] border border-[rgba(63,191,135,0.3)] bg-[#10261e] px-2 py-[3px] text-[11px] tracking-[1.1px] text-[#3fbf87] uppercase">
+              {yieldLabel}
+            </span>
+          ) : null}
+          <span>Ex {formatExDate(item.nextExDate)}</span>
+        </div>
+      </div>
+      <Sparkline
+        points={item.sparkline}
+        id={`wl-m-${item.id}`}
+        changePercent={trendChange(item.sparkline)}
+        width={72}
+        height={28}
+      />
+      <button
+        type="button"
+        disabled={pending}
+        onClick={onRemove}
+        aria-label={`Remove ${item.ticker}`}
+        className="flex size-8 shrink-0 items-center justify-center rounded-[10px] text-[#6c737f] disabled:opacity-40"
+      >
+        <FigmaIcon src="/marketing/dashboard/icon-trash-15.svg" className="size-[15px]" />
+      </button>
+    </div>
   );
 }
