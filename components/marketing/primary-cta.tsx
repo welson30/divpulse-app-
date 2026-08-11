@@ -15,6 +15,7 @@ type SharedProps = {
   contentClassName?: string;
   style?: CSSProperties;
   onClick?: () => void;
+  disabled?: boolean;
 };
 
 type LinkProps = SharedProps & {
@@ -50,6 +51,7 @@ export function PrimaryCta(props: LinkProps | ButtonProps) {
     "hover:-translate-y-1 hover:brightness-110",
     "hover:shadow-[0_0_0_1px_rgba(76,130,247,0.45),0_24px_56px_-14px_rgba(76,130,247,0.7)]",
     "motion-reduce:hover:translate-y-0",
+    props.disabled && "pointer-events-none opacity-70",
     props.className,
   );
 
@@ -99,6 +101,7 @@ export function PrimaryCta(props: LinkProps | ButtonProps) {
     <button
       ref={ref}
       type={props.type ?? "button"}
+      disabled={props.disabled}
       onClick={props.onClick}
       onMouseMove={onMove}
       className={className}

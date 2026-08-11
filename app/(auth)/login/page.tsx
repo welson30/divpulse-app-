@@ -1,42 +1,45 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AuthForm } from "@/components/auth/auth-form";
-import { signInWithPassword } from "@/app/(auth)/actions";
+import { SignInAside } from "@/components/auth/sign-in-aside";
+import { SignInForm } from "@/components/auth/sign-in-form";
 
 export const metadata: Metadata = {
   title: "Sign in — PaidPrime",
   description: "Sign in to your PaidPrime dashboard.",
 };
 
+/**
+ * Figma Sign In Page 8:659 (1440 × 900).
+ * Desktop ≥1024 = side-by-side (1.05 / 0.95). Tablet/mobile = form only.
+ */
 export default async function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ redirectTo?: string; error?: string }>;
 }) {
-  const { redirectTo } = await searchParams;
+  const { redirectTo, error } = await searchParams;
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-sp-3 py-sp-8">
-      {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
-      <img src="/logo.svg" alt="" className="mb-sp-3 h-12 w-12 rounded-card" width={48} height={48} />
+    <div className="pp-landing grid min-h-dvh bg-[#0b0c0e] min-[1024px]:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+      <SignInAside />
 
-      <Card className="w-full max-w-[400px] bg-surface p-sp-2">
-        <CardHeader>
-          <CardTitle className="text-h2 font-display">Welcome back</CardTitle>
-          <CardDescription>Sign in to see what's landed since you last checked.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <AuthForm action={signInWithPassword} submitLabel="Sign in" redirectTo={redirectTo} />
-        </CardContent>
-      </Card>
+      <main className="relative flex flex-col items-center justify-center px-5 py-10 sm:px-8 sm:py-14 min-[1024px]:px-10 min-[1200px]:px-10">
+        <a
+          href="/"
+          className="mb-10 flex h-9 w-[132px] self-start min-[1024px]:hidden"
+          aria-label="PaidPrime home"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/marketing/signin/logo.png"
+            alt="PaidPrime"
+            width={162}
+            height={49}
+            className="h-full w-full object-contain object-left"
+          />
+        </a>
 
-      <p className="mt-sp-3 text-sm text-text-secondary">
-        Don&rsquo;t have an account?{" "}
-        <Link href="/signup" className="text-green-500 hover:underline">
-          Sign up free
-        </Link>
-      </p>
-    </main>
+        <SignInForm redirectTo={redirectTo} oauthError={error === "oauth_failed"} />
+      </main>
+    </div>
   );
 }
