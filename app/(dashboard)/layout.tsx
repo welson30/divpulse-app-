@@ -9,7 +9,7 @@ const PLAN_LABELS: Record<string, string> = {
   pro_plus: "Pro+",
 };
 
-/** Rows shown in the bell dropdown — enough for a quick glance, not a full history (that's /dividends, linked as "View all"). */
+/** Rows shown in the bell dropdown — enough for a quick glance, not a full history (that's /notifications). */
 const RECENT_NOTIFICATIONS_LIMIT = 20;
 
 // proxy.ts already redirects unauthenticated requests away from these

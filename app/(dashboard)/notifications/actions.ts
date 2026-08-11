@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -59,5 +60,13 @@ export async function markNotificationsSeen(): Promise<{ error: string } | null>
     return { error: error.message };
   }
 
+  return null;
+}
+
+/** Same cursor write as the bell, then refresh the inbox so unread dots clear. */
+export async function markAllNotificationsRead(): Promise<{ error: string } | null> {
+  const result = await markNotificationsSeen();
+  if (result) return result;
+  revalidatePath("/notifications");
   return null;
 }

@@ -110,6 +110,19 @@ export function NotificationBell({ notifications, initialUnreadCount }: Notifica
             })
           )}
         </div>
+
+        {notifications.length > 0 ? (
+          <>
+            <DropdownMenuSeparator className="mx-0" />
+            <div className="p-1">
+              <DropdownMenuItem asChild>
+                <Link href="/notifications" className="justify-center px-2 py-2 text-[12px] text-text-secondary">
+                  View all
+                </Link>
+              </DropdownMenuItem>
+            </div>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

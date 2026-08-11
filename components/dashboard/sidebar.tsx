@@ -48,8 +48,8 @@ export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
   {
     label: "Signals",
     links: [
-      { href: "/settings?tab=notifications", label: "Notifications", Icon: IconNotifications },
-      { href: "/settings?tab=notifications", label: "Alert templates", Icon: IconNotifications },
+      { href: "/notifications", label: "Notifications", Icon: IconNotifications },
+      { href: "/alert-templates", label: "Alert templates", Icon: IconNotifications },
       { href: "/watchlist", label: "Watchlist", Icon: IconWatchlist },
     ],
   },

@@ -107,7 +107,32 @@ export async function updateNotificationStyle(_prevState: SettingsActionState, f
   }
 
   revalidatePath("/settings");
+  revalidatePath("/alert-templates");
   return { success: true };
+}
+
+export async function setNotificationStyle(notificationStyle: string): Promise<SettingsActionState> {
+  const formData = new FormData();
+  formData.set("notificationStyle", notificationStyle);
+  return updateNotificationStyle(null, formData);
+}
+
+export async function disablePushAlerts(): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Your session expired. Please sign in again." };
+  }
+
+  const { error } = await supabase.from("push_subscriptions").delete().eq("user_id", user.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/settings");
+  revalidatePath("/alert-templates");
+  return null;
 }
 
 export async function removePushDevice(subscriptionId: string) {
@@ -121,6 +146,7 @@ export async function removePushDevice(subscriptionId: string) {
   await supabase.from("push_subscriptions").delete().eq("id", subscriptionId).eq("user_id", user.id);
 
   revalidatePath("/settings");
+  revalidatePath("/alert-templates");
 }
 
 /**
@@ -177,4 +203,5 @@ export async function disconnectTelegram() {
   await supabase.from("telegram_links").delete().eq("user_id", user.id);
 
   revalidatePath("/settings");
+  revalidatePath("/alert-templates");
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-form";
 import { SettingsQuickActions } from "@/components/dashboard/settings-quick-actions";
@@ -6,7 +7,6 @@ import { ChangePasswordForm } from "@/components/dashboard/change-password-form"
 import { PushDevicesList, type PushDevice } from "@/components/dashboard/push-devices-list";
 import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
 import { CalendarPrivacyForm } from "@/components/dashboard/calendar-privacy-form";
-import { NotificationStylePicker } from "@/components/dashboard/notification-style-picker";
 import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
 import { BillingCard } from "@/components/dashboard/billing-card";
 import { PlaidConnectCard } from "@/components/dashboard/plaid-connect-card";
@@ -59,7 +59,7 @@ export default async function SettingsPage({
   const [{ data: profile }, { data: devices }, { data: telegramLink }, { data: brokerConnections }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("plan, calendar_privacy_mode, notification_style, display_name, default_broker_name")
+      .select("plan, calendar_privacy_mode, display_name, default_broker_name")
       .eq("id", user!.id)
       .single(),
     supabase
@@ -132,7 +132,12 @@ export default async function SettingsPage({
             title="Notification style"
             description="Choose how much detail your dividend alerts show, on push, Telegram, and in the bell menu."
           >
-            <NotificationStylePicker notificationStyle={profile?.notification_style ?? "compact"} />
+            <Link
+              href="/alert-templates"
+              className="inline-flex h-9 items-center rounded-[10px] border border-[#2e343b] bg-[#16191d] px-4 text-[13px] font-medium text-[#f2f4f7] transition-colors hover:border-[#4c82f7]"
+            >
+              Open notification templates
+            </Link>
           </SettingsSection>
 
           <SettingsSection

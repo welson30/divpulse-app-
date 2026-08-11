@@ -41,6 +41,7 @@ const PAGE_LABELS: Record<string, string> = {
   "/goals": "Goals",
   "/settings": "Settings",
   "/notifications": "Notifications",
+  "/alert-templates": "Notification templates",
 };
 
 /**
@@ -60,6 +61,8 @@ const PAGE_PROMPTS: Record<string, string[]> = {
   "/diversification": ["Am I too concentrated in one sector?", "How is my portfolio allocated?"],
   "/goals": ["How far am I from my income goal?", "What would it take to reach it faster?"],
   "/watchlist": ["How would adding to my portfolio change my yield?", "What's my current average yield?"],
+  "/notifications": ["Which dividends paid me recently?", "What's my next dividend payment?"],
+  "/alert-templates": ["Which dividends paid me recently?", "What's my next dividend payment?"],
 };
 
 const DEFAULT_PROMPTS = ["What's my monthly dividend income?", "What's my next payment?"];
