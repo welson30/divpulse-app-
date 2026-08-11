@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-form";
-import { SettingsQuickActions } from "@/components/dashboard/settings-quick-actions";
 import { ChangePasswordForm } from "@/components/dashboard/change-password-form";
-import { PushDevicesList, type PushDevice } from "@/components/dashboard/push-devices-list";
-import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
 import { CalendarPrivacyForm } from "@/components/dashboard/calendar-privacy-form";
-import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
 import { BillingCard } from "@/components/dashboard/billing-card";
-import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
+import { SettingsBillingPanel } from "@/components/dashboard/settings-billing-panel";
 import { SettingsTabs, SETTINGS_TABS, type SettingsTab } from "@/components/dashboard/settings-tabs";
 
 export const metadata: Metadata = {
@@ -22,150 +18,88 @@ const PLAN_LABELS: Record<string, string> = {
   pro_plus: "Pro+",
 };
 
-function SettingsSection({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-card border border-border-subtle bg-surface p-sp-4">
-      <div className="mb-sp-3">
-        <h2 className="text-h2 font-display font-medium text-text-primary">{title}</h2>
-        {description ? <p className="mt-1 text-xs text-text-secondary">{description}</p> : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; checkout?: string }>;
 }) {
-  const { tab: tabParam } = await searchParams;
-  const tab: SettingsTab = SETTINGS_TABS.some((t) => t.value === tabParam) ? (tabParam as SettingsTab) : "profile";
+  const { tab: tabParam, checkout } = await searchParams;
+
+  if (tabParam === "integrations") redirect("/brokers");
+  if (tabParam === "notifications") redirect("/alert-templates");
+
+  const tab: SettingsTab = SETTINGS_TABS.some((t) => t.value === tabParam)
+    ? (tabParam as SettingsTab)
+    : checkout
+      ? "subscription"
+      : "profile";
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: devices }, { data: telegramLink }] = await Promise.all([
+  const [{ data: profile }, { data: subscription }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("plan, calendar_privacy_mode, display_name, default_broker_name")
+      .select("plan, calendar_privacy_mode, display_name, default_broker_name, currency")
       .eq("id", user!.id)
       .single(),
     supabase
-      .from("push_subscriptions")
-      .select("id, user_agent, created_at")
+      .from("subscriptions")
+      .select("stripe_customer_id, current_period_end, status")
       .eq("user_id", user!.id)
-      .order("created_at", { ascending: false }),
-    supabase.from("telegram_links").select("chat_id").eq("user_id", user!.id).maybeSingle(),
+      .maybeSingle(),
   ]);
 
-  const planLabel = PLAN_LABELS[profile?.plan ?? "free"] ?? "Free";
-  // Telegram is a Pro/Pro+ feature (ARCHITECTURE.md §7) — matching gate
-  // lives in app/api/jobs/detect-dividends/route.ts, which independently
-  // re-checks profiles.plan server-side before sending (never trust a
-  // client-visible flag alone for anything that gates a paid feature).
-  const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
+  const plan = (profile?.plan ?? "free") as "free" | "pro" | "pro_plus";
+  const planLabel = PLAN_LABELS[plan] ?? "Free";
 
   return (
-    <div className="min-w-0 flex flex-col gap-sp-4">
-      <div className="relative">
-        <GreetingBackdrop />
-        <div className="relative z-10">
-          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Account</span>
-          <h1 className="text-h1 font-display font-semibold text-text-primary">Settings</h1>
-          <p className="mt-1 text-sm text-text-secondary">Manage your profile, preferences, and subscription.</p>
+    <div className="flex flex-col gap-10">
+      <header className="border-b border-[#22262c] pb-6">
+        <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Account</p>
+        <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
+          Settings
+        </h1>
+        <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
+          Manage your profile, security, plan and billing details.
+        </p>
+      </header>
+
+      <div className="flex flex-col items-start gap-6 min-[900px]:flex-row">
+        <SettingsTabs current={tab} />
+
+        <div className="flex min-w-0 w-full flex-1 flex-col gap-6">
+          {tab === "profile" ? (
+            <>
+              <ProfileSettingsForm
+                email={user!.email ?? ""}
+                displayName={profile?.display_name ?? ""}
+                defaultBroker={profile?.default_broker_name ?? ""}
+                currency={profile?.currency ?? "USD"}
+              />
+              <CalendarPrivacyForm calendarPrivacyMode={profile?.calendar_privacy_mode ?? "full"} />
+            </>
+          ) : null}
+
+          {tab === "security" ? <ChangePasswordForm /> : null}
+
+          {tab === "subscription" ? (
+            <BillingCard plan={plan} planLabel={planLabel} periodEnd={subscription?.current_period_end ?? null} />
+          ) : null}
+
+          {tab === "billing" ? (
+            <SettingsBillingPanel hasStripeCustomer={Boolean(subscription?.stripe_customer_id)} />
+          ) : null}
         </div>
       </div>
 
-      <SettingsTabs current={tab} />
-
-      {tab === "profile" ? (
-        <div className="grid grid-cols-1 items-start gap-sp-3 lg:grid-cols-[1fr_320px]">
-          <div className="min-w-0 flex flex-col gap-sp-3">
-            <SettingsSection title="Profile information" description="Update your personal details and preferences.">
-              <ProfileSettingsForm
-                email={user!.email ?? ""}
-                emailVerified={user!.email_confirmed_at != null}
-                displayName={profile?.display_name ?? ""}
-                defaultBroker={profile?.default_broker_name ?? ""}
-              />
-            </SettingsSection>
-
-            <SettingsSection title="Plan">
-              <BillingCard plan={(profile?.plan ?? "free") as "free" | "pro" | "pro_plus"} planLabel={planLabel} />
-            </SettingsSection>
-          </div>
-
-          <SettingsSection title="Quick actions">
-            <SettingsQuickActions />
-          </SettingsSection>
-        </div>
-      ) : null}
-
-      {tab === "notifications" ? (
-        <div className="flex max-w-2xl flex-col gap-sp-3">
-          <SettingsSection title="Push notifications" description="Get a push alert on this device the moment a dividend is detected.">
-            <div className="mb-sp-3">
-              <EnableNotificationsButton />
-            </div>
-            <PushDevicesList devices={(devices ?? []) as PushDevice[]} />
-          </SettingsSection>
-
-          <SettingsSection
-            title="Notification style"
-            description="Choose how much detail your dividend alerts show, on push, Telegram, and in the bell menu."
-          >
-            <Link
-              href="/alert-templates"
-              className="inline-flex h-9 items-center rounded-[10px] border border-[#2e343b] bg-[#16191d] px-4 text-[13px] font-medium text-[#f2f4f7] transition-colors hover:border-[#4c82f7]"
-            >
-              Open notification templates
-            </Link>
-          </SettingsSection>
-
-          <SettingsSection
-            title="Calendar privacy"
-            description="Control what your dividend calendar shows — useful for recording demos without revealing your holdings."
-          >
-            <CalendarPrivacyForm calendarPrivacyMode={profile?.calendar_privacy_mode ?? "full"} />
-          </SettingsSection>
-        </div>
-      ) : null}
-
-      {tab === "security" ? (
-        <div className="flex max-w-2xl flex-col gap-sp-3">
-          <SettingsSection title="Change password" description="Choose a new password for your account.">
-            <ChangePasswordForm />
-          </SettingsSection>
-        </div>
-      ) : null}
-
-      {tab === "integrations" ? (
-        <div className="flex max-w-2xl flex-col gap-sp-3">
-          <SettingsSection
-            title="Broker auto-sync"
-            description="Connect a US broker via Plaid to sync holdings automatically. Pro+ only."
-          >
-            <Link href="/brokers" className="text-sm text-[#4c82f7] hover:underline">
-              Open broker connections
-            </Link>
-          </SettingsSection>
-
-          <SettingsSection title="Telegram" description="Get a Telegram message the moment a dividend is detected.">
-            <TelegramConnectCard isPro={isPro} isConnected={!!telegramLink?.chat_id} />
-          </SettingsSection>
-        </div>
-      ) : null}
+      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
+        <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
+        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+      </footer>
     </div>
   );
 }

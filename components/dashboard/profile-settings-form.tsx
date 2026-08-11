@@ -1,93 +1,110 @@
 "use client";
 
-import { useActionState, useRef } from "react";
-import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useActionState, useMemo } from "react";
 import { updateProfile, type SettingsActionState } from "@/app/(dashboard)/settings/actions";
+import {
+  SettingsPanel,
+  settingsInputClass,
+  settingsLabelClass,
+  settingsPrimaryBtnClass,
+} from "@/components/dashboard/settings-panel";
 
 type ProfileSettingsFormProps = {
   email: string;
-  emailVerified: boolean;
   displayName: string;
   defaultBroker: string;
+  currency: string;
 };
 
-const DEFAULTS = { displayName: "", defaultBroker: "" };
-
-export function ProfileSettingsForm({ email, emailVerified, displayName, defaultBroker }: ProfileSettingsFormProps) {
+export function ProfileSettingsForm({ email, displayName, defaultBroker, currency }: ProfileSettingsFormProps) {
   const [state, formAction, pending] = useActionState<SettingsActionState, FormData>(updateProfile, null);
-  const nameRef = useRef<HTMLInputElement>(null);
-  const brokerRef = useRef<HTMLInputElement>(null);
-
-  function resetToDefaults() {
-    if (nameRef.current) nameRef.current.value = DEFAULTS.displayName;
-    if (brokerRef.current) brokerRef.current.value = DEFAULTS.defaultBroker;
-  }
+  const timezone = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    } catch {
+      return "UTC";
+    }
+  }, []);
 
   return (
-    <form action={formAction} className="flex flex-col gap-sp-3">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="email">Email address</Label>
-        <div className="relative">
-          <Input id="email" value={email} disabled className="h-11 px-3.5 pr-28 text-[15px]" />
-          {emailVerified ? (
-            <span className="absolute top-1/2 right-3.5 flex -translate-y-1/2 items-center gap-1 font-mono text-xs font-medium text-green-500">
-              <Check className="size-3.5" aria-hidden />
-              Verified
-            </span>
-          ) : null}
+    <form action={formAction}>
+      <SettingsPanel
+        title="Profile"
+        subtitle="Your personal information"
+        footer={
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="submit" disabled={pending} className={settingsPrimaryBtnClass}>
+              {pending ? "Saving…" : "Save changes"}
+            </button>
+            {state && "error" in state ? (
+              <p role="alert" className="text-[13px] text-[#d8695f]">
+                {state.error}
+              </p>
+            ) : null}
+            {state && "success" in state ? <p className="text-[13px] text-[#3fbf87]">Saved.</p> : null}
+          </div>
+        }
+      >
+        <div className="grid grid-cols-1 gap-4 min-[700px]:grid-cols-2">
+          <Field label="Full name" htmlFor="displayName">
+            <input
+              id="displayName"
+              name="displayName"
+              defaultValue={displayName}
+              placeholder="How should we address you?"
+              maxLength={80}
+              className={settingsInputClass}
+            />
+          </Field>
+          <Field label="Email" htmlFor="email">
+            <input id="email" value={email} disabled readOnly className={settingsInputClass} />
+          </Field>
+          <Field label="Timezone" htmlFor="timezone" hint="Detected from this device. Calendar dates are stored in UTC.">
+            <input id="timezone" value={timezone} disabled readOnly className={settingsInputClass} />
+          </Field>
+          <Field label="Base currency" htmlFor="currency" hint="Amounts are shown in USD. Conversion isn't supported.">
+            <input id="currency" value={currency || "USD"} disabled readOnly className={settingsInputClass} />
+          </Field>
+          <Field
+            label="Default broker"
+            htmlFor="defaultBroker"
+            hint="Pre-fills the broker field when you add a holding."
+            className="min-[700px]:col-span-2"
+          >
+            <input
+              id="defaultBroker"
+              name="defaultBroker"
+              defaultValue={defaultBroker}
+              placeholder="Fidelity"
+              className={settingsInputClass}
+            />
+          </Field>
         </div>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="displayName">Display name</Label>
-        <Input
-          id="displayName"
-          name="displayName"
-          ref={nameRef}
-          defaultValue={displayName}
-          placeholder="How should we address you?"
-          maxLength={80}
-          className="h-11 px-3.5 text-[15px]"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="defaultBroker">
-          Default broker <span className="font-normal text-text-secondary">(optional)</span>
-        </Label>
-        <Input
-          id="defaultBroker"
-          name="defaultBroker"
-          ref={brokerRef}
-          defaultValue={defaultBroker}
-          placeholder="Fidelity"
-          className="h-11 px-3.5 text-[15px]"
-        />
-        <span className="text-xs text-text-secondary">Pre-fills the broker field when you add a holding</span>
-      </div>
-
-      {state && "error" in state ? (
-        <p role="alert" className="text-sm text-red-500">
-          {state.error}
-        </p>
-      ) : null}
-      {state && "success" in state ? <p className="text-sm text-green-500">Saved.</p> : null}
-
-      <div className="flex items-center gap-sp-3">
-        <Button type="submit" disabled={pending} className="h-10 px-5 text-[13px]">
-          {pending ? "Saving…" : "Save changes"}
-        </Button>
-        <button
-          type="button"
-          onClick={resetToDefaults}
-          className="font-sans text-[13px] font-medium text-text-secondary transition-colors hover:text-text-primary"
-        >
-          Reset to defaults
-        </button>
-      </div>
+      </SettingsPanel>
     </form>
+  );
+}
+
+function Field({
+  label,
+  htmlFor,
+  hint,
+  children,
+  className,
+}: {
+  label: string;
+  htmlFor: string;
+  hint?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <label htmlFor={htmlFor} className={`${settingsLabelClass} mb-2.5 block`}>
+        {label}
+      </label>
+      {children}
+      {hint ? <p className="mt-1.5 text-[12px] leading-[19.8px] text-[#6c737f]">{hint}</p> : null}
+    </div>
   );
 }
