@@ -244,7 +244,7 @@ export default async function DashboardPage() {
                 </h2>
                 <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Latest confirmed dividend deposits</p>
               </div>
-              <Link href="/dividends" className="shrink-0 pt-1.5 text-[13px] text-[#4c82f7] hover:underline">
+              <Link href="/history" className="shrink-0 pt-1.5 text-[13px] text-[#4c82f7] hover:underline">
                 View all
               </Link>
             </header>

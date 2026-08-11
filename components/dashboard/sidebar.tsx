@@ -42,7 +42,7 @@ export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
       { href: "/dividends", label: "Dividends", Icon: IconDividends },
       { href: "/calendar", label: "Calendar", Icon: IconCalendar },
       { href: "/upcoming", label: "Upcoming payments", Icon: IconCalendar },
-      { href: "/dividends", label: "Payment history", Icon: IconDividends },
+      { href: "/history", label: "Payment history", Icon: IconDividends },
     ],
   },
   {
