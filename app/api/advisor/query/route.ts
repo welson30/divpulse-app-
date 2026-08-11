@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import type { TickerQuote } from "@/lib/dividend-data/types";
-import { computeTrailingIncome } from "@/lib/dividend-data/income";
+import { computeTrailingIncome, computeAnnualIncomeSeries } from "@/lib/dividend-data/income";
 import { estimateUpcomingPayments } from "@/lib/dividend-data/next-payment";
 import { streamAdvisor, isAdvisorConfigured, MAX_HISTORY_TURNS, type AdvisorHolding, type AdvisorTurn } from "@/lib/advisor/openai";
 
@@ -107,10 +107,16 @@ export async function POST(request: NextRequest) {
   // low while the system prompt instructed it to "ground your answer in
   // those numbers." Wrong figures in confident prose are worse than a
   // wrong stat card; see lib/dividend-data/income.ts for the full note.
-  const [income, upcoming] = await Promise.all([
+  const [income, upcoming, annual] = await Promise.all([
     computeTrailingIncome(supabase, heldHoldings),
     distinctTickers.length ? estimateUpcomingPayments(supabase, distinctTickers, rangeStart, rangeEnd) : Promise.resolve([]),
+    computeAnnualIncomeSeries(supabase, heldHoldings, 3),
   ]);
+  const completeYears = annual.filter((p) => p.complete && p.total > 0);
+  const yearOverYearPct =
+    completeYears.length >= 2 && completeYears.at(-2)!.total > 0
+      ? ((completeYears.at(-1)!.total - completeYears.at(-2)!.total) / completeYears.at(-2)!.total) * 100
+      : null;
 
   const sharesByTicker = new Map<string, number>();
   for (const holding of heldHoldings) {
@@ -181,6 +187,7 @@ export async function POST(request: NextRequest) {
       })),
       currentPage: typeof body.page === "string" ? body.page.slice(0, 40) : null,
       tickersWithoutHistory: income.tickersWithoutHistory,
+      yearOverYearPct,
     },
     history,
   );

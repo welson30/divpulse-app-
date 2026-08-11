@@ -51,6 +51,8 @@ export type AdvisorContext = {
   currentPage: string | null;
   /** Held tickers with no recorded dividend history — so the model doesn't read their $0 as a real cut. */
   tickersWithoutHistory: string[];
+  /** Calendar-year income change vs the prior complete year, when both years have payments. */
+  yearOverYearPct: number | null;
 };
 
 export type AdvisorTurn = { role: "user" | "assistant"; content: string };
@@ -68,6 +70,11 @@ function buildContextSummary(context: AdvisorContext): string {
     `Dividend income: ${money(context.monthlyIncome)}/month (${money(context.annualIncome)}/year, trailing 12 months of recorded payments)`,
     `Average portfolio yield: ${context.avgYieldPct.toFixed(2)}%`,
   ];
+  if (context.yearOverYearPct != null) {
+    lines.push(
+      `Calendar-year dividend income vs prior complete year: ${context.yearOverYearPct >= 0 ? "+" : ""}${context.yearOverYearPct.toFixed(1)}% (recorded payments × current shares, not per-share growth)`,
+    );
+  }
 
   if (context.currentPage) {
     lines.push(`The user is currently viewing the ${context.currentPage} page.`);

@@ -41,6 +41,7 @@ const PAGE_LABELS: Record<string, string> = {
   "/diversification": "Allocation",
   "/watchlist": "Watchlist",
   "/goals": "Goals",
+  "/advisor": "AI Advisor",
   "/settings": "Settings",
   "/notifications": "Notifications",
   "/alert-templates": "Notification templates",
@@ -124,6 +125,7 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
 
   const pageLabel = PAGE_LABELS[pathname] ?? null;
   const prompts = PAGE_PROMPTS[pathname] ?? DEFAULT_PROMPTS;
+  const onAdvisorPage = pathname === "/advisor";
 
   /** Closing is always an explicit dismissal — remember it for the session. */
   function close() {
@@ -237,6 +239,8 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
     setQuestion("");
     ask(trimmed);
   }
+
+  if (onAdvisorPage) return null;
 
   return (
     <>
