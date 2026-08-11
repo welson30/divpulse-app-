@@ -67,7 +67,7 @@ export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
     links: [
       { href: "/brokers", label: "Broker connections", Icon: IconBrokers },
       { href: "/settings", label: "Settings", Icon: IconSettings },
-      { href: "mailto:support@paidprime.com", label: "Help center", Icon: IconHelp },
+      { href: "/help", label: "Help center", Icon: IconHelp },
     ],
   },
 ];

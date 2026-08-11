@@ -20,6 +20,7 @@ const PROTECTED_PREFIXES = [
   "/notifications",
   "/alert-templates",
   "/settings",
+  "/help",
   "/tickers",
 ];
 
