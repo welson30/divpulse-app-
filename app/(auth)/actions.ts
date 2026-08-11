@@ -32,7 +32,7 @@ export async function signUpWithPassword(_prevState: AuthActionState, formData: 
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: `${origin}/auth/callback?redirectTo=${encodeURIComponent("/onboarding")}`,
       data: fullName ? { display_name: fullName } : undefined,
     },
   });
@@ -43,6 +43,10 @@ export async function signUpWithPassword(_prevState: AuthActionState, formData: 
 
   if (fullName && data.user) {
     await supabase.from("profiles").update({ display_name: fullName }).eq("id", data.user.id);
+  }
+
+  if (data.session) {
+    redirect("/onboarding");
   }
 
   redirect("/signup/check-email");

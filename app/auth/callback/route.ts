@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
           // Best-effort — a welcome email failing to send should never
           // block the user from reaching the app they just signed up for.
           sendWelcomeEmail(user.email).catch(() => {});
+          return NextResponse.redirect(`${origin}/onboarding`);
         }
       }
 
