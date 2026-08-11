@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IconBot } from "@/components/marketing/icons";
+import { OPEN_ADVISOR_EVENT } from "@/components/dashboard/open-advisor";
 
 type AiAdvisorWidgetProps = {
   isPro: boolean;
@@ -28,12 +29,13 @@ function newId(): string {
  * own labels — /dashboard is "For You" to users, not "Dashboard".
  */
 const PAGE_LABELS: Record<string, string> = {
-  "/dashboard": "For You",
-  "/holdings": "Holdings",
+  "/dashboard": "Dashboard",
+  "/holdings": "Portfolio",
   "/dividends": "Dividends",
   "/calendar": "Calendar",
-  "/collections": "Collections",
-  "/diversification": "Diversification",
+  "/upcoming": "Upcoming payments",
+  "/collections": "Analytics",
+  "/diversification": "Allocation",
   "/watchlist": "Watchlist",
   "/goals": "Goals",
   "/settings": "Settings",
@@ -52,6 +54,7 @@ const PAGE_PROMPTS: Record<string, string[]> = {
   "/holdings": ["Which holding pays me the most?", "Which of my positions is largest?"],
   "/dividends": ["How is my dividend income trending?", "Which tickers pay me the most per year?"],
   "/calendar": ["What payments are coming in the next 30 days?", "Which of those are confirmed vs estimated?"],
+  "/upcoming": ["Which upcoming payments are confirmed?", "How much is expected in the next 90 days?"],
   "/diversification": ["Am I too concentrated in one sector?", "How is my portfolio allocated?"],
   "/goals": ["How far am I from my income goal?", "What would it take to reach it faster?"],
   "/watchlist": ["How would adding to my portfolio change my yield?", "What's my current average yield?"],
@@ -144,6 +147,14 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
+
+  useEffect(() => {
+    function onOpen() {
+      setToggled(true);
+    }
+    window.addEventListener(OPEN_ADVISOR_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_ADVISOR_EVENT, onOpen);
+  }, []);
 
   function ask(trimmed: string) {
     // Captured before the optimistic append so the model receives the
@@ -438,7 +449,7 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
         aria-label={open ? "Close AI Advisor" : "Open AI Advisor"}
         aria-expanded={open}
         className={cn(
-          "fixed right-4 z-50 flex size-13 items-center justify-center rounded-full bg-green-500 text-canvas shadow-lg",
+          "fixed right-4 z-50 flex size-13 items-center justify-center rounded-full bg-[#4c82f7] text-[#f2f4f7] shadow-lg",
           "transition-transform hover:scale-105 active:scale-95",
           // Clears the mobile bottom tab bar (h-16 + safe-area inset);
           // sits in the normal corner once the sidebar takes over at lg.

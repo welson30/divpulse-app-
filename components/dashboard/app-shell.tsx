@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
 import { BottomNav } from "@/components/dashboard/bottom-nav";
@@ -28,9 +29,10 @@ export function AppShell({
   children,
 }: AppShellProps) {
   return (
-    <div className="fixed inset-0 flex overflow-hidden bg-canvas">
-      {/* Desktop sidebar — always visible at lg+ */}
-      <Sidebar planLabel={planLabel} isFree={isFree} holdingCount={holdingCount} className="hidden lg:flex" />
+    <div className="pp-app fixed inset-0 flex overflow-hidden bg-[#0b0c0e]">
+      <Suspense fallback={<div className="hidden h-screen w-[264px] shrink-0 border-r border-[#22262c] bg-[#121417] lg:block" />}>
+        <Sidebar planLabel={planLabel} isFree={isFree} holdingCount={holdingCount} className="hidden lg:flex" />
+      </Suspense>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
@@ -40,17 +42,13 @@ export function AppShell({
           notifications={notifications}
           unreadNotificationCount={unreadNotificationCount}
         />
-        <main className="min-w-0 flex-1 overflow-y-auto px-4 pt-sp-4 pb-20 lg:px-8 lg:pt-sp-4 lg:pb-sp-4">
-          <div className="mx-auto w-full max-w-[1180px]">{children}</div>
+        <main className="min-w-0 flex-1 overflow-y-auto px-4 pt-6 pb-24 lg:p-10 lg:pb-8">
+          <div className="mx-auto w-full max-w-[1120px]">{children}</div>
         </main>
       </div>
 
-      {/* Mobile bottom tab bar — replaces the sidebar below lg: */}
       <BottomNav planLabel={planLabel} isFree={isFree} holdingCount={holdingCount} className="lg:hidden" />
 
-      {/* Lives in the shell rather than per page so the conversation
-          survives client-side navigation. isPro only picks which panel
-          renders — the real gate is server-side in /api/advisor/query. */}
       <AiAdvisorWidget isPro={isPro} />
     </div>
   );

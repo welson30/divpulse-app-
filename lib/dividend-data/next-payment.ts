@@ -79,6 +79,24 @@ function computeCadences(events: { ticker: string; pay_date: string; amount_per_
   return cadences;
 }
 
+export function frequencyFromCadenceDays(days: number): string {
+  if (days <= 10) return "Weekly";
+  if (days <= 45) return "Monthly";
+  if (days <= 135) return "Quarterly";
+  return "Annual";
+}
+
+/** Median payout cadence label per ticker, for calendar chips — same history window as upcoming-payment estimates. */
+export async function getTickerFrequencies(
+  supabase: SupabaseClient,
+  tickers: string[],
+): Promise<Map<string, string>> {
+  if (tickers.length === 0) return new Map();
+  const events = await fetchRecentEvents(supabase, tickers);
+  const cadences = computeCadences(events);
+  return new Map(cadences.map((c) => [c.ticker, frequencyFromCadenceDays(c.cadenceDays)]));
+}
+
 async function fetchRecentEvents(supabase: SupabaseClient, tickers: string[]) {
   const since = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const { data } = await supabase

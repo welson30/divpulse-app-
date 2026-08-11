@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 import { HeaderSearch } from "@/components/dashboard/header-search";
 import { NotificationBell, type RecentNotification } from "@/components/dashboard/notification-bell";
+import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { IconSettings, IconLogOut } from "@/components/marketing/icons";
 import {
   DropdownMenu,
@@ -21,7 +22,6 @@ type TopbarProps = {
   unreadNotificationCount: number;
 };
 
-/** "Shuja Uddin" -> "SU"; falls back to the first two letters of the email's local part when no display name is set. */
 function getInitials(email: string, displayName: string | null) {
   if (displayName?.trim()) {
     const parts = displayName.trim().split(/\s+/);
@@ -32,43 +32,52 @@ function getInitials(email: string, displayName: string | null) {
   return email.slice(0, 2).toUpperCase();
 }
 
+function shortName(email: string, displayName: string | null) {
+  if (displayName?.trim()) {
+    const parts = displayName.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0]!;
+    return `${parts[0]} ${parts[parts.length - 1]![0]}.`;
+  }
+  return email.split("@")[0] ?? "You";
+}
+
 export function Topbar({ email, displayName, planLabel, notifications, unreadNotificationCount }: TopbarProps) {
   const initials = getInitials(email, displayName);
   const name = displayName?.trim() || email;
+  const compact = shortName(email, displayName);
 
   return (
-    <header className="relative flex h-13 shrink-0 items-center gap-3 border-b border-border-subtle bg-sidebar px-4 lg:px-6">
-      <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG */}
-        <img src="/logo.svg" alt="" className="size-7 rounded-md" width={28} height={28} />
-        <span className="font-display text-[15px] font-extrabold tracking-[-0.01em] text-sidebar-foreground">
-          Paid<span className="text-green-500">Prime</span>
+    <header className="relative flex h-16 shrink-0 items-center gap-4 border-b border-[#22262c] bg-[rgba(11,12,14,0.9)] px-4 backdrop-blur-[4px] lg:px-8">
+      <Link href="/dashboard" className="flex items-center gap-2.5 lg:hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
+        <img src="/marketing/dashboard/logo.svg" alt="" width={24} height={24} className="size-6" />
+        <span className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.3px] text-[#f2f4f7]">
+          PaidPrime
         </span>
       </Link>
 
-      {/* One HeaderSearch instance, not two — it owns the palette's
-          open/query state and its single <Dialog>, so rendering it twice
-          (once per breakpoint) would double both. Its desktop trigger is
-          absolutely positioned to sit centered in the header regardless
-          of the logo/icon-cluster's widths; its mobile trigger flows
-          normally inside the icon cluster below. */}
-      <div className="ml-auto flex items-center gap-1 lg:gap-3">
-        <HeaderSearch />
+      <HeaderSearch />
+
+      <div className="ml-auto flex items-center gap-2">
         <NotificationBell notifications={notifications} initialUnreadCount={unreadNotificationCount} />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex size-8.5 shrink-0 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(34,197,94,0.12)] font-mono text-[11px] font-bold text-green-500 transition-colors hover:border-green-500/50"
+              className="flex h-10 items-center gap-2.5 rounded-[10px] border border-[#22262c] bg-[#121417] py-0 pr-3 pl-2 transition-colors hover:border-[#2e343b]"
               title={name}
             >
-              {initials}
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-[8px] bg-[#16233d] text-[11px] text-[#4c82f7]">
+                {initials}
+              </span>
+              <span className="hidden max-w-[120px] truncate text-[13px] text-[#99a1ac] sm:inline">{compact}</span>
+              <FigmaIcon src="/marketing/dashboard/icon-chevron.svg" className="hidden size-[14px] text-[#99a1ac] sm:inline-block" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-60 p-0">
             <div className="flex items-center gap-2.5 p-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-green-500/30 bg-[rgba(34,197,94,0.12)] font-mono text-xs font-bold text-green-500">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-[8px] bg-[#16233d] text-xs font-medium text-[#4c82f7]">
                 {initials}
               </span>
               <div className="min-w-0 flex-1">
@@ -77,7 +86,7 @@ export function Topbar({ email, displayName, planLabel, notifications, unreadNot
               </div>
             </div>
             <div className="px-3 pb-2.5">
-              <span className="inline-flex items-center rounded-full bg-[rgba(34,197,94,0.12)] px-2 py-0.5 font-mono text-[10px] font-semibold tracking-[0.04em] text-green-500 uppercase">
+              <span className="inline-flex items-center rounded-full bg-[#16233d] px-2 py-0.5 text-[10px] font-medium tracking-[0.04em] text-[#4c82f7] uppercase">
                 {planLabel} plan
               </span>
             </div>

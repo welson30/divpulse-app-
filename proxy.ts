@@ -7,6 +7,7 @@ const PROTECTED_PREFIXES = [
   "/holdings",
   "/dividends",
   "/calendar",
+  "/upcoming",
   "/collections",
   "/diversification",
   "/watchlist",

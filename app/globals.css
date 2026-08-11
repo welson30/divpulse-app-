@@ -428,9 +428,44 @@ details.faq-item[open]::details-content {
 
 /* ============================================================
    Marketing landing — Figma "Paid Prime SaaS" homepage tokens
-   Scoped under .pp-landing so dashboard / app chrome stay on the
-   existing green brand system above.
+   Scoped under .pp-landing (marketing) and .pp-app (product shell).
    ============================================================ */
+.pp-app {
+  --bg-base: #0b0c0e;
+  --bg-surface: #121417;
+  --bg-elevated: #16191d;
+  --bg-hover: #1c2128;
+  --green-300: #6ed4a8;
+  --green-500: #3fbf87;
+  --green-600: #2ea06e;
+  --green-900: #10261e;
+  --text-primary: #f2f4f7;
+  --text-secondary: #99a1ac;
+  --text-tertiary: #6c737f;
+  --border-subtle: #22262c;
+  --blue-info: #4c82f7;
+  --font-display: var(--font-funnel-display), "Funnel Display", system-ui, sans-serif;
+  --font-body: var(--font-outfit), Outfit, system-ui, sans-serif;
+  --role-bg-canvas: #0b0c0e;
+  --role-bg-surface-1: #121417;
+  --role-bg-surface-2: #16191d;
+  --role-cta-bg: #4c82f7;
+  --role-cta-bg-hover: #3b6fe0;
+  --role-cta-fg: #f2f4f7;
+  --role-cta-glow: rgba(76, 130, 247, 0.12);
+  --role-gain: #3fbf87;
+  --primary: #4c82f7;
+  --sidebar: #121417;
+  --sidebar-foreground: #f2f4f7;
+  --sidebar-primary: #4c82f7;
+  --sidebar-accent: #16191d;
+  --sidebar-border: #22262c;
+  --radius-card: 14px;
+  background: #0b0c0e;
+  color: #f2f4f7;
+  font-family: var(--font-body);
+}
+
 .pp-landing {
   --pp-bg: #0b0c0e;
   --pp-surface: #121417;

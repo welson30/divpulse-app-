@@ -1,22 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Calendar, CalendarCheck, CalendarClock, ChevronLeft, ChevronRight, Clock, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { estimateUpcomingPayments } from "@/lib/dividend-data/next-payment";
-import { CalendarGrid, type CalendarDayEvent } from "@/components/dashboard/calendar-grid";
-import { CalendarMonthJump } from "@/components/dashboard/calendar-month-jump";
-import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
-import { StatCard } from "@/components/dashboard/market-stats";
-import { TIPS } from "@/lib/tips";
-import { Button } from "@/components/ui/button";
+import { enrichTickers } from "@/lib/tickers/enrich";
+import { estimateUpcomingPayments, getTickerFrequencies } from "@/lib/dividend-data/next-payment";
+import { PaymentCalendar } from "@/components/dashboard/payment-calendar";
+import { BrokerMark } from "@/components/dashboard/broker-mark";
+import type { CalendarPayment } from "@/components/dashboard/calendar-grid";
 
 export const metadata: Metadata = {
   title: "Calendar — PaidPrime",
 };
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 function clampMonth(raw: string | undefined, fallback: number) {
@@ -29,6 +36,34 @@ function clampYear(raw: string | undefined, fallback: number) {
   return Number.isInteger(n) && n >= 2000 && n <= 2100 ? n : fallback;
 }
 
+function formatMoney(value: number) {
+  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatSyncAgo(iso: string | null) {
+  if (!iso) return null;
+  const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  return days === 1 ? "1 day ago" : `${days} days ago`;
+}
+
+function connectionBadge(status: string) {
+  if (status === "error") {
+    return {
+      label: "Attention",
+      className: "border-[rgba(216,105,95,0.3)] bg-[#261615] text-[#d8695f]",
+    };
+  }
+  return {
+    label: "Synced",
+    className: "border-[rgba(63,191,135,0.3)] bg-[#10261e] text-[#3fbf87]",
+  };
+}
+
 export default async function CalendarPage({
   searchParams,
 }: {
@@ -38,7 +73,7 @@ export default async function CalendarPage({
 
   const now = new Date();
   const realYear = now.getUTCFullYear();
-  const realMonth = now.getUTCMonth() + 1; // 1-indexed
+  const realMonth = now.getUTCMonth() + 1;
   const todayStr = `${realYear}-${String(realMonth).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
 
   const year = clampYear(yearParam, realYear);
@@ -56,227 +91,199 @@ export default async function CalendarPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: holdings }, { data: profile }] = await Promise.all([
-    supabase.from("holdings").select("ticker, shares").eq("user_id", user!.id),
+  const [{ data: holdings }, { data: profile }, { data: brokerConnections }] = await Promise.all([
+    supabase.from("holdings").select("ticker, shares, broker_name, company_name").eq("user_id", user!.id),
     supabase.from("profiles").select("calendar_privacy_mode").eq("id", user!.id).single(),
+    supabase
+      .from("broker_connections")
+      .select("id, institution_name, status, last_synced_at")
+      .eq("user_id", user!.id)
+      .neq("status", "disconnected")
+      .order("created_at", { ascending: false }),
   ]);
+
   const tickers = [...new Set((holdings ?? []).map((h) => h.ticker))];
   const calendarPrivacyMode = profile?.calendar_privacy_mode ?? "full";
-  // A ticker can be held more than once (different brokers) — sum shares
-  // across every holding row for that ticker, same pattern dividends/page.tsx
-  // already uses for its own income math.
   const sharesByTicker = new Map<string, number>();
+  const brokerByTicker = new Map<string, { name: string; shares: number }>();
   for (const h of holdings ?? []) {
-    sharesByTicker.set(h.ticker, (sharesByTicker.get(h.ticker) ?? 0) + Number(h.shares));
+    const shares = Number(h.shares);
+    sharesByTicker.set(h.ticker, (sharesByTicker.get(h.ticker) ?? 0) + shares);
+    if (h.broker_name) {
+      const current = brokerByTicker.get(h.ticker);
+      if (!current || shares > current.shares) brokerByTicker.set(h.ticker, { name: h.broker_name, shares });
+    }
   }
 
   const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
   const daysInMonth = new Date(year, month, 0).getDate();
   const monthEnd = `${year}-${String(month).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
 
-  const [{ data: events }, { data: todayEvents }, upcomingEstimates] =
-    tickers.length > 0
-      ? await Promise.all([
-          supabase
-            .from("dividend_events")
-            .select("ticker, ex_date, pay_date, amount_per_share")
-            .in("ticker", tickers)
-            .or(`and(pay_date.gte.${monthStart},pay_date.lte.${monthEnd}),and(ex_date.gte.${monthStart},ex_date.lte.${monthEnd})`),
-          // Scoped to the real today's date regardless of which month is
-          // being browsed — the month-scoped query above won't include
-          // today's row once the user navigates away from the current month.
-          supabase
-            .from("dividend_events")
-            .select("ticker, ex_date, pay_date")
-            .in("ticker", tickers)
-            .or(`pay_date.eq.${todayStr},ex_date.eq.${todayStr}`),
-          // dividend_events never carries a future pay_date (it's built
-          // purely from Yahoo's historical dividend data — confirmed
-          // live, zero exceptions), so anything after today has to be
-          // projected from each ticker's own payment cadence instead —
-          // see lib/dividend-data/next-payment.ts.
-          estimateUpcomingPayments(supabase, tickers, monthStart, monthEnd),
-        ])
-      : [{ data: [] }, { data: [] }, []];
+  const header = (
+    <header className="border-b border-[#22262c] pb-6">
+      <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Calendar</p>
+      <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
+        Payment calendar
+      </h1>
+      <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
+        Expected and confirmed dividend payments mapped to the calendar.
+      </p>
+    </header>
+  );
 
-  const eventsByDay = new Map<number, CalendarDayEvent[]>();
-  let paymentCount = 0;
-  let exDateCount = 0;
-  let estimatedCount = 0;
+  const footer = (
+    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
+      {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
+      <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
+      <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+    </footer>
+  );
 
-  for (const event of events ?? []) {
-    if (event.pay_date) {
-      const payDay = new Date(`${event.pay_date}T00:00:00Z`);
-      if (payDay.getUTCFullYear() === year && payDay.getUTCMonth() + 1 === month) {
-        const day = payDay.getUTCDate();
-        // Actual dollars received (shares × per-share rate) — not the bare
-        // per-share rate itself, which reads as a real amount but usually
-        // isn't one (e.g. "$0.21" for a position paying $21 on 100 shares).
-        const totalAmount = Number(event.amount_per_share) * (sharesByTicker.get(event.ticker) ?? 0);
-        const amount = totalAmount.toFixed(2);
-        const label =
-          calendarPrivacyMode === "amount_only" ? `$${amount}` : calendarPrivacyMode === "ticker_only" ? event.ticker : `${event.ticker} $${amount}`;
-        const list = eventsByDay.get(day) ?? [];
-        list.push({ label, kind: "pay", amount: calendarPrivacyMode === "ticker_only" ? undefined : totalAmount });
-        eventsByDay.set(day, list);
-        paymentCount += 1;
-      }
-    }
-    if (event.ex_date && event.ex_date !== event.pay_date) {
-      const exDay = new Date(`${event.ex_date}T00:00:00Z`);
-      if (exDay.getUTCFullYear() === year && exDay.getUTCMonth() + 1 === month) {
-        const day = exDay.getUTCDate();
-        const label = calendarPrivacyMode === "amount_only" ? "ex" : `${event.ticker} ex`;
-        const list = eventsByDay.get(day) ?? [];
-        list.push({ label, kind: "ex" });
-        eventsByDay.set(day, list);
-        exDateCount += 1;
-      }
-    }
-  }
+  const brokers = (
+    <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
+      <header className="border-b border-[#22262c] px-6 py-5">
+        <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
+          Broker integrations
+        </h2>
+        <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Sync status across accounts</p>
+      </header>
+      {brokerConnections && brokerConnections.length > 0 ? (
+        <div className="px-6 py-2">
+          {brokerConnections.map((row, i) => {
+            const badge = connectionBadge(row.status);
+            const ago = formatSyncAgo(row.last_synced_at);
+            return (
+              <div
+                key={row.id}
+                className={`flex items-center justify-between gap-3 py-3.5 ${
+                  i < brokerConnections.length - 1 ? "border-b border-[#22262c]" : ""
+                }`}
+              >
+                <BrokerMark name={row.institution_name} />
+                <div className="flex shrink-0 items-center gap-2">
+                  {ago ? <span className="text-[11px] leading-[18.15px] text-[#6c737f]">{ago}</span> : null}
+                  <span className={`rounded-[8px] border px-2 py-1 text-[11px] tracking-[1.1px] uppercase ${badge.className}`}>
+                    {badge.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="px-6 py-5 text-[13px] leading-[21.45px] text-[#99a1ac]">
+          No brokers connected.{" "}
+          <Link href="/settings?tab=integrations" className="text-[#4c82f7] hover:underline">
+            Connect a brokerage
+          </Link>
+        </p>
+      )}
+      <div className="border-t border-[#22262c] px-6 py-4">
+        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">
+          All connections are read-only; PaidPrime never has withdrawal access.
+        </p>
+      </div>
+    </section>
+  );
 
-  // dividend_events itself never has a future pay_date, so anything
-  // shown for a day after today comes from here instead — a real
-  // Yahoo-announced date folds into paymentCount like any other real
-  // payment, while a cadence-only guess stays separately counted and
-  // visually distinct (see calendar-grid.tsx's "estimated" kind).
-  for (const estimate of upcomingEstimates) {
-    const payDay = new Date(`${estimate.payDate}T00:00:00Z`);
-    if (payDay.getUTCFullYear() === year && payDay.getUTCMonth() + 1 === month) {
-      const day = payDay.getUTCDate();
-      const totalAmount = estimate.amountPerShare * (sharesByTicker.get(estimate.ticker) ?? 0);
-      const amount = totalAmount.toFixed(2);
-      const label =
-        calendarPrivacyMode === "amount_only"
-          ? `$${amount}`
-          : calendarPrivacyMode === "ticker_only"
-            ? estimate.ticker
-            : `${estimate.ticker} $${amount}`;
-      const list = eventsByDay.get(day) ?? [];
-      list.push({
-        label,
-        kind: estimate.source === "confirmed" ? "pay" : "estimated",
-        amount: calendarPrivacyMode === "ticker_only" ? undefined : totalAmount,
-      });
-      eventsByDay.set(day, list);
-      if (estimate.source === "confirmed") paymentCount += 1;
-      else estimatedCount += 1;
-    }
-  }
-
-  let todayCount = 0;
-  for (const event of todayEvents ?? []) {
-    if (event.pay_date === todayStr) todayCount += 1;
-    if (event.ex_date === todayStr && event.ex_date !== event.pay_date) todayCount += 1;
-  }
-
-  const todayLabel = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-  const isMonthEmpty = paymentCount === 0 && exDateCount === 0 && estimatedCount === 0;
-
-  if (tickers.length === 0) {
+  if (!holdings || holdings.length === 0) {
     return (
-      <div className="flex flex-col gap-sp-3">
-        <div>
-          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
-          <h1 className="text-h1 font-display font-semibold text-text-primary">Calendar</h1>
+      <div className="flex flex-col gap-6">
+        {header}
+        <div className="grid grid-cols-1 items-start gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-sm text-[#99a1ac]">
+            Add a holding to see its dividend calendar.
+          </div>
+          {brokers}
         </div>
-        <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-6 text-center">
-          <p className="text-sm text-text-secondary">Add a holding to see its dividend calendar.</p>
-        </div>
+        {footer}
       </div>
     );
   }
 
+  const [{ data: events }, upcomingEstimates, frequencies, enriched] = await Promise.all([
+    supabase
+      .from("dividend_events")
+      .select("ticker, pay_date, amount_per_share")
+      .in("ticker", tickers)
+      .gte("pay_date", monthStart)
+      .lte("pay_date", monthEnd),
+    estimateUpcomingPayments(supabase, tickers, monthStart, monthEnd),
+    getTickerFrequencies(supabase, tickers),
+    enrichTickers(tickers),
+  ]);
+
+  const nameFor = (ticker: string) =>
+    enriched.get(ticker.toUpperCase())?.name ??
+    holdings.find((h) => h.ticker === ticker)?.company_name ??
+    ticker;
+
+  const hideAmount = calendarPrivacyMode === "ticker_only";
+
+  const recordedKeys = new Set<string>();
+  const payments: CalendarPayment[] = [];
+
+  for (const event of events ?? []) {
+    if (!event.pay_date) continue;
+    const payDay = new Date(`${event.pay_date}T00:00:00Z`);
+    if (payDay.getUTCFullYear() !== year || payDay.getUTCMonth() + 1 !== month) continue;
+    recordedKeys.add(`${event.ticker}|${event.pay_date}`);
+    const totalAmount = Number(event.amount_per_share) * (sharesByTicker.get(event.ticker) ?? 0);
+    payments.push({
+      day: payDay.getUTCDate(),
+      ticker: event.ticker,
+      name: nameFor(event.ticker),
+      kind: "pay",
+      amount: hideAmount ? null : totalAmount,
+      broker: brokerByTicker.get(event.ticker)?.name ?? null,
+      frequency: frequencies.get(event.ticker) ?? null,
+    });
+  }
+
+  for (const estimate of upcomingEstimates) {
+    if (recordedKeys.has(`${estimate.ticker}|${estimate.payDate}`)) continue;
+    const payDay = new Date(`${estimate.payDate}T00:00:00Z`);
+    if (payDay.getUTCFullYear() !== year || payDay.getUTCMonth() + 1 !== month) continue;
+    const totalAmount = estimate.amountPerShare * (sharesByTicker.get(estimate.ticker) ?? 0);
+    payments.push({
+      day: payDay.getUTCDate(),
+      ticker: estimate.ticker,
+      name: nameFor(estimate.ticker),
+      kind: estimate.source === "confirmed" ? "pay" : "estimated",
+      amount: hideAmount ? null : totalAmount,
+      broker: brokerByTicker.get(estimate.ticker)?.name ?? null,
+      frequency: frequencies.get(estimate.ticker) ?? null,
+    });
+  }
+
+  payments.sort((a, b) => a.day - b.day || a.ticker.localeCompare(b.ticker));
+
+  const monthTotal = payments.reduce((sum, p) => sum + (p.amount ?? 0), 0);
+  const hasEstimate = payments.some((p) => p.kind === "estimated");
+  const isPastMonth = year < realYear || (year === realYear && month < realMonth);
+  const expectedLabel = hideAmount
+    ? `${payments.length} ${payments.length === 1 ? "payment" : "payments"} this month`
+    : isPastMonth && !hasEstimate
+      ? `${formatMoney(monthTotal)} recorded this month`
+      : `${hasEstimate ? "~" : ""}${formatMoney(monthTotal)} expected this month`;
+
   return (
-    <div className="flex flex-col gap-sp-4">
-      <div className="relative">
-        <GreetingBackdrop />
-        <div className="relative z-10 flex flex-wrap items-start justify-between gap-sp-2">
-          <div>
-            <div className="flex items-center gap-1">
-              <Button asChild variant="ghost" size="icon-sm">
-                <Link href={`/calendar?month=${prevMonth}&year=${prevYear}`} aria-label="Previous month">
-                  <ChevronLeft className="size-4" />
-                </Link>
-              </Button>
-              <h1 className="text-h1 font-display font-semibold text-text-primary">
-                {MONTH_NAMES[month - 1]} {year}
-              </h1>
-              <Button asChild variant="ghost" size="icon-sm">
-                <Link href={`/calendar?month=${nextMonth}&year=${nextYear}`} aria-label="Next month">
-                  <ChevronRight className="size-4" />
-                </Link>
-              </Button>
-            </div>
-            <p className="mt-1 text-sm text-text-secondary">
-              {paymentCount} dividend {paymentCount === 1 ? "payment" : "payments"} • {exDateCount}{" "}
-              {exDateCount === 1 ? "ex-date" : "ex-dates"}
-              {estimatedCount > 0 ? (
-                <>
-                  {" "}
-                  • {estimatedCount} estimated
-                </>
-              ) : null}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/calendar">Today</Link>
-            </Button>
-            <CalendarMonthJump month={month} year={year} />
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-card border border-border-subtle bg-surface p-sp-3">
-        <CalendarGrid month={month} year={year} eventsByDay={eventsByDay} todayDay={todayDay} />
-
-        <div className="mt-sp-3 flex flex-wrap gap-sp-3 border-t border-border-subtle pt-sp-2">
-          <span className="flex items-center gap-1.5 text-[11px] text-text-secondary">
-            <span aria-hidden className="size-2 rounded-full bg-green-500" />
-            Payment
-          </span>
-          <span className="flex items-center gap-1.5 text-[11px] text-text-secondary">
-            <span aria-hidden className="size-2 rounded-full bg-warning" />
-            Ex-date
-          </span>
-          <span className="flex items-center gap-1.5 text-[11px] text-text-secondary">
-            <span aria-hidden className="size-2 rounded-full border border-dashed border-green-500 bg-transparent" />
-            Estimated payment
-          </span>
-          <span className="flex items-center gap-1.5 text-[11px] text-text-secondary">
-            <span aria-hidden className="size-2 rounded-full bg-info" />
-            Today
-          </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-sp-2 lg:grid-cols-4">
-        <StatCard label="Payments" value={String(paymentCount)} sub={`in ${MONTH_NAMES[month - 1]} ${year}`} icon={CalendarCheck} iconColor="green" compact />
-        <StatCard label="Ex-dates" value={String(exDateCount)} sub={`in ${MONTH_NAMES[month - 1]} ${year}`} icon={CalendarClock} iconColor="amber" compact />
-        <StatCard
-          label="Estimated"
-          value={String(estimatedCount)}
-          sub={`in ${MONTH_NAMES[month - 1]} ${year}`}
-          tip={TIPS.nextPayment}
-          icon={Sparkles}
-          iconColor="amber"
-          compact
-        />
-        <StatCard label="Today" value={String(todayCount)} sub={todayLabel} icon={Clock} iconColor="blue" compact />
-      </div>
-
-      {isMonthEmpty ? (
-        <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-6 text-center">
-          <Calendar className="size-8 text-text-tertiary" aria-hidden />
-          <p className="text-sm font-medium text-text-primary">No dividend activity</p>
-          <p className="text-sm text-text-secondary">
-            There are no payments, ex-dates or estimated payments in {MONTH_NAMES[month - 1]} {year}. Enjoy the calm before the
-            next income.
-          </p>
-        </div>
-      ) : null}
+    <div className="flex flex-col gap-6">
+      {header}
+      <PaymentCalendar
+        month={month}
+        year={year}
+        monthLabel={`${MONTH_NAMES[month - 1]} ${year}`}
+        expectedLabel={expectedLabel}
+        todayDay={todayDay}
+        payments={payments}
+        prevHref={`/calendar?month=${prevMonth}&year=${prevYear}`}
+        nextHref={`/calendar?month=${nextMonth}&year=${nextYear}`}
+        todayHref="/calendar"
+      >
+        {brokers}
+      </PaymentCalendar>
+      {footer}
     </div>
   );
 }

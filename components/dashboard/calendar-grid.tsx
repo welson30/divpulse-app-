@@ -2,142 +2,125 @@
 
 import { cn } from "@/lib/utils";
 
-export type CalendarDayEvent = {
-  label: string;
-  /** "estimated" is a cadence-based guess (no real dividend_events row yet) — always rendered distinctly from a confirmed "pay". */
-  kind: "pay" | "ex" | "estimated";
-  /** Actual dollars this event contributes to the day — undefined for ex-dates (no dollar value) and whenever the "ticker only" privacy mode hides amounts. */
-  amount?: number;
+export type CalendarPayment = {
+  day: number;
+  ticker: string;
+  name: string;
+  kind: "pay" | "estimated";
+  amount: number | null;
+  broker: string | null;
+  frequency: string | null;
 };
 
-export type CalendarGridProps = {
-  /** 1-indexed month (1 = January) */
-  month: number;
-  year: number;
-  /** Map of day-of-month -> events on that day */
-  eventsByDay: Map<number, CalendarDayEvent[]>;
-  todayDay: number | null;
-};
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const WEEKDAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-
-function PadCell({ day }: { day: number }) {
-  return (
-    <div className="flex min-h-13.5 flex-col gap-0.5 rounded-[6px] border border-transparent p-1 text-[10px]">
-      <span className="font-mono text-text-tertiary/50">{day}</span>
-    </div>
-  );
+function formatAmount(value: number, estimated: boolean) {
+  const body = `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return estimated ? `~${body}` : body;
 }
 
-/** Ported from the marketing site's product-tabs.tsx CalendarPanel demo, driven by real data instead of a fixture array. */
-export function CalendarGrid({ month, year, eventsByDay, todayDay }: CalendarGridProps) {
+export function CalendarGrid({
+  month,
+  year,
+  payments,
+  todayDay,
+  selectedDay,
+  onSelectDay,
+}: {
+  month: number;
+  year: number;
+  payments: CalendarPayment[];
+  todayDay: number | null;
+  selectedDay: number;
+  onSelectDay: (day: number) => void;
+}) {
   const daysInMonth = new Date(year, month, 0).getDate();
-  // JS getDay(): 0=Sunday..6=Saturday — grid is Sunday-first, so this is
-  // used directly as the leading-pad-cell count, no remap needed.
   const leadingBlanks = new Date(year, month - 1, 1).getDay();
-
-  const prevMonthDays = new Date(year, month - 1, 0).getDate();
-  const leadingPadDays = Array.from({ length: leadingBlanks }, (_, i) => prevMonthDays - leadingBlanks + i + 1);
-
   const totalCells = leadingBlanks + daysInMonth;
   const trailingBlanks = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-  const trailingPadDays = Array.from({ length: trailingBlanks }, (_, i) => i + 1);
+
+  const byDay = new Map<number, CalendarPayment[]>();
+  for (const payment of payments) {
+    const list = byDay.get(payment.day) ?? [];
+    list.push(payment);
+    byDay.set(payment.day, list);
+  }
 
   return (
-    <div className="grid grid-cols-7 gap-1">
-      {WEEKDAY_LABELS.map((d, i) => (
-        <div key={i} className="text-center font-mono text-[10px] text-text-secondary">
-          {d}
-        </div>
-      ))}
-      {leadingPadDays.map((day, i) => (
-        <PadCell key={`lead-${i}`} day={day} />
-      ))}
-      {Array.from({ length: daysInMonth }).map((_, i) => {
-        const day = i + 1;
-        const events = eventsByDay.get(day) ?? [];
-        const isToday = day === todayDay;
-        const primaryKind: "pay" | "ex" | "estimated" | null = events.some((e) => e.kind === "pay")
-          ? "pay"
-          : events.some((e) => e.kind === "ex")
-            ? "ex"
-            : events.some((e) => e.kind === "estimated")
-              ? "estimated"
-              : null;
-        const isInert = events.length === 0 && !isToday;
-        // Only worth a total once there's more than one dollar figure to
-        // add up — a single event already shows its own amount above.
-        const dollarEvents = events.filter((e) => e.amount != null);
-        const dayTotal = dollarEvents.reduce((sum, e) => sum + e.amount!, 0);
-        const totalHasEstimate = dollarEvents.some((e) => e.kind === "estimated");
-
-        return (
+    <div className="overflow-hidden rounded-[10px]">
+      <div className="grid grid-cols-7 gap-px bg-[#22262c]">
+        {WEEKDAYS.map((d) => (
           <div
-            key={day}
-            className={cn(
-              "group relative flex min-h-13.5 cursor-default flex-col gap-0.5 rounded-[6px] border p-1 text-[10px] transition-all duration-150 ease-out",
-              !isInert && "hover:z-10 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)]",
-              isToday
-                ? "border-info bg-info/8 hover:border-info/70 hover:bg-info/14"
-                : primaryKind === "pay"
-                  ? "border-green-500/30 bg-[rgba(52,211,153,0.08)] hover:border-green-500/60 hover:bg-[rgba(52,211,153,0.14)]"
-                  : primaryKind === "ex"
-                    ? "border-warning/20 bg-[rgba(251,191,36,0.06)] hover:border-warning/50 hover:bg-[rgba(251,191,36,0.12)]"
-                    : primaryKind === "estimated"
-                      ? "border-dashed border-green-500/40 bg-transparent hover:border-green-500/60 hover:bg-[rgba(52,211,153,0.06)]"
-                      : "border-border-subtle bg-surface-2 hover:border-border-interactive",
-            )}
+            key={d}
+            className="bg-[#121417] py-2 text-center text-[10px] tracking-[1.2px] text-[#6c737f] uppercase"
           >
-            <div className="flex items-center justify-between">
-              <span className={cn("font-mono", isToday ? "font-bold text-info" : "text-text-secondary")}>{day}</span>
-              {events.length > 0 ? (
-                <span
-                  className={cn(
-                    "flex size-3.5 items-center justify-center rounded-full text-[8px] font-bold",
-                    primaryKind === "pay"
-                      ? "bg-green-500 text-white"
-                      : primaryKind === "ex"
-                        ? "bg-warning text-white"
-                        : "border border-dashed border-green-500/60 bg-transparent text-green-500",
-                  )}
-                >
-                  {events.length}
+            {d}
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-px bg-[#22262c]">
+        {Array.from({ length: leadingBlanks }).map((_, i) => (
+          <div key={`lead-${i}`} className="min-h-[86px] bg-[#121417] opacity-40" />
+        ))}
+        {Array.from({ length: daysInMonth }).map((_, i) => {
+          const day = i + 1;
+          const events = byDay.get(day) ?? [];
+          const isSelected = day === selectedDay;
+          const isToday = day === todayDay;
+          const visible = events.slice(0, 1);
+          const extra = events.length - visible.length;
+
+          return (
+            <button
+              key={day}
+              type="button"
+              onClick={() => onSelectDay(day)}
+              className={cn(
+                "relative flex min-h-[86px] flex-col items-start gap-1.5 bg-[#121417] px-2 py-2 text-left outline-none",
+                isSelected && "z-[1] shadow-[inset_0_0_0_1px_#4c82f7]",
+              )}
+            >
+              <span
+                className={cn(
+                  "text-[12px] tracking-[-0.24px] text-[#99a1ac]",
+                  isToday && !isSelected && "font-medium text-[#4c82f7]",
+                )}
+              >
+                {day}
+              </span>
+              {visible.length > 0 ? (
+                <span className="flex w-full min-w-0 flex-col gap-1">
+                  {visible.map((event, idx) => (
+                    <span key={`${event.ticker}-${idx}`} className="flex min-w-0 flex-col gap-0.5">
+                      <span
+                        className={cn(
+                          "truncate rounded-[6px] px-1.5 py-0.5 text-[10px] font-medium text-[#4c82f7]",
+                          event.kind === "estimated"
+                            ? "border border-dashed border-[#4c82f7]/50 bg-transparent"
+                            : "bg-[#16233d]",
+                        )}
+                      >
+                        {event.ticker}
+                      </span>
+                      {event.amount != null ? (
+                        <span className="truncate text-[10px] tracking-[-0.2px] text-[#6c737f]">
+                          {formatAmount(event.amount, event.kind === "estimated")}
+                        </span>
+                      ) : null}
+                    </span>
+                  ))}
+                  {extra > 0 ? (
+                    <span className="text-[10px] text-[#6c737f]">+{extra} more</span>
+                  ) : null}
                 </span>
               ) : null}
-            </div>
-            {events.map((event, idx) => (
-              <span
-                key={idx}
-                className={cn(
-                  "truncate rounded-[3px] px-1 py-0.5 text-[9px] transition-colors",
-                  event.kind === "pay"
-                    ? "bg-green-900/60 text-green-500"
-                    : event.kind === "ex"
-                      ? "bg-warning/15 text-warning"
-                      : "border border-dashed border-green-500/40 bg-transparent text-green-500",
-                )}
-              >
-                {event.label}
-              </span>
-            ))}
-            {dollarEvents.length > 1 ? (
-              <span
-                className={cn(
-                  "mt-auto truncate rounded-[3px] px-1 py-0.5 text-[9px] font-bold",
-                  totalHasEstimate
-                    ? "border border-dashed border-green-500/50 text-green-500"
-                    : "bg-green-500/20 text-green-500",
-                )}
-              >
-                {totalHasEstimate ? "~" : ""}${dayTotal.toFixed(2)} total
-              </span>
-            ) : null}
-          </div>
-        );
-      })}
-      {trailingPadDays.map((day, i) => (
-        <PadCell key={`trail-${i}`} day={day} />
-      ))}
+            </button>
+          );
+        })}
+        {Array.from({ length: trailingBlanks }).map((_, i) => (
+          <div key={`trail-${i}`} className="min-h-[86px] bg-[#121417] opacity-40" />
+        ))}
+      </div>
     </div>
   );
 }

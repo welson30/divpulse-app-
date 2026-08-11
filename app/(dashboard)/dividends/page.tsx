@@ -1,37 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BarChart3, Calendar, ChevronRight, CircleDollarSign, Coins, Sprout, Target, TrendingUp, Trophy, Wallet } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { isLinkableTicker } from "@/lib/tickers/validate";
-import { TickerLogo } from "@/components/dashboard/ticker-logo";
-import { computeTrailingIncome, computeMonthlyIncomeSeries } from "@/lib/dividend-data/income";
-import { StatCard } from "@/components/dashboard/market-stats";
-import { InfoTip } from "@/components/dashboard/info-tip";
-import { TIPS } from "@/lib/tips";
-import { MonthlyIncomeChart, type MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
-import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
-import type { SparklinePoint } from "@/lib/dividend-data/types";
+import {
+  computeTrailingIncome,
+  computeMonthlyIncomeSeries,
+  computeAnnualIncomeSeries,
+  computeCadenceIncome,
+} from "@/lib/dividend-data/income";
+import { PassiveIncomeChart } from "@/components/dashboard/passive-income-chart";
+import { DividendGrowthChart } from "@/components/dashboard/dividend-growth-chart";
+import { FigmaIcon } from "@/components/dashboard/figma-icon";
 
 export const metadata: Metadata = {
   title: "Dividends — PaidPrime",
 };
 
-function formatDate(dateStr: string) {
-  return new Date(`${dateStr}T00:00:00Z`).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-function formatMoney(value: number) {
+function formatMoney(value: number, compact = false) {
+  if (compact && Math.abs(value) >= 100) {
+    return `$${Math.round(value).toLocaleString("en-US")}`;
+  }
   return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
-
-const HISTORY_HEAD =
-  "border-b border-border-subtle px-sp-3 py-3.5 font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase";
 
 export default async function DividendsPage() {
   const supabase = await createClient();
@@ -39,346 +30,264 @@ export default async function DividendsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: holdings } = await supabase.from("holdings").select("id, ticker, shares").eq("user_id", user!.id);
+  const { data: holdings } = await supabase
+    .from("holdings")
+    .select("ticker, shares, company_name")
+    .eq("user_id", user!.id);
 
-  const tickers = [...new Set((holdings ?? []).map((h) => h.ticker))];
+  const header = (
+    <header className="border-b border-[#22262c] pb-6">
+      <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Dividends</p>
+      <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
+        Dividend income
+      </h1>
+      <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
+        Trailing twelve months, forward projection and per-holding contribution.
+      </p>
+    </header>
+  );
 
-  const [{ data: payments }, { data: events }] = await Promise.all([
-    supabase
-      .from("dividend_payments")
-      .select("id, amount, pay_date, holding_id")
-      .eq("user_id", user!.id)
-      .order("pay_date", { ascending: false }),
-    tickers.length > 0
-      ? supabase
-          .from("dividend_events")
-          .select("id, ticker, ex_date, pay_date, amount_per_share")
-          .in("ticker", tickers)
-          .order("pay_date", { ascending: false })
-      : Promise.resolve({ data: [] }),
-  ]);
+  const footer = (
+    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
+      {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
+      <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
+      <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+    </footer>
+  );
 
-  const holdingById = new Map((holdings ?? []).map((h) => [h.id, h]));
-  const enriched = await enrichTickers(tickers);
-  const logoFor = (ticker: string | undefined) =>
-    ticker ? (enriched.get(ticker.toUpperCase())?.logoUrl ?? null) : null;
-
-  // The event list on its own is 400-odd rows of raw history; these turn
-  // it into the numbers the page is actually for — what this portfolio
-  // earns per year, month and day.
-  const income = await computeTrailingIncome(supabase, holdings ?? []);
-  const sharesByTicker = new Map<string, number>();
-  for (const h of holdings ?? []) {
-    sharesByTicker.set(h.ticker, (sharesByTicker.get(h.ticker) ?? 0) + Number(h.shares));
-  }
-
-  const now = new Date();
-  const todayIso = now.toISOString().slice(0, 10);
-
-  // Last 12 months of income, bucketed by calendar month — shared with
-  // the Passive Income goal's own trend chart (lib/dividend-data/income.ts),
-  // so the two pages can't drift apart on the same real numbers.
-  const monthlySeries: MonthlyIncomePoint[] = await computeMonthlyIncomeSeries(supabase, holdings ?? []);
-  // Same 12 real monthly totals, reshaped for the stat-card mini sparklines
-  // — not a separate fabricated series.
-  const monthlySparkline: SparklinePoint[] = monthlySeries.map(({ month, total }) => ({
-    t: Math.floor(new Date(`${month}-01T00:00:00Z`).getTime() / 1000),
-    c: total,
-  }));
-
-  // Real, derived growth signal: first half of the trailing-12mo window
-  // vs. the second half. Not "vs last month" (too noisy for weekly/monthly
-  // payers with irregular cadence) — a wider window is stable enough to
-  // say something honest. Hidden if there's too little history to be
-  // meaningful rather than shown with a misleading swing.
-  const firstHalfTotal = monthlySeries.slice(0, 6).reduce((sum, { total }) => sum + total, 0);
-  const secondHalfTotal = monthlySeries.slice(6).reduce((sum, { total }) => sum + total, 0);
-  const growthPct = firstHalfTotal > 0 ? ((secondHalfTotal - firstHalfTotal) / firstHalfTotal) * 100 : null;
-
-  // Which holdings actually generate the income.
-  // The raw event list runs to several hundred rows for a portfolio of
-  // weekly payers — a wall of numbers nobody scrolls. Show the most
-  // recent slice and say how many there are in total.
-  const HISTORY_LIMIT = 60;
-  const recentEvents = (events ?? []).slice(0, HISTORY_LIMIT);
-  const totalEvents = (events ?? []).length;
-
-  // dividend_events holds Yahoo's full trailing history — often a year
-  // or more back, well before a holding was added or before the
-  // detection cron itself was fixed (it silently caught nothing until
-  // 2026-07-31 — see docs/client-feedback-2026-07-31.md §3). A row here
-  // having no matching dividend_payments confirmation just means this
-  // app wasn't around to notify about it in real time, not that the
-  // payment hasn't happened — confirmed live: 395 of 401 real historical
-  // events for a typical portfolio have no confirmation row. So "Paid"
-  // vs "Pending" is a calendar fact (has pay_date already passed?), not
-  // whether our own notification pipeline happened to catch it — a
-  // confirmed row is still preferred for the exact payout amount when
-  // one exists, since it reflects what was actually detected rather than
-  // a recomputed estimate.
-  const paymentByTickerDate = new Map<string, { id: string; amount: number }>();
-  for (const p of payments ?? []) {
-    const ticker = holdingById.get(p.holding_id)?.ticker;
-    if (ticker) paymentByTickerDate.set(`${ticker}|${p.pay_date}`, { id: p.id, amount: Number(p.amount) });
-  }
-
-  const topEarners = [...income.perTicker.entries()]
-    .filter(([, amount]) => amount > 0)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-
-  if (tickers.length === 0) {
+  if (!holdings || holdings.length === 0) {
     return (
-      <div className="flex flex-col gap-sp-3">
-        <div>
-          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Portfolio</span>
-          <h1 className="text-h1 font-display font-semibold text-text-primary">Dividends</h1>
+      <div className="flex flex-col gap-6">
+        {header}
+        <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-sm text-[#99a1ac]">
+          Add a holding to start tracking dividend income.
         </div>
-        <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-6 text-center">
-          <p className="text-sm text-text-secondary">Add a holding to start tracking dividend income.</p>
-        </div>
+        {footer}
       </div>
     );
   }
 
+  const tickers = [...new Set(holdings.map((h) => h.ticker))];
+  const [enriched, income, monthlySeries, annualSeries] = await Promise.all([
+    enrichTickers(tickers),
+    computeTrailingIncome(supabase, holdings),
+    computeMonthlyIncomeSeries(supabase, holdings),
+    computeAnnualIncomeSeries(supabase, holdings),
+  ]);
+  const cadenceLive = await computeCadenceIncome(supabase, holdings, income.perTicker);
+
+  const infoFor = (ticker: string) => enriched.get(ticker.toUpperCase());
+
+  let portfolioValue = 0;
+  for (const holding of holdings) {
+    const price = infoFor(holding.ticker)?.quote?.price;
+    if (price) portfolioValue += Number(holding.shares) * price;
+  }
+  const avgYieldPct = portfolioValue > 0 ? (income.annual / portfolioValue) * 100 : null;
+
+  const completeYears = annualSeries.filter((p) => p.complete && p.total > 0);
+  const firstYear = completeYears[0];
+  const lastYear = completeYears.at(-1);
+  const growthPct =
+    firstYear && lastYear && firstYear.year !== lastYear.year && firstYear.total > 0
+      ? ((lastYear.total - firstYear.total) / firstYear.total) * 100
+      : null;
+  const growthSpan = firstYear && lastYear && firstYear.year !== lastYear.year ? lastYear.year - firstYear.year + 1 : null;
+
+  const chartYears = annualSeries.filter((p, i) => p.total > 0 || annualSeries.slice(0, i).some((x) => x.total > 0));
+
+  const rows = [...new Map(holdings.map((h) => [h.ticker, h])).values()]
+    .map((h) => {
+      const info = infoFor(h.ticker);
+      const shares = holdings
+        .filter((row) => row.ticker === h.ticker)
+        .reduce((sum, row) => sum + Number(row.shares), 0);
+      const price = info?.quote?.price ?? null;
+      const marketValue = price != null ? price * shares : null;
+      const annual = income.perTicker.get(h.ticker) ?? 0;
+      return {
+        ticker: h.ticker,
+        name: info?.name ?? h.company_name ?? h.ticker,
+        annual,
+        monthly: annual / 12,
+        yieldPct: marketValue != null && marketValue > 0 ? (annual / marketValue) * 100 : null,
+      };
+    })
+    .sort((a, b) => b.annual - a.annual);
+
+  const topNames = rows
+    .filter((r) => r.annual > 0)
+    .slice(0, 2)
+    .map((r) => r.ticker);
+
+  const trendBody =
+    growthPct != null && firstYear && lastYear
+      ? `Annual dividend income has ${growthPct >= 0 ? "grown" : "declined"} ${Math.abs(growthPct).toFixed(0)}% from ${firstYear.year} to ${lastYear.year}${
+          cadenceLive.dominantLabel ? `, driven mostly by ${cadenceLive.dominantLabel}` : ""
+        }${topNames.length > 0 ? ` (${topNames.join(", ")})` : ""}.`
+      : cadenceLive.dominantLabel
+        ? `Most of your trailing twelve-month income comes from ${cadenceLive.dominantLabel}${
+            topNames.length > 0 ? `, led by ${topNames.join(" and ")}` : ""
+          }.`
+        : "Income is trailing twelve months of recorded dividend events at your current share counts.";
+
+  const kpis = [
+    {
+      label: "TTM income",
+      value: formatMoney(income.annual, true),
+      sub: "Recorded last 12 months",
+      valueClass: "text-[#f2f4f7]",
+    },
+    {
+      label: "Forward income",
+      value: formatMoney(cadenceLive.forwardAnnual, true),
+      sub: "Estimated next 12mo",
+      valueClass: "text-[#f2f4f7]",
+    },
+    {
+      label: "Average yield",
+      value: avgYieldPct != null ? `${avgYieldPct.toFixed(2)}%` : "—",
+      sub: "Trailing income / value",
+      valueClass: "text-[#f2f4f7]",
+    },
+    {
+      label: growthSpan != null ? `${growthSpan}yr growth rate` : "Growth rate",
+      value: growthPct != null ? `${growthPct >= 0 ? "+" : ""}${Math.round(growthPct)}%` : "—",
+      sub:
+        firstYear && lastYear && firstYear.year !== lastYear.year
+          ? `${firstYear.year} → ${lastYear.year} annual income`
+          : "Need two complete years",
+      valueClass: growthPct != null && growthPct < 0 ? "text-[#d8695f]" : "text-[#3fbf87]",
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-sp-4">
-      <div className="flex flex-col gap-sp-3 lg:flex-row lg:items-stretch">
-        <div className="relative flex flex-1 items-start gap-sp-2">
-          <GreetingBackdrop />
-          <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-[rgba(34,197,94,0.12)] text-green-500">
-            <Sprout className="size-6" />
-          </span>
-          <div className="relative z-10 min-w-0">
-            <h1 className="text-h1 font-display font-semibold text-text-primary">Dividends</h1>
-            <p className="text-sm text-text-secondary">Steady income. Long-term wealth.</p>
-            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-text-secondary">
-              <Calendar className="size-3.5" aria-hidden />
-              {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+    <div className="flex flex-col gap-6">
+      {header}
+
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-[#22262c] bg-[#22262c] lg:grid-cols-4">
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className="flex flex-col gap-2 bg-[#121417] px-5 py-5 min-[900px]:px-6">
+            <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">{kpi.label}</p>
+            <p className={`text-[22px] leading-[26px] tracking-[-0.52px] min-[900px]:text-[26px] ${kpi.valueClass}`}>
+              {kpi.value}
             </p>
+            <p className="text-[12px] leading-[19.8px] tracking-[-0.24px] text-[#99a1ac]">{kpi.sub}</p>
           </div>
-        </div>
-
-        <Link
-          href="/goals"
-          className="flex items-center gap-3 rounded-card border border-green-500/20 bg-[rgba(34,197,94,0.06)] p-sp-3 transition-colors hover:bg-[rgba(34,197,94,0.1)] lg:w-75"
-        >
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[rgba(34,197,94,0.15)] text-green-500">
-            <Target className="size-5" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold text-text-primary">Build passive income</div>
-            <div className="text-xs text-text-secondary">Set a target, track your progress</div>
-          </div>
-          <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
-        </Link>
+        ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-sp-2">
-        <StatCard
-          label="Portfolio annual income"
-          value={formatMoney(income.annual)}
-          tip={TIPS.annualIncome}
-          icon={Coins}
-          sparkline={monthlySparkline}
-          compact
-        />
-        <StatCard
-          label="Monthly income"
-          value={formatMoney(income.monthly)}
-          sub="12-month average"
-          icon={Wallet}
-          sparkline={monthlySparkline}
-          compact
-        />
-        <StatCard
-          label="Daily income"
-          value={formatMoney(income.daily)}
-          tip={TIPS.incomePerDay}
-          icon={CircleDollarSign}
-          sparkline={monthlySparkline}
-          compact
-        />
-      </div>
+      <div className="grid grid-cols-1 items-start gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="flex min-w-0 flex-col gap-6">
+          <PassiveIncomeChart
+            data={monthlySeries}
+            title="Monthly income"
+            subtitle="Dividends received per month, trailing 12 months"
+            chartClassName="h-[240px] min-[900px]:h-[240px]"
+          />
+          <DividendGrowthChart data={chartYears.length > 0 ? chartYears : annualSeries} />
 
-      <div className="grid grid-cols-1 gap-sp-3 lg:grid-cols-[1.6fr_1fr]">
-        <div className="min-w-0 flex flex-col gap-sp-2 rounded-card border border-border-subtle bg-surface p-sp-4">
-          <div className="flex flex-wrap items-center justify-between gap-x-sp-2 gap-y-1.5">
-            <h2 className="flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
-              <BarChart3 className="size-4.5 text-text-secondary" aria-hidden />
-              Income by month
-            </h2>
-            <span className="shrink-0 rounded-full border border-border-subtle px-2.5 py-1 font-mono text-[11px] text-text-secondary">
-              Last 12 months
-            </span>
-          </div>
-          <p className="-mt-1 text-xs text-text-secondary">Dividends paid over the last 12 months, at your current share counts.</p>
-          <MonthlyIncomeChart data={monthlySeries} />
-          {growthPct != null ? (
-            <div className="mt-1 flex items-center gap-2 rounded-card border border-green-500/20 bg-[rgba(34,197,94,0.06)] px-sp-3 py-2.5">
-              <TrendingUp className="size-4 shrink-0 text-green-500" aria-hidden />
-              <p className="text-xs text-text-secondary">
-                <span className="font-semibold text-text-primary">
-                  {growthPct >= 0 ? "Consistent growth" : "Income has slowed"} in dividend income
-                </span>
-                {" — "}
-                {growthPct >= 0 ? "+" : ""}
-                {growthPct.toFixed(0)}% {growthPct >= 0 ? "growth" : "change"} vs. the first half of the last 12 months
+          <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
+            <header className="border-b border-[#22262c] px-5 py-5 min-[900px]:px-6">
+              <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
+                Income by holding
+              </h2>
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
+                Ranked by trailing annual contribution
               </p>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="min-w-0 flex flex-col gap-sp-2 rounded-card border border-border-subtle bg-surface p-sp-4">
-          <div className="flex items-center justify-between gap-sp-2">
-            <h2 className="flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
-              <Trophy className="size-4.5 text-text-secondary" aria-hidden />
-              Top earners
-            </h2>
-          </div>
-          <p className="-mt-1 text-xs text-text-secondary">Which holdings pay you the most.</p>
-          {topEarners.length === 0 ? (
-            <p className="text-sm text-text-secondary">No dividend history yet for your holdings.</p>
-          ) : (
-            <div className="w-full overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th className={`${HISTORY_HEAD} text-left`}>Company</th>
-                    <th className={`${HISTORY_HEAD} text-right`}>
-                      <span className="inline-flex items-center gap-1">Yield <InfoTip label={TIPS.dividendYield} /></span>
-                    </th>
-                    <th className={`${HISTORY_HEAD} text-right`}>Monthly</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topEarners.map(([ticker, amount], i) => {
-                    const yieldPct = enriched.get(ticker.toUpperCase())?.quote?.dividendYieldPercent ?? null;
-                    return (
-                      <tr key={ticker} className={i === topEarners.length - 1 ? "" : "border-b border-border-subtle"}>
-                        <td className="px-sp-3 py-2.5">
-                          {isLinkableTicker(ticker) ? (
-                            <Link href={`/tickers/${ticker}`} className="flex items-center gap-2">
-                              <TickerLogo ticker={ticker} logoUrl={logoFor(ticker)} size="sm" />
-                              <span className="font-mono text-[13px] font-semibold text-text-primary">{ticker}</span>
-                            </Link>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <TickerLogo ticker={ticker} logoUrl={logoFor(ticker)} size="sm" />
-                              <span className="font-mono text-[13px] font-semibold text-text-primary">{ticker}</span>
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-sp-3 py-2.5 text-right font-mono text-[13px] tabular-nums text-text-secondary">
-                          {yieldPct != null ? `${yieldPct.toFixed(2)}%` : "—"}
-                        </td>
-                        <td className="px-sp-3 py-2.5 text-right font-mono text-[13px] font-semibold tabular-nums text-green-500">
-                          {formatMoney(amount / 12)}
-                        </td>
-                      </tr>
+            </header>
+            <div className="overflow-x-auto">
+              <div className="min-w-[560px]">
+                <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(5.5rem,0.6fr)_minmax(6.5rem,0.7fr)_minmax(6rem,0.7fr)] border-b border-[#22262c] px-6 py-3 text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">
+                  <span>Holding</span>
+                  <span className="text-right">Yield</span>
+                  <span className="text-right">Monthly</span>
+                  <span className="text-right">Annual</span>
+                </div>
+                {rows.length === 0 ? (
+                  <p className="px-6 py-8 text-[13px] text-[#99a1ac]">No holdings to rank yet.</p>
+                ) : (
+                  rows.map((row, i) => {
+                    const holding = (
+                      <>
+                        <span className="block text-[14px] font-medium leading-[23.1px] text-[#f2f4f7]">{row.ticker}</span>
+                        <span className="block truncate text-[12px] leading-[19.8px] text-[#6c737f]">{row.name}</span>
+                      </>
                     );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-sp-2">
-        <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-1.5 text-h2 font-display font-medium text-text-primary">
-            <Calendar className="size-4.5 text-text-secondary" aria-hidden />
-            Recent dividend payments
-          </h2>
-        </div>
-        <p className="-mt-1 text-xs text-text-secondary">
-          {totalEvents > HISTORY_LIMIT
-            ? `Most recent ${HISTORY_LIMIT} of ${totalEvents} payouts for your tracked tickers.`
-            : "Past payouts for your tracked tickers."}
-        </p>
-        {recentEvents.length === 0 ? (
-          <div className="rounded-card border border-border-subtle bg-surface-2 p-sp-4 text-sm text-text-secondary">
-            No dividend history found yet for your tracked tickers.
-          </div>
-        ) : (
-          <div className="w-full overflow-x-auto rounded-card border border-border-subtle bg-surface">
-            <table className="w-full min-w-160 border-collapse">
-              <thead>
-                <tr>
-                  <th className={`${HISTORY_HEAD} text-left`}>Company</th>
-                  <th className={`${HISTORY_HEAD} text-right`}>Amount</th>
-                  <th className={`${HISTORY_HEAD} text-left`}>
-                    <span className="inline-flex items-center gap-1">Ex-date <InfoTip label={TIPS.exDate} /></span>
-                  </th>
-                  <th className={`${HISTORY_HEAD} text-left`}>Payment date</th>
-                  <th className={`${HISTORY_HEAD} text-right`}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentEvents.map((event, i) => {
-                  const shares = sharesByTicker.get(event.ticker) ?? 0;
-                  const matched = paymentByTickerDate.get(`${event.ticker}|${event.pay_date}`);
-                  // Status reflects the calendar, not our own notification
-                  // bookkeeping — see the comment on paymentByTickerDate
-                  // above. A confirmed row is still preferred for the
-                  // exact amount when one exists.
-                  const isPaid = event.pay_date <= todayIso;
-                  const payout = matched ? matched.amount : shares * Number(event.amount_per_share);
-                  return (
-                    <tr
-                      key={event.id}
-                      className={`transition-colors hover:bg-surface-hover ${i === recentEvents.length - 1 ? "" : "border-b border-border-subtle"}`}
-                    >
-                      <td className="px-sp-3 py-3">
-                        {isLinkableTicker(event.ticker) ? (
-                          <Link href={`/tickers/${event.ticker}`} className="flex items-center gap-2.5">
-                            <TickerLogo ticker={event.ticker} logoUrl={logoFor(event.ticker)} size="sm" />
-                            <div className="min-w-0">
-                              <div className="font-mono text-sm font-semibold text-text-primary">{event.ticker}</div>
-                              <div className="mt-0.5 max-w-50 truncate text-xs text-text-secondary">
-                                {enriched.get(event.ticker.toUpperCase())?.name ?? ""}
-                              </div>
-                            </div>
+                    return (
+                      <div
+                        key={row.ticker}
+                        className={`grid grid-cols-[minmax(0,1.6fr)_minmax(5.5rem,0.6fr)_minmax(6.5rem,0.7fr)_minmax(6rem,0.7fr)] items-center px-6 py-3.5 ${
+                          i < rows.length - 1 ? "border-b border-[#22262c]" : ""
+                        }`}
+                      >
+                        {isLinkableTicker(row.ticker) ? (
+                          <Link href={`/tickers/${row.ticker}`} className="min-w-0 pr-4 hover:opacity-80">
+                            {holding}
                           </Link>
                         ) : (
-                          <div className="flex items-center gap-2.5">
-                            <TickerLogo ticker={event.ticker} logoUrl={logoFor(event.ticker)} size="sm" />
-                            <div className="min-w-0">
-                              <div className="font-mono text-sm font-semibold text-text-primary">{event.ticker}</div>
-                              <div className="mt-0.5 max-w-50 truncate text-xs text-text-secondary">
-                                {enriched.get(event.ticker.toUpperCase())?.name ?? ""}
-                              </div>
-                            </div>
-                          </div>
+                          <div className="min-w-0 pr-4">{holding}</div>
                         )}
-                      </td>
-                      <td className="px-sp-3 py-3 text-right font-mono text-sm font-semibold tabular-nums text-green-500">
-                        {payout > 0 ? `+${formatMoney(payout)}` : "—"}
-                      </td>
-                      <td className="px-sp-3 py-3 text-[13px] text-text-secondary">
-                        {event.ex_date ? formatDate(event.ex_date) : "—"}
-                      </td>
-                      <td className="px-sp-3 py-3 text-[13px] text-text-secondary">{formatDate(event.pay_date)}</td>
-                      <td className="px-sp-3 py-3 text-right">
-                        <span
-                          className={`inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[10px] font-bold ${
-                            isPaid
-                              ? "border-green-500/30 bg-[rgba(34,197,94,0.1)] text-green-500"
-                              : "border-warning/30 bg-[rgba(251,191,36,0.1)] text-warning"
-                          }`}
-                        >
-                          {isPaid ? "Paid" : "Pending"}
+                        <span className="text-right text-[13px] tracking-[-0.26px] text-[#3fbf87]">
+                          {row.yieldPct != null ? `${row.yieldPct.toFixed(2)}%` : "—"}
                         </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                        <span className="text-right text-[13px] tracking-[-0.26px] text-[#99a1ac]">
+                          {formatMoney(row.monthly)}
+                        </span>
+                        <span className="text-right text-[14px] tracking-[-0.28px] text-[#f2f4f7]">
+                          {formatMoney(row.annual, true)}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside className="flex flex-col gap-6">
+          <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
+            <header className="border-b border-[#22262c] px-6 py-5">
+              <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
+                Payout frequency mix
+              </h2>
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Share of annual income by cadence</p>
+            </header>
+            <div className="flex flex-col gap-5 p-6">
+              {cadenceLive.mix.map((row) => (
+                <div key={row.key} className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] leading-[21.45px] text-[#f2f4f7]">{row.label}</span>
+                    <span className="text-[13px] tracking-[-0.26px] text-[#99a1ac]">{Math.round(row.pct)}%</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-[#16191d]">
+                    <div
+                      className="h-2 rounded-full"
+                      style={{ width: `${Math.min(100, row.pct)}%`, backgroundColor: row.color }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-[14px] border border-[#22262c] bg-[#16191d] p-6">
+            <div className="flex items-center gap-2">
+              <FigmaIcon src="/marketing/dashboard/icon-trend.svg" className="size-4 text-[#4c82f7]" />
+              <p className="text-[11px] tracking-[1.76px] text-[#4c82f7] uppercase">Income trend</p>
+            </div>
+            <p className="mt-3 text-[14px] leading-[22.75px] text-[#f2f4f7]">{trendBody}</p>
+            <div className="mt-4 h-px bg-[#22262c]" />
+            <p className="mt-3 text-[12px] leading-[19.8px] text-[#6c737f]">
+              Figures use current share counts. Reinvested distributions are excluded. Forward income is estimated from
+              recent payout cadence.
+            </p>
+          </section>
+        </aside>
       </div>
+
+      {footer}
     </div>
   );
 }

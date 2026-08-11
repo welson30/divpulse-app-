@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { IconBell } from "@/components/marketing/icons";
+import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
 import { markNotificationsSeen } from "@/app/(dashboard)/notifications/actions";
 import { isLinkableTicker } from "@/lib/tickers/validate";
@@ -52,16 +52,11 @@ export function NotificationBell({ notifications, initialUnreadCount }: Notifica
         <button
           type="button"
           aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
-          className="relative flex size-8.5 shrink-0 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-surface-2 hover:text-text-primary"
+          className="relative flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#121417] text-[#99a1ac] transition-colors hover:text-[#f2f4f7]"
         >
-          <IconBell className="size-4.5" />
+          <FigmaIcon src="/marketing/dashboard/icon-bell.svg" className="size-[17px]" />
           {unreadCount > 0 ? (
-            <span
-              aria-hidden
-              className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-green-500 px-[3px] font-mono text-[9px] font-bold text-canvas ring-2 ring-sidebar"
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
+            <span aria-hidden className="absolute top-[9.8px] right-[9.8px] size-1.5 rounded-full bg-[#4c82f7]" />
           ) : null}
         </button>
       </DropdownMenuTrigger>

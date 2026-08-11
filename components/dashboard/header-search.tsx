@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { getCategoryStyle } from "@/components/dashboard/collection-category-style";
@@ -12,7 +12,9 @@ import { listCollectionsForSearch, type CollectionSearchResult } from "@/app/(da
 import { cn } from "@/lib/utils";
 
 type NavLink = { href: string; label: string; Icon: React.ComponentType<{ className?: string }> };
-const PAGES: NavLink[] = NAV_SECTIONS.flatMap((section): NavLink[] => [...section.links]);
+const PAGES: NavLink[] = NAV_SECTIONS.flatMap((section) => section.links).filter(
+  (link): link is NavLink => !link.action && !link.href.startsWith("mailto:"),
+);
 const DEBOUNCE_MS = 250;
 
 /**
@@ -90,11 +92,11 @@ export function HeaderSearch() {
       <button
         type="button"
         onClick={() => handleOpenChange(true)}
-        className="hidden h-10 items-center gap-2.5 rounded-lg border border-border-interactive bg-canvas px-3.5 text-left text-text-secondary transition-colors hover:border-green-500/50 lg:absolute lg:top-1/2 lg:left-1/2 lg:flex lg:w-full lg:max-w-md lg:-translate-x-1/2 lg:-translate-y-1/2"
+        className="hidden h-10 max-w-[448px] min-w-0 flex-1 items-center gap-3 rounded-[10px] border border-[#22262c] bg-[#121417] px-[13.8px] text-left text-[#6c737f] transition-colors hover:border-[#2e343b] lg:flex"
       >
-        <Search className="size-4 shrink-0" aria-hidden />
-        <span className="min-w-0 flex-1 truncate text-[13px]">Search stocks, holdings, or collections...</span>
-        <kbd className="shrink-0 rounded-[5px] border border-border-subtle bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-text-tertiary">
+        <FigmaIcon src="/marketing/dashboard/icon-search.svg" className="size-4 text-[#6c737f]" />
+        <span className="min-w-0 flex-1 truncate text-[14px] leading-[23.1px]">Search holdings, payments, tickers</span>
+        <kbd className="shrink-0 rounded-[4px] border border-[#2e343b] px-[5.8px] py-[1.8px] text-[10px] leading-[16.5px] text-[#6c737f]">
           ⌘K
         </kbd>
       </button>
@@ -104,9 +106,9 @@ export function HeaderSearch() {
         type="button"
         onClick={() => handleOpenChange(true)}
         aria-label="Search"
-        className="flex size-9 shrink-0 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary lg:hidden"
+        className="flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#121417] text-[#99a1ac] transition-colors hover:text-[#f2f4f7] lg:hidden"
       >
-        <Search className="size-4.5" aria-hidden />
+        <FigmaIcon src="/marketing/dashboard/icon-search.svg" className="size-4" />
       </button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -121,7 +123,7 @@ export function HeaderSearch() {
           <DialogTitle className="sr-only">Search</DialogTitle>
 
           <div className="flex items-center gap-2.5 border-b border-border-subtle px-4 py-3.5">
-            <Search className="size-4 shrink-0 text-text-secondary" aria-hidden />
+            <FigmaIcon src="/marketing/dashboard/icon-search.svg" className="size-4 text-text-secondary" />
             <input
               ref={inputRef}
               value={query}
@@ -153,7 +155,7 @@ export function HeaderSearch() {
                     </div>
                     {matchedPages.map((page) => (
                       <button
-                        key={page.href}
+                        key={`${page.label}-${page.href}`}
                         type="button"
                         onClick={() => go(page.href)}
                         className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-surface-hover"
