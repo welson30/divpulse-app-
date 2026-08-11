@@ -9,7 +9,6 @@ import { EnableNotificationsButton } from "@/components/notifications/enable-not
 import { CalendarPrivacyForm } from "@/components/dashboard/calendar-privacy-form";
 import { TelegramConnectCard } from "@/components/dashboard/telegram-connect-card";
 import { BillingCard } from "@/components/dashboard/billing-card";
-import { PlaidConnectCard } from "@/components/dashboard/plaid-connect-card";
 import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
 import { SettingsTabs, SETTINGS_TABS, type SettingsTab } from "@/components/dashboard/settings-tabs";
 
@@ -56,7 +55,7 @@ export default async function SettingsPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: devices }, { data: telegramLink }, { data: brokerConnections }] = await Promise.all([
+  const [{ data: profile }, { data: devices }, { data: telegramLink }] = await Promise.all([
     supabase
       .from("profiles")
       .select("plan, calendar_privacy_mode, display_name, default_broker_name")
@@ -68,11 +67,6 @@ export default async function SettingsPage({
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false }),
     supabase.from("telegram_links").select("chat_id").eq("user_id", user!.id).maybeSingle(),
-    supabase
-      .from("broker_connections")
-      .select("id, institution_name, status, last_synced_at")
-      .eq("user_id", user!.id)
-      .order("created_at", { ascending: false }),
   ]);
 
   const planLabel = PLAN_LABELS[profile?.plan ?? "free"] ?? "Free";
@@ -81,7 +75,6 @@ export default async function SettingsPage({
   // re-checks profiles.plan server-side before sending (never trust a
   // client-visible flag alone for anything that gates a paid feature).
   const isPro = profile?.plan === "pro" || profile?.plan === "pro_plus";
-  const isProPlus = profile?.plan === "pro_plus";
 
   return (
     <div className="min-w-0 flex flex-col gap-sp-4">
@@ -159,8 +152,13 @@ export default async function SettingsPage({
 
       {tab === "integrations" ? (
         <div className="flex max-w-2xl flex-col gap-sp-3">
-          <SettingsSection title="Broker auto-sync" description="Connect a US broker via Plaid to sync holdings automatically.">
-            <PlaidConnectCard isProPlus={isProPlus} connections={brokerConnections ?? []} />
+          <SettingsSection
+            title="Broker auto-sync"
+            description="Connect a US broker via Plaid to sync holdings automatically. Pro+ only."
+          >
+            <Link href="/brokers" className="text-sm text-[#4c82f7] hover:underline">
+              Open broker connections
+            </Link>
           </SettingsSection>
 
           <SettingsSection title="Telegram" description="Get a Telegram message the moment a dividend is detected.">

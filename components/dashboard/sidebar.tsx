@@ -65,7 +65,7 @@ export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
   {
     label: "Account",
     links: [
-      { href: "/settings?tab=integrations", label: "Broker connections", Icon: IconBrokers },
+      { href: "/brokers", label: "Broker connections", Icon: IconBrokers },
       { href: "/settings", label: "Settings", Icon: IconSettings },
       { href: "mailto:support@paidprime.com", label: "Help center", Icon: IconHelp },
     ],
@@ -91,7 +91,6 @@ function isLinkActive(pathname: string, tab: string | null, href: string, action
   if (pathname !== url.pathname) return false;
   const linkTab = url.searchParams.get("tab");
   if (linkTab) return tab === linkTab;
-  if (url.pathname === "/settings") return !tab || tab === "profile";
   return true;
 }
 

@@ -26,6 +26,35 @@ export function brokerChipSrc(name: string | null | undefined): string | null {
   return hit?.src ?? null;
 }
 
+/** Figma Broker connections: 120×40 logo plate. */
+export function BrokerLogoPlate({
+  name,
+  className,
+}: {
+  name: string | null | undefined;
+  className?: string;
+}) {
+  const label = name?.trim() || null;
+  const src = brokerChipSrc(label);
+  const initials = (label ?? "—").replace(/[^A-Za-z0-9]/g, "").slice(0, 3).toUpperCase() || "—";
+
+  return (
+    <span
+      className={cn(
+        "flex h-10 w-[120px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-[#22262c] bg-[#0b0c0e]",
+        className,
+      )}
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element -- local broker chip
+        <img src={src} alt="" width={120} height={40} className="h-full w-full object-cover" />
+      ) : (
+        <span className="text-[11px] font-medium tracking-wide text-[#99a1ac]">{initials}</span>
+      )}
+    </span>
+  );
+}
+
 /** Figma Portfolio table: 60×20 rounded chip + broker name. */
 export function BrokerMark({
   name,

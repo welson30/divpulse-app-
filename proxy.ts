@@ -16,6 +16,7 @@ const PROTECTED_PREFIXES = [
   "/watchlist",
   "/goals",
   "/advisor",
+  "/brokers",
   "/notifications",
   "/alert-templates",
   "/settings",

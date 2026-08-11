@@ -42,6 +42,7 @@ const PAGE_LABELS: Record<string, string> = {
   "/watchlist": "Watchlist",
   "/goals": "Goals",
   "/advisor": "AI Advisor",
+  "/brokers": "Broker connections",
   "/settings": "Settings",
   "/notifications": "Notifications",
   "/alert-templates": "Notification templates",

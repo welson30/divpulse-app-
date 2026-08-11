@@ -173,7 +173,7 @@ export default async function CalendarPage({
       ) : (
         <p className="px-6 py-5 text-[13px] leading-[21.45px] text-[#99a1ac]">
           No brokers connected.{" "}
-          <Link href="/settings?tab=integrations" className="text-[#4c82f7] hover:underline">
+          <Link href="/brokers" className="text-[#4c82f7] hover:underline">
             Connect a brokerage
           </Link>
         </p>

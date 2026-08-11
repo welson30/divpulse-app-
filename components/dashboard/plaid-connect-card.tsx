@@ -1,8 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { usePlaidLink, type PlaidLinkOnSuccessMetadata } from "react-plaid-link";
-import { useRouter } from "next/navigation";
+import { usePlaidConnect } from "@/components/dashboard/use-plaid-connect";
 
 type PlaidConnection = {
   id: string;
@@ -22,45 +20,7 @@ function formatDate(dateStr: string | null) {
 }
 
 export function PlaidConnectCard({ isProPlus, connections }: PlaidConnectCardProps) {
-  const router = useRouter();
-  const [linkToken, setLinkToken] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  const onSuccess = useCallback(
-    (publicToken: string, metadata: PlaidLinkOnSuccessMetadata) => {
-      startTransition(async () => {
-        setError(null);
-        const response = await fetch("/api/plaid/exchange-token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ publicToken, institutionName: metadata.institution?.name ?? null }),
-        });
-        const result = await response.json();
-        if (!response.ok) {
-          setError(result.error ?? "Couldn't finish connecting.");
-          return;
-        }
-        setLinkToken(null);
-        router.refresh();
-      });
-    },
-    [router],
-  );
-
-  const { open, ready } = usePlaidLink({
-    token: linkToken,
-    onSuccess,
-  });
-
-  // usePlaidLink only opens once `ready` flips true after a token is set —
-  // this effect bridges "we just fetched a token" to "actually open the
-  // Plaid modal" without the caller needing to manage that timing itself.
-  useEffect(() => {
-    if (linkToken && ready) {
-      open();
-    }
-  }, [linkToken, ready, open]);
+  const { connect, isPending, error } = usePlaidConnect();
 
   if (!isProPlus) {
     return (
@@ -112,18 +72,7 @@ export function PlaidConnectCard({ isProPlus, connections }: PlaidConnectCardPro
       <button
         type="button"
         disabled={isPending}
-        onClick={() =>
-          startTransition(async () => {
-            setError(null);
-            const response = await fetch("/api/plaid/link-token", { method: "POST" });
-            const result = await response.json();
-            if (!response.ok) {
-              setError(result.error ?? "Couldn't start broker connection.");
-              return;
-            }
-            setLinkToken(result.linkToken);
-          })
-        }
+        onClick={connect}
         className="self-start rounded-control bg-green-500 px-3.5 py-2 font-sans text-xs font-semibold text-canvas transition-colors hover:bg-green-500/90 disabled:opacity-40"
       >
         {isPending ? "Connecting…" : connections.length > 0 ? "Connect another broker" : "Connect a broker"}
