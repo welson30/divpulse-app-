@@ -219,6 +219,7 @@ export default async function CalendarPage({
     ticker;
 
   const hideAmount = calendarPrivacyMode === "ticker_only";
+  const hideIdentity = calendarPrivacyMode === "amount_only";
 
   const recordedKeys = new Set<string>();
   const payments: CalendarPayment[] = [];
@@ -237,6 +238,7 @@ export default async function CalendarPage({
       amount: hideAmount ? null : totalAmount,
       broker: brokerByTicker.get(event.ticker)?.name ?? null,
       frequency: frequencies.get(event.ticker) ?? null,
+      identityHidden: hideIdentity,
     });
   }
 
@@ -253,6 +255,7 @@ export default async function CalendarPage({
       amount: hideAmount ? null : totalAmount,
       broker: brokerByTicker.get(estimate.ticker)?.name ?? null,
       frequency: frequencies.get(estimate.ticker) ?? null,
+      identityHidden: hideIdentity,
     });
   }
 

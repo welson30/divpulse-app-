@@ -116,8 +116,14 @@ export function PaymentCalendar({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[14px] font-medium leading-[23.1px] text-[#f2f4f7]">{event.ticker}</p>
-                      <p className="truncate text-[12px] leading-[19.8px] text-[#6c737f]">{event.name}</p>
+                      {event.identityHidden ? (
+                        <p className="text-[14px] font-medium leading-[23.1px] text-[#f2f4f7]">Dividend payment</p>
+                      ) : (
+                        <>
+                          <p className="text-[14px] font-medium leading-[23.1px] text-[#f2f4f7]">{event.ticker}</p>
+                          <p className="truncate text-[12px] leading-[19.8px] text-[#6c737f]">{event.name}</p>
+                        </>
+                      )}
                     </div>
                     <p className="shrink-0 text-[14px] tracking-[-0.28px] text-[#3fbf87]">
                       {event.amount != null

@@ -10,6 +10,8 @@ export type CalendarPayment = {
   amount: number | null;
   broker: string | null;
   frequency: string | null;
+  /** True when calendar_privacy_mode is "amount_only" — ticker/company must never be shown, only the amount. */
+  identityHidden: boolean;
 };
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -100,7 +102,7 @@ export function CalendarGrid({
                             : "bg-[#16233d]",
                         )}
                       >
-                        {event.ticker}
+                        {event.identityHidden ? "•••" : event.ticker}
                       </span>
                       {event.amount != null ? (
                         <span className="truncate text-[10px] tracking-[-0.2px] text-[#6c737f]">
