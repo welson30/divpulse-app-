@@ -9,34 +9,42 @@ const FEATURES = [
   {
     label: "Passive Income Tracking",
     icon: "/marketing/product/icon-passive-income.svg",
+    active: false,
   },
   {
     label: "Portfolio Allocation",
     icon: "/marketing/product/icon-portfolio-allocation.svg",
+    active: false,
   },
   {
     label: "Sector Allocation",
     icon: "/marketing/product/icon-sector-allocation.svg",
+    active: false,
   },
   {
     label: "Financial Freedom Goals",
     icon: "/marketing/product/icon-freedom-goals.svg",
+    active: false,
   },
   {
     label: "Smart Watchlists",
     icon: "/marketing/product/icon-watchlists.svg",
+    active: false,
   },
   {
     label: "AI Advisor",
     icon: "/marketing/product/icon-ai-advisor.svg",
+    active: false,
   },
   {
     label: "Dividend Calendar",
     icon: "/marketing/product/icon-calendar.svg",
+    active: false,
   },
   {
     label: "Real-Time Alerts",
     icon: "/marketing/product/icon-alerts.svg",
+    active: false,
   },
 ] as const;
 
