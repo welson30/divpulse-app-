@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import { PrimaryCta } from "@/components/marketing/primary-cta";
+import { GoogleSignInButton } from "@/components/auth/google-signin-button";
+import { AppleSignInButton } from "@/components/auth/apple-signin-button";
 import {
   signInWithGoogle,
   signUpWithPassword,
@@ -60,35 +62,9 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
       <div className="mt-[21px] grid grid-cols-2 gap-3">
         <form action={signInWithGoogle} className="w-full">
           <input type="hidden" name="oauthFailPath" value="/signup" />
-          <button
-            type="submit"
-            className="flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[14px] border border-[#2e343b] bg-[#16191d] text-[15px] leading-[25px] font-medium text-[#f2f4f7] transition-colors hover:border-[#4c82f7]/50"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/marketing/signin/icon-google.svg"
-              alt=""
-              width={18}
-              height={18}
-              className="size-[18px]"
-            />
-            Google
-          </button>
+          <GoogleSignInButton />
         </form>
-        <button
-          type="button"
-          className="flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[14px] border border-[#2e343b] bg-[#16191d] text-[15px] leading-[25px] font-medium text-[#f2f4f7] transition-colors hover:border-[#4c82f7]/50"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/marketing/signin/icon-apple.svg"
-            alt=""
-            width={18}
-            height={18}
-            className="size-[18px]"
-          />
-          Apple
-        </button>
+        <AppleSignInButton />
       </div>
 
       <div className="mt-4 flex items-center gap-4">

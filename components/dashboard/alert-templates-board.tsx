@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import {
@@ -10,7 +10,7 @@ import {
   setNotificationStyle,
 } from "@/app/(dashboard)/settings/actions";
 import { savePushToken } from "@/app/(dashboard)/notifications/actions";
-import { requestPushToken } from "@/lib/firebase/client";
+import { requestPushToken, getExistingPushToken } from "@/lib/firebase/client";
 import { type NotificationStyle } from "@/lib/notifications/templates";
 import { cn } from "@/lib/utils";
 
@@ -81,59 +81,119 @@ export function AlertTemplatesBoard({
   const [pushOn, setPushOn] = useState(pushEnabled);
   const [telegramOn, setTelegramOn] = useState(telegramConnected);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  // Three independent transitions, not one shared — a single useTransition()
+  // here previously meant clicking any one control (a template card, Push,
+  // or Telegram) disabled all the others too while its own request was in
+  // flight, even though they're unrelated actions. Same bug class already
+  // fixed this session in collection-table.tsx/watchlist-table.tsx.
+  const [styleSaving, startStyleTransition] = useTransition();
+  const [pushSaving, startPushTransition] = useTransition();
+  const [telegramSaving, startTelegramTransition] = useTransition();
   const templates = cardsFor(preview);
 
+  // pushEnabled (the initial prop) is account-wide — computed server-side
+  // from whether ANY device has a saved push_subscriptions row, per
+  // components/dashboard/notification-bell.tsx's original account-level
+  // model. It says nothing about whether THIS browser ever granted
+  // permission. Without this check, a device that's never asked would
+  // still show the switch as "on" (because some other device is
+  // registered), so clicking it would silently delete every other
+  // device's subscription instead of ever calling
+  // Notification.requestPermission() on this one. main's
+  // EnableNotificationsButton avoided exactly this by checking a real,
+  // per-browser token via getExistingPushToken() instead of trusting an
+  // account-wide flag — same fix here.
+  useEffect(() => {
+    let cancelled = false;
+    getExistingPushToken()
+      .then(async (token) => {
+        if (cancelled) return;
+        if (token) {
+          // Self-heal: confirm the server actually has this device's
+          // token on file (a prior save may have failed silently).
+          await savePushToken(token, navigator.userAgent);
+          if (!cancelled) setPushOn(true);
+        } else {
+          setPushOn(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPushOn(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function pickStyle(value: NotificationStyle) {
-    if (value === selected || pending) return;
+    if (value === selected || styleSaving) return;
     const previous = selected;
     setSelected(value);
     setError(null);
-    startTransition(async () => {
-      const result = await setNotificationStyle(value);
-      if (result && "error" in result) {
-        setSelected(previous);
-        setError(result.error);
-        return;
-      }
-      router.refresh();
-    });
-  }
-
-  function togglePush() {
-    if (pending) return;
-    setError(null);
-    if (pushOn) {
-      setPushOn(false);
-      startTransition(async () => {
-        const result = await disablePushAlerts();
-        if (result?.error) {
-          setPushOn(true);
+    startStyleTransition(async () => {
+      try {
+        const result = await setNotificationStyle(value);
+        if (result && "error" in result) {
+          setSelected(previous);
           setError(result.error);
           return;
         }
         router.refresh();
+      } catch {
+        setSelected(previous);
+        setError("Couldn't save the template. Try again.");
+      }
+    });
+  }
+
+  function togglePush() {
+    if (pushSaving) return;
+    setError(null);
+    if (pushOn) {
+      setPushOn(false);
+      startPushTransition(async () => {
+        try {
+          const result = await disablePushAlerts();
+          if (result?.error) {
+            setPushOn(true);
+            setError(result.error);
+            return;
+          }
+          router.refresh();
+        } catch {
+          setPushOn(true);
+          setError("Couldn't disable push notifications. Try again.");
+        }
       });
       return;
     }
-    startTransition(async () => {
-      const token = await requestPushToken();
-      if (!token) {
-        setError("Couldn't enable push on this device. Check the browser permission and try again.");
-        return;
+    startPushTransition(async () => {
+      try {
+        // requestPushToken() throws for a range of browser-level reasons
+        // (blocked by an ad blocker/privacy extension, a stale conflicting
+        // service worker registration, FCM rejecting the subscription) —
+        // it isn't limited to returning null. Uncaught, that surfaced as a
+        // hard crash on click instead of the friendly message below.
+        const token = await requestPushToken();
+        if (!token) {
+          setError("Couldn't enable push on this device. Check the browser permission and try again.");
+          return;
+        }
+        const result = await savePushToken(token, navigator.userAgent);
+        if (result?.error) {
+          setError(result.error);
+          return;
+        }
+        setPushOn(true);
+        router.refresh();
+      } catch {
+        setError("Couldn't enable push on this device — a browser extension or blocked permission may be interfering.");
       }
-      const result = await savePushToken(token, navigator.userAgent);
-      if (result?.error) {
-        setError(result.error);
-        return;
-      }
-      setPushOn(true);
-      router.refresh();
     });
   }
 
   function toggleTelegram() {
-    if (pending) return;
+    if (telegramSaving) return;
     setError(null);
     if (!isPro) {
       setError("Telegram alerts are a Pro feature.");
@@ -141,19 +201,43 @@ export function AlertTemplatesBoard({
     }
     if (telegramOn) {
       setTelegramOn(false);
-      startTransition(async () => {
-        await disconnectTelegram();
-        router.refresh();
+      startTelegramTransition(async () => {
+        try {
+          await disconnectTelegram();
+          router.refresh();
+        } catch {
+          setTelegramOn(true);
+          setError("Couldn't disconnect Telegram. Try again.");
+        }
       });
       return;
     }
-    startTransition(async () => {
-      const result = await getTelegramLinkUrl();
-      if ("error" in result) {
-        setError(result.error);
-        return;
+    // Opened synchronously, inside the click handler, so the browser still
+    // treats it as a direct result of user input. Calling window.open()
+    // only after the awaited server action below loses that "user
+    // activation" window and gets silently popup-blocked in most browsers.
+    // Deliberately no noopener/noreferrer here — per spec, either one makes
+    // window.open() return null, which would throw away the only handle we
+    // have to navigate this tab once the URL is ready, leaving it stuck
+    // blank forever (exactly what happened before this fix).
+    const popup = window.open("", "_blank");
+    startTelegramTransition(async () => {
+      try {
+        const result = await getTelegramLinkUrl();
+        if ("error" in result) {
+          popup?.close();
+          setError(result.error);
+          return;
+        }
+        if (popup) {
+          popup.location.href = result.url;
+        } else {
+          window.open(result.url, "_blank", "noopener,noreferrer");
+        }
+      } catch {
+        popup?.close();
+        setError("Couldn't start the Telegram connection. Try again.");
       }
-      window.open(result.url, "_blank", "noopener,noreferrer");
     });
   }
 
@@ -188,7 +272,7 @@ export function AlertTemplatesBoard({
                 key={card.value}
                 type="button"
                 onClick={() => pickStyle(card.value)}
-                disabled={pending}
+                disabled={styleSaving}
                 className="flex flex-col gap-3 py-4 text-left disabled:opacity-70"
               >
                 <div className="flex items-center justify-between gap-2">
@@ -254,14 +338,14 @@ export function AlertTemplatesBoard({
             icon="/marketing/dashboard/icon-channel-push-16.svg"
             on={pushOn}
             onToggle={togglePush}
-            disabled={pending}
+            disabled={pushSaving}
           />
           <ChannelRow
             label="Telegram bot"
             icon="/marketing/dashboard/icon-channel-telegram-16.svg"
             on={telegramOn}
             onToggle={toggleTelegram}
-            disabled={pending}
+            disabled={telegramSaving}
             hint={!isPro ? "Pro" : telegramOn ? undefined : "Opens Telegram to connect"}
           />
           <ChannelRow
@@ -344,11 +428,11 @@ function ChannelRow({
         onClick={onToggle}
         className={cn(
           "flex h-6 w-[45px] shrink-0 items-center rounded-full border p-[3px] transition-colors",
-          on ? "justify-end border-[#4c82f7] bg-[#4c82f7]" : "justify-start border-[#2e343b] bg-[#16191d]",
+          on ? "justify-end border-[#3fbf87] bg-[#3fbf87]" : "justify-start border-[#3a4048] bg-[#2e343b]",
           (!onToggle || disabled) && "cursor-not-allowed opacity-60",
         )}
       >
-        <span className="size-[18px] rounded-full bg-white" />
+        <span className={cn("size-[18px] rounded-full shadow-sm transition-colors", on ? "bg-white" : "bg-[#6c737f]")} />
       </button>
     </div>
   );
