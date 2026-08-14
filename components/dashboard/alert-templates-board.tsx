@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   disablePushAlerts,
   disconnectTelegram,
@@ -81,6 +82,11 @@ export function AlertTemplatesBoard({
   const [pushOn, setPushOn] = useState(pushEnabled);
   const [telegramOn, setTelegramOn] = useState(telegramConnected);
   const [error, setError] = useState<string | null>(null);
+  // Same "blocked by an ad blocker/privacy extension" case main's
+  // EnableNotificationsButton surfaces via a dialog rather than inline
+  // text — a permission problem is easy to miss in a page-bottom banner,
+  // so it gets the same modal treatment here.
+  const [permissionBlocked, setPermissionBlocked] = useState(false);
   // Three independent transitions, not one shared — a single useTransition()
   // here previously meant clicking any one control (a template card, Push,
   // or Telegram) disabled all the others too while its own request was in
@@ -169,14 +175,16 @@ export function AlertTemplatesBoard({
     }
     startPushTransition(async () => {
       try {
-        // requestPushToken() throws for a range of browser-level reasons
-        // (blocked by an ad blocker/privacy extension, a stale conflicting
-        // service worker registration, FCM rejecting the subscription) —
-        // it isn't limited to returning null. Uncaught, that surfaced as a
-        // hard crash on click instead of the friendly message below.
+        // requestPushToken() first calls Notification.requestPermission()
+        // — the actual browser permission prompt — then throws for a
+        // range of separate reasons (blocked by an ad blocker/privacy
+        // extension, a stale conflicting service worker registration, FCM
+        // rejecting the subscription) even once permission is granted.
+        // Both a null return and a thrown exception land here as "the
+        // browser is still preventing this," same as main's dialog.
         const token = await requestPushToken();
         if (!token) {
-          setError("Couldn't enable push on this device. Check the browser permission and try again.");
+          setPermissionBlocked(true);
           return;
         }
         const result = await savePushToken(token, navigator.userAgent);
@@ -187,7 +195,7 @@ export function AlertTemplatesBoard({
         setPushOn(true);
         router.refresh();
       } catch {
-        setError("Couldn't enable push on this device — a browser extension or blocked permission may be interfering.");
+        setPermissionBlocked(true);
       }
     });
   }
@@ -391,6 +399,27 @@ export function AlertTemplatesBoard({
           {error}
         </p>
       ) : null}
+
+      <Dialog open={permissionBlocked} onOpenChange={setPermissionBlocked}>
+        <DialogContent className="border-[#22262c] bg-[#121417]">
+          <DialogHeader>
+            <DialogTitle className="font-[family-name:var(--font-funnel-display)] text-[#f2f4f7]">
+              Couldn&rsquo;t enable notifications
+            </DialogTitle>
+            <DialogDescription className="text-[#99a1ac]">
+              Something blocked the request — an ad blocker or privacy extension can interfere with push
+              notifications. Try allowing this site, then try again.
+            </DialogDescription>
+          </DialogHeader>
+          <button
+            type="button"
+            onClick={() => setPermissionBlocked(false)}
+            className="mt-4 h-10 w-full rounded-[10px] bg-[#4c82f7] px-4 text-[13px] font-medium text-white hover:bg-[#3d72e8]"
+          >
+            Got it
+          </button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
