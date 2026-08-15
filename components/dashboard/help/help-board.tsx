@@ -11,7 +11,7 @@ import {
   type HelpCategoryId,
 } from "@/lib/help/articles";
 
-const SUPPORT_MAIL = "mailto:support@paidprime.com?subject=PaidPrime%20support";
+const SUPPORT_MAIL = "mailto:paidprime1@gmail.com?subject=PaidPrime%20support";
 
 export function HelpBoard() {
   const [query, setQuery] = useState("");
@@ -145,7 +145,7 @@ export function HelpBoard() {
               <FigmaIcon src="/marketing/dashboard/icon-help-mail.svg" className="size-[17px] shrink-0 text-[#99a1ac]" />
               <div>
                 <p className="text-[13px] font-medium leading-[21.45px] text-[#f2f4f7]">Email support</p>
-                <p className="text-[12px] leading-[19.8px] text-[#6c737f]">support@paidprime.com</p>
+                <p className="text-[12px] leading-[19.8px] text-[#6c737f]">paidprime1@gmail.com</p>
               </div>
             </a>
             <a

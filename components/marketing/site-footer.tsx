@@ -15,7 +15,7 @@ const COMPANY_LINKS = [
   { href: "#", label: "Careers" },
   { href: "#", label: "Press kit" },
   { href: "#", label: "Blog" },
-  { href: "mailto:support@paidprime.com", label: "Contact" },
+  { href: "mailto:paidprime1@gmail.com", label: "Contact" },
 ] as const;
 
 const RESOURCE_LINKS = [
@@ -115,7 +115,7 @@ export function SiteFooter() {
 
               <div className="flex flex-col gap-2 pt-3.5">
                 <a
-                  href="mailto:support@paidprime.com"
+                  href="mailto:paidprime1@gmail.com"
                   className="inline-flex items-center gap-2.5 text-[15px] leading-[24.75px] text-[#99a1ac] transition-colors hover:text-[#f2f4f7]"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -126,7 +126,7 @@ export function SiteFooter() {
                     height={17}
                     className="size-[17px] shrink-0"
                   />
-                  support@paidprime.com
+                  paidprime1@gmail.com
                 </a>
                 <p className="m-0 inline-flex items-center gap-2.5 text-[15px] leading-[24.75px] text-[#99a1ac]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -137,7 +137,7 @@ export function SiteFooter() {
                     height={17}
                     className="size-[17px] shrink-0"
                   />
-                  New York, NY
+                  Florida - USA
                 </p>
               </div>
 

@@ -25,6 +25,26 @@ const FAQ_ITEMS = [
     q: "Is there a free plan?",
     a: "Yes. Free includes up to 5 tracked holdings, real-time payment alerts, the dividend calendar and a 3-ticker watchlist. No card required.",
   },
+  {
+    q: "How do I enable push notifications?",
+    a: "Push notifications are enabled automatically when you first sign in. Your browser will ask for permission — just click \"Allow.\" On iPhone, open PaidPrime in Safari, tap the Share icon, then \"Add to Home Screen\" to enable notifications. On Android, use Chrome and tap \"Add to Home Screen\" when prompted.",
+  },
+  {
+    q: "Can I use PaidPrime like an app on my phone?",
+    a: "Yes! PaidPrime is a PWA (Progressive Web App), which means it installs on your phone just like a native app — no App Store needed. On iPhone: open in Safari → Share → \"Add to Home Screen.\" On Android: open in Chrome → menu → \"Add to Home Screen.\" Once installed, it opens fullscreen and supports push notifications.",
+  },
+  {
+    q: "Is my financial data safe?",
+    a: "Yes. PaidPrime only reads your portfolio data — we never have access to trade on your behalf or move money. Broker connections (Pro+) use Plaid, the same secure technology used by major financial apps. All data is encrypted in transit and at rest.",
+  },
+  {
+    q: "How do I connect my broker account?",
+    a: "Broker sync is available on the Pro+ plan. Go to Settings → Connected Accounts → Connect Broker. We use Plaid to securely link your account with read-only access. Supported brokers include Fidelity, Schwab, Robinhood, IBKR, and more. For brokers not supported by Plaid, you can import your portfolio via CSV.",
+  },
+  {
+    q: "What happens if I cancel my plan?",
+    a: "You can cancel anytime from Settings → Subscription. Your plan stays active until the end of the current billing period. After that, your account moves to the Free plan and you keep access to your portfolio data. No data is deleted.",
+  },
 ] as const;
 
 /**

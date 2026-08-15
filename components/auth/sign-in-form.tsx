@@ -79,7 +79,7 @@ export function SignInForm({ redirectTo, oauthError }: SignInFormProps) {
               Password
             </label>
             <Link
-              href="mailto:support@paidprime.com?subject=Password%20reset"
+              href="mailto:paidprime1@gmail.com?subject=Password%20reset"
               className="text-[13px] leading-[21px] font-medium text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]"
             >
               Forgot password?
