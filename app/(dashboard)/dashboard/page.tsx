@@ -121,14 +121,9 @@ export default async function DashboardPage() {
   const tickers = [...new Set(holdings.map((h) => h.ticker))];
   const upcomingEnd = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-  const [enriched, { data: todayPayments }, { data: recentPayments }, nextPayment, upcoming, income, monthlySeries] =
+  const [enriched, { data: recentPayments }, nextPayment, upcoming, income, monthlySeries] =
     await Promise.all([
       enrichTickers(tickers, "1y"),
-      supabase
-        .from("dividend_payments")
-        .select("id, amount, holding_id")
-        .eq("user_id", user!.id)
-        .eq("pay_date", todayIso),
       supabase
         .from("dividend_payments")
         .select("id, amount, pay_date, holding_id, notified_at")
@@ -158,14 +153,6 @@ export default async function DashboardPage() {
   const portfolioSparkline = buildPortfolioSparkline(holdings, (ticker) => infoFor(ticker)?.sparkline ?? []);
   const annualIncome = income.annual;
   const avgYieldPct = portfolioValue > 0 ? (annualIncome / portfolioValue) * 100 : 0;
-  const todayTotal = (todayPayments ?? []).reduce((sum, p) => sum + Number(p.amount), 0);
-
-  const topToday = [...(todayPayments ?? [])].sort((a, b) => Number(b.amount) - Number(a.amount))[0];
-  const topTodayHolding = topToday ? holdingById.get(topToday.holding_id) : null;
-  const todaySub =
-    todayTotal > 0 && topTodayHolding
-      ? `From ${topTodayHolding.company_name ?? topTodayHolding.ticker}${topTodayHolding.company_name ? ` (${topTodayHolding.ticker})` : ""}`
-      : "No dividends detected today";
 
   const nextHolding = nextPayment ? holdings.find((h) => h.ticker === nextPayment.ticker) : null;
   const nextAmount =
@@ -196,9 +183,9 @@ export default async function DashboardPage() {
       valueClass: "text-[#3fbf87]",
     },
     {
-      label: "Today's income",
-      value: formatMoney(todayTotal),
-      sub: todaySub,
+      label: "Monthly income",
+      value: formatMoney(income.monthly),
+      sub: "Trailing 12-month average",
       valueClass: "text-[#f2f4f7]",
     },
     {
