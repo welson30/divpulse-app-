@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const NOTIFICATIONS = [
   {
     logo: "/marketing/signin/notif-jnj.png",
@@ -61,13 +63,13 @@ export function SignInAside() {
         }}
       />
 
-      <a href="/" className="absolute top-9 left-8 z-10 flex items-center gap-2.5 min-[1200px]:top-10 min-[1200px]:left-14">
+      <Link href="/" className="absolute top-9 left-8 z-10 flex items-center gap-2.5 min-[1200px]:top-10 min-[1200px]:left-14">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.svg" alt="" width={40} height={40} className="size-9 rounded-[8px] min-[1200px]:size-10" />
         <span className="font-[family-name:var(--font-inter-tight)] text-[19px] font-semibold text-[#f2f4f7] min-[1200px]:text-[21px]">
           PaidPrime
         </span>
-      </a>
+      </Link>
 
       <div className="relative flex flex-1 items-center justify-center px-8 py-16 min-[1200px]:px-14">
         <div className="relative h-[513px] w-[236px] origin-center scale-[0.78] min-[1200px]:scale-100">
