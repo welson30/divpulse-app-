@@ -162,7 +162,11 @@ export async function computeMonthlyIncomeSeries(
 export type AnnualIncomePoint = {
   year: number;
   total: number;
-  /** False for the current calendar year (YTD, not a full year). */
+  /**
+   * True only when this year is both in the past *and* fully covered by
+   * recorded history. Callers use it to decide what may be compared
+   * year-over-year, so it must not be true for a part-year.
+   */
   complete: boolean;
 };
 
@@ -200,11 +204,28 @@ export async function computeAnnualIncomeSeries(
     .limit(MAX_EVENT_ROWS);
 
   const byYear = new Map(points.map((p) => [p.year, p]));
+  let earliestPayDate: string | null = null;
   for (const event of events ?? []) {
+    if (earliestPayDate == null || event.pay_date < earliestPayDate) earliestPayDate = event.pay_date;
     const year = Number(event.pay_date.slice(0, 4));
     const point = byYear.get(year);
     if (!point) continue;
     point.total += Number(event.amount_per_share) * (sharesByTicker.get(event.ticker) ?? 0);
+  }
+
+  // A past year only counts as complete if history actually covers all of
+  // it. dividend_events is built from Yahoo's trailing ~365 days, so the
+  // oldest year in range is normally truncated. Measured on a real
+  // portfolio: history began 2025-07-31, so 2025 held six months of income
+  // yet was flagged complete purely because it wasn't the current year —
+  // enough to draw a false year-over-year decline into the current year and,
+  // with one more truncated year, to print a fabricated growth percentage.
+  if (earliestPayDate != null) {
+    const earliestYear = Number(earliestPayDate.slice(0, 4));
+    const firstFullyCoveredYear = earliestPayDate <= `${earliestYear}-01-01` ? earliestYear : earliestYear + 1;
+    for (const point of points) {
+      point.complete = point.year < currentYear && point.year >= firstFullyCoveredYear;
+    }
   }
 
   return points;
