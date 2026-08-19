@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
-import { buildPortfolioSparkline, scaleBenchmarkToPortfolio } from "@/lib/tickers/portfolio-sparkline";
+import { buildPortfolioSeries, scaleBenchmarkAligned } from "@/lib/tickers/portfolio-sparkline";
 import { HoldingsTable, type Holding } from "@/components/dashboard/holdings-table";
 import { AddHoldingDialog } from "@/components/dashboard/add-holding-dialog";
 import { ImportCsvDialog } from "@/components/dashboard/import-csv-dialog";
@@ -90,9 +90,9 @@ export default async function HoldingsPage() {
   const dayChange = portfolioPrevValue > 0 ? totalValue - portfolioPrevValue : null;
   const dayChangePct = portfolioPrevValue > 0 ? (dayChange! / portfolioPrevValue) * 100 : null;
 
-  const portfolioSparkline = buildPortfolioSparkline(list, (ticker) => infoFor(ticker)?.sparkline ?? []);
+  const portfolioSeries = buildPortfolioSeries(list, (ticker) => infoFor(ticker)?.sparkline ?? []);
   const spySparkline = infoFor("SPY")?.sparkline ?? [];
-  const benchmarkPoints = scaleBenchmarkToPortfolio(portfolioSparkline, spySparkline);
+  const benchmarkPoints = scaleBenchmarkAligned(portfolioSeries.points, spySparkline);
 
   const actions = (
     <div className="flex flex-wrap items-center gap-2">
@@ -152,7 +152,11 @@ export default async function HoldingsPage() {
         </div>
       </div>
 
-      <PerformanceVsBenchmarkCard points={portfolioSparkline} benchmarkPoints={benchmarkPoints} />
+      <PerformanceVsBenchmarkCard
+        points={portfolioSeries.points}
+        benchmarkPoints={benchmarkPoints}
+        excludedTickers={portfolioSeries.excluded}
+      />
 
       <HoldingsTable holdings={rows} actions={actions} />
 

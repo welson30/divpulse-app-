@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import {
-  buildPortfolioSparklineAligned,
+  buildPortfolioSeries,
   scaleBenchmarkAligned,
 } from "@/lib/tickers/portfolio-sparkline";
 import {
@@ -104,10 +104,10 @@ export default async function PerformancePage() {
     provider.fetchQuotes(["^IRX"]).catch(() => new Map()),
   ]);
 
-  const portfolio = buildPortfolioSparklineAligned(
+  const portfolio = buildPortfolioSeries(
     holdings,
     (ticker) => histories.get(ticker.toUpperCase()) ?? [],
-  );
+  ).points;
   const spy = histories.get("SPY") ?? [];
   const benchmark = scaleBenchmarkAligned(portfolio, spy);
   const chartCutoff =

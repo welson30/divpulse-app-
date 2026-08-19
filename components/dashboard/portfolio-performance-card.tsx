@@ -32,9 +32,11 @@ function slicePoints(points: SparklinePoint[], days: number | null): SparklinePo
 
 type PortfolioPerformanceCardProps = {
   points: SparklinePoint[];
+  /** Holdings whose price history is too short for this window — named rather than silently dropped. */
+  excludedTickers?: string[];
 };
 
-export function PortfolioPerformanceCard({ points }: PortfolioPerformanceCardProps) {
+export function PortfolioPerformanceCard({ points, excludedTickers = [] }: PortfolioPerformanceCardProps) {
   const [range, setRange] = useState<RangeId>("1Y");
   const visible = useMemo(() => {
     const days = RANGES.find((r) => r.id === range)?.days ?? null;
@@ -51,6 +53,11 @@ export function PortfolioPerformanceCard({ points }: PortfolioPerformanceCardPro
           <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
             Total account value across all connected brokers
           </p>
+          {excludedTickers.length > 0 ? (
+            <p className="mt-1 text-[12px] leading-[19.8px] text-[#6c737f]">
+              Excludes {excludedTickers.join(", ")} — listed too recently to cover this window.
+            </p>
+          ) : null}
         </div>
         <div
           role="group"

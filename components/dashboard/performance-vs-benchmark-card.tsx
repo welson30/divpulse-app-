@@ -33,9 +33,15 @@ function slicePoints(points: SparklinePoint[], days: number | null): SparklinePo
 type PerformanceVsBenchmarkCardProps = {
   points: SparklinePoint[];
   benchmarkPoints: SparklinePoint[];
+  /** Holdings whose price history is too short for this window — named rather than silently dropped. */
+  excludedTickers?: string[];
 };
 
-export function PerformanceVsBenchmarkCard({ points, benchmarkPoints }: PerformanceVsBenchmarkCardProps) {
+export function PerformanceVsBenchmarkCard({
+  points,
+  benchmarkPoints,
+  excludedTickers = [],
+}: PerformanceVsBenchmarkCardProps) {
   const [range, setRange] = useState<RangeId>("1Y");
   const [showBenchmark, setShowBenchmark] = useState(true);
 
@@ -60,6 +66,11 @@ export function PerformanceVsBenchmarkCard({ points, benchmarkPoints }: Performa
           <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
             Portfolio value against S&amp;P 500 (SPY)
           </p>
+          {excludedTickers.length > 0 ? (
+            <p className="mt-1 text-[12px] leading-[19.8px] text-[#6c737f]">
+              Excludes {excludedTickers.join(", ")} — listed too recently to cover this window.
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button

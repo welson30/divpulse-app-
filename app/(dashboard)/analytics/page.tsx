@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { computeMonthlyIncomeSeries, computeAnnualIncomeSeries } from "@/lib/dividend-data/income";
-import { buildPortfolioSparkline } from "@/lib/tickers/portfolio-sparkline";
+import { buildPortfolioSeries } from "@/lib/tickers/portfolio-sparkline";
 import { AnalyticsBoard } from "@/components/dashboard/analytics-board";
 
 export const metadata: Metadata = {
@@ -40,7 +40,7 @@ export default async function AnalyticsPage() {
     computeAnnualIncomeSeries(supabase, holdings, 6),
     enrichTickers(tickers, "1y"),
   ]);
-  const portfolio = buildPortfolioSparkline(holdings, (ticker) => enriched.get(ticker.toUpperCase())?.sparkline ?? []);
+  const portfolio = buildPortfolioSeries(holdings, (ticker) => enriched.get(ticker.toUpperCase())?.sparkline ?? []).points;
 
   return (
     <div className="flex flex-col gap-6">

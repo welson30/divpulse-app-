@@ -12,7 +12,7 @@ import { PassiveIncomeChart } from "@/components/dashboard/passive-income-chart"
 import { OpenAdvisorButton } from "@/components/dashboard/open-advisor-button";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { Button } from "@/components/ui/button";
-import { buildPortfolioSparkline } from "@/lib/tickers/portfolio-sparkline";
+import { buildPortfolioSeries } from "@/lib/tickers/portfolio-sparkline";
 
 export const metadata: Metadata = {
   title: "Dashboard — PaidPrime",
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
   const portfolioDayChangePct =
     portfolioPrevValue > 0 ? ((portfolioValue - portfolioPrevValue) / portfolioPrevValue) * 100 : null;
 
-  const portfolioSparkline = buildPortfolioSparkline(holdings, (ticker) => infoFor(ticker)?.sparkline ?? []);
+  const portfolioSeries = buildPortfolioSeries(holdings, (ticker) => infoFor(ticker)?.sparkline ?? []);
   const annualIncome = income.annual;
   const avgYieldPct = portfolioValue > 0 ? (annualIncome / portfolioValue) * 100 : 0;
 
@@ -220,7 +220,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 items-start gap-6 min-[1100px]:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.9fr)]">
         <div className="flex min-w-0 flex-col gap-6">
-          <PortfolioPerformanceCard points={portfolioSparkline} />
+          <PortfolioPerformanceCard points={portfolioSeries.points} excludedTickers={portfolioSeries.excluded} />
           <PassiveIncomeChart data={monthlySeries} />
 
           <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
