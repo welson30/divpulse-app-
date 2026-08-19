@@ -73,8 +73,8 @@ export function SiteHeader() {
   const borderOpacity = lerp(0, 1, t);
   const bottomBorderOpacity = lerp(1, 0, t);
   const shadowOpacity = lerp(0, 0.75, t);
-  const logoH = lerp(desktop ? 59 : 36, desktop ? 40 : 32, t);
-  const logoW = lerp(desktop ? 196 : 120, desktop ? 136 : 108, t);
+  const logoH = lerp(desktop ? 44 : 32, desktop ? 34 : 28, t);
+  const logoFontSize = lerp(desktop ? 21 : 18, desktop ? 17 : 15, t);
   const ctaH = lerp(desktop ? 56 : 44, desktop ? 44 : 40, t);
 
   const shellStyle = {
@@ -118,20 +118,16 @@ export function SiteHeader() {
               paddingRight: lerp(desktop ? 48 : 16, desktop ? 28 : 16, t),
             }}
           >
-            <Link
-              href="/"
-              className="relative shrink-0"
-              style={{ width: logoW, height: logoH }}
-              aria-label="PaidPrime home"
-            >
-              <Image
-                src="/marketing/header/logo.png"
-                alt="PaidPrime"
-                fill
-                priority
-                className="object-contain object-left"
-                sizes="196px"
-              />
+            <Link href="/" className="flex shrink-0 items-center gap-2.5">
+              <span className="relative shrink-0" style={{ width: logoH, height: logoH }}>
+                <Image src="/logo.svg" alt="" fill priority className="rounded-[6px] object-contain" sizes="44px" />
+              </span>
+              <span
+                className="font-[family-name:var(--font-inter-tight)] font-semibold whitespace-nowrap text-[#f2f4f7]"
+                style={{ fontSize: logoFontSize }}
+              >
+                PaidPrime
+              </span>
             </Link>
 
             <nav

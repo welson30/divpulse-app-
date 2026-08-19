@@ -61,19 +61,12 @@ export function SignInAside() {
         }}
       />
 
-      <a
-        href="/"
-        className="absolute top-9 left-8 z-10 h-10 w-[132px] min-[1200px]:left-14 min-[1200px]:w-[162px] min-[1200px]:h-[49px]"
-        aria-label="PaidPrime home"
-      >
+      <a href="/" className="absolute top-9 left-8 z-10 flex items-center gap-2.5 min-[1200px]:top-10 min-[1200px]:left-14">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/marketing/signin/logo.png"
-          alt="PaidPrime"
-          width={162}
-          height={49}
-          className="h-full w-full object-contain object-left"
-        />
+        <img src="/logo.svg" alt="" width={40} height={40} className="size-9 rounded-[8px] min-[1200px]:size-10" />
+        <span className="font-[family-name:var(--font-inter-tight)] text-[19px] font-semibold text-[#f2f4f7] min-[1200px]:text-[21px]">
+          PaidPrime
+        </span>
       </a>
 
       <div className="relative flex flex-1 items-center justify-center px-8 py-16 min-[1200px]:px-14">

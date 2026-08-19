@@ -117,7 +117,7 @@ export function HeroSection() {
                 />
               </PrimaryCta>
               <Link
-                href="#how-it-works"
+                href="#connections"
                 className="inline-flex h-12 items-center justify-center gap-2.5 rounded-[18px] border border-[#2e343b] bg-[#16191d] px-6 text-[16px] font-semibold text-[#f2f4f7] transition-colors hover:border-[#4c82f7]/50 sm:h-14 sm:px-8 sm:text-[17px] min-[1200px]:h-16 min-[1200px]:px-9 min-[1200px]:text-[19px]"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
