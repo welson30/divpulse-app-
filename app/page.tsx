@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { PrimaryCta } from "@/components/marketing/primary-cta";
+import { WaitlistForm } from "@/components/marketing/waitlist-form";
 
 export const metadata: Metadata = {
   title: "PaidPrime — Coming soon",
@@ -62,27 +62,12 @@ export default function ComingSoonPage() {
             Real-time dividend alerts — the instant a payment lands, before your broker&rsquo;s app tells you.
           </p>
 
-          <form
-            action="/signup"
-            method="get"
-            className="pp-fade-up-delay-2 mt-2 flex w-full max-w-[440px] flex-col gap-3 sm:flex-row"
-          >
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="you@domain.com"
-              aria-label="Your email address"
-              className="box-border h-[52px] min-w-0 flex-1 rounded-[14px] border border-[#2e343b] bg-[#121417] px-4 text-[16px] text-[#f2f4f7] transition-colors outline-none placeholder:text-[#6c737f] focus:border-[#4c82f7]/60"
-            />
-            <PrimaryCta type="submit" className="h-[52px] shrink-0 rounded-[14px] px-6 text-[16px]">
-              Get early access
-            </PrimaryCta>
-          </form>
-
-          <p className="pp-fade-up-delay-2 m-0 text-[13px] leading-[21px] text-[#6c737f]">
-            Free for 5 tracked holdings. No card required.
-          </p>
+          <div className="pp-fade-up-delay-2 mt-2 flex w-full flex-col items-center gap-3">
+            <WaitlistForm />
+            <p className="m-0 text-[13px] leading-[21px] text-[#6c737f]">
+              We&rsquo;ll only email you when it launches.
+            </p>
+          </div>
         </div>
       </main>
 
