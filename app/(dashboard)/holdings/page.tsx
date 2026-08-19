@@ -81,6 +81,10 @@ export default async function HoldingsPage() {
         : null;
   }
 
+  // Same basis as the dashboard's "Portfolio yield" (trailing 12mo recorded
+  // income over current market value), so the two pages can't disagree.
+  const portfolioYieldPct = totalValue > 0 ? (income.annual / totalValue) * 100 : null;
+
   let portfolioPrevValue = 0;
   for (const holding of list) {
     const quote = infoFor(holding.ticker)?.quote;
@@ -125,9 +129,13 @@ export default async function HoldingsPage() {
           </p>
         </div>
         <div className="flex flex-col gap-2 bg-[#121417] px-5 py-5 min-[900px]:px-6">
-          <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">Cost basis</p>
-          <p className="text-[22px] leading-[26px] tracking-[-0.52px] text-[#f2f4f7] min-[900px]:text-[26px]">—</p>
-          <p className="text-[12px] leading-[19.8px] tracking-[-0.24px] text-[#99a1ac]">Purchase price not recorded</p>
+          <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">Portfolio yield</p>
+          <p className="text-[22px] leading-[26px] tracking-[-0.52px] text-[#f2f4f7] min-[900px]:text-[26px]">
+            {portfolioYieldPct != null ? `${portfolioYieldPct.toFixed(2)}%` : "—"}
+          </p>
+          <p className="text-[12px] leading-[19.8px] tracking-[-0.24px] text-[#99a1ac]">
+            {portfolioYieldPct != null ? "Trailing 12mo income ÷ value" : "Waiting on live prices"}
+          </p>
         </div>
         <div className="flex flex-col gap-2 bg-[#121417] px-5 py-5 min-[900px]:px-6">
           <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">Today&apos;s change</p>
