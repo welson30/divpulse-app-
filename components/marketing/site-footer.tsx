@@ -80,7 +80,8 @@ export function SiteFooter() {
         <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-12 px-0 pt-14 pb-10 min-[1200px]:gap-16 min-[1200px]:px-12 min-[1200px]:pt-20 min-[1200px]:pb-12">
           <div className="grid grid-cols-2 gap-x-8 gap-y-10 min-[900px]:grid-cols-4 min-[1200px]:grid-cols-[minmax(280px,2fr)_repeat(4,minmax(0,1fr))] min-[1200px]:gap-12">
             <div className="col-span-2 flex flex-col gap-2.5 min-[900px]:col-span-4 min-[1200px]:col-span-1">
-              <Link href="/" className="flex shrink-0 items-center gap-2.5">
+              {/* /homepage, not / — the root is the coming-soon gate. */}
+              <Link href="/homepage" className="flex shrink-0 items-center gap-2.5">
                 <span className="relative size-9 shrink-0 min-[1200px]:size-11">
                   <Image src="/logo.svg" alt="" fill className="rounded-[8px] object-contain" sizes="44px" />
                 </span>

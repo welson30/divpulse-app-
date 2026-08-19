@@ -63,7 +63,11 @@ export function SignInAside() {
         }}
       />
 
-      <Link href="/" className="absolute top-9 left-8 z-10 flex items-center gap-2.5 min-[1200px]:top-10 min-[1200px]:left-14">
+      {/* /homepage, not / — the root is the coming-soon gate. */}
+      <Link
+        href="/homepage"
+        className="absolute top-9 left-8 z-10 flex items-center gap-2.5 min-[1200px]:top-10 min-[1200px]:left-14"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.svg" alt="" width={40} height={40} className="size-9 rounded-[8px] min-[1200px]:size-10" />
         <span className="font-[family-name:var(--font-inter-tight)] text-[19px] font-semibold text-[#f2f4f7] min-[1200px]:text-[21px]">

@@ -1,0 +1,76 @@
+import type { Metadata } from "next";
+import { AiAdvisorSection } from "@/components/marketing/ai-advisor-section";
+import { AnalyticsSection } from "@/components/marketing/analytics-section";
+import { BrokerConnectionsSection } from "@/components/marketing/broker-connections-section";
+import { DiversificationSection } from "@/components/marketing/diversification-section";
+import { DividendAlertsSection } from "@/components/marketing/dividend-alerts-section";
+import { DividendCalendarSection } from "@/components/marketing/dividend-calendar-section";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { GoalsSection } from "@/components/marketing/goals-section";
+import { HeroSection } from "@/components/marketing/hero-section";
+import { NotificationTemplatesSection } from "@/components/marketing/notification-templates-section";
+import { PortfolioOverviewSection } from "@/components/marketing/portfolio-overview-section";
+import { PricingSection } from "@/components/marketing/pricing-section";
+import { ProductSection } from "@/components/marketing/product-section";
+import { SiteFooter } from "@/components/marketing/site-footer";
+import { SiteHeader } from "@/components/marketing/site-header";
+import { UpcomingPaymentsSection } from "@/components/marketing/upcoming-payments-section";
+import { WaitlistSection } from "@/components/marketing/waitlist-section";
+import { WatchlistSection } from "@/components/marketing/watchlist-section";
+
+export const metadata: Metadata = {
+  title: "PaidPrime — Know the moment you're paid",
+};
+
+/**
+ * The full marketing site. Lives at /homepage rather than / because the
+ * public root is currently the coming-soon gate (app/page.tsx) — move this
+ * back to app/page.tsx when the site goes live.
+ */
+export default function HomePage() {
+  return (
+    <div className="pp-landing min-h-screen">
+      {/*
+        Figma Homepage:
+        Header 1:2452 = 96.8px
+        Section 1:7   = 1196.7px (hero + stats)
+        Section 1:347 = 977.64px (broker connections)
+        Section 1:411 = 1063.04px (dividend alerts)
+        Section 1:509 = 1296.95px (notification templates)
+        Section 1:752 = 1038.54px (product dashboard)
+        Section 1:1033 = 602.94px (diversification)
+        Section 1:1153 = 1147.45px (dividend calendar)
+        Section 1:1346 = portfolio overview
+        Section 1:1457 = upcoming payments
+        Section 1:1591 = watchlist
+        Section 1:1707 = AI advisor
+        Section 1:1799 = analytics
+        Section 1:1944 = goals
+        Section 1:2112 = pricing
+        Section 1:2031 = FAQ (placed after pricing)
+        Section 1:2089 = waitlist CTA
+        Footer 1:2337
+      */}
+      <SiteHeader />
+      <main>
+        <HeroSection />
+        <BrokerConnectionsSection />
+        <DividendAlertsSection />
+        <NotificationTemplatesSection />
+        <ProductSection />
+        <DiversificationSection />
+        <DividendCalendarSection />
+        <PortfolioOverviewSection />
+        <UpcomingPaymentsSection />
+        <WatchlistSection />
+        <AiAdvisorSection />
+        <AnalyticsSection />
+        <GoalsSection />
+        <PricingSection />
+        <FaqSection />
+        <WaitlistSection />
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}

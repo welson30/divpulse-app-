@@ -118,7 +118,9 @@ export function SiteHeader() {
               paddingRight: lerp(desktop ? 48 : 16, desktop ? 28 : 16, t),
             }}
           >
-            <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            {/* /homepage, not / — the root is the coming-soon gate, so linking
+                there would bounce a visitor off the marketing site. */}
+            <Link href="/homepage" className="flex shrink-0 items-center gap-2.5">
               <span className="relative shrink-0" style={{ width: logoH, height: logoH }}>
                 <Image src="/logo.svg" alt="" fill priority className="rounded-[6px] object-contain" sizes="44px" />
               </span>
