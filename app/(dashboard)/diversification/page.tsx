@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
-import { AllocationDonut, ALLOC_COLORS } from "@/components/dashboard/allocation-donut";
+import { AllocationDonut } from "@/components/dashboard/allocation-donut";
+import { ALLOC_COLORS } from "@/lib/allocation-colors";
 import { BrokerMark } from "@/components/dashboard/broker-mark";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 
@@ -95,7 +96,7 @@ export default async function DiversificationPage() {
     }),
   );
   const quoteByTicker = new Map(distinctTickers.map((ticker, i) => [ticker, quotes[i]]));
-  const pricesMissing = distinctTickers.some((t) => !quoteByTicker.get(t)?.price);
+  const unpricedTickers = distinctTickers.filter((t) => !quoteByTicker.get(t)?.price);
 
   const byBroker = new Map<string, number>();
   const brokerLabels = new Map<string, string>();
@@ -105,7 +106,15 @@ export default async function DiversificationPage() {
   for (const holding of holdings) {
     const quote = quoteByTicker.get(holding.ticker);
     const shares = Number(holding.shares);
-    const value = quote?.price ? shares * quote.price : shares;
+
+    // A holding with no live price is skipped, not valued at its share
+    // count. Substituting the count mixes units — measured on a real
+    // portfolio, two rows of an unpriced option contract at 10,000 shares
+    // each contributed $20,000 of phantom "value" and made up 40% of this
+    // chart, pushing every genuine position's weight down by roughly the
+    // same proportion (KO read 1.8% instead of 3.0%).
+    if (!quote?.price) continue;
+    const value = shares * quote.price;
 
     const brokerRaw = holding.broker_name?.trim() || "Unspecified";
     const brokerKey = brokerRaw.toLowerCase();
@@ -159,17 +168,26 @@ export default async function DiversificationPage() {
               <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Weight by instrument type</p>
             </header>
             <div className="flex flex-col gap-5 p-6">
-              {assetRows.map((row) => (
-                <div key={row.label} className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-[13px] text-[#f2f4f7]">{row.label}</span>
-                    <span className="text-[13px] tracking-[-0.26px] text-[#99a1ac]">{row.pct.toFixed(0)}%</span>
+              {assetRows.map((row) => {
+                // Floor the drawn width so a real but small slice still reads as a
+                // line instead of a sub-pixel sliver; a true 0% stays empty. The
+                // label keeps a decimal below 1% so it can't render as "0%" next
+                // to a visible bar.
+                const barWidth = row.pct > 0 ? Math.min(100, Math.max(row.pct, 1.5)) : 0;
+                return (
+                  <div key={row.label} className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[13px] text-[#f2f4f7]">{row.label}</span>
+                      <span className="text-[13px] tracking-[-0.26px] text-[#99a1ac]">
+                        {row.pct >= 1 ? row.pct.toFixed(0) : row.pct.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-[#16191d]">
+                      <div className="h-2 rounded-full" style={{ width: `${barWidth}%`, background: row.color }} />
+                    </div>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[#16191d]">
-                    <div className="h-2 rounded-full" style={{ width: `${Math.min(100, row.pct)}%`, background: row.color }} />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -253,10 +271,10 @@ export default async function DiversificationPage() {
         </div>
       </section>
 
-      {pricesMissing ? (
+      {unpricedTickers.length > 0 ? (
         <p className="text-sm text-[#99a1ac]">
-          Live price lookup failed for one or more tickers — those positions are weighted by share count until the next
-          refresh.
+          No live price for {unpricedTickers.join(", ")} — {unpricedTickers.length === 1 ? "that position is" : "those positions are"}{" "}
+          left out of the weightings above so the percentages stay in dollars.
         </p>
       ) : null}
 

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-
-export const ALLOC_COLORS = ["#4c82f7", "#3fbf87", "#e0a45c", "#8b7fe8", "#5fb2c9", "#d8695f"] as const;
+// Not re-exported from here on purpose — server components must import it
+// from lib/allocation-colors directly, or they get a client reference
+// instead of the array. See that file's comment.
+import { ALLOC_COLORS } from "@/lib/allocation-colors";
 
 export type AllocationSegment = {
   label: string;
@@ -30,19 +32,19 @@ export function AllocationDonut({ segments, totalLabel = "Total" }: AllocationDo
   const cx = 110;
   const cy = 110;
 
-  let offset = 0;
+  // Each arc's offset is derived from the segments before it rather than
+  // accumulated into a mutable local, which react-hooks/immutability flags
+  // as unsafe to reassign during render.
   const arcs = segments.map((segment, i) => {
     const fraction = total > 0 ? segment.value / total : 0;
-    const dash = fraction * circumference;
-    const arc = {
+    const priorValue = segments.slice(0, i).reduce((sum, s) => sum + s.value, 0);
+    return {
       ...segment,
-      dash,
-      offset,
+      dash: fraction * circumference,
+      offset: total > 0 ? (priorValue / total) * circumference : 0,
       color: ALLOC_COLORS[i % ALLOC_COLORS.length]!,
       percent: fraction * 100,
     };
-    offset += dash;
-    return arc;
   });
 
   return (
