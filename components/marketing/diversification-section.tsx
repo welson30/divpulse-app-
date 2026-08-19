@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Reveal } from "@/components/marketing/reveal";
 
 const BULLETS = [
@@ -15,12 +18,17 @@ const BULLETS = [
   },
 ] as const;
 
+// Same palette as components/dashboard/allocation-donut.tsx's ALLOC_COLORS,
+// for consistency between the marketing preview and the real in-app chart.
 const ALLOCATION = [
   { label: "Covered call ETFs", percent: 34, color: "#4c82f7" },
-  { label: "Dividend growth", percent: 27, color: "#6c737f" },
-  { label: "REITs", percent: 21, color: "#3f4650" },
-  { label: "Broad market", percent: 18, color: "#9b95e0" },
+  { label: "Dividend growth", percent: 27, color: "#3fbf87" },
+  { label: "REITs", percent: 21, color: "#e0a45c" },
+  { label: "Broad market", percent: 18, color: "#8b7fe8" },
 ] as const;
+
+const DONUT_RADIUS = 50;
+const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
 
 /**
  * Figma Homepage section 1:1033 — Diversification (1440 × 602.94).
@@ -28,6 +36,17 @@ const ALLOCATION = [
  * Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
 export function DiversificationSection() {
+  const [active, setActive] = useState<string | null>(null);
+
+  const arcs = ALLOCATION.map((segment, index) => {
+    const priorPercent = ALLOCATION.slice(0, index).reduce((sum, s) => sum + s.percent, 0);
+    return {
+      ...segment,
+      dash: (segment.percent / 100) * DONUT_CIRCUMFERENCE,
+      offset: (priorPercent / 100) * DONUT_CIRCUMFERENCE,
+    };
+  });
+
   return (
     <section
       id="diversification"
@@ -94,43 +113,34 @@ export function DiversificationSection() {
                   </p>
 
                   <div className="flex items-center gap-5">
-                    <div className="relative size-32 shrink-0" aria-hidden>
-                      {/* Figma donut segments — absolute boxes match 1:1087 */}
-                      <div className="absolute inset-[1.56%]">
-                        <div className="absolute top-[0%] right-[0%] bottom-1/2 left-[26.02%]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src="/marketing/diversification/donut-1.svg"
-                            alt=""
-                            className="absolute inset-0 size-full max-w-none"
-                          />
-                        </div>
-                        <div className="absolute inset-[8.78%_69.69%_21.04%_1.56%]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src="/marketing/diversification/donut-2.svg"
-                            alt=""
-                            className="absolute inset-0 size-full max-w-none"
-                          />
-                        </div>
-                        <div className="absolute inset-[73.46%_31.35%_1.56%_12.21%]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src="/marketing/diversification/donut-3.svg"
-                            alt=""
-                            className="absolute inset-0 size-full max-w-none"
-                          />
-                        </div>
-                        <div className="absolute inset-[51.31%_1.59%_5.97%_65.63%]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src="/marketing/diversification/donut-4.svg"
-                            alt=""
-                            className="absolute inset-0 size-full max-w-none"
-                          />
-                        </div>
-                      </div>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+                    <div className="relative size-32 shrink-0">
+                      <svg viewBox="0 0 128 128" width={128} height={128} role="img" aria-label="Sample allocation breakdown" className="size-32">
+                        <circle cx={64} cy={64} r={DONUT_RADIUS} fill="none" stroke="#22262c" strokeWidth={16} />
+                        {arcs.map((arc) => {
+                          const dimmed = active != null && active !== arc.label;
+                          return (
+                            <circle
+                              key={arc.label}
+                              cx={64}
+                              cy={64}
+                              r={DONUT_RADIUS}
+                              fill="none"
+                              stroke={arc.color}
+                              strokeWidth={16}
+                              strokeDasharray={`${arc.dash} ${DONUT_CIRCUMFERENCE - arc.dash}`}
+                              strokeDashoffset={-arc.offset}
+                              strokeLinecap="butt"
+                              transform="rotate(-90 64 64)"
+                              pointerEvents="stroke"
+                              className="cursor-pointer transition-opacity"
+                              style={{ opacity: dimmed ? 0.35 : 1 }}
+                              onMouseEnter={() => setActive(arc.label)}
+                              onMouseLeave={() => setActive(null)}
+                            />
+                          );
+                        })}
+                      </svg>
+                      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-0.5">
                         <span className="text-[15px] leading-[24.75px] font-medium tracking-[-0.3px] text-[#f2f4f7]">
                           100%
                         </span>
@@ -141,26 +151,32 @@ export function DiversificationSection() {
                     </div>
 
                     <ul className="m-0 flex min-w-0 flex-1 list-none flex-col gap-2 p-0">
-                      {ALLOCATION.map((row) => (
-                        <li
-                          key={row.label}
-                          className="flex items-center justify-between gap-3"
-                        >
-                          <span className="flex min-w-0 items-center gap-2">
-                            <span
-                              className="size-2 shrink-0 rounded-[6px]"
-                              style={{ backgroundColor: row.color }}
-                              aria-hidden
-                            />
-                            <span className="truncate text-[12px] leading-[19.8px] font-normal text-[#99a1ac]">
-                              {row.label}
+                      {ALLOCATION.map((row) => {
+                        const dimmed = active != null && active !== row.label;
+                        return (
+                          <li
+                            key={row.label}
+                            className="flex cursor-pointer items-center justify-between gap-3 transition-opacity"
+                            style={{ opacity: dimmed ? 0.5 : 1 }}
+                            onMouseEnter={() => setActive(row.label)}
+                            onMouseLeave={() => setActive(null)}
+                          >
+                            <span className="flex min-w-0 items-center gap-2">
+                              <span
+                                className="size-2 shrink-0 rounded-[6px]"
+                                style={{ backgroundColor: row.color }}
+                                aria-hidden
+                              />
+                              <span className="truncate text-[12px] leading-[19.8px] font-normal text-[#99a1ac]">
+                                {row.label}
+                              </span>
                             </span>
-                          </span>
-                          <span className="shrink-0 text-[12px] leading-[19.8px] font-normal tracking-[-0.24px] text-[#f2f4f7]">
-                            {row.percent}%
-                          </span>
-                        </li>
-                      ))}
+                            <span className="shrink-0 text-[12px] leading-[19.8px] font-normal tracking-[-0.24px] text-[#f2f4f7]">
+                              {row.percent}%
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 </div>

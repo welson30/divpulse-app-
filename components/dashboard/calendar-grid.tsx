@@ -79,13 +79,13 @@ export function CalendarGrid({
               onClick={() => onSelectDay(day)}
               className={cn(
                 "relative flex min-h-[86px] flex-col items-start gap-1.5 bg-[#121417] px-2 py-2 text-left outline-none",
-                isSelected && "z-[1] shadow-[inset_0_0_0_1px_#4c82f7]",
+                isSelected && "z-[1] shadow-[inset_0_0_0_1px_#3fbf87]",
               )}
             >
               <span
                 className={cn(
                   "text-[12px] tracking-[-0.24px] text-[#99a1ac]",
-                  isToday && !isSelected && "font-medium text-[#4c82f7]",
+                  isToday && !isSelected && "font-medium text-[#3fbf87]",
                 )}
               >
                 {day}
@@ -96,10 +96,10 @@ export function CalendarGrid({
                     <span key={`${event.ticker}-${idx}`} className="flex min-w-0 flex-col gap-0.5">
                       <span
                         className={cn(
-                          "truncate rounded-[6px] px-1.5 py-0.5 text-[10px] font-medium text-[#4c82f7]",
+                          "truncate rounded-[6px] px-1.5 py-0.5 text-[10px] font-medium text-[#3fbf87]",
                           event.kind === "estimated"
-                            ? "border border-dashed border-[#4c82f7]/50 bg-transparent"
-                            : "bg-[#16233d]",
+                            ? "border border-dashed border-[rgba(63,191,135,0.5)] bg-transparent"
+                            : "bg-[#10261e]",
                         )}
                       >
                         {event.identityHidden ? "•••" : event.ticker}
