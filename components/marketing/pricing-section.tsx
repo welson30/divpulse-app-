@@ -18,59 +18,75 @@ type Plan = {
   features: { label: string; value: FeatureValue }[];
 };
 
+// Matches the real plans (profiles.plan: "free" | "pro" | "pro_plus") and
+// their actual Stripe prices/feature gates — see
+// components/dashboard/billing-card.tsx ($59/yr, $119/yr), the isPro check
+// in app/(dashboard)/advisor/page.tsx and alert-templates-board.tsx
+// (AI Advisor + Telegram, both Pro and Pro+), FREE_PLAN_HOLDING_CAP in
+// holdings/actions.ts (5), and the isProPlus gate on CSV import /
+// broker auto-sync (import-csv-dialog.tsx, plaid-connect-dialog.tsx).
+// Deliberately no invented tiers or features — this page previously showed
+// fictional "Investor"/"Wealth" plans at $12/mo and $29/mo that don't
+// exist anywhere in the actual product or Stripe setup.
 const PLANS: Plan[] = [
   {
     name: "Free",
     price: "$0",
-    description: "Track a handful of holdings and never miss a payment.",
+    description: "Track up to 5 holdings and never miss a payment.",
     cta: "Get Started Free",
     href: "/signup",
     features: [
       { label: "Tracked holdings", value: { type: "text", label: "5 holdings" } },
       { label: "Real-time payment alerts", value: { type: "check" } },
       { label: "Dividend calendar", value: { type: "check" } },
-      { label: "Watchlist", value: { type: "text", label: "3 tickers" } },
+      { label: "Watchlist", value: { type: "text", label: "Unlimited" } },
+      { label: "Analytics", value: { type: "check" } },
+      { label: "Financial goals", value: { type: "check" } },
       { label: "AI Advisor", value: { type: "dash" } },
-      { label: "Advanced analytics", value: { type: "dash" } },
-      { label: "Financial goals", value: { type: "dash" } },
-      { label: "Priority support", value: { type: "dash" } },
+      { label: "Telegram alerts", value: { type: "dash" } },
+      { label: "CSV import", value: { type: "dash" } },
+      { label: "Broker auto-sync", value: { type: "dash" } },
     ],
   },
   {
-    name: "Investor",
-    price: "$12",
-    period: "/mo",
-    description: "For active dividend investors managing a full portfolio.",
-    cta: "Start Investor plan",
+    name: "Pro",
+    price: "$59",
+    period: "/yr",
+    description: "Unlimited manual tracking for active dividend investors.",
+    cta: "Start with Pro",
     href: "/signup",
     featured: true,
     features: [
-      { label: "Tracked holdings", value: { type: "text", label: "Unlimited holdings" } },
+      { label: "Tracked holdings", value: { type: "text", label: "Unlimited" } },
       { label: "Real-time payment alerts", value: { type: "check" } },
       { label: "Dividend calendar", value: { type: "check" } },
       { label: "Watchlist", value: { type: "text", label: "Unlimited" } },
-      { label: "AI Advisor", value: { type: "check" } },
-      { label: "Advanced analytics", value: { type: "check" } },
+      { label: "Analytics", value: { type: "check" } },
       { label: "Financial goals", value: { type: "check" } },
-      { label: "Priority support", value: { type: "dash" } },
+      { label: "AI Advisor", value: { type: "check" } },
+      { label: "Telegram alerts", value: { type: "check" } },
+      { label: "CSV import", value: { type: "dash" } },
+      { label: "Broker auto-sync", value: { type: "dash" } },
     ],
   },
   {
-    name: "Wealth",
-    price: "$29",
-    period: "/mo",
-    description: "Multi-account households and serious income builders.",
-    cta: "Start Wealth plan",
+    name: "Pro+",
+    price: "$119",
+    period: "/yr",
+    description: "Unlimited tracking, CSV import, and broker auto-sync.",
+    cta: "Start with Pro+",
     href: "/signup",
     features: [
-      { label: "Tracked holdings", value: { type: "text", label: "Unlimited holdings" } },
+      { label: "Tracked holdings", value: { type: "text", label: "Unlimited" } },
       { label: "Real-time payment alerts", value: { type: "check" } },
       { label: "Dividend calendar", value: { type: "check" } },
       { label: "Watchlist", value: { type: "text", label: "Unlimited" } },
-      { label: "AI Advisor", value: { type: "check" } },
-      { label: "Advanced analytics", value: { type: "check" } },
+      { label: "Analytics", value: { type: "check" } },
       { label: "Financial goals", value: { type: "check" } },
-      { label: "Priority support", value: { type: "check" } },
+      { label: "AI Advisor", value: { type: "check" } },
+      { label: "Telegram alerts", value: { type: "check" } },
+      { label: "CSV import", value: { type: "check" } },
+      { label: "Broker auto-sync", value: { type: "check" } },
     ],
   },
 ];
@@ -267,8 +283,8 @@ export function PricingSection() {
             </h2>
 
             <p className="m-0 max-w-[780px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[21.6px] min-[1200px]:leading-[34.56px]">
-              Start free with five holdings. Upgrade when you need unlimited tracking and
-              deeper analytics.
+              Start free with five holdings. Upgrade when you need unlimited tracking, the AI
+              Advisor and Telegram alerts, or CSV import and broker auto-sync.
             </p>
           </Reveal>
 
@@ -281,8 +297,8 @@ export function PricingSection() {
           </Reveal>
 
           <p className="m-0 max-w-[720px] text-center text-[15px] leading-[26.4px] text-[#6c737f] min-[1200px]:text-[16px]">
-            All plans include read-only broker sync, encrypted storage and cancel-anytime
-            billing.
+            Broker auto-sync is read-only and Pro+ only — PaidPrime can never place trades or
+            move funds. Encrypted storage and cancel-anytime billing on every plan.
           </p>
         </div>
       </div>
