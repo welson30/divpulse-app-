@@ -339,8 +339,11 @@ function BarChart({
           {ticks.map((t) => (
             <div key={t.p} aria-hidden className="absolute inset-x-0 border-t border-[#22262c]" style={{ bottom: `${t.p * 100}%` }} />
           ))}
+          {/* h-full on each column is load-bearing — see passive-income-chart.tsx:
+              the parent's items-end leaves the column content-sized, and the bar's
+              percentage height can't resolve against an indefinite parent. */}
           {data.map((d) => (
-            <div key={d.month} className="relative z-[1] flex min-w-0 flex-1 flex-col items-center justify-end">
+            <div key={d.month} className="relative z-[1] flex h-full min-w-0 flex-1 flex-col items-center justify-end">
               <div
                 className="w-full max-w-[22px] rounded-t-[3px]"
                 style={{ height: `${Math.max((d.total / niceMax) * 100, 2)}%`, backgroundColor: color }}

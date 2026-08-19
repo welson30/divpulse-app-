@@ -51,7 +51,10 @@ export function MonthlyIncomeChart({ data, className }: { data: MonthlyIncomePoi
           const heightPct = (d.total / max) * 100;
           const isStrong = d.total >= avg;
           return (
-            <div key={d.month} className="group relative flex flex-1 flex-col items-center justify-end">
+            // h-full is load-bearing — see passive-income-chart.tsx: the parent's
+            // items-end leaves this column content-sized, and the bar's percentage
+            // height can't resolve against an indefinite parent.
+            <div key={d.month} className="group relative flex h-full flex-1 flex-col items-center justify-end">
               {/* Native title gives a usable hover readout without shipping
                   a tooltip library or making this a client component. */}
               <div

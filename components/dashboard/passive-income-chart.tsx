@@ -70,7 +70,11 @@ export function PassiveIncomeChart({
                 {data.map((d) => {
                   const heightPct = niceMax > 0 ? (d.total / niceMax) * 100 : 0;
                   return (
-                    <div key={d.month} className="relative z-[1] flex min-w-0 flex-1 flex-col items-center justify-end">
+                    // h-full is load-bearing: the parent sets items-end, so this
+                    // column isn't stretched and its height would be content-based.
+                    // The bar's percentage height needs a definite parent height to
+                    // resolve against — without it every bar collapses to zero.
+                    <div key={d.month} className="relative z-[1] flex h-full min-w-0 flex-1 flex-col items-center justify-end">
                       <div
                         className="w-full max-w-[28px] rounded-t-[3px] bg-[#3fbf87] hover:opacity-80"
                         style={{ height: `${Math.max(heightPct, 2)}%` }}
