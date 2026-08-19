@@ -10,37 +10,26 @@ const PRODUCT_LINKS = [
   { href: "#pricing", label: "Pricing" },
 ] as const;
 
+// About/Careers/Press kit/Blog dropped — no pages exist for any of them yet.
+// Re-add once there's a real destination; a link to nowhere is worse than no link.
 const COMPANY_LINKS = [
-  { href: "#", label: "About" },
-  { href: "#", label: "Careers" },
-  { href: "#", label: "Press kit" },
-  { href: "#", label: "Blog" },
   { href: "mailto:paidprime1@gmail.com", label: "Contact" },
 ] as const;
 
+// Dividend glossary/System status dropped for the same reason. Help center
+// points at email rather than /help — that route is the authenticated
+// in-app help center (app/(dashboard)/help), so a signed-out visitor
+// clicking it from the public footer would just bounce off the login wall.
 const RESOURCE_LINKS = [
   { href: "#faq", label: "FAQ" },
-  { href: "#", label: "Help center" },
+  { href: "mailto:paidprime1@gmail.com?subject=PaidPrime%20support", label: "Help center" },
   { href: "#connections", label: "Broker connections" },
-  { href: "#", label: "Dividend glossary" },
-  { href: "#", label: "System status" },
 ] as const;
 
-const LEGAL_LINKS = [
-  { href: "#", label: "Privacy policy" },
-  { href: "#", label: "Terms of service" },
-  { href: "#", label: "Security" },
-  { href: "#", label: "Disclosures" },
-  { href: "#", label: "Cookie settings" },
-] as const;
-
-const SOCIAL_LINKS = [
-  { href: "#", label: "X", icon: "/marketing/footer/icon-x.svg" },
-  { href: "#", label: "LinkedIn", icon: "/marketing/footer/icon-linkedin.svg" },
-  { href: "#", label: "Instagram", icon: "/marketing/footer/icon-instagram.svg" },
-  { href: "#", label: "YouTube", icon: "/marketing/footer/icon-youtube.svg" },
-  { href: "#", label: "Discord", icon: "/marketing/footer/icon-discord.svg" },
-] as const;
+// Terms of service/Security/Disclosures/Cookie settings still have no real
+// page — only add them here once real content exists for each, same rule
+// as everything else dropped above.
+const LEGAL_LINKS = [{ href: "/privacy", label: "Privacy policy" }] as const;
 
 function FooterColumn({
   title,
@@ -135,27 +124,6 @@ export function SiteFooter() {
                   Florida - USA
                 </p>
               </div>
-
-              <ul className="m-0 flex list-none flex-wrap gap-3 p-0 pt-[18px]">
-                {SOCIAL_LINKS.map((social) => (
-                  <li key={social.label}>
-                    <a
-                      href={social.href}
-                      aria-label={social.label}
-                      className="flex size-12 items-center justify-center rounded-[14px] border border-[#2e343b] bg-[#121417] transition-colors hover:border-[#4c82f7]/50"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={social.icon}
-                        alt=""
-                        width={20}
-                        height={20}
-                        className="size-5"
-                      />
-                    </a>
-                  </li>
-                ))}
-              </ul>
             </div>
 
             <FooterColumn title="Product" links={PRODUCT_LINKS} />
