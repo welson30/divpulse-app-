@@ -4,10 +4,10 @@ import { getPlaidClient } from "@/lib/plaid/client";
 import { decrypt } from "@/lib/crypto/encryption";
 
 /**
- * Revokes a Plaid Item, marks the connection disconnected, and removes
- * Plaid-sourced holdings that belonged to that Item. Writes go through
- * the service-role client — broker_connections has no client update/delete
- * RLS (see supabase/migrations/20260729000000_broker_connections.sql).
+ * Revokes a Plaid Item, marks the connection disconnected, and removes the
+ * holdings that came from it. Writes go through the service-role client —
+ * broker_connections has no client update/delete RLS (see
+ * supabase/migrations/20260729000000_broker_connections.sql).
  */
 export async function disconnectConnectionForUser(
   userId: string,
@@ -35,42 +35,49 @@ export async function disconnectConnectionForUser(
     accessToken = null;
   }
 
-  const plaid = getPlaidClient();
-  let accountIds: string[] = [];
-
   if (accessToken) {
     try {
-      const holdingsResponse = await plaid.investmentsHoldingsGet({ access_token: accessToken });
-      accountIds = [...new Set(holdingsResponse.data.holdings.map((h) => h.account_id))];
+      await getPlaidClient().itemRemove({ access_token: accessToken });
     } catch {
-      // Item may already be revoked or the investments product unavailable.
-    }
-    try {
-      await plaid.itemRemove({ access_token: accessToken });
-    } catch {
-      // Already removed on Plaid's side — still mark us disconnected.
+      // Already removed on Plaid's side, or the Item is in a state that
+      // refuses the call — either way we still mark ourselves
+      // disconnected, since leaving a connection the user asked to remove
+      // sitting there "active" is worse than a stale Item at Plaid.
     }
   }
 
-  if (accountIds.length > 0) {
+  // Deleting by connection replaces what used to be a two-branch guess:
+  // fetch the Item's account IDs and delete those, or — if that fetch
+  // failed, which is exactly what happens on a revoked or errored Item —
+  // fall back to deleting every Plaid holding for the user, but only if
+  // no other connection existed. That fallback meant disconnecting a
+  // broken broker while a second one was linked left its holdings behind
+  // permanently, with nothing pointing at them.
+  await admin.from("holdings").delete().eq("broker_connection_id", connectionId);
+
+  // Transitional, mirroring lib/plaid/sync.ts: pre-migration rows carry a
+  // null broker_connection_id. If this was the user's only live
+  // connection, any orphaned Plaid rows belonged to it.
+  const { count } = await admin
+    .from("broker_connections")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .neq("id", connectionId)
+    .neq("status", "disconnected");
+
+  if (!count) {
     await admin
       .from("holdings")
       .delete()
       .eq("user_id", userId)
       .eq("source", "plaid")
-      .in("plaid_account_id", accountIds);
-  } else {
-    const { count } = await admin
-      .from("broker_connections")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .neq("id", connectionId)
-      .neq("status", "disconnected");
-    if (!count) {
-      await admin.from("holdings").delete().eq("user_id", userId).eq("source", "plaid");
-    }
+      .is("broker_connection_id", null);
   }
 
-  await admin.from("broker_connections").update({ status: "disconnected" }).eq("id", connectionId);
+  await admin
+    .from("broker_connections")
+    .update({ status: "disconnected", needs_reauth: false, last_error_code: null })
+    .eq("id", connectionId);
+
   return { ok: true };
 }

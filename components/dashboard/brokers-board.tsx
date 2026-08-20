@@ -8,11 +8,16 @@ import { usePlaidConnect } from "@/components/dashboard/use-plaid-connect";
 import { disconnectBrokerConnection, resyncBrokerConnection } from "@/app/(dashboard)/brokers/actions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+/** A position Plaid returned that carried no ticker, so it couldn't be stored as a holding. */
+export type UnmatchedPosition = { name: string; quantity: number; security_id: string };
+
 export type BrokerConnectionRow = {
   id: string;
   institution_name: string | null;
   status: "active" | "error" | "disconnected";
   last_synced_at: string | null;
+  needs_reauth: boolean;
+  unmatched_positions: UnmatchedPosition[] | null;
 };
 
 type BrokersBoardProps = {
@@ -42,13 +47,14 @@ function accountCountLabel(count: number) {
 }
 
 export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
-  const { connect, isPending: isConnecting, error: connectError } = usePlaidConnect();
+  const { connect, reconnect, isPending: isConnecting, error: connectError } = usePlaidConnect();
   const [managing, setManaging] = useState<BrokerConnectionRow | null>(null);
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [isActing, startAction] = useTransition();
 
   const live = connections.filter((c) => c.status !== "disconnected");
+  const stale = live.filter((c) => c.needs_reauth);
 
   function startConnect() {
     if (!isProPlus) return;
@@ -87,6 +93,34 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
         </p>
       </header>
 
+      {/* Bank logins expire every few months — without a prompt this deep
+          in the app, a dead connection just quietly stops syncing. */}
+      {stale.length > 0 ? (
+        <section className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[14px] border border-[rgba(224,164,92,0.35)] bg-[#241d12] px-5 py-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-medium leading-[23.1px] text-[#e0a45c]">
+              {stale.length === 1
+                ? `${stale[0]!.institution_name?.trim() || "A broker"} needs you to sign in again`
+                : `${stale.length} brokers need you to sign in again`}
+            </p>
+            <p className="text-[13px] leading-[21.45px] text-[#99a1ac]">
+              Holdings stopped syncing. Reconnecting takes a few seconds and keeps your history.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={isConnecting}
+            onClick={() => {
+              setActionError(null);
+              reconnect(stale[0]!.id);
+            }}
+            className="h-9 shrink-0 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
+          >
+            {isConnecting ? "Opening…" : "Reconnect"}
+          </button>
+        </section>
+      ) : null}
+
       <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
         <header className="border-b border-[#22262c] px-6 py-5">
           <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
@@ -121,7 +155,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
                     <FigmaIcon src="/marketing/dashboard/icon-readonly.svg" className="size-[11px] text-[#99a1ac]" />
                     Read-only
                   </span>
-                  <StatusBadge status={row.status} syncing={syncing} />
+                  <StatusBadge status={row.status} syncing={syncing} needsReauth={row.needs_reauth} />
                   <button
                     type="button"
                     onClick={() => {
@@ -232,7 +266,44 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
               {actionError}
             </p>
           ) : null}
+
+          {/* Positions Plaid sent that have no ticker — mutual funds,
+              treasuries, sweep vehicles. They can't be stored as holdings,
+              but the user is entitled to know they're missing rather than
+              wonder why the totals look light. */}
+          {managing?.unmatched_positions?.length ? (
+            <div className="rounded-[10px] border border-[#2e343b] bg-[#16191d] px-4 py-3">
+              <p className="text-[13px] font-medium leading-[21.45px] text-[#f2f4f7]">
+                {managing.unmatched_positions.length}{" "}
+                {managing.unmatched_positions.length === 1 ? "position" : "positions"} couldn&rsquo;t be matched to a ticker
+              </p>
+              <ul className="mt-1.5 flex flex-col gap-0.5">
+                {managing.unmatched_positions.map((position) => (
+                  <li key={position.security_id} className="text-[12px] leading-[19.8px] text-[#99a1ac]">
+                    {position.name} · {position.quantity}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-[12px] leading-[19.8px] text-[#6c737f]">
+                Your broker didn&rsquo;t report a symbol for these, so they aren&rsquo;t tracked. Add them manually if you want them counted.
+              </p>
+            </div>
+          ) : null}
+
           <div className="flex flex-col gap-2">
+            {managing?.needs_reauth ? (
+              <button
+                type="button"
+                disabled={isConnecting || !managing}
+                onClick={() => {
+                  setActionError(null);
+                  reconnect(managing.id);
+                }}
+                className="h-10 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
+              >
+                {isConnecting ? "Opening…" : "Reconnect"}
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={isActing || !managing}
@@ -256,12 +327,30 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
   );
 }
 
-function StatusBadge({ status, syncing }: { status: BrokerConnectionRow["status"]; syncing: boolean }) {
+function StatusBadge({
+  status,
+  syncing,
+  needsReauth,
+}: {
+  status: BrokerConnectionRow["status"];
+  syncing: boolean;
+  needsReauth: boolean;
+}) {
   if (syncing) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[rgba(76,130,247,0.3)] bg-[#16233d] px-[9px] py-1 text-[11px] tracking-[1.1px] text-[#4c82f7] uppercase">
         <FigmaIcon src="/marketing/dashboard/icon-syncing.svg" className="size-[11px] animate-spin text-[#4c82f7]" />
         Syncing
+      </span>
+    );
+  }
+  // Checked before status, and worded as an instruction rather than
+  // "Attention" — this state has exactly one fix and the user is the only
+  // one who can perform it.
+  if (needsReauth) {
+    return (
+      <span className="inline-flex items-center rounded-[8px] border border-[rgba(224,164,92,0.35)] bg-[#241d12] px-[9px] py-1 text-[11px] tracking-[1.1px] text-[#e0a45c] uppercase">
+        Reconnect
       </span>
     );
   }

@@ -62,7 +62,7 @@ export default async function DashboardPage() {
     supabase.from("profiles").select("display_name, plan").eq("id", user!.id).single(),
     supabase
       .from("broker_connections")
-      .select("id, institution_name, status, last_synced_at")
+      .select("id, institution_name, status, last_synced_at, needs_reauth")
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false }),
   ]);

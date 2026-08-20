@@ -12,7 +12,11 @@ import { syncHoldingsForConnection } from "@/lib/plaid/sync";
  * the user waiting for the next scheduled sync.
  */
 export async function POST(request: NextRequest) {
-  const { publicToken, institutionName } = (await request.json()) as { publicToken?: string; institutionName?: string };
+  const { publicToken, institutionName, institutionId } = (await request.json()) as {
+    publicToken?: string;
+    institutionName?: string;
+    institutionId?: string;
+  };
 
   if (!publicToken) {
     return NextResponse.json({ error: "Missing public token." }, { status: 400 });
@@ -50,6 +54,11 @@ export async function POST(request: NextRequest) {
       plaid_item_id: itemId,
       plaid_access_token: encrypt(accessToken),
       institution_name: institutionName ?? null,
+      // Link hands us the institution_id exactly once, here. Update mode
+      // and any per-institution handling key off the ID rather than the
+      // display name, and there is no way to recover it later without
+      // another round-trip.
+      plaid_institution_id: institutionId ?? null,
       status: "active",
     })
     .select("id")

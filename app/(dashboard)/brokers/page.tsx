@@ -16,7 +16,7 @@ export default async function BrokersPage() {
     supabase.from("profiles").select("plan").eq("id", user!.id).single(),
     supabase
       .from("broker_connections")
-      .select("id, institution_name, status, last_synced_at")
+      .select("id, institution_name, status, last_synced_at, needs_reauth, unmatched_positions")
       .eq("user_id", user!.id)
       .neq("status", "disconnected")
       .order("created_at", { ascending: false }),

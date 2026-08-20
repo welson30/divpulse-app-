@@ -7,6 +7,7 @@ type PlaidConnection = {
   institution_name: string | null;
   status: "active" | "error" | "disconnected";
   last_synced_at: string | null;
+  needs_reauth: boolean;
 };
 
 type PlaidConnectCardProps = {
@@ -20,7 +21,7 @@ function formatDate(dateStr: string | null) {
 }
 
 export function PlaidConnectCard({ isProPlus, connections }: PlaidConnectCardProps) {
-  const { connect, isPending, error } = usePlaidConnect();
+  const { connect, reconnect, isPending, error } = usePlaidConnect();
 
   if (!isProPlus) {
     return (
@@ -45,19 +46,32 @@ export function PlaidConnectCard({ isProPlus, connections }: PlaidConnectCardPro
               key={connection.id}
               className="flex items-center justify-between gap-2 rounded-card border border-border-subtle bg-surface p-sp-3"
             >
-              <div>
+              <div className="min-w-0">
                 <div className="text-sm text-text-primary">{connection.institution_name ?? "Connected broker"}</div>
                 <div className="text-xs text-text-secondary">
-                  {connection.status === "active" ? (
+                  {connection.needs_reauth ? (
+                    <span className="text-warning">Sign-in expired</span>
+                  ) : connection.status === "active" ? (
                     <span className="text-green-500">Synced</span>
                   ) : connection.status === "error" ? (
-                    <span className="text-red-500">Sync error — reconnect</span>
+                    <span className="text-red-500">Sync error</span>
                   ) : (
                     "Disconnected"
                   )}{" "}
                   · last synced {formatDate(connection.last_synced_at)}
                 </div>
               </div>
+              {/* The old copy said "reconnect" but offered no way to do it. */}
+              {connection.needs_reauth ? (
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => reconnect(connection.id)}
+                  className="shrink-0 rounded-control border border-border-subtle px-3 py-1.5 font-sans text-xs font-semibold text-text-primary hover:border-warning disabled:opacity-40"
+                >
+                  {isPending ? "Opening…" : "Reconnect"}
+                </button>
+              ) : null}
             </div>
           ))}
         </div>

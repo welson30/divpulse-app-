@@ -9,6 +9,7 @@ type PlaidConnection = {
   institution_name: string | null;
   status: "active" | "error" | "disconnected";
   last_synced_at: string | null;
+  needs_reauth: boolean;
 };
 
 type PlaidConnectDialogProps = {
