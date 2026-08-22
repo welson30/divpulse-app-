@@ -56,9 +56,28 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
   const live = connections.filter((c) => c.status !== "disconnected");
   const stale = live.filter((c) => c.needs_reauth);
 
-  function startConnect() {
+  // Which control started the flow — "broker:<name>" for an Available
+  // brokers tile, "reauth:<id>" for a Reconnect button.
+  //
+  // usePlaidConnect exposes one shared isConnecting for the whole page, so
+  // rendering it directly made every control announce itself at once: all
+  // four tiles disabled and said "Connecting…" together, which read as the
+  // whole list reloading rather than one card being clicked. Never cleared
+  // explicitly — every read is gated on isConnecting, so a stale key is
+  // inert once the flow ends.
+  const [connectingKey, setConnectingKey] = useState<string | null>(null);
+  const isBusy = (key: string) => isConnecting && connectingKey === key;
+
+  function startConnect(name: string) {
     if (!isProPlus) return;
+    setConnectingKey(`broker:${name}`);
     connect();
+  }
+
+  function startReconnect(connectionId: string) {
+    setActionError(null);
+    setConnectingKey(`reauth:${connectionId}`);
+    reconnect(connectionId);
   }
 
   function runResync(id: string) {
@@ -110,13 +129,10 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
           <button
             type="button"
             disabled={isConnecting}
-            onClick={() => {
-              setActionError(null);
-              reconnect(stale[0]!.id);
-            }}
+            onClick={() => startReconnect(stale[0]!.id)}
             className="h-9 shrink-0 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
           >
-            {isConnecting ? "Opening…" : "Reconnect"}
+            {isBusy(`reauth:${stale[0]!.id}`) ? "Opening…" : "Reconnect"}
           </button>
         </section>
       ) : null}
@@ -190,7 +206,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
               key={name}
               type="button"
               disabled={!isProPlus || isConnecting}
-              onClick={startConnect}
+              onClick={() => startConnect(name)}
               className="flex flex-col items-center gap-[11px] rounded-[14px] border border-[#2e343b] px-4 py-6 text-center hover:border-[#4c82f7] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="flex size-10 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#0b0c0e]">
@@ -198,7 +214,10 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
               </span>
               <span className="text-[13px] font-medium leading-[21.45px] text-[#f2f4f7]">{name}</span>
               <span className="text-[11px] leading-[18.15px] text-[#6c737f]">
-                {!isProPlus ? "Pro+" : isConnecting ? "Connecting…" : "Connect"}
+                {/* Only the clicked tile reports progress. The rest stay
+                    disabled — one Link session at a time — but keep their
+                    normal label so they read as "not now", not "loading". */}
+                {!isProPlus ? "Pro+" : isBusy(`broker:${name}`) ? "Connecting…" : "Connect"}
               </span>
             </button>
           ))}
@@ -295,13 +314,10 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
               <button
                 type="button"
                 disabled={isConnecting || !managing}
-                onClick={() => {
-                  setActionError(null);
-                  reconnect(managing.id);
-                }}
+                onClick={() => startReconnect(managing.id)}
                 className="h-10 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
               >
-                {isConnecting ? "Opening…" : "Reconnect"}
+                {isBusy(`reauth:${managing.id}`) ? "Opening…" : "Reconnect"}
               </button>
             ) : null}
             <button
