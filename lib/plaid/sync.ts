@@ -56,9 +56,15 @@ export async function syncHoldingsForConnection(connectionId: string): Promise<S
   }
 
   const plaid = getPlaidClient();
-  const accessToken = decrypt(connection.plaid_access_token);
 
   try {
+    // Inside the try, not above it. decrypt() throws on a corrupt payload or
+    // a changed ENCRYPTION_KEY, and when that throw escaped this function it
+    // took the caller with it — including the nightly cron, which iterates
+    // every connection in one loop, so a single unreadable token stopped the
+    // resync for every other user on the platform.
+    const accessToken = decrypt(connection.plaid_access_token);
+
     let holdings: Holding[] = [];
     let securities: Security[] = [];
 
@@ -131,40 +137,70 @@ export async function syncHoldingsForConnection(connectionId: string): Promise<S
       });
     }
 
-    // Replace this connection's prior holdings wholesale — the simplest
-    // correct way to reflect sells and full liquidations, since a ticker
-    // that disappeared from Plaid's response should disappear from ours.
+    // Identify what this sync replaces, before writing anything.
     //
-    // Scoped by broker_connection_id, NOT by the account IDs in the
-    // current response. The old account-ID scoping silently failed
-    // whenever those IDs changed: a reconnect, or a second Item at the
-    // same institution, deleted nothing and inserted a full duplicate
-    // set. Verified live on a test account holding 9 positions as 18
-    // rows, which inflated both the portfolio total and the allocation
-    // chart.
-    await supabase.from("holdings").delete().eq("broker_connection_id", connection.id);
+    // Scoped by broker_connection_id, NOT by the account IDs in the current
+    // response. The old account-ID scoping silently failed whenever those
+    // IDs changed: a reconnect, or a second Item at the same institution,
+    // deleted nothing and inserted a full duplicate set. Verified live on a
+    // test account holding 9 positions as 18 rows, which inflated both the
+    // portfolio total and the allocation chart.
+    const staleIds = new Set<string>();
+
+    const { data: owned, error: ownedError } = await supabase
+      .from("holdings")
+      .select("id")
+      .eq("broker_connection_id", connection.id);
+    if (ownedError) throw new Error(`Couldn't read existing holdings: ${ownedError.message}`);
+    for (const row of owned ?? []) staleIds.add(row.id);
 
     // Transitional: rows synced before broker_connection_id existed carry
-    // null, and the migration could only backfill users who had exactly
-    // one connection. Match those on the old key so the first sync under
-    // the new scheme replaces them instead of stacking on top. Can be
-    // deleted once every connection has synced at least once.
+    // null, and the migration could only backfill users who had exactly one
+    // connection. Match those on the old key so the first sync under the new
+    // scheme replaces them instead of stacking on top. Can be deleted once
+    // every connection has synced at least once.
     const accountIds = [...new Set(holdings.map((h) => h.account_id))];
     if (accountIds.length > 0) {
-      await supabase
+      const { data: legacy, error: legacyError } = await supabase
         .from("holdings")
-        .delete()
+        .select("id")
         .eq("user_id", connection.user_id)
         .eq("source", "plaid")
         .is("broker_connection_id", null)
         .in("plaid_account_id", accountIds);
+      if (legacyError) throw new Error(`Couldn't read legacy holdings: ${legacyError.message}`);
+      for (const row of legacy ?? []) staleIds.add(row.id);
     }
 
+    // Insert BEFORE deleting, and check the result.
+    //
+    // The previous order deleted first, then inserted without inspecting the
+    // outcome — and supabase-js reports failures in a returned `error`
+    // rather than throwing, so a rejected insert was invisible. The row went
+    // on to mark the connection "active" with a fresh last_synced_at and
+    // report holdingsSynced: rows.length, meaning a wiped portfolio
+    // presented as a clean sync. The reachable trigger is
+    // holdings_enforce_plan_cap: a Pro+ user who downgrades to free still
+    // has a live connection, so the next cron run would have emptied their
+    // holdings. Inserting first means the worst case is stale data retained,
+    // never data destroyed.
     if (rows.length > 0) {
-      await supabase.from("holdings").insert(rows);
+      const { error: insertError } = await supabase.from("holdings").insert(rows);
+      if (insertError) throw new Error(`Couldn't save holdings: ${insertError.message}`);
     }
 
-    await supabase
+    if (staleIds.size > 0) {
+      const { error: deleteError } = await supabase.from("holdings").delete().in("id", [...staleIds]);
+      // Deliberately not fatal: the new rows are already in, so the user
+      // sees correct-plus-stale rather than missing data, and the next sync
+      // recomputes staleIds and clears them. Failing the whole sync here
+      // would report a problem the user cannot act on.
+      if (deleteError) {
+        console.error("[plaid/sync] stale holdings not removed", { connectionId, message: deleteError.message });
+      }
+    }
+
+    const { error: statusError } = await supabase
       .from("broker_connections")
       .update({
         status: "active",
@@ -174,6 +210,7 @@ export async function syncHoldingsForConnection(connectionId: string): Promise<S
         unmatched_positions: unmatched,
       })
       .eq("id", connectionId);
+    if (statusError) throw new Error(`Couldn't update connection status: ${statusError.message}`);
 
     return { holdingsSynced: rows.length };
   } catch (err) {

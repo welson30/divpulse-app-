@@ -4,7 +4,7 @@ import { getDividendDataProvider } from "@/lib/dividend-data";
 import { sendPush } from "@/lib/firebase/admin";
 import { sendTelegramMessage } from "@/lib/telegram/send";
 import { buildNotificationContent, type NotificationStyle } from "@/lib/notifications/templates";
-import { findBrokerConfirmedDeposit } from "@/lib/notifications/plaid-confirmation";
+import { loadBrokerDividends, type BrokerDividendIndex } from "@/lib/notifications/plaid-confirmation";
 
 export const maxDuration = 60;
 
@@ -106,6 +106,22 @@ export async function GET(request: NextRequest) {
 
   const tickers = [...new Set((holdings ?? []).map((h) => h.ticker))];
   const provider = getDividendDataProvider();
+
+  // One Plaid fetch per user for the whole run, not one per payment. The
+  // loop below is nested (events x holdings), so querying inside it meant
+  // re-fetching the same few days of investment transactions dozens of
+  // times for a single user — a rate-limit risk and a billable one. The
+  // promise is cached, not the result, so concurrent lookups for the same
+  // user share one in-flight request.
+  const brokerDividendsByUser = new Map<string, Promise<BrokerDividendIndex>>();
+  function brokerDividendsFor(userId: string): Promise<BrokerDividendIndex> {
+    let pending = brokerDividendsByUser.get(userId);
+    if (!pending) {
+      pending = loadBrokerDividends(userId);
+      brokerDividendsByUser.set(userId, pending);
+    }
+    return pending;
+  }
 
   const tickerErrors: { ticker: string; error: string }[] = [];
   let eventsUpserted = 0;
@@ -217,7 +233,7 @@ export async function GET(request: NextRequest) {
           // see lib/notifications/plaid-confirmation.ts. buildNotificationContent
           // degrades "premium" to the descriptive copy rather than fabricate
           // a confirmation when this is false.
-          const brokerConfirmed = await findBrokerConfirmedDeposit(holding.user_id, ticker, amount);
+          const brokerConfirmed = (await brokerDividendsFor(holding.user_id)).confirms(ticker, amount);
           const content = buildNotificationContent(notificationStyle, {
             ticker,
             amount,

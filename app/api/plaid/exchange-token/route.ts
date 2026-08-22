@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlaidClient } from "@/lib/plaid/client";
+import { plaidErrorResponse } from "@/lib/plaid/errors";
 import { encrypt } from "@/lib/crypto/encryption";
 import { syncHoldingsForConnection } from "@/lib/plaid/sync";
 
@@ -36,17 +37,52 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Broker auto-sync is a Pro+ feature." }, { status: 403 });
   }
 
+  // broker_connections has no client-insert RLS policy by design (see the
+  // migration) — every write here goes through the service-role client.
+  const adminSupabase = createAdminClient();
+
+  // Plaid mints a fresh item_id for every Link session, so the unique
+  // constraint on plaid_item_id can't catch a user connecting the same bank
+  // twice — which is easy to do after a failed-looking attempt. Both Items
+  // then sync the same positions, doubling the portfolio and the dividend
+  // income derived from it. Guarded on institution instead.
+  if (institutionId) {
+    const { data: duplicate } = await adminSupabase
+      .from("broker_connections")
+      .select("id, institution_name")
+      .eq("user_id", user.id)
+      .eq("plaid_institution_id", institutionId)
+      .neq("status", "disconnected")
+      .maybeSingle();
+
+    if (duplicate) {
+      return NextResponse.json(
+        {
+          error: `${duplicate.institution_name ?? "That broker"} is already connected. Use Sync now to refresh it, or disconnect it first to reconnect.`,
+        },
+        { status: 409 },
+      );
+    }
+  }
+
   const plaid = getPlaidClient();
 
-  const exchangeResponse = await plaid.itemPublicTokenExchange({ public_token: publicToken });
-  const accessToken = exchangeResponse.data.access_token;
-  const itemId = exchangeResponse.data.item_id;
+  let accessToken: string;
+  let itemId: string;
+  try {
+    const exchangeResponse = await plaid.itemPublicTokenExchange({ public_token: publicToken });
+    accessToken = exchangeResponse.data.access_token;
+    itemId = exchangeResponse.data.item_id;
+  } catch (err) {
+    // Previously uncaught, so an expired or already-used public_token
+    // produced a bare 500 with an empty body — the same undiagnosable
+    // failure the link-token route used to have.
+    return plaidErrorResponse(err, "exchange-token");
+  }
 
-  // broker_connections has no client-insert RLS policy by design (see
-  // the migration) — writes go through the service-role client only, so
-  // a compromised session token can't be used to plant a connection row
-  // pointing at an attacker-controlled encrypted access token.
-  const adminSupabase = createAdminClient();
+  // Writes go through the service-role client only, so a compromised
+  // session token can't be used to plant a connection row pointing at an
+  // attacker-controlled encrypted access token.
   const { data: connection, error } = await adminSupabase
     .from("broker_connections")
     .insert({
@@ -70,5 +106,15 @@ export async function POST(request: NextRequest) {
 
   const syncResult = await syncHoldingsForConnection(connection.id);
 
-  return NextResponse.json({ connected: true, holdingsSynced: syncResult.holdingsSynced });
+  // The connection is real either way — the Item exists at Plaid and the
+  // token is stored — so this stays a 200 and the caller keeps its success
+  // path. But the sync error is no longer swallowed: it used to return
+  // connected: true unconditionally, so a connection that landed straight
+  // in status='error' looked like a clean success and the user had no idea
+  // why no holdings appeared.
+  return NextResponse.json({
+    connected: true,
+    holdingsSynced: syncResult.holdingsSynced,
+    ...(syncResult.error ? { syncError: syncResult.error } : {}),
+  });
 }

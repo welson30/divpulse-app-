@@ -32,7 +32,7 @@ export function descriptiveTemplate(ticker: string, amount: number): TemplateCon
 }
 
 /**
- * Premium — only reachable when findBrokerConfirmedDeposit() found a
+ * Premium — only reachable when loadBrokerDividends().confirms() found a
  * matching real transaction in a linked Plaid account. Never call this
  * with brokerConfirmed=false upstream; buildNotificationContent enforces
  * that so a "Premium" pick can't fabricate a confirmation that never
