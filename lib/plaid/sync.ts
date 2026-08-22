@@ -47,7 +47,7 @@ export async function syncHoldingsForConnection(connectionId: string): Promise<S
 
   const { data: connection } = await supabase
     .from("broker_connections")
-    .select("id, user_id, plaid_access_token")
+    .select("id, user_id, plaid_access_token, institution_name")
     .eq("id", connectionId)
     .single();
 
@@ -131,7 +131,15 @@ export async function syncHoldingsForConnection(connectionId: string): Promise<S
         ticker: ticker.toUpperCase(),
         company_name: security?.name ?? null,
         shares: holding.quantity,
-        broker_name: null,
+        // The institution Link reported, not null. Everything that groups
+        // or names a holding's broker reads this column — Diversification
+        // buckets by it, Dashboard and Upcoming print it, and the
+        // broker-confirmed notification interpolates it. Left null, a
+        // Plaid-synced position showed as "Unspecified" everywhere and the
+        // Premium alert degraded to "Confirmed via your linked broker" for
+        // precisely the users who had linked one, while the connection row
+        // knew the name the whole time.
+        broker_name: connection.institution_name,
         source: "plaid",
         plaid_account_id: holding.account_id,
       });
