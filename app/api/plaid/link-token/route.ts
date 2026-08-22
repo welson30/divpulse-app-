@@ -25,6 +25,44 @@ import { decrypt } from "@/lib/crypto/encryption";
  * webhook has no such dashboard requirement and is accepted as-is, but is
  * still gated so local development doesn't register an unreachable URL.
  */
+/**
+ * Turns a thrown Plaid SDK error into a response the caller can act on.
+ *
+ * Without this the SDK's rejection escapes the route handler and Next
+ * returns a bare 500 with an empty body — which is exactly what happened
+ * during the production cutover: the connect flow was dead and there was
+ * no way to tell from outside whether the secret was wrong, the redirect
+ * URI wasn't allow-listed for the environment, or the product wasn't
+ * enabled. The error_code is not sensitive and is the single most useful
+ * thing to surface; the raw message is logged rather than returned since
+ * it can carry request detail.
+ */
+function plaidErrorResponse(err: unknown, context: string) {
+  const data = (err as { response?: { data?: { error_code?: string; error_message?: string } } })?.response?.data;
+  const code = data?.error_code ?? null;
+
+  console.error(`[plaid/link-token] ${context} failed`, { code, message: data?.error_message });
+
+  // Codes that mean "the operator misconfigured something", not "the user
+  // did something wrong" — worth naming so the fix is obvious.
+  const OPERATOR_ERRORS: Record<string, string> = {
+    INVALID_API_KEYS: "Broker connection is misconfigured (bad Plaid credentials). We've been notified.",
+    INVALID_FIELD: "Broker connection is misconfigured (Plaid rejected a setting). We've been notified.",
+    INVALID_PRODUCT: "Broker connection isn't enabled for this account yet. We've been notified.",
+    PRODUCTS_NOT_SUPPORTED: "Broker connection isn't enabled for this account yet. We've been notified.",
+  };
+
+  return NextResponse.json(
+    {
+      error: (code && OPERATOR_ERRORS[code]) ?? "Couldn't start broker connection. Please try again shortly.",
+      // Surfaced deliberately: it's what makes a failed cutover diagnosable
+      // from outside without shipping another deploy just to read the log.
+      code,
+    },
+    { status: 502 },
+  );
+}
+
 function optionalLinkSettings(): Pick<LinkTokenCreateRequest, "webhook" | "redirect_uri"> {
   const settings: Pick<LinkTokenCreateRequest, "webhook" | "redirect_uri"> = {};
 
@@ -108,26 +146,34 @@ export async function POST(request: NextRequest) {
     // one here is only for adding credit products, and would be rejected.
     // The access_token is unchanged by the flow, so nothing needs
     // exchanging afterwards.
-    const response = await plaid.linkTokenCreate({
-      user: { client_user_id: user.id },
-      client_name: "PaidPrime",
-      country_codes: [CountryCode.Us],
-      language: "en",
-      access_token: accessToken,
-      ...optionalLinkSettings(),
-    });
-
-    return NextResponse.json({ linkToken: response.data.link_token, mode: "update" });
+    try {
+      const response = await plaid.linkTokenCreate({
+        user: { client_user_id: user.id },
+        client_name: "PaidPrime",
+        country_codes: [CountryCode.Us],
+        language: "en",
+        access_token: accessToken,
+        ...optionalLinkSettings(),
+      });
+      return NextResponse.json({ linkToken: response.data.link_token, mode: "update" });
+    } catch (err) {
+      return plaidErrorResponse(err, "update mode");
+    }
   }
 
-  const response = await plaid.linkTokenCreate({
-    user: { client_user_id: user.id },
-    client_name: "PaidPrime",
-    products: [Products.Investments],
-    country_codes: [CountryCode.Us],
-    language: "en",
-    ...optionalLinkSettings(),
-  });
+  let response;
+  try {
+    response = await plaid.linkTokenCreate({
+      user: { client_user_id: user.id },
+      client_name: "PaidPrime",
+      products: [Products.Investments],
+      country_codes: [CountryCode.Us],
+      language: "en",
+      ...optionalLinkSettings(),
+    });
+  } catch (err) {
+    return plaidErrorResponse(err, "create mode");
+  }
 
   return NextResponse.json({ linkToken: response.data.link_token, mode: "create" });
 }
