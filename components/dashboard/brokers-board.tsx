@@ -25,9 +25,6 @@ type BrokersBoardProps = {
   connections: BrokerConnectionRow[];
 };
 
-/** US institutions Plaid Link commonly covers — each card opens the same picker. */
-const PLAID_EXAMPLES = ["TradeStation", "Alpaca", "Fidelity", "E*TRADE"] as const;
-
 function formatLastSync(iso: string | null) {
   if (!iso) return "Last sync: Never";
   const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
@@ -46,6 +43,9 @@ function accountCountLabel(count: number) {
   return `${count} account${count === 1 ? "" : "s"} linked`;
 }
 
+/** Identifies the Connect a broker button in the shared pending state below. */
+const CONNECT_KEY = "connect";
+
 export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
   const { connect, reconnect, isPending: isConnecting, error: connectError } = usePlaidConnect();
   const [managing, setManaging] = useState<BrokerConnectionRow | null>(null);
@@ -56,21 +56,21 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
   const live = connections.filter((c) => c.status !== "disconnected");
   const stale = live.filter((c) => c.needs_reauth);
 
-  // Which control started the flow — "broker:<name>" for an Available
-  // brokers tile, "reauth:<id>" for a Reconnect button.
+  // Which control started the flow — CONNECT_KEY for the Connect a broker
+  // button, "reauth:<id>" for a Reconnect button.
   //
   // usePlaidConnect exposes one shared isConnecting for the whole page, so
-  // rendering it directly made every control announce itself at once: all
-  // four tiles disabled and said "Connecting…" together, which read as the
-  // whole list reloading rather than one card being clicked. Never cleared
-  // explicitly — every read is gated on isConnecting, so a stale key is
-  // inert once the flow ends.
+  // rendering it directly made every control announce itself at once —
+  // clicking Connect also put the reauth banner into "Opening…", which read
+  // as the page reloading rather than one button being pressed. Never
+  // cleared explicitly: every read is gated on isConnecting, so a stale key
+  // is inert once the flow ends.
   const [connectingKey, setConnectingKey] = useState<string | null>(null);
   const isBusy = (key: string) => isConnecting && connectingKey === key;
 
-  function startConnect(name: string) {
+  function startConnect() {
     if (!isProPlus) return;
-    setConnectingKey(`broker:${name}`);
+    setConnectingKey(CONNECT_KEY);
     connect();
   }
 
@@ -190,37 +190,39 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
       </section>
 
       <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
+        {/* One button, not a grid of named brokers. Plaid Link has no
+            institution parameter — every entry point opens the same
+            searchable directory — so naming four of them was decoration
+            that read as the supported list, and would have had a user on
+            Vanguard or Schwab assume we don't cover them. */}
         <header className="border-b border-[#22262c] px-6 py-5">
           <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-            Available brokers
+            Connect a broker
           </h2>
           <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
             {isProPlus
-              ? "Opens Plaid Link — pick any supported US broker. Not a limited list."
+              ? "Search 3,000+ US brokerages and banks."
               : "Broker auto-sync is Pro+. Upgrade to connect a US brokerage via Plaid."}
           </p>
         </header>
-        <div className="grid grid-cols-2 gap-4 p-6 min-[1100px]:grid-cols-4">
-          {PLAID_EXAMPLES.map((name) => (
-            <button
-              key={name}
-              type="button"
-              disabled={!isProPlus || isConnecting}
-              onClick={() => startConnect(name)}
-              className="flex flex-col items-center gap-[11px] rounded-[14px] border border-[#2e343b] px-4 py-6 text-center hover:border-[#4c82f7] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <span className="flex size-10 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#0b0c0e]">
-                <FigmaIcon src="/marketing/dashboard/icon-plug.svg" className="size-[17px] text-[#99a1ac]" />
-              </span>
-              <span className="text-[13px] font-medium leading-[21.45px] text-[#f2f4f7]">{name}</span>
-              <span className="text-[11px] leading-[18.15px] text-[#6c737f]">
-                {/* Only the clicked tile reports progress. The rest stay
-                    disabled — one Link session at a time — but keep their
-                    normal label so they read as "not now", not "loading". */}
-                {!isProPlus ? "Pro+" : isBusy(`broker:${name}`) ? "Connecting…" : "Connect"}
-              </span>
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-4 px-6 py-6">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#0b0c0e]">
+            <FigmaIcon src="/marketing/dashboard/icon-plug.svg" className="size-[17px] text-[#99a1ac]" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-medium leading-[23.1px] text-[#f2f4f7]">Plaid Link opens in a secure window</p>
+            <p className="text-[13px] leading-[21.45px] text-[#99a1ac]">
+              Find your brokerage, sign in there, and holdings sync back automatically. Your login never touches PaidPrime.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={!isProPlus || isConnecting}
+            onClick={startConnect}
+            className="h-10 shrink-0 rounded-[10px] bg-[#4c82f7] px-[18px] text-[13px] font-medium text-white transition-colors hover:bg-[#3d72e8] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {!isProPlus ? "Pro+ only" : isBusy(CONNECT_KEY) ? "Connecting…" : live.length > 0 ? "Connect another" : "Connect a broker"}
+          </button>
         </div>
         {!isProPlus ? (
           <div className="border-t border-[#22262c] px-6 py-4">
