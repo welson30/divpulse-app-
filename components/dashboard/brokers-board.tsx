@@ -18,7 +18,21 @@ export type BrokerConnectionRow = {
   last_synced_at: string | null;
   needs_reauth: boolean;
   unmatched_positions: UnmatchedPosition[] | null;
+  /** Investment accounts shared at the last sync. 0 = user selected none; null = never synced. */
+  investment_account_count: number | null;
 };
+
+/**
+ * True when the user completed Link but shared no investment accounts.
+ *
+ * Plaid's Account Select lists checking, savings, credit cards and loans
+ * next to brokerage and retirement accounts, so this is an easy mistake to
+ * make — and the sync then succeeds with nothing to import, leaving a
+ * green "Synced" connection and an empty portfolio with no explanation.
+ */
+function sharedNoInvestmentAccounts(row: BrokerConnectionRow) {
+  return row.investment_account_count === 0 && row.status !== "disconnected";
+}
 
 type BrokersBoardProps = {
   isProPlus: boolean;
@@ -55,6 +69,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
 
   const live = connections.filter((c) => c.status !== "disconnected");
   const stale = live.filter((c) => c.needs_reauth);
+  const noInvestment = live.filter(sharedNoInvestmentAccounts);
 
   // Which control started the flow — CONNECT_KEY for the Connect a broker
   // button, "reauth:<id>" for a Reconnect button.
@@ -137,6 +152,34 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
         </section>
       ) : null}
 
+      {/* Connected successfully, but shared no investment accounts — so the
+          sync works perfectly and imports nothing. Without this the user
+          sees a green "Synced" badge next to an empty portfolio and has no
+          way to know the account picker was the problem. */}
+      {noInvestment.length > 0 ? (
+        <section className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-[14px] border border-[rgba(224,164,92,0.35)] bg-[#241d12] px-5 py-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-medium leading-[23.1px] text-[#e0a45c]">
+              {noInvestment.length === 1
+                ? `No investment accounts were shared from ${noInvestment[0]!.institution_name?.trim() || "your broker"}`
+                : `${noInvestment.length} connections shared no investment accounts`}
+            </p>
+            <p className="text-[13px] leading-[21.45px] text-[#99a1ac]">
+              Only cash, card or loan accounts came across, so there are no holdings to import. Reconnect and tick your
+              brokerage, IRA or 401(k) on the account screen.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={isConnecting}
+            onClick={() => startReconnect(noInvestment[0]!.id)}
+            className="h-9 shrink-0 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
+          >
+            {isBusy(`reauth:${noInvestment[0]!.id}`) ? "Opening…" : "Choose accounts"}
+          </button>
+        </section>
+      ) : null}
+
       <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
         <header className="border-b border-[#22262c] px-6 py-5">
           <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
@@ -171,7 +214,12 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
                     <FigmaIcon src="/marketing/dashboard/icon-readonly.svg" className="size-[11px] text-[#99a1ac]" />
                     Read-only
                   </span>
-                  <StatusBadge status={row.status} syncing={syncing} needsReauth={row.needs_reauth} />
+                  <StatusBadge
+                    status={row.status}
+                    syncing={syncing}
+                    needsReauth={row.needs_reauth}
+                    noInvestmentAccounts={sharedNoInvestmentAccounts(row)}
+                  />
                   <button
                     type="button"
                     onClick={() => {
@@ -288,6 +336,16 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
             </p>
           ) : null}
 
+          {managing && sharedNoInvestmentAccounts(managing) ? (
+            <div className="rounded-[10px] border border-[rgba(224,164,92,0.35)] bg-[#241d12] px-4 py-3">
+              <p className="text-[13px] font-medium leading-[21.45px] text-[#e0a45c]">No investment accounts shared</p>
+              <p className="mt-1 text-[12px] leading-[19.8px] text-[#99a1ac]">
+                This connection is working, but only cash, card or loan accounts were shared — none of which hold
+                positions. Reconnect and tick your brokerage, IRA or 401(k) when the account list appears.
+              </p>
+            </div>
+          ) : null}
+
           {/* Positions Plaid sent that have no ticker — mutual funds,
               treasuries, sweep vehicles. They can't be stored as holdings,
               but the user is entitled to know they're missing rather than
@@ -312,14 +370,20 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
           ) : null}
 
           <div className="flex flex-col gap-2">
-            {managing?.needs_reauth ? (
+            {/* Reconnect is the fix for both states: an expired login, and
+                an account selection that shared nothing to import. */}
+            {managing && (managing.needs_reauth || sharedNoInvestmentAccounts(managing)) ? (
               <button
                 type="button"
-                disabled={isConnecting || !managing}
+                disabled={isConnecting}
                 onClick={() => startReconnect(managing.id)}
                 className="h-10 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
               >
-                {isBusy(`reauth:${managing.id}`) ? "Opening…" : "Reconnect"}
+                {isBusy(`reauth:${managing.id}`)
+                  ? "Opening…"
+                  : managing.needs_reauth
+                    ? "Reconnect"
+                    : "Choose accounts"}
               </button>
             ) : null}
             <button
@@ -349,10 +413,12 @@ function StatusBadge({
   status,
   syncing,
   needsReauth,
+  noInvestmentAccounts,
 }: {
   status: BrokerConnectionRow["status"];
   syncing: boolean;
   needsReauth: boolean;
+  noInvestmentAccounts: boolean;
 }) {
   if (syncing) {
     return (
@@ -376,6 +442,15 @@ function StatusBadge({
     return (
       <span className="inline-flex items-center rounded-[8px] border border-[rgba(216,105,95,0.3)] bg-[#261615] px-[9px] py-1 text-[11px] tracking-[1.1px] text-[#d8695f] uppercase">
         Attention
+      </span>
+    );
+  }
+  // Technically a healthy sync, but calling it "Synced" next to an empty
+  // portfolio is the whole problem — the row has to admit nothing came in.
+  if (noInvestmentAccounts) {
+    return (
+      <span className="inline-flex items-center rounded-[8px] border border-[rgba(224,164,92,0.35)] bg-[#241d12] px-[9px] py-1 text-[11px] tracking-[1.1px] text-[#e0a45c] uppercase">
+        No accounts
       </span>
     );
   }

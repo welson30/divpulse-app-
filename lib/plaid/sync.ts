@@ -1,5 +1,5 @@
 import "server-only";
-import type { Holding, Security } from "plaid";
+import { AccountType, type Holding, type InvestmentAccount, type Security } from "plaid";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlaidClient } from "@/lib/plaid/client";
 import { decrypt } from "@/lib/crypto/encryption";
@@ -67,12 +67,16 @@ export async function syncHoldingsForConnection(connectionId: string): Promise<S
 
     let holdings: Holding[] = [];
     let securities: Security[] = [];
+    let accounts: InvestmentAccount[] = [];
 
     for (let attempt = 1; ; attempt += 1) {
       try {
         const response = await plaid.investmentsHoldingsGet({ access_token: accessToken });
         holdings = response.data.holdings;
         securities = response.data.securities;
+        // Every account on the Item, not just investment ones — Plaid
+        // returns the full set the user shared at Account Select.
+        accounts = response.data.accounts;
         break;
       } catch (err) {
         if (plaidErrorCode(err) === "PRODUCT_NOT_READY" && attempt < NOT_READY_RETRIES) {
@@ -82,6 +86,14 @@ export async function syncHoldingsForConnection(connectionId: string): Promise<S
         throw err;
       }
     }
+
+    // Plaid's Account Select lets the user choose which accounts to share,
+    // and lists depository, credit and loan accounts right alongside
+    // brokerage and retirement ones. Picking only the former produces a
+    // perfectly healthy Item with nothing for this app to read. Counted so
+    // the Brokers page can say so instead of showing an unexplained empty
+    // "Synced" connection.
+    const investmentAccounts = accounts.filter((a) => a.type === AccountType.Investment).length;
 
     const securityById = new Map(securities.map((s) => [s.security_id, s]));
 
@@ -216,6 +228,10 @@ export async function syncHoldingsForConnection(connectionId: string): Promise<S
         last_error_code: null,
         last_synced_at: new Date().toISOString(),
         unmatched_positions: unmatched,
+        // Zero here means the user shared no investment accounts at Plaid's
+        // Account Select screen — a silent dead end until now, since the
+        // sync legitimately succeeds and there is simply nothing to import.
+        investment_account_count: investmentAccounts,
       })
       .eq("id", connectionId);
     if (statusError) throw new Error(`Couldn't update connection status: ${statusError.message}`);

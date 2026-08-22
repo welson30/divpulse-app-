@@ -116,6 +116,16 @@ export async function POST(request: NextRequest) {
         country_codes: [CountryCode.Us],
         language: "en",
         access_token: accessToken,
+        // Reopens Plaid's Account Select. Reconnect is also the recovery
+        // path for a user who shared no investment accounts the first time
+        // — without this, update mode only re-authenticates and they would
+        // have to disconnect and start over to fix the account choice.
+        //
+        // Plaid ignores the flag for OAuth institutions that run their own
+        // account selection (most US brokerages), where Account Select is
+        // always shown in update mode regardless; it is the non-OAuth case
+        // this actually changes.
+        update: { account_selection_enabled: true },
         ...optionalLinkSettings(),
       });
       return NextResponse.json({ linkToken: response.data.link_token, mode: "update" });
