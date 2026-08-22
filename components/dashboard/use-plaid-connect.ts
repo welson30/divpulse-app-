@@ -45,6 +45,51 @@ function readOauthResume(): OauthResume | null {
   }
 }
 
+/**
+ * Turns a Plaid Link failure into something safe to put in front of a user.
+ *
+ * Never falls back to `error_message`. That field is written for
+ * developers, not customers — an unregistered institution renders as
+ * "You must register your application with this institution before you can
+ * create items for it… View registration status at
+ * https://dashboard.plaid.com/…", which was reaching real users and
+ * pointing them at our Plaid dashboard. `display_message` is the field
+ * Plaid intends for end users, but it is frequently null on exactly these
+ * operator-side errors, which is how the developer text leaked through.
+ *
+ * The raw error still goes to the console so it stays diagnosable.
+ */
+function messageForLinkError(err: PlaidLinkError): string {
+  console.error("[plaid/link] exited with error", {
+    error_code: err.error_code,
+    error_type: err.error_type,
+    error_message: err.error_message,
+  });
+
+  // The bank is fine, we just can't reach it yet — nothing the user can fix.
+  const UNAVAILABLE = "This bank isn't available to connect yet. Please try a different one, or check back soon.";
+
+  switch (err.error_code) {
+    case "INSTITUTION_REGISTRATION_REQUIRED":
+    case "INSTITUTION_NOT_AVAILABLE":
+    case "INSTITUTION_NO_LONGER_SUPPORTED":
+      return UNAVAILABLE;
+    case "INSTITUTION_DOWN":
+    case "INSTITUTION_NOT_RESPONDING":
+      return "This bank isn't responding right now. Please try again in a little while.";
+    case "INVALID_CREDENTIALS":
+    case "INVALID_MFA":
+      return "Those sign-in details weren't accepted by your bank. Please try again.";
+    case "USER_INPUT_TIMEOUT":
+      return "The connection timed out. Please try again.";
+    case "ITEM_LOCKED":
+      return "Your bank has locked this account. Please sign in on their website first, then try again.";
+    default:
+      // display_message is safe by definition when Plaid provides it.
+      return err.display_message || "Couldn't finish connecting to that bank. Please try again.";
+  }
+}
+
 export function usePlaidConnect() {
   const router = useRouter();
   const [oauthResume] = useState(readOauthResume);
@@ -122,7 +167,7 @@ export function usePlaidConnect() {
     (err: PlaidLinkError | null) => {
       // A plain close with no error is the user changing their mind —
       // resetting silently is the right response, not an error message.
-      setError(err ? err.display_message || err.error_message || "Connection cancelled before it finished." : null);
+      setError(err ? messageForLinkError(err) : null);
       finish();
     },
     [finish],
