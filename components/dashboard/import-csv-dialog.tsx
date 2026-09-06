@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { parseHoldingsCsv, type ParsedHoldingRow } from "@/lib/csv/parse-holdings";
 import { importHoldingsFromCsv } from "@/app/(dashboard)/holdings/actions";
 
@@ -59,9 +60,20 @@ export function ImportCsvDialog({ isProPlus }: ImportCsvDialogProps) {
 
   if (!isProPlus) {
     return (
-      <Button variant="secondary" disabled className="h-10" title="CSV import is a Pro+ feature">
-        Import CSV
-      </Button>
+      <Tooltip>
+        {/* Native `disabled` buttons drop mouse/focus events inconsistently
+            across browsers, so the trigger has to be a plain wrapping span —
+            not the disabled button itself — or the tooltip won't reliably
+            open on hover. */}
+        <TooltipTrigger asChild>
+          <span tabIndex={0} className="inline-flex">
+            <Button variant="secondary" disabled className="pointer-events-none h-10">
+              Import CSV
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>CSV import is a Pro+ feature.</TooltipContent>
+      </Tooltip>
     );
   }
 

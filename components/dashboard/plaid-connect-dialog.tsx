@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { PlaidConnectCard } from "@/components/dashboard/plaid-connect-card";
 import { usePlaidConnect } from "@/components/dashboard/use-plaid-connect";
 
@@ -41,9 +42,20 @@ export function PlaidConnectDialog({ isProPlus, connections }: PlaidConnectDialo
 
   if (!isProPlus) {
     return (
-      <Button variant="secondary" disabled className="h-10" title="Broker auto-sync is a Pro+ feature">
-        Auto-sync
-      </Button>
+      <Tooltip>
+        {/* Native `disabled` buttons drop mouse/focus events inconsistently
+            across browsers, so the trigger has to be a plain wrapping span —
+            not the disabled button itself — or the tooltip won't reliably
+            open on hover. */}
+        <TooltipTrigger asChild>
+          <span tabIndex={0} className="inline-flex">
+            <Button variant="secondary" disabled className="pointer-events-none h-10">
+              Auto-sync
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>Broker auto-sync is a Pro+ feature.</TooltipContent>
+      </Tooltip>
     );
   }
 
