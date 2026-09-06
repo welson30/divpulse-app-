@@ -63,9 +63,8 @@ export function SignInAside() {
         }}
       />
 
-      {/* /homepage, not / — the root is the coming-soon gate. */}
       <Link
-        href="/homepage"
+        href="/"
         className="absolute top-9 left-8 z-10 flex items-center gap-2.5 min-[1200px]:top-10 min-[1200px]:left-14"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
