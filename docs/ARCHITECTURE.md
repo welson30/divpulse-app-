@@ -1,9 +1,9 @@
 # PaidPrime — Architecture Document
 
-**Version:** 1.0
-**Date:** 2026-07-15
-**Status:** Living document — describes both the target architecture (derived from `PRD.md`, `services.md`, and `Prototype/`) and the actual current implementation state (Section 14). Update this file as the build progresses; do not let it drift from reality.
-**Sources synthesized:** `docs/PRD.md`, `docs/services.md`, `Prototype/*.html`, `Design-System/*`, current codebase (`app/`, `components/`, `lib/`, `package.json`).
+**Version:** 1.1
+**Date:** 2026-07-15 (Sections 4, 6, 7, 9.4, 11, 14, 15, 16 refreshed 2026-09-06 against the live codebase — everything else is unchanged from the original target-architecture draft and may still describe intent rather than fact where not called out below)
+**Status:** Living document — describes both the target architecture (derived from `PRD.md`, `services.md`, and `Prototype/`) and the actual current implementation state (Section 14). Update this file as the build progresses; do not let it drift from reality. As of this refresh, most of Sections 5–13 describe features that are now **built**, not proposed — treat "proposed"/target framing in unreviewed sections with suspicion and verify against code before trusting it.
+**Sources synthesized:** `docs/PRD.md`, `docs/services.md`, `Prototype/*.html`, `Design-System/*`, current codebase (`app/`, `components/`, `lib/`, `package.json`, `.env`, `supabase/migrations/`).
 
 ---
 
@@ -65,17 +65,19 @@ The Brazilian-broker case is not incidental: the app prototype's topbar already 
 | Styling | Tailwind CSS v4 | `@theme inline` mapping to PaidPrime design tokens; default palette reset to a closed world (see Section 13). |
 | Component primitives | shadcn/ui (Radix UI) | Already integrated, re-themed to brand tokens (Section 13). |
 | Fonts | Inter, Inter Tight, JetBrains Mono | Self-hosted via `next/font/google`, not the design system's CDN `@import`. |
-| Database / Auth / Storage | Supabase (Postgres) | Not yet connected in code — see Section 14. |
-| Hosting | Vercel | Automatic deploy on push; also the natural home for scheduled jobs (Vercel Cron). |
-| Payments | Stripe | Subscription billing for Pro/Pro+; card, PayPal, PIX. |
-| Push notifications | OneSignal | Free to 10k users. |
-| Dividend / market data | Yahoo Finance (unofficial API) | No registration, no official SLA — flagged as a reliability risk in Section 12. |
-| Broker sync (US) | Plaid | Pro+ only, read-only, ~$0.30/connected account/mo. |
-| Broker sync (non-US) | CSV import / manual entry | No integration; Brazilian brokers (XP, Avenue, Nomad) unsupported by Plaid. |
-| Messaging | Telegram Bot API | Pro+; requires a per-user chat-linking flow (Section 9.4), not just the single owner chat ID currently in `.env`. |
-| Transactional email | Resend | Free to 3k emails/mo — welcome, password reset, payment confirmation. |
-| AI Advisor | PRD said Google Gemini Flash, `services.md` said OpenAI (~$0.001/query) | **Resolved: OpenAI `gpt-4o-mini`** — see Section 15 decision #2. |
-| Supplementary calendar data | Alpha Vantage (free tier) or a static PaidPrime-maintained list | For FOMC/earnings dates only, not core dividend data. |
+| Database / Auth / Storage | Supabase (Postgres) | **Built** — 20 migrations as of 2026-08-23 (`supabase/migrations/`), RLS on every user-scoped table. See Section 14. |
+| Hosting | Vercel | Live at paidprime.com. Automatic deploy on push; also runs the scheduled jobs (Vercel Cron / `pg_cron`). |
+| Payments | Stripe | **Built** — Checkout, Customer Portal, and webhook-driven plan sync (`app/api/stripe/*`, `app/api/webhooks/stripe/`) for Free/Pro/Pro+. |
+| Push notifications | **Firebase Cloud Messaging** (not OneSignal) | OneSignal was integrated first, then replaced entirely 2026-07-23 — see `docs/scope-comparison.md` §C. `firebase`/`firebase-admin` in `package.json`, `NEXT_PUBLIC_FIREBASE_*` + `FIREBASE_SERVICE_ACCOUNT_JSON` in `.env`, logic in `lib/firebase/`. The `ONESIGNAL_*` env vars are vestigial — `docs/services.md` is stale on this point, do not trust its push-notification section. |
+| Dividend / market data | Yahoo Finance (unofficial API) | **Built** — `lib/tickers/enrich.ts` and friends. No registration, no official SLA — flagged as a reliability risk in Section 12. |
+| Broker sync (US) | Plaid | **Built and live in production** (cutover 2026-08-22). Pro+ only, read-only. Individual institutions are gated by Plaid's own per-institution registration, independent of the app's production access — as of ~2026-09-06 some major brokers are still pending on Plaid's side. `.env` locally runs `PLAID_ENV=sandbox`; Vercel's production env is `PLAID_ENV=production` (client-managed, not in this repo's `.env`). |
+| Broker sync (non-US) | CSV import / manual entry | **Built** — `lib/csv/`, `importHoldingsFromCsv` server action in `app/(dashboard)/holdings/actions.ts` (a Server Action, not a separate Route Handler as Section 9.3 originally proposed). Brazilian brokers (XP, Avenue, Nomad) unsupported by Plaid. |
+| Messaging | Telegram Bot API | **Built** — per-user chat-linking flow implemented (`lib/telegram/`, `app/api/telegram/webhook/`, `telegram_links` migration, `components/dashboard/telegram-connect-card.tsx`), matching Section 9.4's original proposal. Pro+. |
+| Transactional email | Resend | **Built** — `lib/resend/`. Free to 3k emails/mo — welcome, password reset, payment confirmation. |
+| Ticker/company logos | Logo.dev (+ a static domain map) | **Not in the original service list — added since.** `lib/tickers/logo.ts`, `NEXT_PUBLIC_LOGO_DEV_KEY`. Two-source resolution: a static issuer→domain map first, Logo.dev as fallback (after Clearbit's logo API was found shut down). Not documented in `docs/services.md` — worth adding there. |
+| Charting (ticker detail pages) | `lightweight-charts` | Client library, not a service — used on `/tickers/[ticker]` for the price chart. Everything else (sparklines, income bar chart) stays hand-rolled SVG per the design system's anti-bloat stance. |
+| AI Advisor | PRD said Google Gemini Flash, `services.md` said OpenAI (~$0.001/query) | **Resolved and implemented: OpenAI `gpt-4o-mini`** via a plain `fetch` (`lib/advisor/openai.ts`, `app/api/advisor/query/`) — see Section 15 decision #2. Dormant in this environment: `OPENAI_API_KEY` is not currently set, so the route returns 503. |
+| Supplementary calendar data | Alpha Vantage (free tier) or a static PaidPrime-maintained list | Still **not built** — no `ALPHA_VANTAGE_API_KEY` in `.env`. Calendar likely relies on Yahoo's own ex-date/pay-date fields only; FOMC/earnings overlay remains an open item. |
 
 ---
 
@@ -112,13 +114,15 @@ SUPABASE                THIRD-PARTY SERVICES
 
 ## 6. Information Architecture / Routing Map
 
-Derived from `Prototype/app.html`'s sidebar (Main / Explore / Account sections) and `Prototype/paidprime-spark_2.html` (separate marketing landing). Per the design system's own screen-file-first policy (`Design-System/DESIGN-MANIFEST.json`), the landing page, auth flow, and product app are kept as distinct route groups — never merged into one screen.
+Originally derived from `Prototype/app.html`'s sidebar and `Prototype/paidprime-spark_2.html`. **Refreshed 2026-09-06 against the actual `app/` tree** — the real route list grew well beyond this doc's original 10 proposed routes; every route below exists in code today unless marked otherwise.
 
-| Route (proposed) | Surface | Auth | Notes |
+| Route | Surface | Auth | Notes |
 |---|---|---|---|
-| `app/(marketing)/page.tsx` → `/` | Landing page | Public | Hero, value props, pricing, proof — content from `paidprime-spark_2.html`. |
-| `app/(auth)/login/page.tsx` → `/login` | Sign in | Public | Email/password, "Continue with Google", demo-mode entry (prototype has all three). |
+| `app/page.tsx` → `/` | Marketing homepage | Public | Full site — hero, broker connections, dividend alerts, product sections, pricing, FAQ, waitlist CTA. Has swapped places with `app/homepage/page.tsx` more than once as launch timing changed (see `docs/SESSION_HANDOFF.md`); this row reflects **as of 2026-09-06**. |
+| `app/homepage/page.tsx` → `/homepage` | Archived "coming soon" gate | Public, unlinked | Not the live homepage right now — kept rather than deleted. Check which of `/` and `/homepage` is actually live before assuming this table is current; it has flipped before. |
+| `app/(auth)/login/page.tsx` → `/login` | Sign in | Public | |
 | `app/(auth)/signup/page.tsx` → `/signup` | Sign up | Public | |
+| `app/(auth)/onboarding/page.tsx` → `/onboarding` | Post-signup onboarding | Public/transitional | Not in the original proposal. |
 | `app/(dashboard)/dashboard/page.tsx` → `/dashboard` | "For You" home | Authenticated | Default landing post-login. |
 | `app/(dashboard)/holdings/page.tsx` → `/holdings` | Holdings Tracker | Authenticated | |
 | `app/(dashboard)/dividends/page.tsx` → `/dividends` | Dividend history/income | Authenticated | |
@@ -127,19 +131,28 @@ Derived from `Prototype/app.html`'s sidebar (Main / Explore / Account sections) 
 | `app/(dashboard)/diversification/page.tsx` → `/diversification` | Diversification View | Authenticated | |
 | `app/(dashboard)/watchlist/page.tsx` → `/watchlist` | Watchlist | Authenticated | |
 | `app/(dashboard)/goals/page.tsx` → `/goals` | Goals & Financial Planning | Authenticated | |
-| `app/(dashboard)/notifications/page.tsx` → `/notifications` | Notification preferences | Authenticated, Pro+ gated | Prototype badges this "PRO" in the sidebar. |
-| `app/(dashboard)/settings/page.tsx` → `/settings` | Account/plan/currency/language | Authenticated | |
-| `app/(dashboard)/layout.tsx` → `components/dashboard/app-shell.tsx` | App shell (sidebar/topbar/bottom nav) | Authenticated | Mounts `AiAdvisorWidget` — a floating launcher present on every route under `(dashboard)`, not scoped to one page, so the conversation survives client-side navigation. |
+| `app/(dashboard)/notifications/page.tsx` → `/notifications` | Notification preferences | Authenticated | |
+| `app/(dashboard)/settings/page.tsx` → `/settings` | Account/plan/billing | Authenticated | |
+| `app/(dashboard)/brokers/page.tsx` → `/brokers` | Broker connections (Plaid) | Authenticated, Pro+ gated | Not in the original proposal — dedicated page for connect/reconnect/disconnect/resync, separate from the inline Auto-sync entry points on Holdings/Dashboard. |
+| `app/(dashboard)/advisor/page.tsx` → `/advisor` | AI Advisor | Authenticated | Not in the original proposal as a standalone route — also reachable via the floating launcher described below. |
+| `app/(dashboard)/analytics/page.tsx` → `/analytics` | Portfolio analytics | Authenticated | Not in the original proposal. |
+| `app/(dashboard)/performance/page.tsx` → `/performance` | Portfolio performance | Authenticated | Not in the original proposal. |
+| `app/(dashboard)/tickers/[ticker]/page.tsx` → `/tickers/[ticker]` | Per-ticker detail (price chart, key stats) | Authenticated | Not in the original proposal — added per `docs/scope-comparison.md` §G. |
+| `app/(dashboard)/upcoming/page.tsx` → `/upcoming` | Upcoming payments | Authenticated | Not in the original proposal. |
+| `app/(dashboard)/history/page.tsx` → `/history` | Historical activity | Authenticated | Not in the original proposal. |
+| `app/(dashboard)/alert-templates/page.tsx` → `/alert-templates` | Notification style/template picker | Authenticated | Not in the original proposal. |
+| `app/(dashboard)/help/page.tsx` → `/help` | Help/support | Authenticated | Not in the original proposal. |
+| `app/(dashboard)/layout.tsx` | App shell (sidebar/topbar/bottom nav) | Authenticated | Mounts the AI Advisor's floating launcher, present on every route under `(dashboard)` so the conversation survives client-side navigation. |
 | `app/api/**` | Route Handlers | Mixed | See Section 9. |
-| `app/manifest.ts`, `app/icon.svg`, etc. | PWA metadata | Public | **Already implemented** — see Section 14. |
+| `app/manifest.ts`, `app/icon.svg`, etc. | PWA metadata | Public | Implemented — see Section 14. |
 
-`(dashboard)` routes share one layout containing the sidebar + topbar shell (logo, search, notification bell, currency/language switcher, avatar menu — all present in the prototype) and are protected by `middleware.ts` checking the Supabase session, redirecting to `/login` if absent.
+`(dashboard)` routes share one layout containing the sidebar + topbar shell and are protected by `proxy.ts` (Next.js 16's replacement for `middleware.ts`) checking the Supabase session, redirecting to `/login` if absent — not `middleware.ts` as originally proposed here; that file doesn't exist in this Next.js version.
 
 ---
 
-## 7. Data Architecture (proposed Supabase/Postgres schema)
+## 7. Data Architecture (Supabase/Postgres schema)
 
-No schema exists in code yet (Section 14). This is a proposed model derived from the feature set; refine before the first migration.
+**Built** — this was a proposed model when first written; 20 migrations now exist in `supabase/migrations/` (2026-07-17 through 2026-08-23). The table below is the *original proposal* and has not been individually verified column-by-column against every migration since — Section 9.4 already documents one confirmed divergence (Telegram linking uses a dedicated `telegram_links` table, not a `notification_preferences.telegram_chat_id` column). Treat this table as directionally right but check the actual migration file before writing code against a specific column.
 
 | Table | Key columns | Purpose |
 |---|---|---|
@@ -174,12 +187,16 @@ Flag this with the client explicitly — it changes how early you need to struct
 
 ## 9. Backend Architecture — Route Handlers & Jobs
 
+**Built, as of the 2026-09-06 refresh** — every subsection below describes shipped code, not a proposal, except where a note calls out a specific divergence from the original plan.
+
 ### 9.1 Dividend detection job (the core value prop)
 
 This is the single most important piece of backend architecture — it's the entire product's reason to exist.
 
+**The original `06:00 UTC` schedule below was a real production bug, since fixed** — Yahoo doesn't publish a same-day dividend into its feed until market open (13:30 UTC), so the job was checking 7.5 hours before the data could exist, and once the date rolled over the event was permanently missed. Rescheduled to 15:00 UTC, DST-safe year-round (`20260731000000_reschedule_dividend_detection.sql`, `20260731010000_dst_safe_dividend_detection.sql`). The pseudocode's shape (steps 1–5) is otherwise still accurate.
+
 ```
-Vercel Cron (daily, e.g. 06:00 UTC + intraday re-checks near known pay dates)
+Vercel Cron (daily, e.g. 06:00 UTC + intraday re-checks near known pay dates)  # stale — actually 15:00 UTC, see note above
    → POST /api/jobs/detect-dividends   (protected by a cron secret header)
       1. SELECT DISTINCT ticker FROM holdings
       2. For each ticker: fetch dividend data from Yahoo Finance
@@ -197,23 +214,26 @@ Reliability requirements from the PRD ("no missed notifications on service resta
 
 - `POST /api/plaid/link-token` — create a Plaid Link token for the client-side Link flow (Pro+ only)
 - `POST /api/plaid/exchange-token` — exchange public token for access token, store encrypted in `broker_connections`
-- `POST /api/jobs/sync-plaid-holdings` — scheduled (or webhook-triggered via Plaid's own webhooks) sync of holdings from connected accounts into `holdings`
+- `POST /api/plaid/webhook` — Plaid's own webhook (not in the original proposal, added since)
+- `POST /api/jobs/sync-plaid-holdings` — scheduled sync of holdings from connected accounts into `holdings`
+
+Production caveats (per-institution registration status, known open code issues in the sync path) change too often to track here — see the team's own current-status notes instead of this architecture doc for that level of detail.
 
 ### 9.3 CSV import
 
-- `POST /api/holdings/import-csv` — Pro+, accepts an uploaded file (Supabase Storage or direct multipart), parses broker-specific export formats (XP, Avenue, Nomad at minimum per `services.md`), inserts `holdings` rows with `source = 'csv'`.
+Implemented as a Server Action, not a Route Handler as originally proposed here: `importHoldingsFromCsv` in `app/(dashboard)/holdings/actions.ts`, backed by `lib/csv/`. Pro+, parses broker export formats, inserts `holdings` rows with `source = 'csv'`.
 
 ### 9.4 Telegram linking
 
-`services.md` only documents a single `TELEGRAM_OWNER_CHAT_ID` — that's a developer/admin alert channel, not the per-user delivery mechanism the PRD describes ("Telegram alerts... the moment a dividend is detected" as a Pro+ user-facing feature). A real per-user flow is needed:
-1. User clicks "Connect Telegram" in Settings → shown a deep link to the bot with a unique linking code
+Built as originally proposed. `services.md` still only documents a single `TELEGRAM_OWNER_CHAT_ID` (a developer/admin alert channel) and is stale on this point — the actual, shipped mechanism is per-user:
+1. User clicks "Connect Telegram" in Settings (`components/dashboard/telegram-connect-card.tsx`) → shown a deep link to the bot with a unique linking code
 2. User sends `/start <code>` to the bot
-3. Bot webhook (`POST /api/telegram/webhook`) captures the resulting `chat_id`, matches it to the linking code, writes it to `notification_preferences.telegram_chat_id`
+3. Bot webhook (`POST /api/telegram/webhook`, `lib/telegram/`) captures the resulting `chat_id`, matches it to the linking code, and persists the link — in a dedicated `telegram_links` table (`20260726000000_telegram_links.sql`), not the `notification_preferences.telegram_chat_id` column this doc originally proposed. Check the migration directly before writing code against this table.
 
 ### 9.5 Stripe billing
 
 - `POST /api/stripe/checkout` — create Checkout Session for Pro/Pro+
-- `POST /api/stripe/webhook` — handle `checkout.session.completed`, `customer.subscription.updated/deleted` to keep `subscriptions` in sync (source of truth for plan gating everywhere else in the app)
+- `POST /api/webhooks/stripe` — handles `checkout.session.completed`, `customer.subscription.updated/deleted` to keep `subscriptions` and `profiles.plan` in sync (source of truth for plan gating everywhere else in the app). Note the actual path is `/api/webhooks/stripe`, not `/api/stripe/webhook` as originally proposed here.
 - `POST /api/stripe/portal` — Stripe Customer Portal session for self-serve upgrade/downgrade/cancel
 
 ### 9.6 AI Advisor
@@ -226,49 +246,66 @@ Reliability requirements from the PRD ("no missed notifications on service resta
 
 - **Provider:** Supabase Auth — email/password + Google OAuth (both present in the prototype's login screen), plus a "demo mode" entry point for prospects to explore without an account.
 - **Session handling:** Supabase's SSR helpers (`@supabase/ssr`) with Next.js middleware refreshing the session cookie on each request.
-- **Route protection:** `middleware.ts` redirects unauthenticated requests away from `(dashboard)` routes to `/login`.
-- **Plan gating:** a single source of truth — `subscriptions.plan` (kept in sync by the Stripe webhook) — checked both server-side (Route Handlers reject over-plan actions, e.g. a 6th manual holding on Free) and client-side (UI shows upgrade prompts, matching the prototype's "PRO" sidebar badges). Never trust a client-side check alone for anything that gates cost (Plaid connections, AI queries, Telegram sends).
+- **Route protection:** `proxy.ts` (not `middleware.ts` — see Section 6's note on the Next.js 16 rename) redirects unauthenticated requests away from `(dashboard)` routes to `/login`.
+- **Plan gating:** every page/action gate actually checked reads `profiles.plan` (e.g. `dashboard/page.tsx`, `brokers/page.tsx`, `holdings/page.tsx`), not `subscriptions.plan` as originally proposed here — `subscriptions` still exists and mirrors full Stripe state (customer/subscription IDs, period end), but `profiles.plan` is the column every plan-gate in the app actually reads, kept in sync by the Stripe webhook (`app/api/webhooks/stripe/route.ts`, which writes both tables). Checked both server-side (Route Handlers/Server Actions reject over-plan actions, e.g. a 6th manual holding on Free) and client-side (UI shows upgrade prompts / Pro+-only badges). Never trust a client-side check alone for anything that gates cost (Plaid connections, AI queries, Telegram sends).
 
 ---
 
 ## 11. Third-Party Integration Summary
 
+**Refreshed 2026-09-06 against the actual `.env` and `package.json`.**
+
 | # | Service | Registration | Cost | Powers |
 |---|---|---|---|---|
 | 1 | Supabase | supabase.com | Free | DB, auth, storage |
-| 2 | Vercel | vercel.com | Free | Hosting, cron |
-| 3 | OneSignal | onesignal.com | Free ≤10k users | Push notifications |
-| 4 | Stripe | stripe.com | Free + tx % | Subscriptions |
-| 5 | Yahoo Finance | none | Free, unofficial | Dividend data, calendar, collections pricing |
-| 6 | Plaid | plaid.com/developers | ~$0.30/account/mo | US broker auto-sync (Pro+) |
-| 7 | Telegram Bot API | pre-configured | Free | Pro+ alerts |
+| 2 | Vercel | vercel.com | Free | Hosting, cron — live at paidprime.com |
+| 3 | Firebase Cloud Messaging | firebase.google.com | Free | Push notifications. **Replaced OneSignal 2026-07-23** (`docs/scope-comparison.md` §C) — the `ONESIGNAL_*` vars below are vestigial, not wired to anything. |
+| 4 | Stripe | stripe.com | Free + tx % | Subscriptions — built (Checkout, Portal, webhook) |
+| 5 | Yahoo Finance | none | Free, unofficial | Dividend data, calendar, collections pricing, quotes/sparklines |
+| 6 | Plaid | plaid.com/developers | ~$0.30/account/mo | US broker auto-sync (Pro+) — live in production since 2026-08-22, individual institutions gated by Plaid's own registration |
+| 7 | Telegram Bot API | pre-configured | Free | Per-user Pro+ alerts — built (Section 9.4) |
 | 8 | Resend | resend.com | Free ≤3k emails/mo | Welcome, password reset, payment confirmation |
-| 9 | OpenAI | platform.openai.com | ~$0.001/query (`gpt-4o-mini`) | AI Advisor — resolved, see Section 15 decision #2 |
-| — | Alpha Vantage | alphavantage.co | Free tier | Optional FOMC/earnings calendar overlay |
+| 9 | OpenAI | platform.openai.com | ~$0.001/query (`gpt-4o-mini`) | AI Advisor — implemented in code, dormant until `OPENAI_API_KEY` is provisioned (see Section 15 decision #2) |
+| 10 | Logo.dev | logo.dev | Free tier | Ticker/company logo fallback (`lib/tickers/logo.ts`) — **not in the original service list**, added since; also missing from `docs/services.md`, worth adding there |
+| — | Alpha Vantage | alphavantage.co | Free tier | Optional FOMC/earnings calendar overlay — still not built, no key configured |
 
-Required environment variables (union of the above, names inferred from convention — confirm exact names when each integration is wired up):
+Actual environment variables in use (from `.env` directly, not inferred):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
-STRIPE_SECRET_KEY
-STRIPE_WEBHOOK_SECRET
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-ONESIGNAL_APP_ID
-ONESIGNAL_REST_API_KEY
+NEXT_PUBLIC_SITE_URL
+CRON_SECRET                    # protects /api/jobs/* from unauthenticated invocation
 PLAID_CLIENT_ID
 PLAID_SECRET
-PLAID_ENV
+PLAID_ENV                      # sandbox locally; production in Vercel
+PLAID_WEBHOOK_URL
+ENCRYPTION_KEY                 # AES-256-GCM for broker_connections.plaid_access_token at rest
 TELEGRAM_BOT_TOKEN
-TELEGRAM_OWNER_CHAT_ID        # dev/admin alerts only, not per-user delivery
+STRIPE_SECRET_KEY
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_PRICE_ID_PRO
+STRIPE_PRICE_ID_PRO_PLUS
+NEXT_PUBLIC_FIREBASE_API_KEY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+NEXT_PUBLIC_FIREBASE_PROJECT_ID
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+NEXT_PUBLIC_FIREBASE_APP_ID
+NEXT_PUBLIC_FIREBASE_VAPID_KEY
+FIREBASE_SERVICE_ACCOUNT_JSON
 RESEND_API_KEY
-OPENAI_API_KEY                 # AI Advisor; without it /api/advisor/query returns 503
-ALPHA_VANTAGE_API_KEY          # optional
-CRON_SECRET                    # protects /api/jobs/* from unauthenticated invocation
+RESEND_FROM_EMAIL
+NEXT_PUBLIC_LOGO_DEV_KEY
+OPENAI_API_KEY                 # AI Advisor; NOT currently set — /api/advisor/query returns 503
+ONESIGNAL_APP_ID               # vestigial — push moved to Firebase, these are unused
+ONESIGNAL_REST_API_KEY         # vestigial
+NEXT_PUBLIC_ONESIGNAL_APP_ID   # vestigial
 ```
 
-`TELEGRAM_BOT_TOKEN` is already flagged as a live credential in `services.md` — confirm it's never committed and lives only in Vercel's environment variable store / `.env.local` (gitignored).
+Not present in `.env` (confirmed absent, not just undocumented): `ALPHA_VANTAGE_API_KEY`, `TELEGRAM_OWNER_CHAT_ID`. `TELEGRAM_BOT_TOKEN` is a live credential — confirm it's never committed and lives only in Vercel's environment variable store / `.env` (gitignored).
 
 ---
 
@@ -311,27 +348,29 @@ Unlike the sections above, this part is **already built**, not proposed. Three l
 
 ## 14. Current Implementation Status
 
-Be honest about this — most of the document above is target architecture, not built yet.
+**Rewritten 2026-09-06 — the previous version of this section (written 2026-07-15, before any product code existed) was completely obsolete and actively misleading.** Everything below is grounded in the actual codebase, not narrative.
 
-**Built:**
-- Next.js 16 App Router scaffold, TypeScript, Tailwind v4
-- Full design-token / Tailwind-theme / kit.css three-layer styling system (Section 13)
-- shadcn/ui integrated and re-themed
-- Logo, favicons, PWA manifest, viewport theming
-- A single placeholder home page (`app/page.tsx`) demonstrating the theme — not a real dashboard
+**Built and live in production (paidprime.com):**
+- Next.js 16 App Router, TypeScript, Tailwind v4, full design-token/kit.css styling system, shadcn/ui — the original Section 13 description still holds
+- Supabase auth (email/password + Google OAuth), route protection via `proxy.ts`
+- The full dashboard: holdings (manual/CSV/Plaid), dividends, calendar (with a privacy-filter setting), collections (with free-text ticker search), watchlist, diversification, goals, analytics, performance, a per-ticker detail page with a live price chart, upcoming payments, history, help, settings — 19 authenticated routes total, see Section 6
+- Full Supabase schema — 20 migrations (`supabase/migrations/`), RLS on every user-scoped table
+- Dividend detection cron (`app/api/jobs/detect-dividends`) — idempotent, DST-safe scheduling, rescheduled multiple times since first ship to fix same-day detection accuracy
+- Stripe billing — Checkout, Customer Portal, webhook-driven `profiles.plan`/`subscriptions` sync for Free/Pro/Pro+
+- Plaid broker auto-sync (Pro+) — link token, exchange token, webhook, scheduled holdings sync; live in Vercel production since 2026-08-22 (see Section 4/11 notes on per-institution registration gating)
+- CSV import (Pro+) for brokers Plaid doesn't cover
+- Push notifications via Firebase Cloud Messaging (not OneSignal — see Section 4)
+- Telegram alerts with real per-user account linking (Section 9.4)
+- Transactional email via Resend
+- AI Advisor — implemented end-to-end (`lib/advisor/openai.ts`, `/api/advisor/query`, floating launcher + standalone `/advisor` route), but **dormant**: `OPENAI_API_KEY` is not set, so every request currently 503s
+- Ticker enrichment layer — live Yahoo quotes, sparklines, logos (static map + Logo.dev fallback), 52-week range, market-open status, rolled out across most list views
 
-**Not started:**
-- Supabase project connection (no `@supabase/*` dependency installed yet)
-- Authentication (no login/signup pages, no middleware)
-- Any of the 10 product routes in Section 6 beyond the placeholder home page
-- Data layer / schema (Section 7 is a proposal, not a migration)
-- All backend Route Handlers (Section 9)
-- All third-party integrations (Section 11) — zero API clients installed
-- Stripe billing, plan gating
-- i18n (Section 8)
-- The marketing landing page as a distinct route (currently only exists as a static prototype file)
+**Still not built:**
+- i18n / currency-locale switching (Section 8) — no `next-intl` or equivalent, no locale files, no switcher component found in code. Still an open question for the client, not just unimplemented.
+- Alpha Vantage / FOMC-earnings calendar overlay — no key configured, calendar likely runs on Yahoo's ex-date/pay-date fields alone
+- A durable job queue for the detection cron (Section 9.1's "worth planning for" note) — not needed yet at current scale, per that section's own framing
 
-In short: the **foundation and design system are production-grade; the product itself has not been started.**
+**In short:** the earlier "foundation is done, product hasn't started" framing is backwards — this is a live, feature-complete product with real users and real money moving through Stripe, not a scaffold. Treat every other section of this document that still uses "proposed"/target-tense language as needing the same kind of verification this section just got, not as settled fact.
 
 ---
 
@@ -355,14 +394,14 @@ See the client-facing questions note for the one open scope question (currency/l
 
 ## 16. Suggested Build Sequence
 
-A rough phase order, not a committed roadmap — reprioritize against actual client deadlines:
+**Historical — every phase below is done as of 2026-09-06 (see Section 14), except #8 (i18n, still not built) and the polish/launch-checklist part of #9.** Kept for the record of intended order rather than removed; don't read this as a live plan.
 
-1. **Data + auth foundation** — Supabase project, `profiles`/`subscriptions` tables, RLS, Supabase Auth wired into `middleware.ts`, login/signup pages.
-2. **Holdings core loop** — manual holdings CRUD, dashboard, dividend history display (no live data yet — seed/mock).
-3. **Dividend detection pipeline** — Yahoo Finance integration, `dividend_events`/`dividend_payments`, the daily cron job, OneSignal push (the core value prop — ship this before anything else user-facing beyond the basics).
-4. **Billing** — Stripe Checkout/Portal/webhooks, plan gating enforcement.
-5. **Calendar, Diversification, Collections, Watchlist, Goals** — mostly read views over data already flowing from steps 2–3.
-6. **Pro+ features** — Plaid sync, CSV import, Telegram linking + alerts.
-7. **AI Advisor** — built on OpenAI (decision #2 resolved); reachable from the floating launcher on every dashboard page. Blocked only on `OPENAI_API_KEY` being provisioned.
-8. **i18n** (if confirmed in scope) — should land as early as feasible once confirmed, since retrofitting is expensive; listed late here only because it's pending a scope decision.
-9. **Landing page** as its own route, polish pass, launch checklist (SEO/analytics — explicitly deferred per PRD §9, but worth a pre-launch pass).
+1. ~~**Data + auth foundation**~~ — done. (Originally said "wired into `middleware.ts`" — actually `proxy.ts`, Next.js 16's replacement; see Section 6.)
+2. ~~**Holdings core loop**~~ — done, plus CSV/Plaid sources beyond the original manual-only scope.
+3. ~~**Dividend detection pipeline**~~ — done. Shipped on OneSignal originally, since replaced by Firebase Cloud Messaging (Section 4).
+4. ~~**Billing**~~ — done.
+5. ~~**Calendar, Diversification, Collections, Watchlist, Goals**~~ — done, each grown well past "read views" (see `docs/scope-comparison.md` §E for specifics).
+6. ~~**Pro+ features**~~ — done (Plaid live in production, CSV import, Telegram linking + alerts).
+7. ~~**AI Advisor**~~ — done, still blocked only on `OPENAI_API_KEY` being provisioned.
+8. **i18n** — still not built, still pending a scope decision. The only phase on this list that's genuinely open.
+9. **Landing page** — done as its own route (`app/page.tsx`), though which of `app/page.tsx` / `app/homepage/page.tsx` is the live one has changed more than once post-launch (Section 6) — the "polish pass, launch checklist" half of this item is a separate, still-relevant question worth revisiting periodically rather than something to check off once.

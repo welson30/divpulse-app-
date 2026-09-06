@@ -1,6 +1,6 @@
 # PaidPrime — Services & Connections
 
-> **Technical Reference Document · July 2026**
+> **Technical Reference Document · July 2026, refreshed 2026-09-06**
 > All services a developer needs to connect for the SaaS Web platform to function completely. Each entry includes where to register, cost, and what it powers.
 
 ---
@@ -11,7 +11,7 @@
 |---|---|---|---|---|
 | 1 | Database & Auth | Supabase | [supabase.com](https://supabase.com) | ✅ Free |
 | 2 | App Hosting | Vercel | [vercel.com](https://vercel.com) | ✅ Free |
-| 3 | Push Notifications | OneSignal | [onesignal.com](https://onesignal.com) | ✅ Free (up to 10k users) |
+| 3 | Push Notifications | Firebase Cloud Messaging | [firebase.google.com](https://firebase.google.com) | ✅ Free |
 | 4 | Payments & Subscriptions | Stripe | [stripe.com](https://stripe.com) | ✅ Free + % per transaction |
 | 5 | Dividend Data, Calendar & Collections | Yahoo Finance API | No registration needed | ✅ Free |
 | 6 | US Broker Sync (Pro+) | Plaid | [plaid.com/developers](https://plaid.com/developers) | ⚠️ ~$0.30/account/mo |
@@ -19,6 +19,7 @@
 | 7 | Telegram Alerts | Telegram Bot API | Already configured | ✅ Free |
 | 8 | Transactional Email | Resend | [resend.com](https://resend.com) | ✅ Free (up to 3k emails/mo) |
 | 9 | AI Advisor | OpenAI | [platform.openai.com](https://platform.openai.com) | ⚠️ Pay per use (~$0.001/query) |
+| 10 | Ticker/Company Logos | Logo.dev | [logo.dev](https://logo.dev) | ✅ Free tier |
 
 ---
 
@@ -46,12 +47,16 @@
 
 ## 3. Push Notifications — Lock Screen Alerts
 
+**Updated 2026-09-06 — this section originally documented OneSignal; that integration was replaced entirely by Firebase Cloud Messaging on 2026-07-23** (see `docs/scope-comparison.md` §C). The `ONESIGNAL_*` env vars still exist in `.env` but are unused/vestigial — don't provision or debug against OneSignal for this feature.
+
 | Field | Detail |
 |---|---|
-| **Service** | OneSignal |
-| **Register at** | [onesignal.com](https://onesignal.com) |
-| **Cost** | Free up to 10,000 users |
+| **Service** | Firebase Cloud Messaging |
+| **Register at** | [firebase.google.com](https://firebase.google.com) |
+| **Cost** | Free |
 | **Used for** | Sending real-time lock screen alerts e.g. `"Dividend received · JEPI · +$61.20"` directly to the user's phone |
+| **Env vars** | `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`, `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`, `NEXT_PUBLIC_FIREBASE_VAPID_KEY`, `FIREBASE_SERVICE_ACCOUNT_JSON` |
+| **Code** | `lib/firebase/` |
 
 ---
 
@@ -163,6 +168,21 @@ Plaid does not support Brazilian brokers or most international brokers. Two fall
 | **Model** | `gpt-4o-mini` (see `lib/advisor/openai.ts`) |
 | **Used for** | Answering natural language questions such as *"How much capital do I need to earn $1,000/month in dividends?"* — available from the floating advisor launcher on every dashboard page |
 | **Cost controls** | Pro/Pro+ only (server-side plan check), 500-char question cap, 8-turn history cap, and 10 questions/user/day counted from `ai_advisor_queries` |
+
+---
+
+## 10. Ticker/Company Logos
+
+**Added since the original service list — not part of the July 2026 scope, built as part of the visual redesign work (see `docs/scope-comparison.md` §G).**
+
+| Field | Detail |
+|---|---|
+| **Service** | Logo.dev |
+| **Register at** | [logo.dev](https://logo.dev) |
+| **Cost** | Free tier |
+| **Env var** | `NEXT_PUBLIC_LOGO_DEV_KEY` |
+| **Code** | `lib/tickers/logo.ts` |
+| **Used for** | Company/ticker logos across Holdings, Watchlist, Collections, Dashboard, Dividends, and the ticker-search autocomplete. Two-source resolution: a static issuer→domain map first, Logo.dev as fallback (Clearbit's logo API, the original fallback, was found shut down). |
 
 ---
 
