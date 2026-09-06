@@ -1,7 +1,5 @@
 "use client";
 
-import { usePlaidConnect } from "@/components/dashboard/use-plaid-connect";
-
 type PlaidConnection = {
   id: string;
   institution_name: string | null;
@@ -13,6 +11,10 @@ type PlaidConnection = {
 type PlaidConnectCardProps = {
   isProPlus: boolean;
   connections: PlaidConnection[];
+  connect: () => void;
+  reconnect: (connectionId: string) => void;
+  isPending: boolean;
+  error: string | null;
 };
 
 function formatDate(dateStr: string | null) {
@@ -20,9 +22,13 @@ function formatDate(dateStr: string | null) {
   return new Date(dateStr).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
-export function PlaidConnectCard({ isProPlus, connections }: PlaidConnectCardProps) {
-  const { connect, reconnect, isPending, error } = usePlaidConnect();
-
+/**
+ * Presentational only — the Plaid Link session (usePlaidConnect) is owned by
+ * the caller, not this component. See PlaidConnectDialog for why: Link opens
+ * its own full-page overlay, and that has to outlive whatever dialog this
+ * card happens to be rendered inside of.
+ */
+export function PlaidConnectCard({ isProPlus, connections, connect, reconnect, isPending, error }: PlaidConnectCardProps) {
   if (!isProPlus) {
     return (
       <div className="flex items-center justify-between gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-3">
