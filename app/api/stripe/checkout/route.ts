@@ -45,25 +45,33 @@ export async function POST(request: NextRequest) {
 
   let customerId = existingSubscription?.stripe_customer_id ?? undefined;
 
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email,
-      metadata: { supabase_user_id: user.id },
+  try {
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        metadata: { supabase_user_id: user.id },
+      });
+      customerId = customer.id;
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${SITE_URL}/settings?tab=subscription&checkout=success`,
+      cancel_url: `${SITE_URL}/settings?tab=subscription&checkout=canceled`,
+      client_reference_id: user.id,
+      subscription_data: {
+        metadata: { supabase_user_id: user.id },
+      },
     });
-    customerId = customer.id;
+
+    return NextResponse.json({ url: session.url });
+  } catch {
+    // Most likely cause: an existing stripe_customer_id belongs to a
+    // different Stripe mode than the current STRIPE_SECRET_KEY (e.g. a
+    // test-mode customer left over from before a live-mode cutover) —
+    // Stripe can never resolve an object across modes.
+    return NextResponse.json({ error: "Couldn't start checkout. Please try again." }, { status: 502 });
   }
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${SITE_URL}/settings?tab=subscription&checkout=success`,
-    cancel_url: `${SITE_URL}/settings?tab=subscription&checkout=canceled`,
-    client_reference_id: user.id,
-    subscription_data: {
-      metadata: { supabase_user_id: user.id },
-    },
-  });
-
-  return NextResponse.json({ url: session.url });
 }

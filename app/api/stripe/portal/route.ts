@@ -25,10 +25,21 @@ export async function POST() {
     return NextResponse.json({ error: "No billing account found yet — subscribe first." }, { status: 404 });
   }
 
-  const session = await getStripe().billingPortal.sessions.create({
-    customer: subscription.stripe_customer_id,
-    return_url: `${SITE_URL}/settings?tab=billing`,
-  });
+  try {
+    const session = await getStripe().billingPortal.sessions.create({
+      customer: subscription.stripe_customer_id,
+      return_url: `${SITE_URL}/settings?tab=billing`,
+    });
 
-  return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url });
+  } catch {
+    // Most likely cause: stripe_customer_id belongs to a different Stripe
+    // mode than the current STRIPE_SECRET_KEY (e.g. a test-mode customer
+    // left over from before a live-mode cutover) — Stripe can never resolve
+    // an object across modes, so this always 400s in that case.
+    return NextResponse.json(
+      { error: "Couldn't open billing management — your billing account may need to be reconnected. Contact support." },
+      { status: 502 },
+    );
+  }
 }
