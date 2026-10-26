@@ -57,8 +57,8 @@ export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
     label: "Insight",
     links: [
       { href: "/analytics", label: "Analytics", Icon: IconAnalytics },
-      { href: "/performance", label: "Performance", Icon: IconAnalytics },
-      { href: "/goals", label: "Goals", Icon: IconGoals },
+      // { href: "/performance", label: "Performance", Icon: IconAnalytics }, // hidden – re-enable when ready
+      // { href: "/goals", label: "Goals", Icon: IconGoals }, // hidden – re-enable when ready
       { href: "/advisor", label: "AI Advisor", Icon: IconAdvisor },
     ],
   },
