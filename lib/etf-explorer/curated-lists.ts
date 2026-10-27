@@ -15,9 +15,30 @@ export type CuratedList = {
   description: string;
   frequency: PayFrequency;
   tickers: string[];
+  /** If true, this list focuses on growth/appreciation rather than income */
+  isGrowth?: boolean;
 };
 
 export const CURATED_LISTS: CuratedList[] = [
+  {
+    id: "growth-core-etfs",
+    title: "Growth & Core Portfolio",
+    description: "The foundation of a long-term portfolio — S&P 500, Nasdaq, and total-market ETFs for compounding wealth over time. Start here before chasing yield.",
+    frequency: "Quarterly",
+    isGrowth: true,
+    tickers: [
+      // Core index — the backbone
+      "VOO", "QQQM", "VTI", "QQQ", "SPY",
+      // Growth-tilted
+      "MGK", "VONG", "IWF", "SCHG", "VUG",
+      // Dividend-growth hybrid (income + appreciation)
+      "SCHD", "VYM", "DGRO", "VIG", "NOBL",
+      // International diversification
+      "VXUS", "VEA", "EFA", "VWO", "IXUS",
+      // Bonds for balance
+      "BND", "AGG", "BIL", "SGOV", "SCHZ",
+    ],
+  },
   {
     id: "monthly-dividend-etfs",
     title: "Top Monthly Dividend ETFs",
@@ -57,18 +78,41 @@ export const CURATED_LISTS: CuratedList[] = [
   {
     id: "weekly-dividend-etfs",
     title: "Top Weekly Dividend ETFs",
-    description: "Option-income ETFs that distribute dividends every week — the highest-frequency income available.",
+    description: "Option-income ETFs that distribute dividends every week — the highest-frequency income available. High yield comes with NAV decay risk.",
     frequency: "Weekly",
     tickers: [
-      // Roundhill & broad weekly options
-      "QDTE", "XDTE", "RDTE", "YMAX", "FEPI",
-      // YieldMax single-stock covered-call ETFs
+      // Roundhill 0DTE Covered Call (Friday)
+      "QDTE", "XDTE", "RDTE",
+      // YieldMax broad funds
+      "YMAX", "YMAG", "FEPI",
+      // YieldMax single-stock (Friday)
       "TSLY", "NVDY", "AMZY", "MSFO", "CONY",
-      "APLY", "NFLY", "DISO", "PLTY", "JPMO",
-      "FBY", "SNOY", "AMDY", "ULTY", "OARK",
+      "APLY", "NFLY", "PLTY", "FBY", "AMDY",
+      // Roundhill WeeklyPay (Mon–Thu)
+      "MSFW", "METW", "MSTW", "GOOQ", "NFLW",
+      "AMDW", "AMZW", "APLW", "NVDW", "TSLW",
     ],
   },
 ];
+
+/**
+ * Tickers that use covered-call / options strategies and are subject to NAV decay.
+ * Used to show a risk warning badge in the UI.
+ */
+export const NAV_DECAY_RISK_TICKERS = new Set([
+  // Roundhill 0DTE
+  "QDTE", "XDTE", "RDTE",
+  // YieldMax single-stock
+  "TSLY", "NVDY", "AMZY", "MSFO", "CONY", "APLY", "NFLY", "PLTY", "FBY", "AMDY",
+  "SNOY", "DISO", "JPMO", "OARK", "ULTY", "MARO", "SMCY", "HOODY",
+  // YieldMax broad
+  "YMAX", "YMAG", "ULTY",
+  // Other covered-call
+  "QYLD", "RYLD", "XYLD", "NUSI",
+  // Roundhill WeeklyPay (leveraged)
+  "MSFW", "METW", "MSTW", "GOOQ", "NFLW", "AMDW", "AMZW", "APLW",
+  "NVDW", "TSLW", "COINW", "HOODW", "ARMW", "AVGOW",
+]);
 
 /** Map from ticker to its payment frequency — derived from curated lists. */
 export const TICKER_FREQUENCY: Record<string, PayFrequency> = Object.fromEntries(

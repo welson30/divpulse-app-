@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BarChart2, X, ChevronDown, ChevronUp } from "lucide-react";
+import { BarChart2, X, ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
 import { EtfTable, type EtfRow } from "@/components/dashboard/etf-table";
 import { EtfYieldCalculator } from "@/components/dashboard/etf-yield-calculator";
 import type { CuratedList } from "@/lib/etf-explorer/curated-lists";
@@ -108,11 +108,23 @@ export function EtfExplorerClient({ lists }: Props) {
           <section key={list.id}>
             <div className="mb-sp-3 flex items-start justify-between gap-2">
               <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-h2 font-display font-semibold text-text-primary">{list.title}</h2>
-                  <FreqTag freq={list.frequency} />
+                  {list.isGrowth ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wide uppercase text-emerald-400">
+                      <TrendingUp className="size-2.5" />
+                      Growth
+                    </span>
+                  ) : (
+                    <FreqTag freq={list.frequency} />
+                  )}
                 </div>
                 <p className="text-sm text-text-secondary">{list.description}</p>
+                {list.isGrowth && (
+                  <p className="text-xs text-emerald-400/70 font-mono">
+                    💡 Start here — build your core before adding income ETFs
+                  </p>
+                )}
               </div>
             </div>
             {(() => {

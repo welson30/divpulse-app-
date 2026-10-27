@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Check, Loader2, Plus, TrendingUp, BarChart2 } from "lucide-react";
+import { Check, Loader2, Plus, TrendingUp, BarChart2, AlertTriangle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { watchTicker } from "@/app/(dashboard)/watchlist/actions";
 import { Sparkline, ChangeBadge } from "@/components/dashboard/sparkline";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
@@ -10,6 +10,7 @@ import { InfoTip } from "@/components/dashboard/info-tip";
 import { TIPS } from "@/lib/tips";
 import type { SparklinePoint } from "@/lib/dividend-data/types";
 import type { PayFrequency } from "@/lib/etf-explorer/curated-lists";
+import { NAV_DECAY_RISK_TICKERS } from "@/lib/etf-explorer/curated-lists";
 
 export type EtfRow = {
   ticker: string;
@@ -81,6 +82,8 @@ function FreqBadge({ freq }: { freq: PayFrequency }) {
 const HEAD =
   "border-b border-border-subtle px-sp-3 py-3.5 font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase";
 
+type SortDir = "asc" | "desc" | null;
+
 type Props = {
   rows: EtfRow[];
   investAmount?: number;
@@ -93,6 +96,19 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
   const [, startTransition] = useTransition();
   const [watched, setWatched] = useState<Set<string>>(new Set());
   const [pendingTicker, setPendingTicker] = useState<string | null>(null);
+  const [yieldSort, setYieldSort] = useState<SortDir>(null);
+
+  const sortedRows = yieldSort
+    ? [...rows].sort((a, b) => {
+        const ya = a.yieldPct ?? -1;
+        const yb = b.yieldPct ?? -1;
+        return yieldSort === "desc" ? yb - ya : ya - yb;
+      })
+    : rows;
+
+  function cycleYieldSort() {
+    setYieldSort((prev) => (prev === null ? "desc" : prev === "desc" ? "asc" : null));
+  }
 
   const handleWatch = (ticker: string) => {
     setPendingTicker(ticker);
@@ -222,9 +238,18 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                 </span>
               </th>
               <th className={`${HEAD} text-right`}>
-                <span className="inline-flex items-center gap-1">
-                  Yield <InfoTip label={TIPS.dividendYield} />
-                </span>
+                <button
+                  type="button"
+                  onClick={cycleYieldSort}
+                  className="inline-flex items-center gap-1 hover:text-text-primary transition-colors"
+                  title="Sort by yield"
+                >
+                  Yield
+                  {yieldSort === null && <ArrowUpDown className="size-3 opacity-40" />}
+                  {yieldSort === "desc" && <ArrowDown className="size-3 text-green-400" />}
+                  {yieldSort === "asc" && <ArrowUp className="size-3 text-green-400" />}
+                  <InfoTip label={TIPS.dividendYield} />
+                </button>
               </th>
               {investAmount > 0 && (
                 <th className={`${HEAD} text-right`}>
@@ -237,16 +262,17 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, i) => {
+            {sortedRows.map((row, i) => {
               const isWatched = watched.has(row.ticker);
               const isSelected = selectedTickers.includes(row.ticker);
               const income = annualIncome(investAmount, row.yieldPct);
+              const hasRisk = NAV_DECAY_RISK_TICKERS.has(row.ticker);
               return (
                 <tr
                   key={row.ticker}
                   className={`transition-colors hover:bg-surface-hover ${
                     isSelected ? "bg-blue-500/5" : ""
-                  } ${i === rows.length - 1 ? "" : "border-b border-border-subtle"}`}
+                  } ${i === sortedRows.length - 1 ? "" : "border-b border-border-subtle"}`}
                 >
                   {compareMode && (
                     <td className="px-sp-3 py-3">
@@ -267,7 +293,18 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                     <Link href={`/tickers/${row.ticker}`} className="flex items-center gap-2.5">
                       <TickerLogo ticker={row.ticker} logoUrl={row.logoUrl} />
                       <div className="min-w-0">
-                        <div className="font-mono text-sm font-semibold text-text-primary">{row.ticker}</div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-sm font-semibold text-text-primary">{row.ticker}</span>
+                          {hasRisk && (
+                            <span
+                              title="Covered-call / options strategy — high yield may come with NAV decay over time. Review before investing."
+                              className="inline-flex cursor-help items-center gap-0.5 rounded-full bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-amber-400 uppercase tracking-wide"
+                            >
+                              <AlertTriangle className="size-2.5" />
+                              NAV risk
+                            </span>
+                          )}
+                        </div>
                         <div className="mt-0.5 max-w-72 truncate text-xs text-text-secondary">{row.name ?? "—"}</div>
                       </div>
                     </Link>
