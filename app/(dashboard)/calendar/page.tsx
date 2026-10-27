@@ -120,32 +120,40 @@ export default async function CalendarPage({
   const monthEnd = `${year}-${String(month).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
 
   const header = (
-    <header className="border-b border-[#22262c] pb-6">
-      <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Calendar</p>
-      <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-        Payment calendar
-      </h1>
-      <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-        Expected and confirmed dividend payments mapped to the calendar.
-      </p>
+    <header className="relative overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] px-5 py-6 shadow-[0_8px_40px_rgba(0,0,0,0.4)] min-[900px]:px-6">
+      {/* Ambient gradient mesh */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-20 -top-20 size-72 rounded-full bg-[#3fbf87] opacity-[0.04] blur-3xl" />
+        <div className="absolute -right-10 -top-10 size-64 rounded-full bg-[#60a5fa] opacity-[0.035] blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 size-48 rounded-full bg-[#a78bfa] opacity-[0.03] blur-2xl" />
+      </div>
+      <div className="relative z-[1]">
+        <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">Calendar</p>
+        <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#e8eaf0] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
+          Payment calendar
+        </h1>
+        <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#3d4554]">
+          Expected and confirmed dividend payments mapped to the calendar.
+        </p>
+      </div>
     </header>
   );
 
   const footer = (
-    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
+    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1c2028] pt-5">
       {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
       <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-      <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+      <p className="text-[12px] leading-[19.8px] text-[#3d4554]">Read-only broker access · Data delayed 15 min</p>
     </footer>
   );
 
   const brokers = (
-    <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
-      <header className="border-b border-[#22262c] px-6 py-5">
-        <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
+    <section className="overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+      <header className="border-b border-[#1c2028] px-6 py-5">
+        <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#e8eaf0]">
           Broker integrations
         </h2>
-        <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Sync status across accounts</p>
+        <p className="mt-1 text-[13px] leading-[21.45px] text-[#3d4554]">Sync status across accounts</p>
       </header>
       {brokerConnections && brokerConnections.length > 0 ? (
         <div className="px-6 py-2">
@@ -156,12 +164,12 @@ export default async function CalendarPage({
               <div
                 key={row.id}
                 className={`flex items-center justify-between gap-3 py-3.5 ${
-                  i < brokerConnections.length - 1 ? "border-b border-[#22262c]" : ""
+                  i < brokerConnections.length - 1 ? "border-b border-[#1c2028]" : ""
                 }`}
               >
                 <BrokerMark name={row.institution_name} />
                 <div className="flex shrink-0 items-center gap-2">
-                  {ago ? <span className="text-[11px] leading-[18.15px] text-[#6c737f]">{ago}</span> : null}
+                  {ago ? <span className="text-[11px] leading-[18.15px] text-[#3d4554]">{ago}</span> : null}
                   <span className={`rounded-[8px] border px-2 py-1 text-[11px] tracking-[1.1px] uppercase ${badge.className}`}>
                     {badge.label}
                   </span>
@@ -171,15 +179,15 @@ export default async function CalendarPage({
           })}
         </div>
       ) : (
-        <p className="px-6 py-5 text-[13px] leading-[21.45px] text-[#99a1ac]">
+        <p className="px-6 py-5 text-[13px] leading-[21.45px] text-[#3d4554]">
           No brokers connected.{" "}
-          <Link href="/brokers" className="text-[#4c82f7] hover:underline">
+          <Link href="/brokers" className="text-[#60a5fa] hover:underline">
             Connect a brokerage
           </Link>
         </p>
       )}
-      <div className="border-t border-[#22262c] px-6 py-4">
-        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">
+      <div className="border-t border-[#1c2028] px-6 py-4">
+        <p className="text-[12px] leading-[19.8px] text-[#3d4554]">
           All connections are read-only; PaidPrime never has withdrawal access.
         </p>
       </div>
@@ -191,7 +199,7 @@ export default async function CalendarPage({
       <div className="flex flex-col gap-6">
         {header}
         <div className="grid grid-cols-1 items-start gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-sm text-[#99a1ac]">
+          <div className="rounded-[18px] border border-[#1c2028] bg-[#0b0e12] px-6 py-12 text-center text-sm text-[#3d4554]">
             Add a holding to see its dividend calendar.
           </div>
           {brokers}

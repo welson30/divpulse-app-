@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { AnimatedKpiTiles } from "@/components/dashboard/animated-kpi-tiles";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { buildPortfolioSeries, scaleBenchmarkAligned } from "@/lib/tickers/portfolio-sparkline";
@@ -108,57 +109,53 @@ export default async function HoldingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-4 border-b border-[#22262c] pb-6 min-[900px]:flex-row min-[900px]:items-end min-[900px]:justify-between">
-        <div className="min-w-0">
-          <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Portfolio</p>
-          <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-            Portfolio overview
-          </h1>
-          <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-            Consolidated positions across all connected brokerage accounts.
-          </p>
+      <header className="relative overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+        {/* Ambient gradient mesh */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-20 -top-20 size-72 rounded-full bg-[#3fbf87] opacity-[0.04] blur-3xl" />
+          <div className="absolute -right-10 -top-10 size-64 rounded-full bg-[#60a5fa] opacity-[0.035] blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 size-48 rounded-full bg-[#a78bfa] opacity-[0.03] blur-2xl" />
         </div>
-        <ExportHoldingsButton holdings={rows} />
+        <div className="relative z-[1] flex flex-col gap-4 px-5 py-6 min-[900px]:flex-row min-[900px]:items-end min-[900px]:justify-between min-[900px]:px-6">
+          <div className="min-w-0">
+            <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">Portfolio</p>
+            <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#e8eaf0] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
+              Portfolio overview
+            </h1>
+            <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#3d4554]">
+              Consolidated positions across all connected brokerage accounts.
+            </p>
+          </div>
+          <ExportHoldingsButton holdings={rows} />
+        </div>
       </header>
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-[#22262c] bg-[#22262c] lg:grid-cols-4">
-        <div className="flex flex-col gap-2 bg-[#121417] px-5 py-5 min-[900px]:px-6">
-          <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">Portfolio value</p>
-          <p className="text-[22px] leading-[26px] tracking-[-0.52px] text-[#f2f4f7] min-[900px]:text-[26px]">
-            {formatMoney(totalValue, true)}
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 bg-[#121417] px-5 py-5 min-[900px]:px-6">
-          <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">Portfolio yield</p>
-          <p className="text-[22px] leading-[26px] tracking-[-0.52px] text-[#f2f4f7] min-[900px]:text-[26px]">
-            {portfolioYieldPct != null ? `${portfolioYieldPct.toFixed(2)}%` : "—"}
-          </p>
-          <p className="text-[12px] leading-[19.8px] tracking-[-0.24px] text-[#99a1ac]">
-            {portfolioYieldPct != null ? "Trailing 12mo income ÷ value" : "Waiting on live prices"}
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 bg-[#121417] px-5 py-5 min-[900px]:px-6">
-          <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">Today&apos;s change</p>
-          <p
-            className={`text-[22px] leading-[26px] tracking-[-0.52px] min-[900px]:text-[26px] ${
-              dayChange == null ? "text-[#f2f4f7]" : dayChange >= 0 ? "text-[#3fbf87]" : "text-red-500"
-            }`}
-          >
-            {dayChange == null
-              ? "—"
-              : `${dayChange >= 0 ? "+" : ""}${formatMoney(dayChange, true)}`}
-          </p>
-          <p className="text-[12px] leading-[19.8px] tracking-[-0.24px] text-[#99a1ac]">
-            {dayChangePct == null ? "No change data yet" : `${dayChangePct >= 0 ? "+" : ""}${dayChangePct.toFixed(2)}%`}
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 bg-[#121417] px-5 py-5 min-[900px]:px-6">
-          <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">Annual income</p>
-          <p className="text-[22px] leading-[26px] tracking-[-0.52px] text-[#f2f4f7] min-[900px]:text-[26px]">
-            {formatMoney(income.annual, true)}
-          </p>
-        </div>
-      </div>
+      <AnimatedKpiTiles kpis={[
+        {
+          label: "Portfolio value",
+          value: formatMoney(totalValue, true),
+          sub: "Current market value",
+          valueClass: "text-[#e8eaf0]",
+        },
+        {
+          label: "Portfolio yield",
+          value: portfolioYieldPct != null ? `${portfolioYieldPct.toFixed(2)}%` : "—",
+          sub: portfolioYieldPct != null ? "Trailing 12mo income ÷ value" : "Waiting on live prices",
+          valueClass: "text-[#e8eaf0]",
+        },
+        {
+          label: "Today's change",
+          value: dayChange == null ? "—" : `${dayChange >= 0 ? "+" : ""}${formatMoney(dayChange, true)}`,
+          sub: dayChangePct == null ? "No change data yet" : `${dayChangePct >= 0 ? "+" : ""}${dayChangePct.toFixed(2)}% vs yesterday`,
+          valueClass: dayChange == null ? "text-[#e8eaf0]" : dayChange >= 0 ? "text-[#3fbf87]" : "text-red-400",
+        },
+        {
+          label: "Annual income",
+          value: formatMoney(income.annual, true),
+          sub: "Trailing 12 months",
+          valueClass: "text-[#e8eaf0]",
+        },
+      ]} />
 
       <PerformanceVsBenchmarkCard
         points={portfolioSeries.points}
@@ -168,10 +165,10 @@ export default async function HoldingsPage() {
 
       <HoldingsTable holdings={rows} actions={actions} />
 
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
+      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1c2028] pt-5">
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
         <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+        <p className="text-[12px] leading-[19.8px] text-[#3d4554]">Read-only broker access · Data delayed 15 min</p>
       </footer>
     </div>
   );

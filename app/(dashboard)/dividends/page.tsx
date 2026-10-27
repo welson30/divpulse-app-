@@ -12,6 +12,7 @@ import {
 import { PassiveIncomeChart } from "@/components/dashboard/passive-income-chart";
 import { DividendGrowthChart } from "@/components/dashboard/dividend-growth-chart";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
+import { AnimatedKpiTiles } from "@/components/dashboard/animated-kpi-tiles";
 
 export const metadata: Metadata = {
   title: "Dividends — PaidPrime",
@@ -36,22 +37,30 @@ export default async function DividendsPage() {
     .eq("user_id", user!.id);
 
   const header = (
-    <header className="border-b border-[#22262c] pb-6">
-      <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Dividends</p>
-      <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-        Dividend income
-      </h1>
-      <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-        Trailing twelve months, forward projection and per-holding contribution.
-      </p>
+    <header className="relative overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] px-5 py-6 shadow-[0_8px_40px_rgba(0,0,0,0.4)] min-[900px]:px-6">
+      {/* Ambient gradient mesh */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-20 -top-20 size-72 rounded-full bg-[#3fbf87] opacity-[0.04] blur-3xl" />
+        <div className="absolute -right-10 -top-10 size-64 rounded-full bg-[#60a5fa] opacity-[0.035] blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 size-48 rounded-full bg-[#a78bfa] opacity-[0.03] blur-2xl" />
+      </div>
+      <div className="relative z-[1]">
+        <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">Dividends</p>
+        <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#e8eaf0] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
+          Dividend income
+        </h1>
+        <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#3d4554]">
+          Trailing twelve months, forward projection and per-holding contribution.
+        </p>
+      </div>
     </header>
   );
 
   const footer = (
-    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
+    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1c2028] pt-5">
       {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
       <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-      <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+      <p className="text-[12px] leading-[19.8px] text-[#3d4554]">Read-only broker access · Data delayed 15 min</p>
     </footer>
   );
 
@@ -59,7 +68,7 @@ export default async function DividendsPage() {
     return (
       <div className="flex flex-col gap-6">
         {header}
-        <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-sm text-[#99a1ac]">
+        <div className="rounded-[18px] border border-[#1c2028] bg-[#0b0e12] px-6 py-12 text-center text-sm text-[#3d4554]">
           Add a holding to start tracking dividend income.
         </div>
         {footer}
@@ -165,17 +174,7 @@ export default async function DividendsPage() {
     <div className="flex flex-col gap-6">
       {header}
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-[#22262c] bg-[#22262c] lg:grid-cols-4">
-        {kpis.map((kpi) => (
-          <div key={kpi.label} className="flex flex-col gap-2 bg-[#121417] px-5 py-5 min-[900px]:px-6">
-            <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">{kpi.label}</p>
-            <p className={`text-[22px] leading-[26px] tracking-[-0.52px] min-[900px]:text-[26px] ${kpi.valueClass}`}>
-              {kpi.value}
-            </p>
-            <p className="text-[12px] leading-[19.8px] tracking-[-0.24px] text-[#99a1ac]">{kpi.sub}</p>
-          </div>
-        ))}
-      </div>
+      <AnimatedKpiTiles kpis={kpis} />
 
       <div className="grid grid-cols-1 items-start gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex min-w-0 flex-col gap-6">
@@ -187,38 +186,38 @@ export default async function DividendsPage() {
           />
           <DividendGrowthChart data={chartYears.length > 0 ? chartYears : annualSeries} />
 
-          <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
-            <header className="border-b border-[#22262c] px-5 py-5 min-[900px]:px-6">
-              <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
+          <section className="overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+            <header className="border-b border-[#1c2028] px-5 py-5 min-[900px]:px-6">
+              <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#e8eaf0]">
                 Income by holding
               </h2>
-              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#3d4554]">
                 Ranked by trailing annual contribution
               </p>
             </header>
             <div className="overflow-x-auto">
               <div className="min-w-[560px]">
-                <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(5.5rem,0.6fr)_minmax(6.5rem,0.7fr)_minmax(6rem,0.7fr)] border-b border-[#22262c] px-6 py-3 text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">
+                <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(5.5rem,0.6fr)_minmax(6.5rem,0.7fr)_minmax(6rem,0.7fr)] border-b border-[#1c2028] px-6 py-3 text-[11px] font-bold tracking-[1.54px] text-[#3d4554] uppercase">
                   <span>Holding</span>
                   <span className="text-right">Yield</span>
                   <span className="text-right">Monthly</span>
                   <span className="text-right">Annual</span>
                 </div>
                 {rows.length === 0 ? (
-                  <p className="px-6 py-8 text-[13px] text-[#99a1ac]">No holdings to rank yet.</p>
+                  <p className="px-6 py-8 text-[13px] text-[#3d4554]">No holdings to rank yet.</p>
                 ) : (
                   rows.map((row, i) => {
                     const holding = (
                       <>
-                        <span className="block text-[14px] font-medium leading-[23.1px] text-[#f2f4f7]">{row.ticker}</span>
-                        <span className="block truncate text-[12px] leading-[19.8px] text-[#6c737f]">{row.name}</span>
+                        <span className="block text-[14px] font-medium leading-[23.1px] text-[#e8eaf0]">{row.ticker}</span>
+                        <span className="block truncate text-[12px] leading-[19.8px] text-[#3d4554]">{row.name}</span>
                       </>
                     );
                     return (
                       <div
                         key={row.ticker}
-                        className={`grid grid-cols-[minmax(0,1.6fr)_minmax(5.5rem,0.6fr)_minmax(6.5rem,0.7fr)_minmax(6rem,0.7fr)] items-center px-6 py-3.5 ${
-                          i < rows.length - 1 ? "border-b border-[#22262c]" : ""
+                        className={`grid grid-cols-[minmax(0,1.6fr)_minmax(5.5rem,0.6fr)_minmax(6.5rem,0.7fr)_minmax(6rem,0.7fr)] items-center px-6 py-3.5 transition-colors hover:bg-[#0e1219] ${
+                          i < rows.length - 1 ? "border-b border-[#1c2028]" : ""
                         }`}
                       >
                         {isLinkableTicker(row.ticker) ? (
@@ -228,13 +227,13 @@ export default async function DividendsPage() {
                         ) : (
                           <div className="min-w-0 pr-4">{holding}</div>
                         )}
-                        <span className="text-right text-[13px] tracking-[-0.26px] text-[#3fbf87]">
+                        <span className="text-right text-[13px] tracking-[-0.26px] text-[#3fbf87]" style={{ filter: "drop-shadow(0 0 6px rgba(63,191,135,0.35))" }}>
                           {row.yieldPct != null ? `${row.yieldPct.toFixed(2)}%` : "—"}
                         </span>
-                        <span className="text-right text-[13px] tracking-[-0.26px] text-[#99a1ac]">
+                        <span className="text-right text-[13px] tracking-[-0.26px] text-[#3d4554]">
                           {formatMoney(row.monthly)}
                         </span>
-                        <span className="text-right text-[14px] tracking-[-0.28px] text-[#f2f4f7]">
+                        <span className="text-right text-[14px] tracking-[-0.28px] text-[#e8eaf0]">
                           {formatMoney(row.annual, true)}
                         </span>
                       </div>
@@ -247,24 +246,28 @@ export default async function DividendsPage() {
         </div>
 
         <aside className="flex flex-col gap-6">
-          <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
-            <header className="border-b border-[#22262c] px-6 py-5">
-              <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
+          <section className="overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+            <header className="border-b border-[#1c2028] px-6 py-5">
+              <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#e8eaf0]">
                 Payout frequency mix
               </h2>
-              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Share of annual income by cadence</p>
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#3d4554]">Share of annual income by cadence</p>
             </header>
             <div className="flex flex-col gap-5 p-6">
               {cadenceLive.mix.map((row) => (
                 <div key={row.key} className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] leading-[21.45px] text-[#f2f4f7]">{row.label}</span>
-                    <span className="text-[13px] tracking-[-0.26px] text-[#99a1ac]">{Math.round(row.pct)}%</span>
+                    <span className="text-[13px] leading-[21.45px] text-[#e8eaf0]">{row.label}</span>
+                    <span className="text-[13px] tracking-[-0.26px] text-[#3d4554]">{Math.round(row.pct)}%</span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[#16191d]">
+                  <div className="h-2 overflow-hidden rounded-full bg-[#141820]">
                     <div
-                      className="h-2 rounded-full"
-                      style={{ width: `${Math.min(100, row.pct)}%`, backgroundColor: row.color }}
+                      className="h-2 rounded-full transition-all duration-700"
+                      style={{
+                        width: `${Math.min(100, row.pct)}%`,
+                        background: `linear-gradient(to right, ${row.color}aa, ${row.color})`,
+                        boxShadow: `0 0 8px ${row.color}55`,
+                      }}
                     />
                   </div>
                 </div>
@@ -272,17 +275,21 @@ export default async function DividendsPage() {
             </div>
           </section>
 
-          <section className="rounded-[14px] border border-[#22262c] bg-[#16191d] p-6">
-            <div className="flex items-center gap-2">
-              <FigmaIcon src="/marketing/dashboard/icon-trend.svg" className="size-4 text-[#4c82f7]" />
-              <p className="text-[11px] tracking-[1.76px] text-[#4c82f7] uppercase">Income trend</p>
+          <section className="relative overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] p-6 shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+            {/* Subtle blue ambient glow */}
+            <div className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full bg-[#60a5fa] opacity-[0.04] blur-2xl" />
+            <div className="relative z-[1]">
+              <div className="flex items-center gap-2">
+                <FigmaIcon src="/marketing/dashboard/icon-trend.svg" className="size-4 text-[#60a5fa]" />
+                <p className="text-[11px] tracking-[1.76px] text-[#60a5fa] uppercase">Income trend</p>
+              </div>
+              <p className="mt-3 text-[14px] leading-[22.75px] text-[#c8ccd8]">{trendBody}</p>
+              <div className="mt-4 h-px bg-[#1c2028]" />
+              <p className="mt-3 text-[12px] leading-[19.8px] text-[#3d4554]">
+                Figures use current share counts. Reinvested distributions are excluded. Forward income is estimated from
+                recent payout cadence.
+              </p>
             </div>
-            <p className="mt-3 text-[14px] leading-[22.75px] text-[#f2f4f7]">{trendBody}</p>
-            <div className="mt-4 h-px bg-[#22262c]" />
-            <p className="mt-3 text-[12px] leading-[19.8px] text-[#6c737f]">
-              Figures use current share counts. Reinvested distributions are excluded. Forward income is estimated from
-              recent payout cadence.
-            </p>
           </section>
         </aside>
       </div>
