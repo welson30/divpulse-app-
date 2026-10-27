@@ -94,13 +94,23 @@ export default async function DashboardPage() {
   const brokerCount = (brokerConnections ?? []).length;
 
   const header = (
-    <header className="flex flex-col gap-4 border-b border-[#22262c] pb-6 min-[900px]:flex-row min-[900px]:items-end min-[900px]:justify-between">
-      <div className="min-w-0">
-        <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{dateLabel}</p>
-        <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-          Welcome back, {firstName}
+    <header className="relative flex flex-col gap-4 overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] px-5 py-6 min-[900px]:flex-row min-[900px]:items-end min-[900px]:justify-between min-[900px]:px-7 min-[900px]:py-7">
+      {/* Ambient gradient mesh */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-20 -top-20 size-72 rounded-full bg-[#3fbf87] opacity-[0.04] blur-3xl" />
+        <div className="absolute -right-10 -top-10 size-64 rounded-full bg-[#60a5fa] opacity-[0.035] blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 size-48 rounded-full bg-[#a78bfa] opacity-[0.03] blur-2xl" />
+      </div>
+
+      <div className="relative min-w-0">
+        <p className="text-[10px] font-semibold tracking-[2.5px] text-[#2e3848] uppercase">{dateLabel}</p>
+        <h1 className="mt-[6px] font-[family-name:var(--font-funnel-display)] text-[26px] font-bold tracking-[-1px] text-[#e8eaf0] min-[900px]:text-[30px] min-[900px]:leading-[1.2]">
+          Welcome back,{" "}
+          <span style={{ color: "#3fbf87", filter: "drop-shadow(0 0 12px rgba(63,191,135,0.4))" }}>
+            {firstName}
+          </span>
         </h1>
-        <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
+        <p className="mt-2 max-w-[580px] text-[13px] leading-[1.65] text-[#3d4554]">
           {syncAgo
             ? `Portfolio synced ${syncAgo} · read-only across ${brokerCount} ${brokerCount === 1 ? "broker" : "brokers"}.`
             : brokerCount > 0
@@ -109,8 +119,8 @@ export default async function DashboardPage() {
         </p>
       </div>
       {syncAgo ? (
-        <div className={`flex items-center gap-1.5 rounded-[8px] border ${syncBadge.border} ${syncBadge.bg} px-[7.8px] py-[3px]`}>
-          <span className={`size-1.5 rounded-full ${syncBadge.dot}`} />
+        <div className={`relative flex items-center gap-1.5 rounded-[8px] border ${syncBadge.border} ${syncBadge.bg} px-[7.8px] py-[3px]`}>
+          <span className={`size-1.5 animate-pulse rounded-full ${syncBadge.dot}`} />
           <span className={`text-[11px] tracking-[1.1px] ${syncBadge.text} uppercase`}>Synced {syncAgo}</span>
         </div>
       ) : null}

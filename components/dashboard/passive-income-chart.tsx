@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
 
-// Current month label e.g. "Oct"
 const CURRENT_MONTH = new Date().toLocaleString("en-US", { month: "short" });
 
 function niceCeiling(max: number): number {
@@ -35,122 +34,156 @@ export function PassiveIncomeChart({
   chartClassName?: string;
 }) {
   const [hoveredMonth, setHoveredMonth] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 120);
+    return () => clearTimeout(t);
+  }, []);
+
   const max = data.length > 0 ? Math.max(...data.map((d) => d.total)) : 0;
   const niceMax = niceCeiling(max);
   const ticks = [1, 0.75, 0.5, 0.25, 0].map((p) => ({ p, label: formatAxis(niceMax * p) }));
   const avgTotal = data.length > 0 ? data.reduce((s, d) => s + d.total, 0) / data.length : 0;
 
+  const hoveredData = hoveredMonth ? data.find((x) => x.month === hoveredMonth) : null;
+
   return (
-    <section className={cn("flex flex-col rounded-[14px] border border-[#22262c] bg-[#121417]", className)}>
-      <header className="border-b border-[#22262c] px-5 py-5 min-[900px]:px-6">
-        <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-          {title}
-        </h2>
-        <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{subtitle}</p>
+    <section className={cn("flex flex-col rounded-[18px] border border-[#1c2028] bg-[#0b0e12] shadow-[0_8px_40px_rgba(0,0,0,0.4)]", className)}>
+      <header className="border-b border-[#1a1e26] px-5 py-5 min-[900px]:px-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#e8eaf0]">
+              {title}
+            </h2>
+            <p className="mt-1 text-[12px] leading-[1.65] text-[#3d4554]">{subtitle}</p>
+          </div>
+          {/* Live average badge */}
+          {avgTotal > 0 && (
+            <div className="flex shrink-0 flex-col items-end gap-0.5">
+              <span className="text-[10px] font-medium tracking-[1.5px] text-[#3d4554] uppercase">avg / mo</span>
+              <span className="font-mono text-[14px] font-semibold text-[#3fbf87]" style={{ filter: "drop-shadow(0 0 8px rgba(63,191,135,0.4))" }}>
+                {formatAxis(avgTotal)}
+              </span>
+            </div>
+          )}
+        </div>
       </header>
+
       {/* Tooltip */}
-      {hoveredMonth && (() => {
-        const d = data.find((x) => x.month === hoveredMonth);
-        return d ? (
-          <div className="mx-4 mb-2 flex items-center justify-between rounded-lg border border-[#22262c] bg-[#0d1117] px-3 py-2 min-[900px]:mx-6">
-            <span className="font-[family-name:var(--font-outfit)] text-[12px] text-[#99a1ac]">{d.label}</span>
-            <span className="font-[family-name:var(--font-outfit)] text-[13px] font-semibold text-[#3fbf87]">
-              ${d.total.toFixed(2)}
+      <div
+        className={cn(
+          "mx-4 overflow-hidden transition-all duration-200 min-[900px]:mx-6",
+          hoveredData ? "mt-3 max-h-12 opacity-100" : "mt-0 max-h-0 opacity-0",
+        )}
+      >
+        {hoveredData && (
+          <div className="flex items-center justify-between rounded-xl border border-[#1c2028] bg-[#0f1318] px-4 py-2.5">
+            <span className="text-[12px] font-medium text-[#5a6270]">{hoveredData.label}</span>
+            <span className="font-mono text-[15px] font-bold text-[#3fbf87]" style={{ filter: "drop-shadow(0 0 8px rgba(63,191,135,0.5))" }}>
+              ${hoveredData.total.toFixed(2)}
             </span>
           </div>
-        ) : null;
-      })()}
+        )}
+      </div>
 
-      <div className="px-4 pb-5 pt-2 min-[900px]:px-6">
+      <div className="px-4 pb-5 pt-3 min-[900px]:px-6">
         {max <= 0 ? (
-          <div
-            className={cn(
-              "flex h-[220px] items-center justify-center text-center text-[13px] text-[#99a1ac] min-[900px]:h-[260px]",
-              chartClassName,
-            )}
-          >
+          <div className={cn("flex h-[220px] items-center justify-center text-center text-[13px] text-[#3d4554] min-[900px]:h-[260px]", chartClassName)}>
             Payouts appear here as your holdings pay them.
           </div>
         ) : (
           <div className={cn("flex h-[220px] gap-2 min-[900px]:h-[260px]", chartClassName)}>
-            {/* SVG gradient definition */}
-            <svg width="0" height="0" className="absolute">
-              <defs>
-                <linearGradient id="bar-gradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3fbf87" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#1a6644" stopOpacity="0.7" />
-                </linearGradient>
-                <linearGradient id="bar-gradient-current" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#5de3a3" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#3fbf87" stopOpacity="0.8" />
-                </linearGradient>
-                <linearGradient id="bar-gradient-hover" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#7eefc0" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#3fbf87" stopOpacity="0.9" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="flex w-9 shrink-0 flex-col justify-between pb-6 pt-0.5 text-right font-[family-name:var(--font-outfit)] text-[11px] text-[#6c737f]">
+            {/* Y-axis */}
+            <div className="flex w-9 shrink-0 flex-col justify-between pb-6 pt-0.5 text-right font-mono text-[10px] text-[#2a3040]">
               {ticks.map((t) => (
                 <span key={t.p}>{t.label}</span>
               ))}
             </div>
+
             <div className="flex min-w-0 flex-1 flex-col">
-              <div className="relative flex min-h-0 flex-1 items-end gap-1.5">
+              <div className="relative flex min-h-0 flex-1 items-end gap-1">
+                {/* Grid lines */}
                 {ticks.map((t) => (
                   <div
                     key={t.p}
                     aria-hidden
-                    className="absolute inset-x-0 border-t border-[#22262c]"
+                    className="absolute inset-x-0 border-t border-[#141820]"
                     style={{ bottom: `${t.p * 100}%` }}
                   />
                 ))}
-                {/* Average line */}
+
+                {/* Average dashed line */}
                 {avgTotal > 0 && (
                   <div
                     aria-hidden
-                    className="absolute inset-x-0 border-t border-dashed border-[#3fbf87]/20 z-[2]"
+                    className="absolute inset-x-0 z-[2] border-t border-dashed border-[#3fbf87]/25"
                     style={{ bottom: `${(avgTotal / niceMax) * 100}%` }}
                   />
                 )}
-                {data.map((d) => {
+
+                {/* Bars */}
+                {data.map((d, idx) => {
                   const heightPct = niceMax > 0 ? (d.total / niceMax) * 100 : 0;
                   const isCurrent = d.label === CURRENT_MONTH;
                   const isHovered = hoveredMonth === d.month;
+                  const isTallest = d.total === max;
+
                   return (
                     <div
                       key={d.month}
-                      className="relative z-[1] flex h-full min-w-0 flex-1 flex-col items-center justify-end cursor-pointer"
+                      className="relative z-[1] flex h-full min-w-0 flex-1 cursor-pointer flex-col items-center justify-end"
                       onMouseEnter={() => setHoveredMonth(d.month)}
                       onMouseLeave={() => setHoveredMonth(null)}
                     >
+                      {/* Glow behind tallest bar */}
+                      {isTallest && (
+                        <div
+                          className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[120%] rounded-full opacity-30 blur-xl"
+                          style={{
+                            height: `${heightPct * 0.6}%`,
+                            background: "radial-gradient(ellipse, #3fbf87 0%, transparent 70%)",
+                          }}
+                        />
+                      )}
+
                       <div
-                        className="w-full max-w-[28px] rounded-t-[4px] transition-all duration-150"
+                        className="w-full max-w-[26px] rounded-t-[5px] origin-bottom"
                         style={{
-                          height: `${Math.max(heightPct, 2)}%`,
+                          height: mounted ? `${Math.max(heightPct, 1.5)}%` : "0%",
+                          transition: `height 0.65s cubic-bezier(0.34,1.4,0.64,1) ${idx * 35}ms`,
                           background: isHovered
-                            ? "url(#bar-gradient-hover)"
+                            ? "linear-gradient(to bottom, #7eefc0, #3fbf87)"
                             : isCurrent
-                            ? "linear-gradient(to bottom, #5de3a3, #3fbf87cc)"
-                            : "linear-gradient(to bottom, #3fbf87, #1a664488)",
-                          boxShadow: isCurrent ? "0 0 8px rgba(63,191,135,0.4)" : undefined,
-                          transform: isHovered ? "scaleX(1.1)" : undefined,
+                            ? "linear-gradient(to bottom, #5de3a3, #3fbf87bb)"
+                            : "linear-gradient(to bottom, #2d8c60, #1a5c3e88)",
+                          boxShadow: isCurrent
+                            ? "0 0 16px rgba(63,191,135,0.5), 0 0 4px rgba(63,191,135,0.8)"
+                            : isHovered
+                            ? "0 0 10px rgba(63,191,135,0.35)"
+                            : undefined,
+                          transform: isHovered ? "scaleX(1.12)" : "scaleX(1)",
+                          filter: isHovered ? "brightness(1.15)" : undefined,
                         }}
                       />
                     </div>
                   );
                 })}
               </div>
-              <div className="mt-2 flex gap-1.5">
+
+              {/* X-axis labels */}
+              <div className="mt-2 flex gap-1">
                 {data.map((d) => {
                   const isCurrent = d.label === CURRENT_MONTH;
                   return (
                     <div
                       key={d.month}
-                      className={cn(
-                        "min-w-0 flex-1 truncate text-center font-[family-name:var(--font-outfit)] text-[11px]",
-                        isCurrent ? "font-semibold text-[#3fbf87]" : "text-[#6c737f]",
-                      )}
+                      className="min-w-0 flex-1 truncate text-center font-mono text-[10px]"
+                      style={{
+                        color: isCurrent ? "#3fbf87" : "#2a3040",
+                        fontWeight: isCurrent ? 700 : 400,
+                        filter: isCurrent ? "drop-shadow(0 0 6px rgba(63,191,135,0.6))" : undefined,
+                      }}
                     >
                       {d.label}
                     </div>
