@@ -40,10 +40,17 @@ export default async function EtfExplorerPage() {
   return (
     <div className="flex flex-col gap-sp-6">
       {/* ── Hero section ── */}
-      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-[#0e1116] via-[#111519] to-[#0a0d10] p-6 lg:p-8">
-        {/* Glow orbs */}
-        <div className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-blue-500/5 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -right-16 size-56 rounded-full bg-green-500/5 blur-3xl" />
+      {/*
+        overflow-hidden is intentionally removed from the outer div so the search
+        dropdown is NOT clipped. The glow orbs live in their own overflow-hidden
+        container so they still respect the card boundary.
+      */}
+      <div className="relative rounded-2xl border border-border-subtle bg-gradient-to-br from-[#0e1116] via-[#111519] to-[#0a0d10] p-6 lg:p-8">
+        {/* Glow orbs — clipped to card only, not the dropdown */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+          <div className="absolute -left-24 -top-24 size-72 rounded-full bg-blue-500/5 blur-3xl" />
+          <div className="absolute -bottom-16 -right-16 size-56 rounded-full bg-green-500/5 blur-3xl" />
+        </div>
 
         <div className="relative flex flex-col gap-4">
           <div>

@@ -23,28 +23,50 @@ export const CURATED_LISTS: CuratedList[] = [
     title: "Top Monthly Dividend ETFs",
     description: "ETFs that pay dividends every month — ideal for generating consistent monthly cash flow.",
     frequency: "Monthly",
-    tickers: ["JEPI", "JEPQ", "QYLD", "RYLD", "XYLD", "DIVO", "NUSI", "SDIV", "SPHD", "PFFD"],
+    tickers: [
+      // Core covered-call & high-income
+      "JEPI", "JEPQ", "QYLD", "RYLD", "XYLD", "DIVO", "NUSI", "SDIV", "SPHD", "PFFD",
+      // Additional monthly payers
+      "GLDI", "SLVO", "MDIV", "DIVY", "HNDL", "PAYD", "XYLG", "HYLD", "AMLP", "BXMX",
+    ],
   },
   {
     id: "quarterly-dividend-etfs",
     title: "Top Quarterly Dividend ETFs",
     description: "High-yielding ETFs with quarterly distributions and strong track records.",
     frequency: "Quarterly",
-    tickers: ["SCHD", "VYM", "HDV", "DVY", "DGRO", "VIG", "NOBL", "SDY", "FVD", "SPYD"],
+    tickers: [
+      // Core dividend-growth
+      "SCHD", "VYM", "HDV", "DVY", "DGRO", "VIG", "NOBL", "SDY", "FVD", "SPYD",
+      // Additional quarterly payers
+      "FDVV", "DGRW", "DTD", "RDIV", "IDV", "VYMI", "PEY", "DHS", "UTF", "PTY",
+    ],
   },
   {
     id: "monthly-reits",
     title: "Top Monthly Dividend REITs",
     description: "Real Estate Investment Trusts that pay monthly dividends, combining real estate exposure with income.",
     frequency: "Monthly",
-    tickers: ["O", "STAG", "MAIN", "GOOD", "AGNC", "NNN", "ADC", "IIPR", "LTC", "EPRT"],
+    tickers: [
+      // Core REITs
+      "O", "STAG", "MAIN", "GOOD", "AGNC", "NNN", "ADC", "IIPR", "LTC", "EPRT",
+      // BDCs & mREITs also paying monthly
+      "HTGC", "ARCC", "GAIN", "PSEC", "PFLT", "LADR", "HRZN", "BBDC", "OXSQ", "PNNT",
+    ],
   },
   {
     id: "weekly-dividend-etfs",
     title: "Top Weekly Dividend ETFs",
     description: "Option-income ETFs that distribute dividends every week — the highest-frequency income available.",
     frequency: "Weekly",
-    tickers: ["QDTE", "XDTE", "RDTE", "CONY", "MSFO", "AMZY", "NVDY", "FEPI", "TSLY", "YMAX"],
+    tickers: [
+      // Roundhill & broad weekly options
+      "QDTE", "XDTE", "RDTE", "YMAX", "FEPI",
+      // YieldMax single-stock covered-call ETFs
+      "TSLY", "NVDY", "AMZY", "MSFO", "CONY",
+      "APLY", "NFLY", "DISO", "PLTY", "JPMO",
+      "FBY", "SNOY", "AMDY", "ULTY", "OARK",
+    ],
   },
 ];
 

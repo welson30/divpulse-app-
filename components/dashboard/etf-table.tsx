@@ -268,7 +268,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                       <TickerLogo ticker={row.ticker} logoUrl={row.logoUrl} />
                       <div className="min-w-0">
                         <div className="font-mono text-sm font-semibold text-text-primary">{row.ticker}</div>
-                        <div className="mt-0.5 max-w-60 truncate text-xs text-text-secondary">{row.name ?? "—"}</div>
+                        <div className="mt-0.5 max-w-72 truncate text-xs text-text-secondary">{row.name ?? "—"}</div>
                       </div>
                     </Link>
                   </td>
