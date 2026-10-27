@@ -52,6 +52,25 @@ export function EtfExplorerClient({ lists }: Props) {
       {/* ── Yield calculator ── */}
       <EtfYieldCalculator onAmountChange={setInvestAmount} initialAmount={investAmount} />
 
+      {/* ── Compare CTA hint (visible BEFORE selecting, sits right below calc) ── */}
+      {selected.length === 0 && (
+        <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3">
+          <BarChart2 className="size-4 shrink-0 text-blue-400" />
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-sm font-medium text-text-primary">Compare ETFs side by side</span>
+            <span className="text-xs text-text-secondary">
+              — check the boxes in the table to select up to 3 ETFs, then click Compare.
+            </span>
+          </div>
+          <Link
+            href="/etf-explorer/compare?tickers=JEPI,SCHD,O"
+            className="shrink-0 font-mono text-xs text-blue-400 underline underline-offset-2 hover:text-blue-300"
+          >
+            Demo →
+          </Link>
+        </div>
+      )}
+
       {/* ── Compare bar (sticky when items selected) ── */}
       {selected.length > 0 && (
         <div className="sticky top-4 z-20 flex items-center justify-between gap-3 rounded-xl border border-blue-500/30 bg-[#0d1117] px-4 py-3 shadow-xl shadow-black/40 backdrop-blur">
@@ -183,18 +202,6 @@ export function EtfExplorerClient({ lists }: Props) {
         ))}
       </div>
 
-      {/* Compare CTA hint when nothing selected */}
-      {selected.length === 0 && (
-        <div className="flex items-center gap-2 rounded-xl border border-border-subtle bg-surface p-4 text-sm text-text-secondary">
-          <BarChart2 className="size-4 shrink-0 text-blue-400" />
-          <span>
-            Tip: check the boxes next to any ETFs to compare them side by side.{" "}
-            <Link href="/etf-explorer/compare?tickers=JEPI,SCHD,O" className="text-blue-400 underline underline-offset-2">
-              Try a demo comparison →
-            </Link>
-          </span>
-        </div>
-      )}
     </div>
   );
 }

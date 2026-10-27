@@ -220,19 +220,24 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
 
       {/* ── Desktop table ── */}
       <div className="hidden w-full overflow-x-auto overflow-y-hidden rounded-card border border-border-subtle bg-surface lg:block">
-        <table className="w-full min-w-[900px] border-collapse">
+        <table className="w-full min-w-[640px] border-collapse">
           <thead>
             <tr>
-              {compareMode && <th className={`${HEAD} w-10`} />}
+              {compareMode && (
+                <th className={`${HEAD} w-14 text-center`}>
+                  <span className="inline-flex flex-col items-center gap-0.5">
+                    <BarChart2 className="size-3 text-blue-400" />
+                    <span className="text-[9px]">Compare</span>
+                  </span>
+                </th>
+              )}
               <th className={`${HEAD} text-left`}>Asset</th>
-              <th className={`${HEAD} text-left`}>Pays</th>
-              <th className={`${HEAD} text-right`}>Price</th>
               <th className={`${HEAD} text-right`}>
                 <span className="inline-flex items-center gap-1">
-                  Today <InfoTip label={TIPS.todayChange} />
+                  Price <InfoTip label={TIPS.todayChange} />
                 </span>
               </th>
-              <th className={`${HEAD} text-center`}>
+              <th className={`${HEAD} text-center w-20`}>
                 <span className="inline-flex items-center gap-1">
                   1M <InfoTip label={TIPS.sparkline1M} />
                 </span>
@@ -253,7 +258,10 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
               </th>
               {investAmount > 0 && (
                 <th className={`${HEAD} text-right`}>
-                  ${investAmount.toLocaleString()} → /yr
+                  <span className="inline-flex items-center gap-1">
+                    ${investAmount.toLocaleString()} → /yr
+                    <InfoTip label="Estimated annual income based on current yield. Weekly ETF yields may show lower than actual — data providers sometimes underreport new funds." />
+                  </span>
                 </th>
               )}
               <th className={`${HEAD} text-right`}>
@@ -275,11 +283,12 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                   } ${i === sortedRows.length - 1 ? "" : "border-b border-border-subtle"}`}
                 >
                   {compareMode && (
-                    <td className="px-sp-3 py-3">
+                    <td className="px-sp-3 py-3 text-center">
                       <button
                         type="button"
                         onClick={() => onToggleCompare?.(row.ticker)}
-                        className={`flex size-5 items-center justify-center rounded border transition-colors ${
+                        title="Select to compare"
+                        className={`mx-auto flex size-5 items-center justify-center rounded border transition-colors ${
                           isSelected
                             ? "border-blue-500 bg-blue-500 text-white"
                             : "border-border-interactive text-transparent hover:border-blue-500"
@@ -309,14 +318,13 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                       </div>
                     </Link>
                   </td>
-                  <td className="px-sp-3 py-3">
-                    {row.frequency ? <FreqBadge freq={row.frequency} /> : <span className="text-text-secondary">—</span>}
-                  </td>
-                  <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-text-primary">
-                    {formatPrice(row.price, row.currency)}
-                  </td>
-                  <td className="px-sp-3 py-3 text-right text-sm">
-                    <ChangeBadge changePercent={row.changePercent ?? null} />
+                  <td className="px-sp-3 py-3 text-right">
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="font-mono text-sm tabular-nums text-text-primary">
+                        {formatPrice(row.price, row.currency)}
+                      </span>
+                      <ChangeBadge changePercent={row.changePercent ?? null} />
+                    </div>
                   </td>
                   <td className="px-sp-3 py-3">
                     <div className="flex justify-center">
