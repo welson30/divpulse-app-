@@ -458,27 +458,37 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
         </div>
       ) : null}
 
-      <button
-        type="button"
-        onClick={() => (open ? close() : setToggled(true))}
-        aria-label={open ? "Close AI Advisor" : "Open AI Advisor"}
-        aria-expanded={open}
+      <div
         className={cn(
-          "fixed right-4 z-50 flex size-13 items-center justify-center rounded-full bg-[#4c82f7] text-[#f2f4f7] shadow-lg",
-          "transition-transform hover:scale-105 active:scale-95",
-          // Clears the mobile bottom tab bar (h-16 + safe-area inset);
-          // sits in the normal corner once the sidebar takes over at lg.
+          "fixed right-4 z-50 flex flex-col items-end gap-2",
           "bottom-[calc(4rem+1rem+env(safe-area-inset-bottom))] lg:right-6 lg:bottom-6",
-          // Below lg the launcher would land on top of the open panel's
-          // send button — the panel bottom and the launcher both sit just
-          // above the tab bar. Hide it there and let the header's X close
-          // the panel. At lg the panel moves to bottom-24, clearing the
-          // bottom-6 launcher, so the toggle can stay.
-          open && "hidden scale-95 lg:flex",
+          open && "hidden lg:flex",
         )}
       >
-        {open ? <X className="size-6" /> : <IconBot className="size-6" />}
-      </button>
+        {/* Tooltip label — desktop only */}
+        {!open && (
+          <span className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-[rgba(34,197,94,0.2)] bg-[#0b1a12] px-3 py-1 text-[11px] font-semibold tracking-wide text-green-400 uppercase shadow-lg">
+            <span className="size-1.5 rounded-full bg-green-400 animate-pulse" />
+            AI Advisor
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => (open ? close() : setToggled(true))}
+          aria-label={open ? "Close AI Advisor" : "Open AI Advisor"}
+          aria-expanded={open}
+          className={cn(
+            "relative flex size-14 items-center justify-center rounded-full bg-green-500 text-white shadow-[0_0_24px_rgba(34,197,94,0.35)]",
+            "transition-all duration-200 hover:scale-105 hover:shadow-[0_0_32px_rgba(34,197,94,0.5)] active:scale-95",
+          )}
+        >
+          {/* Pulse ring */}
+          {!open && (
+            <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-20" />
+          )}
+          {open ? <X className="size-6" /> : <IconBot className="size-6" />}
+        </button>
+      </div>
     </>
   );
 }

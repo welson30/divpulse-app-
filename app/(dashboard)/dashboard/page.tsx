@@ -9,6 +9,7 @@ import { TickerLogo } from "@/components/dashboard/ticker-logo";
 import { PlaidConnectDialog } from "@/components/dashboard/plaid-connect-dialog";
 import { PortfolioPerformanceCard } from "@/components/dashboard/portfolio-performance-card";
 import { PassiveIncomeChart } from "@/components/dashboard/passive-income-chart";
+import { AnimatedKpiTiles } from "@/components/dashboard/animated-kpi-tiles";
 import { OpenAdvisorButton } from "@/components/dashboard/open-advisor-button";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,20 @@ function formatSyncAgo(iso: string | null) {
   return `${Math.round(hours / 24)}d ago`;
 }
 
+function syncFreshness(iso: string | null): "fresh" | "stale" | "old" {
+  if (!iso) return "old";
+  const hours = (Date.now() - new Date(iso).getTime()) / 3600000;
+  if (hours < 24) return "fresh";
+  if (hours < 168) return "stale"; // < 7 days
+  return "old";
+}
+
+const SYNC_BADGE: Record<string, { border: string; bg: string; dot: string; text: string }> = {
+  fresh: { border: "border-[rgba(63,191,135,0.3)]", bg: "bg-[#10261e]", dot: "bg-[#3fbf87]", text: "text-[#3fbf87]" },
+  stale: { border: "border-[rgba(245,158,11,0.3)]", bg: "bg-[#251e0e]", dot: "bg-amber-400", text: "text-amber-400" },
+  old:   { border: "border-[rgba(239,68,68,0.3)]",  bg: "bg-[#250e0e]", dot: "bg-red-400",   text: "text-red-400"   },
+};
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
@@ -75,6 +90,7 @@ export default async function DashboardPage() {
 
   const syncedAt = (brokerConnections ?? []).map((c) => c.last_synced_at).filter(Boolean).sort().at(-1) ?? null;
   const syncAgo = formatSyncAgo(syncedAt);
+  const syncBadge = SYNC_BADGE[syncFreshness(syncedAt)];
   const brokerCount = (brokerConnections ?? []).length;
 
   const header = (
@@ -93,9 +109,9 @@ export default async function DashboardPage() {
         </p>
       </div>
       {syncAgo ? (
-        <div className="flex items-center gap-1.5 rounded-[8px] border border-[rgba(63,191,135,0.3)] bg-[#10261e] px-[7.8px] py-[3px]">
-          <span className="size-1.5 rounded-full bg-[#3fbf87]" />
-          <span className="text-[11px] tracking-[1.1px] text-[#3fbf87] uppercase">Synced {syncAgo}</span>
+        <div className={`flex items-center gap-1.5 rounded-[8px] border ${syncBadge.border} ${syncBadge.bg} px-[7.8px] py-[3px]`}>
+          <span className={`size-1.5 rounded-full ${syncBadge.dot}`} />
+          <span className={`text-[11px] tracking-[1.1px] ${syncBadge.text} uppercase`}>Synced {syncAgo}</span>
         </div>
       ) : null}
     </header>
@@ -206,17 +222,7 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-6">
       {header}
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-[#22262c] bg-[#22262c] lg:grid-cols-4">
-        {kpis.map((kpi) => (
-          <div key={kpi.label} className="flex flex-col gap-[7px] bg-[#121417] px-5 py-5 min-[900px]:px-6">
-            <p className="text-[11px] tracking-[1.76px] text-[#99a1ac] uppercase">{kpi.label}</p>
-            <p className={`text-[22px] leading-[26px] tracking-[-0.52px] min-[900px]:text-[26px] ${kpi.valueClass}`}>
-              {kpi.value}
-            </p>
-            <p className="text-[12px] leading-[19.8px] tracking-[-0.24px] text-[#99a1ac]">{kpi.sub}</p>
-          </div>
-        ))}
-      </div>
+      <AnimatedKpiTiles kpis={kpis} />
 
       <div className="grid grid-cols-1 items-start gap-6 min-[1100px]:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.9fr)]">
         <div className="flex min-w-0 flex-col gap-6">
