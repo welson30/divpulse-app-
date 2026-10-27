@@ -3,8 +3,9 @@ import Link from "next/link";
 import { ChevronLeft, ArrowUpRight } from "lucide-react";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { getYieldPct } from "@/lib/tickers/yield";
-import { CURATED_LISTS, TICKER_FREQUENCY } from "@/lib/etf-explorer/curated-lists";
+import { TICKER_FREQUENCY } from "@/lib/etf-explorer/curated-lists";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
+import { EtfComparePicker } from "@/components/dashboard/etf-compare-picker";
 
 export const metadata: Metadata = {
   title: "Compare ETFs — PaidPrime",
@@ -43,7 +44,6 @@ export default async function EtfComparePage({ searchParams }: Props) {
   const { tickers: raw } = await searchParams;
 
   // Parse up to 3 tickers from ?tickers=JEPI,SCHD,O
-  const allKnown = new Set(CURATED_LISTS.flatMap((l) => l.tickers));
   const tickers = (raw ?? "")
     .toUpperCase()
     .split(",")
@@ -91,16 +91,12 @@ export default async function EtfComparePage({ searchParams }: Props) {
         <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Compare</span>
         <h1 className="text-h1 font-display font-semibold text-text-primary">ETF Comparator</h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Side-by-side stats for up to 3 ETFs — select them from any list and click "Compare selected".
+          Add up to 3 ETFs by ticker to compare them side by side.
         </p>
       </div>
 
-      {/* Change tickers hint */}
-      <div className="rounded-xl border border-border-subtle bg-surface p-4 text-sm text-text-secondary">
-        Comparing{" "}
-        <span className="font-semibold text-text-primary">{validTickers.join(", ")}</span>. To change, go back to the
-        ETF Explorer, check up to 3 tickers and press <span className="font-semibold text-text-primary">Compare selected</span>.
-      </div>
+      {/* Interactive ticker picker */}
+      <EtfComparePicker tickers={validTickers} />
 
       {/* Comparison grid */}
       <div
