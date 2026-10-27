@@ -124,6 +124,23 @@ export function SiteFooter() {
                   Florida - USA
                 </p>
               </div>
+
+              {/* Social links */}
+              <div className="flex items-center gap-3 pt-1">
+                <a
+                  href="https://www.instagram.com/paid.prime"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="PaidPrime on Instagram"
+                  className="group flex size-9 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#0f1117] text-[#6c737f] transition-all hover:border-[rgba(168,85,247,0.4)] hover:bg-[rgba(168,85,247,0.08)] hover:text-[#c084fc]"
+                >
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <circle cx="12" cy="12" r="5" />
+                    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                  </svg>
+                </a>
+              </div>
             </div>
 
             <FooterColumn title="Product" links={PRODUCT_LINKS} />
