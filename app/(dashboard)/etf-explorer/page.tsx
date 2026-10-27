@@ -57,8 +57,10 @@ export default async function EtfExplorerPage() {
             </p>
           </div>
 
-          {/* Search bar */}
-          <EtfSearch />
+          {/* Search bar — z-50 so the dropdown floats above the cards below */}
+          <div className="relative z-50">
+            <EtfSearch />
+          </div>
 
           {/* Frequency legend */}
           <div className="flex flex-wrap items-center gap-3">

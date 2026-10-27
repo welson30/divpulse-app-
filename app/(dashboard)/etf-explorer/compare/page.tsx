@@ -27,7 +27,7 @@ function fmtYield(y: number | null) {
 function fmtIncome(invest: number, y: number | null) {
   if (!y) return "—";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(
-    invest * y * 100
+    invest * y
   );
 }
 

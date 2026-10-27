@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BarChart2, X } from "lucide-react";
+import { BarChart2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { EtfTable, type EtfRow } from "@/components/dashboard/etf-table";
 import { EtfYieldCalculator } from "@/components/dashboard/etf-yield-calculator";
 import type { CuratedList } from "@/lib/etf-explorer/curated-lists";
@@ -13,9 +13,29 @@ type Props = {
   lists: ListWithRows[];
 };
 
+const DEFAULT_VISIBLE = 6;
+
 export function EtfExplorerClient({ lists }: Props) {
   const [investAmount, setInvestAmount] = useState(10_000);
   const [selected, setSelected] = useState<string[]>([]);
+  // Track how many rows to show per list ID
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>(() =>
+    Object.fromEntries(lists.map((l) => [l.id, DEFAULT_VISIBLE]))
+  );
+
+  function showMore(listId: string, total: number) {
+    setVisibleCounts((prev: Record<string, number>) => ({
+      ...prev,
+      [listId]: Math.min((prev[listId] ?? DEFAULT_VISIBLE) + 10, total),
+    }));
+  }
+
+  function showLess(listId: string) {
+    setVisibleCounts((prev: Record<string, number>) => ({
+      ...prev,
+      [listId]: DEFAULT_VISIBLE,
+    }));
+  }
 
   function toggleCompare(ticker: string) {
     setSelected((prev: string[]) => {
@@ -94,20 +114,59 @@ export function EtfExplorerClient({ lists }: Props) {
                 </div>
                 <p className="text-sm text-text-secondary">{list.description}</p>
               </div>
-              <Link
-                href={`/etf-explorer/list/${list.id}`}
-                className="shrink-0 font-mono text-xs text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
-              >
-                View all
-              </Link>
             </div>
-            <EtfTable
-              rows={list.rows}
-              investAmount={investAmount}
-              compareMode={true}
-              selectedTickers={selected}
-              onToggleCompare={toggleCompare}
-            />
+            {(() => {
+              const visible = visibleCounts[list.id] ?? DEFAULT_VISIBLE;
+              const visibleRows = list.rows.slice(0, visible);
+              const remaining = list.rows.length - visible;
+              const isExpanded = visible >= list.rows.length;
+              return (
+                <>
+                  <EtfTable
+                    rows={visibleRows}
+                    investAmount={investAmount}
+                    compareMode={true}
+                    selectedTickers={selected}
+                    onToggleCompare={toggleCompare}
+                  />
+                  {/* Show more / Show less controls */}
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <div className="h-px flex-1 bg-border-subtle" />
+                    {!isExpanded ? (
+                      <button
+                        type="button"
+                        onClick={() => showMore(list.id, list.rows.length)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border-interactive px-4 py-1.5 font-mono text-xs font-medium text-text-secondary transition-colors hover:border-blue-500 hover:text-blue-400"
+                      >
+                        <ChevronDown className="size-3.5" />
+                        Show {Math.min(remaining, 10)} more ETFs
+                        <span className="text-text-secondary opacity-60">
+                          ({visible}/{list.rows.length})
+                        </span>
+                      </button>
+                    ) : visible > DEFAULT_VISIBLE ? (
+                      <button
+                        type="button"
+                        onClick={() => showLess(list.id)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border-interactive px-4 py-1.5 font-mono text-xs font-medium text-text-secondary transition-colors hover:border-border-interactive hover:text-text-primary"
+                      >
+                        <ChevronUp className="size-3.5" />
+                        Show less
+                      </button>
+                    ) : null}
+                    <div className="h-px flex-1 bg-border-subtle" />
+                    {list.rows.length > DEFAULT_VISIBLE && (
+                      <Link
+                        href={`/etf-explorer/list/${list.id}`}
+                        className="font-mono text-xs text-text-secondary underline-offset-2 hover:text-blue-400 hover:underline"
+                      >
+                        Full list →
+                      </Link>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
           </section>
         ))}
       </div>

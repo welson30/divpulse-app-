@@ -40,7 +40,8 @@ function formatYield(yieldPct: number | null) {
 
 function annualIncome(invest: number, yieldPct: number | null): string | null {
   if (!yieldPct || !invest) return null;
-  const annual = invest * yieldPct * 100;
+  // yieldPct is already a decimal fraction (e.g. 0.0816 = 8.16%)
+  const annual = invest * yieldPct;
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(annual);
 }
 
