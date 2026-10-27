@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { TrendingUp, Search } from "lucide-react";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { getYieldPct } from "@/lib/tickers/yield";
-import { CURATED_LISTS } from "@/lib/etf-explorer/curated-lists";
-import { CollectionTable, type CollectionRow } from "@/components/dashboard/collection-table";
-import { GreetingBackdrop } from "@/components/dashboard/greeting-backdrop";
+import { CURATED_LISTS, TICKER_FREQUENCY } from "@/lib/etf-explorer/curated-lists";
+import { EtfExplorerClient } from "@/components/dashboard/etf-explorer-client";
 import { EtfSearch } from "@/components/dashboard/etf-search";
+import type { EtfRow } from "@/components/dashboard/etf-table";
 
 export const metadata: Metadata = {
   title: "ETF Explorer — PaidPrime",
 };
 
-// Revalidate every 5 minutes so yield / price data stays reasonably fresh
-// without hammering Yahoo Finance on every request.
 export const revalidate = 300;
 
 export default async function EtfExplorerPage() {
@@ -21,60 +18,69 @@ export default async function EtfExplorerPage() {
   const allTickers = [...new Set(CURATED_LISTS.flatMap((l) => l.tickers))];
   const enriched = await enrichTickers(allTickers, "1mo");
 
+  // Build row data per list
+  const listsWithRows = CURATED_LISTS.map((list) => ({
+    ...list,
+    rows: list.tickers.map((ticker): EtfRow => {
+      const e = enriched.get(ticker);
+      return {
+        ticker,
+        price: e?.quote?.price ?? null,
+        currency: e?.quote?.currency ?? null,
+        yieldPct: getYieldPct(e?.quote),
+        name: e?.name ?? null,
+        logoUrl: e?.logoUrl ?? null,
+        changePercent: e?.quote?.changePercent ?? null,
+        sparkline: e?.sparkline ?? [],
+        frequency: TICKER_FREQUENCY[ticker] ?? null,
+      };
+    }),
+  }));
+
   return (
     <div className="flex flex-col gap-sp-6">
-      <GreetingBackdrop />
+      {/* ── Hero section ── */}
+      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-[#0e1116] via-[#111519] to-[#0a0d10] p-6 lg:p-8">
+        {/* Glow orbs */}
+        <div className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-blue-500/5 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -right-16 size-56 rounded-full bg-green-500/5 blur-3xl" />
 
-      {/* Header */}
-      <div>
-        <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">
-          Discover
-        </span>
-        <h1 className="text-h1 font-display font-semibold text-text-primary">ETF Explorer</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Curated dividend ETFs and REITs — browse by payment frequency or search any ticker.
-        </p>
+        <div className="relative flex flex-col gap-4">
+          <div>
+            <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold tracking-widest text-blue-400 uppercase">
+              Discover
+            </span>
+            <h1 className="text-h1 font-display font-semibold text-text-primary">ETF Explorer</h1>
+            <p className="mt-1.5 max-w-xl text-sm text-text-secondary">
+              Curated dividend ETFs and REITs — browse by payment frequency, compare side-by-side, or calculate your
+              expected annual income.
+            </p>
+          </div>
+
+          {/* Search bar */}
+          <EtfSearch />
+
+          {/* Frequency legend */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-mono text-xs text-text-secondary">Pay frequency:</span>
+            <FreqPill color="bg-blue-400" label="Monthly" />
+            <FreqPill color="bg-amber-400" label="Weekly" />
+            <FreqPill color="bg-violet-400" label="Quarterly" />
+          </div>
+        </div>
       </div>
 
-      {/* Search */}
-      <EtfSearch />
-
-      {/* Curated lists */}
-      <div className="flex flex-col gap-sp-8">
-        {CURATED_LISTS.map((list) => {
-          const rows: CollectionRow[] = list.tickers.map((ticker) => {
-            const e = enriched.get(ticker);
-            return {
-              ticker,
-              price: e?.quote?.price ?? null,
-              currency: e?.quote?.currency ?? null,
-              yieldPct: getYieldPct(e?.quote),
-              name: e?.name ?? null,
-              logoUrl: e?.logoUrl ?? null,
-              changePercent: e?.quote?.changePercent ?? null,
-              sparkline: e?.sparkline ?? [],
-            };
-          });
-
-          return (
-            <section key={list.id}>
-              <div className="mb-sp-3 flex items-start justify-between gap-2">
-                <div>
-                  <h2 className="text-h2 font-display font-semibold text-text-primary">{list.title}</h2>
-                  <p className="mt-0.5 text-sm text-text-secondary">{list.description}</p>
-                </div>
-                <Link
-                  href={`/etf-explorer/list/${list.id}`}
-                  className="shrink-0 font-mono text-xs text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
-                >
-                  View all
-                </Link>
-              </div>
-              <CollectionTable rows={rows} />
-            </section>
-          );
-        })}
-      </div>
+      {/* ── Client shell: calculator + compare + lists ── */}
+      <EtfExplorerClient lists={listsWithRows} />
     </div>
+  );
+}
+
+function FreqPill({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1 font-mono text-xs text-text-secondary">
+      <span className={`size-2 rounded-full ${color}`} />
+      {label}
+    </span>
   );
 }
