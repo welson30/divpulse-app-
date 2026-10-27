@@ -26,6 +26,7 @@ const IconAdvisor = navIcon("/marketing/dashboard/nav-advisor.svg");
 const IconBrokers = navIcon("/marketing/dashboard/nav-brokers.svg");
 const IconSettings = navIcon("/marketing/dashboard/nav-settings.svg");
 const IconHelp = navIcon("/marketing/dashboard/nav-help.svg");
+const IconEtf = navIcon("/marketing/dashboard/icon-trend.svg");
 
 export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
   {
@@ -43,6 +44,13 @@ export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
       { href: "/calendar", label: "Calendar", Icon: IconCalendar },
       { href: "/upcoming", label: "Upcoming payments", Icon: IconCalendar },
       { href: "/history", label: "Payment history", Icon: IconDividends },
+    ],
+  },
+  {
+    label: "Explore",
+    links: [
+      { href: "/etf-explorer", label: "ETF Explorer", Icon: IconEtf },
+      { href: "/collections", label: "Collections", Icon: IconWatchlist },
     ],
   },
   {
