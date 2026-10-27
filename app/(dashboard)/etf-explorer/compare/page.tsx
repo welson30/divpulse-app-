@@ -66,6 +66,7 @@ export default async function EtfComparePage({ searchParams }: Props) {
       currency: e?.quote?.currency ?? null,
       yieldPct,
       changePercent: e?.quote?.changePercent ?? null,
+      fiftyTwoWeekChangePercent: e?.quote?.fiftyTwoWeekChangePercent ?? null,
       frequency: TICKER_FREQUENCY[ticker] ?? null,
       exDividendDate: e?.quote?.exDividendDate ?? null,
     };
@@ -74,6 +75,7 @@ export default async function EtfComparePage({ searchParams }: Props) {
   // Find the best in each metric for highlighting
   const bestYield = Math.max(...cols.map((c) => (c.yieldPct ? c.yieldPct * 100 : 0)));
   const lowestPrice = Math.min(...cols.map((c) => c.price ?? Infinity));
+  const bestAnnualReturn = Math.max(...cols.map((c) => c.fiftyTwoWeekChangePercent ?? -Infinity));
 
   return (
     <div className="flex flex-col gap-sp-6">
@@ -106,6 +108,7 @@ export default async function EtfComparePage({ searchParams }: Props) {
         {cols.map((col) => {
           const isBestYield = col.yieldPct != null && Math.abs(col.yieldPct * 100 - bestYield) < 0.001;
           const isCheapest = col.price != null && col.price === lowestPrice;
+          const isBestReturn = col.fiftyTwoWeekChangePercent != null && col.fiftyTwoWeekChangePercent === bestAnnualReturn;
           return (
             <div
               key={col.ticker}
@@ -156,6 +159,22 @@ export default async function EtfComparePage({ searchParams }: Props) {
                       ? "text-text-secondary"
                       : col.changePercent >= 0
                       ? "text-green-400"
+                      : "text-red-400"
+                  }
+                />
+                <Stat
+                  label="52-week return"
+                  value={
+                    col.fiftyTwoWeekChangePercent != null
+                      ? `${col.fiftyTwoWeekChangePercent >= 0 ? "+" : ""}${col.fiftyTwoWeekChangePercent.toFixed(2)}%`
+                      : "—"
+                  }
+                  highlight={isBestReturn}
+                  valueClass={
+                    col.fiftyTwoWeekChangePercent == null
+                      ? "text-text-secondary"
+                      : col.fiftyTwoWeekChangePercent >= 0
+                      ? "text-emerald-400"
                       : "text-red-400"
                   }
                 />

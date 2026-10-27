@@ -1,11 +1,27 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useRef, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Search, Loader2 } from "lucide-react";
+import { Plus, X, Search, Loader2, TrendingUp } from "lucide-react";
+import { CURATED_LISTS, TICKER_FREQUENCY } from "@/lib/etf-explorer/curated-lists";
 
 type Props = {
   tickers: string[];
+};
+
+// Build a flat, deduplicated lookup of ticker → frequency label for suggestions
+const ALL_KNOWN = Array.from(
+  new Map(
+    CURATED_LISTS.flatMap((l) =>
+      l.tickers.map((t) => [t, TICKER_FREQUENCY[t] ?? null])
+    )
+  ).entries()
+).map(([ticker, freq]) => ({ ticker, freq }));
+
+const FREQ_COLOR: Record<string, string> = {
+  Monthly: "text-blue-400",
+  Quarterly: "text-violet-400",
+  Weekly: "text-amber-400",
 };
 
 export function EtfComparePicker({ tickers }: Props) {
@@ -14,9 +30,35 @@ export function EtfComparePicker({ tickers }: Props) {
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const canAdd = tickers.length < 3;
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Filtered suggestions
+  const suggestions = query.trim().length >= 1
+    ? ALL_KNOWN
+        .filter(
+          ({ ticker }) =>
+            ticker.startsWith(query.trim().toUpperCase()) &&
+            !tickers.includes(ticker)
+        )
+        .slice(0, 8)
+    : [];
+
+  const showDropdown = focused && adding && suggestions.length > 0;
 
   function navigate(next: string[]) {
     const url = `/etf-explorer/compare?tickers=${next.join(",")}`;
@@ -29,15 +71,15 @@ export function EtfComparePicker({ tickers }: Props) {
     navigate(tickers.filter((t) => t !== ticker));
   }
 
-  function handleAdd() {
-    const ticker = query.trim().toUpperCase();
-    if (!ticker) return;
-    if (ticker.length > 6 || !/^[A-Z0-9.^-]+$/.test(ticker)) {
+  function addTicker(ticker: string) {
+    const t = ticker.trim().toUpperCase();
+    if (!t) return;
+    if (t.length > 6 || !/^[A-Z0-9.^-]+$/.test(t)) {
       setError("Enter a valid ticker symbol (e.g. JEPI, SCHD, O)");
       return;
     }
-    if (tickers.includes(ticker)) {
-      setError(`${ticker} is already in the comparison`);
+    if (tickers.includes(t)) {
+      setError(`${t} is already in the comparison`);
       return;
     }
     if (!canAdd) {
@@ -47,15 +89,17 @@ export function EtfComparePicker({ tickers }: Props) {
     setError(null);
     setQuery("");
     setAdding(false);
-    navigate([...tickers, ticker]);
+    setFocused(false);
+    navigate([...tickers, t]);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") handleAdd();
+    if (e.key === "Enter") addTicker(query);
     if (e.key === "Escape") {
       setAdding(false);
       setQuery("");
       setError(null);
+      setFocused(false);
     }
   }
 
@@ -95,7 +139,7 @@ export function EtfComparePicker({ tickers }: Props) {
           </div>
         ))}
 
-        {/* Empty slots */}
+        {/* Empty slot placeholders */}
         {Array.from({ length: Math.max(0, 2 - tickers.length) }).map((_, i) => (
           <div
             key={`empty-${i}`}
@@ -105,14 +149,17 @@ export function EtfComparePicker({ tickers }: Props) {
           </div>
         ))}
 
-        {/* Add button / inline input */}
+        {/* Add button */}
         {canAdd && !adding && (
           <button
             type="button"
             onClick={() => {
               setAdding(true);
               setError(null);
-              setTimeout(() => inputRef.current?.focus(), 50);
+              setTimeout(() => {
+                inputRef.current?.focus();
+                setFocused(true);
+              }, 50);
             }}
             className="flex h-8 items-center gap-1.5 rounded-full border border-dashed border-border-interactive px-3 font-mono text-xs text-text-secondary transition-colors hover:border-blue-500 hover:text-blue-400"
           >
@@ -122,10 +169,10 @@ export function EtfComparePicker({ tickers }: Props) {
         )}
       </div>
 
-      {/* Inline search input */}
+      {/* Inline search with autocomplete */}
       {adding && (
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-1.5" ref={wrapperRef}>
+          <div className="relative flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-text-secondary" />
               <input
@@ -135,18 +182,48 @@ export function EtfComparePicker({ tickers }: Props) {
                 onChange={(e) => {
                   setQuery(e.target.value.toUpperCase());
                   setError(null);
+                  setFocused(true);
                 }}
+                onFocus={() => setFocused(true)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ticker symbol… e.g. JEPI"
+                placeholder="Ticker… JEPI, VOO, SCHD"
                 className="w-full rounded-xl border border-border-interactive bg-surface-hover py-2 pl-9 pr-3 font-mono text-sm text-text-primary placeholder:text-text-secondary/50 focus:border-blue-500 focus:outline-none"
                 maxLength={10}
                 autoComplete="off"
                 spellCheck={false}
               />
+
+              {/* Autocomplete dropdown */}
+              {showDropdown && (
+                <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-border-interactive bg-[#0d1117] shadow-xl shadow-black/50">
+                  {suggestions.map(({ ticker, freq }) => (
+                    <button
+                      key={ticker}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // prevent blur
+                        addTicker(ticker);
+                      }}
+                      className="flex w-full items-center justify-between px-4 py-2.5 text-left transition-colors hover:bg-surface-hover"
+                    >
+                      <span className="font-mono text-sm font-semibold text-text-primary">
+                        {ticker}
+                      </span>
+                      {freq && (
+                        <span className={`flex items-center gap-1 font-mono text-[10px] font-semibold ${FREQ_COLOR[freq] ?? "text-text-secondary"}`}>
+                          {freq === "Weekly" && <TrendingUp className="size-2.5" />}
+                          {freq}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
             <button
               type="button"
-              onClick={handleAdd}
+              onClick={() => addTicker(query)}
               disabled={!query.trim()}
               className="rounded-xl bg-blue-500 px-4 py-2 font-sans text-xs font-semibold text-white transition-colors hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -158,17 +235,19 @@ export function EtfComparePicker({ tickers }: Props) {
                 setAdding(false);
                 setQuery("");
                 setError(null);
+                setFocused(false);
               }}
               className="font-mono text-xs text-text-secondary hover:text-text-primary"
             >
               Cancel
             </button>
           </div>
+
           {error && (
             <p className="font-mono text-[11px] text-red-400">{error}</p>
           )}
           <p className="font-mono text-[10px] text-text-secondary/60">
-            Press Enter to add · Esc to cancel · up to 3 ETFs
+            Enter to add · Esc to cancel · up to 3 ETFs
           </p>
         </div>
       )}
