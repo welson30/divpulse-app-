@@ -129,6 +129,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
         {rows.map((row) => {
           const isWatched = watched.has(row.ticker);
           const isSelected = selectedTickers.includes(row.ticker);
+          const hasStaleYieldMobile = row.frequency === "Weekly" && (row.yieldPct ?? 0) < 0.05;
           return (
             <div
               key={row.ticker}
@@ -163,13 +164,19 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                     {formatPrice(row.price, row.currency)}
                   </span>
                   <div className="flex items-center gap-1.5">
+                    {hasStaleYieldMobile ? (
+                    <span title="Yahoo Finance data unreliable — check fund site" className="inline-flex items-center gap-0.5 font-mono text-xs text-amber-400 cursor-help">
+                      <AlertTriangle className="size-2.5" />N/A
+                    </span>
+                  ) : (
                     <span className="font-mono text-xs tabular-nums text-green-500">{formatYield(row.yieldPct)}</span>
+                  )}
                     <ChangeBadge changePercent={row.changePercent ?? null} className="text-xs" />
                   </div>
                 </div>
               </div>
               {/* Income estimate on mobile */}
-              {investAmount > 0 && row.yieldPct && (
+              {investAmount > 0 && row.yieldPct && !hasStaleYieldMobile && (
                 <div className="rounded-lg bg-surface-hover px-3 py-1.5 text-xs text-text-secondary">
                   <span className="font-mono">
                     ${investAmount.toLocaleString()} invested →{" "}
@@ -177,6 +184,11 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                       {annualIncome(investAmount, row.yieldPct)}/yr
                     </span>
                   </span>
+                </div>
+              )}
+              {investAmount > 0 && hasStaleYieldMobile && (
+                <div className="rounded-lg bg-amber-500/5 border border-amber-500/10 px-3 py-1.5 text-xs text-amber-400/80">
+                  <span className="font-mono">Yield data unreliable — check fund site for real distribution</span>
                 </div>
               )}
               <div className="flex items-center justify-end gap-2">
@@ -275,6 +287,9 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
               const isSelected = selectedTickers.includes(row.ticker);
               const income = annualIncome(investAmount, row.yieldPct);
               const hasRisk = NAV_DECAY_RISK_TICKERS.has(row.ticker);
+              // Yahoo Finance returns bad yield data for Roundhill 0DTE ETFs (QDTE, XDTE, RDTE)
+              // and FEPI — weekly funds where dividendYieldPercent is often < 5% when real yield is 40-80%+
+              const hasStaleYield = row.frequency === "Weekly" && (row.yieldPct ?? 0) < 0.05;
               return (
                 <tr
                   key={row.ticker}
@@ -335,12 +350,29 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                       />
                     </div>
                   </td>
-                  <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums text-green-500">
-                    {formatYield(row.yieldPct)}
+                  <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums">
+                    {hasStaleYield ? (
+                      <span
+                        title="Yahoo Finance reports incorrect yield for this ETF. Check the fund's official site for actual distribution rate."
+                        className="inline-flex cursor-help items-center gap-1 text-amber-400"
+                      >
+                        <AlertTriangle className="size-3" />
+                        N/A
+                      </span>
+                    ) : (
+                      <span className="text-green-500">{formatYield(row.yieldPct)}</span>
+                    )}
                   </td>
                   {investAmount > 0 && (
                     <td className="px-sp-3 py-3 text-right font-mono text-sm tabular-nums">
-                      {income ? (
+                      {hasStaleYield ? (
+                        <span
+                          title="Yield data unreliable for this ETF — check fund site for real distribution."
+                          className="cursor-help text-amber-400/60 text-xs"
+                        >
+                          see site ↗
+                        </span>
+                      ) : income ? (
                         <span className="text-green-400">{income}</span>
                       ) : (
                         <span className="text-text-secondary">—</span>
