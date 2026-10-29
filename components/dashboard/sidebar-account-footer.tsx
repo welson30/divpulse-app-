@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { signOut } from "@/app/(auth)/actions";
 import { IconLogOut } from "@/components/marketing/icons";
 
@@ -7,7 +9,7 @@ import { IconLogOut } from "@/components/marketing/icons";
  * Plan status + upgrade CTA + sign-out — shared between the desktop
  * `Sidebar` and the mobile `MoreSheet` so the two navs can't drift apart.
  */
-export async function SidebarAccountFooter({
+export function SidebarAccountFooter({
   planLabel,
   isFree,
   holdingCount,
@@ -16,7 +18,7 @@ export async function SidebarAccountFooter({
   isFree: boolean;
   holdingCount: number;
 }) {
-  const t = await getTranslations("dashboard.sidebar");
+  const t = useTranslations("dashboard.sidebar");
   return (
     <div>
       <div className="mb-2 rounded-lg border border-green-500/20 bg-[rgba(34,197,94,0.06)] px-3 py-2.5">
