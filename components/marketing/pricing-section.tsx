@@ -2,20 +2,22 @@
 
 import Link from "next/link";
 import { useRef, type CSSProperties, type MouseEvent } from "react";
+import { useTranslations } from "next-intl";
 import { PrimaryCta } from "@/components/marketing/primary-cta";
 import { Reveal } from "@/components/marketing/reveal";
 
-type FeatureValue = { type: "text"; label: string } | { type: "check" } | { type: "dash" };
+type FeatureValue =
+  | { type: "text"; valueKey: string }
+  | { type: "check" }
+  | { type: "dash" };
 
 type Plan = {
-  name: string;
+  planKey: "free" | "pro" | "proPlus";
   price: string;
   period?: string;
-  description: string;
-  cta: string;
   href: string;
   featured?: boolean;
-  features: { label: string; value: FeatureValue }[];
+  features: { key: string; value: FeatureValue }[];
 };
 
 // Matches the real plans (profiles.plan: "free" | "pro" | "pro_plus") and
@@ -25,77 +27,75 @@ type Plan = {
 // (AI Advisor + Telegram, both Pro and Pro+), FREE_PLAN_HOLDING_CAP in
 // holdings/actions.ts (5), and the isProPlus gate on CSV import /
 // broker auto-sync (import-csv-dialog.tsx, plaid-connect-dialog.tsx).
-// Deliberately no invented tiers or features — this page previously showed
-// fictional "Investor"/"Wealth" plans at $12/mo and $29/mo that don't
-// exist anywhere in the actual product or Stripe setup.
+// Deliberately no invented tiers or features.
 const PLANS: Plan[] = [
   {
-    name: "Free",
+    planKey: "free",
     price: "$0",
-    description: "Track up to 5 holdings and never miss a payment.",
-    cta: "Get Started Free",
     href: "/signup",
     features: [
-      { label: "Tracked holdings", value: { type: "text", label: "5 holdings" } },
-      { label: "Real-time payment alerts", value: { type: "check" } },
-      { label: "Dividend calendar", value: { type: "check" } },
-      { label: "Watchlist", value: { type: "text", label: "Unlimited" } },
-      { label: "Analytics", value: { type: "check" } },
-      { label: "Financial goals", value: { type: "check" } },
-      { label: "AI Advisor", value: { type: "dash" } },
-      { label: "Telegram alerts", value: { type: "dash" } },
-      { label: "CSV import", value: { type: "dash" } },
-      { label: "Broker auto-sync", value: { type: "dash" } },
+      { key: "trackedHoldings", value: { type: "text", valueKey: "fiveHoldings" } },
+      { key: "realTimeAlerts", value: { type: "check" } },
+      { key: "dividendCalendar", value: { type: "check" } },
+      { key: "watchlist", value: { type: "text", valueKey: "unlimited" } },
+      { key: "analytics", value: { type: "check" } },
+      { key: "financialGoals", value: { type: "check" } },
+      { key: "aiAdvisor", value: { type: "dash" } },
+      { key: "telegramAlerts", value: { type: "dash" } },
+      { key: "csvImport", value: { type: "dash" } },
+      { key: "brokerSync", value: { type: "dash" } },
     ],
   },
   {
-    name: "Pro",
+    planKey: "pro",
     price: "$59",
     period: "/yr",
-    description: "Unlimited manual tracking for active dividend investors.",
-    cta: "Start with Pro",
     href: "/signup",
     featured: true,
     features: [
-      { label: "Tracked holdings", value: { type: "text", label: "Unlimited" } },
-      { label: "Real-time payment alerts", value: { type: "check" } },
-      { label: "Dividend calendar", value: { type: "check" } },
-      { label: "Watchlist", value: { type: "text", label: "Unlimited" } },
-      { label: "Analytics", value: { type: "check" } },
-      { label: "Financial goals", value: { type: "check" } },
-      { label: "AI Advisor", value: { type: "check" } },
-      { label: "Telegram alerts", value: { type: "check" } },
-      { label: "CSV import", value: { type: "dash" } },
-      { label: "Broker auto-sync", value: { type: "dash" } },
+      { key: "trackedHoldings", value: { type: "text", valueKey: "unlimited" } },
+      { key: "realTimeAlerts", value: { type: "check" } },
+      { key: "dividendCalendar", value: { type: "check" } },
+      { key: "watchlist", value: { type: "text", valueKey: "unlimited" } },
+      { key: "analytics", value: { type: "check" } },
+      { key: "financialGoals", value: { type: "check" } },
+      { key: "aiAdvisor", value: { type: "check" } },
+      { key: "telegramAlerts", value: { type: "check" } },
+      { key: "csvImport", value: { type: "dash" } },
+      { key: "brokerSync", value: { type: "dash" } },
     ],
   },
   {
-    name: "Pro+",
+    planKey: "proPlus",
     price: "$119",
     period: "/yr",
-    description: "Unlimited tracking, CSV import, and broker auto-sync.",
-    cta: "Start with Pro+",
     href: "/signup",
     features: [
-      { label: "Tracked holdings", value: { type: "text", label: "Unlimited" } },
-      { label: "Real-time payment alerts", value: { type: "check" } },
-      { label: "Dividend calendar", value: { type: "check" } },
-      { label: "Watchlist", value: { type: "text", label: "Unlimited" } },
-      { label: "Analytics", value: { type: "check" } },
-      { label: "Financial goals", value: { type: "check" } },
-      { label: "AI Advisor", value: { type: "check" } },
-      { label: "Telegram alerts", value: { type: "check" } },
-      { label: "CSV import", value: { type: "check" } },
-      { label: "Broker auto-sync", value: { type: "check" } },
+      { key: "trackedHoldings", value: { type: "text", valueKey: "unlimited" } },
+      { key: "realTimeAlerts", value: { type: "check" } },
+      { key: "dividendCalendar", value: { type: "check" } },
+      { key: "watchlist", value: { type: "text", valueKey: "unlimited" } },
+      { key: "analytics", value: { type: "check" } },
+      { key: "financialGoals", value: { type: "check" } },
+      { key: "aiAdvisor", value: { type: "check" } },
+      { key: "telegramAlerts", value: { type: "check" } },
+      { key: "csvImport", value: { type: "check" } },
+      { key: "brokerSync", value: { type: "check" } },
     ],
   },
 ];
 
-function FeatureValue({ value }: { value: FeatureValue }) {
+function PricingFeatureValue({
+  value,
+  tValues,
+}: {
+  value: FeatureValue;
+  tValues: (key: string) => string;
+}) {
   if (value.type === "text") {
     return (
       <span className="text-[15px] leading-[24.75px] font-medium whitespace-nowrap text-[#f2f4f7]">
-        {value.label}
+        {tValues(value.valueKey)}
       </span>
     );
   }
@@ -124,6 +124,7 @@ function FeatureValue({ value }: { value: FeatureValue }) {
 }
 
 function PlanCard({ plan }: { plan: Plan }) {
+  const t = useTranslations("pricing");
   const ref = useRef<HTMLDivElement>(null);
 
   function onMove(e: MouseEvent<HTMLDivElement>) {
@@ -133,6 +134,9 @@ function PlanCard({ plan }: { plan: Plan }) {
     el.style.setProperty("--spot-x", `${e.clientX - rect.left}px`);
     el.style.setProperty("--spot-y", `${e.clientY - rect.top}px`);
   }
+
+  // Typed adapter so PricingFeatureValue receives a plain string function
+  const tValues = (key: string) => t(`values.${key}` as Parameters<typeof t>[0]);
 
   return (
     <div
@@ -171,14 +175,14 @@ function PlanCard({ plan }: { plan: Plan }) {
               height={12}
               className="size-3"
             />
-            Most popular
+            {t("mostPopular")}
           </div>
         </div>
       ) : null}
 
       <div className="relative flex flex-1 flex-col">
         <h3 className="pp-display m-0 text-[22px] leading-[36.3px] font-semibold tracking-[-0.44px] text-[#f2f4f7]">
-          {plan.name}
+          {t(`plans.${plan.planKey}.name` as Parameters<typeof t>[0])}
         </h3>
 
         <p className="pp-display m-0 mt-4 flex items-baseline gap-1 text-[clamp(42px,8vw,62px)] font-semibold leading-none tracking-[-1.24px] text-[#f2f4f7]">
@@ -191,7 +195,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         </p>
 
         <p className="m-0 mt-4 min-h-[52px] text-[16px] leading-[26px] text-[#99a1ac]">
-          {plan.description}
+          {t(`plans.${plan.planKey}.description` as Parameters<typeof t>[0])}
         </p>
 
         {plan.featured ? (
@@ -199,7 +203,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             href={plan.href}
             className="mt-8 h-14 w-full rounded-[18px] text-[17px]"
           >
-            {plan.cta}
+            {t(`plans.${plan.planKey}.cta` as Parameters<typeof t>[0])}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/marketing/pricing/icon-arrow-white.svg"
@@ -214,7 +218,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             href={plan.href}
             className="mt-8 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[18px] border border-[#2e343b] bg-[#16191d] text-[17px] font-semibold text-[#f2f4f7] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-[#4c82f7]/60 hover:bg-[#1a1f26] hover:-translate-y-0.5"
           >
-            {plan.cta}
+            {t(`plans.${plan.planKey}.cta` as Parameters<typeof t>[0])}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/marketing/pricing/icon-arrow.svg"
@@ -229,13 +233,13 @@ function PlanCard({ plan }: { plan: Plan }) {
         <ul className="m-0 mt-9 flex list-none flex-col gap-4 border-t border-[#22262c] p-0 pt-7">
           {plan.features.map((feature) => (
             <li
-              key={feature.label}
+              key={feature.key}
               className="flex items-center justify-between gap-3"
             >
               <span className="text-[15px] leading-[26.4px] text-[#99a1ac] sm:text-[16px]">
-                {feature.label}
+                {t(`features.${feature.key}` as Parameters<typeof t>[0])}
               </span>
-              <FeatureValue value={feature.value} />
+              <PricingFeatureValue value={feature.value} tValues={tValues} />
             </li>
           ))}
         </ul>
@@ -250,6 +254,8 @@ function PlanCard({ plan }: { plan: Plan }) {
  * Hover: lift + cursor spotlight + border/glow intensify.
  */
 export function PricingSection() {
+  const t = useTranslations("pricing");
+
   return (
     <section
       id="pricing"
@@ -270,35 +276,31 @@ export function PricingSection() {
           <Reveal className="mx-auto flex w-full max-w-[860px] flex-col items-center gap-4 text-center min-[1200px]:gap-[23px]">
             <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
               <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-              Pricing
+              {t("eyebrow")}
             </div>
 
             <h2
               id="pricing-heading"
               className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
             >
-              Plans that scale with your{" "}
-              <br className="hidden min-[1200px]:block" />
-              portfolio
+              {t("title")}
             </h2>
 
             <p className="m-0 max-w-[780px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[21.6px] min-[1200px]:leading-[34.56px]">
-              Start free with five holdings. Upgrade when you need unlimited tracking, the AI
-              Advisor and Telegram alerts, or CSV import and broker auto-sync.
+              {t("description")}
             </p>
           </Reveal>
 
           <Reveal delayMs={80} className="w-full">
             <div className="grid grid-cols-1 items-stretch gap-5 sm:gap-6 min-[1024px]:grid-cols-3 min-[1200px]:gap-6 min-[1200px]:pt-4">
               {PLANS.map((plan) => (
-                <PlanCard key={plan.name} plan={plan} />
+                <PlanCard key={plan.planKey} plan={plan} />
               ))}
             </div>
           </Reveal>
 
           <p className="m-0 max-w-[720px] text-center text-[15px] leading-[26.4px] text-[#6c737f] min-[1200px]:text-[16px]">
-            Broker auto-sync is read-only and Pro+ only — PaidPrime can never place trades or
-            move funds. Encrypted storage and cancel-anytime billing on every plan.
+            {t("footerNote")}
           </p>
         </div>
       </div>
