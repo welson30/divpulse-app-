@@ -310,7 +310,36 @@
       "currentPlan": "Current plan",
       "holdingsCount": "{count}/5 holdings",
       "upgradePro": "Upgrade to Pro",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "sections": {
+        "overview": "Overview",
+        "income": "Income",
+        "explore": "Explore",
+        "signals": "Signals",
+        "insight": "Insight",
+        "account": "Account"
+      },
+      "links": {
+        "dashboard": "Dashboard",
+        "portfolio": "Portfolio",
+        "allocation": "Allocation",
+        "dividends": "Dividends",
+        "calendar": "Calendar",
+        "upcomingPayments": "Upcoming payments",
+        "paymentHistory": "Payment history",
+        "etfExplorer": "ETF Explorer",
+        "collections": "Collections",
+        "notifications": "Notifications",
+        "alertTemplates": "Alert templates",
+        "watchlist": "Watchlist",
+        "analytics": "Analytics",
+        "aiAdvisor": "AI Advisor",
+        "brokerConnections": "Broker connections",
+        "settings": "Settings",
+        "helpCenter": "Help center"
+      },
+      "collapse": "Collapse",
+      "more": "More"
     },
     "overview": {
       "welcomeBack": "Welcome back,",
@@ -581,7 +610,7 @@
       "cta": "Upgrade now"
     },
     "topbar": {
-      "plan": "plan",
+      "plan": "Plan",
       "settings": "Settings",
       "signOut": "Sign out"
     },

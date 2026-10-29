@@ -310,7 +310,36 @@
       "currentPlan": "Plano atual",
       "holdingsCount": "{count}/5 ativos",
       "upgradePro": "Assinar Pro",
-      "signOut": "Sair"
+      "signOut": "Sair",
+      "sections": {
+        "overview": "Visão geral",
+        "income": "Renda",
+        "explore": "Explorar",
+        "signals": "Sinais",
+        "insight": "Análise",
+        "account": "Conta"
+      },
+      "links": {
+        "dashboard": "Painel",
+        "portfolio": "Portfólio",
+        "allocation": "Alocação",
+        "dividends": "Dividendos",
+        "calendar": "Calendário",
+        "upcomingPayments": "Próximos pagamentos",
+        "paymentHistory": "Histórico de pagamentos",
+        "etfExplorer": "Explorador de ETFs",
+        "collections": "Coleções",
+        "notifications": "Notificações",
+        "alertTemplates": "Modelos de alerta",
+        "watchlist": "Lista de acompanhamento",
+        "analytics": "Análises",
+        "aiAdvisor": "Consultor IA",
+        "brokerConnections": "Conexões com corretoras",
+        "settings": "Configurações",
+        "helpCenter": "Central de ajuda"
+      },
+      "collapse": "Recolher",
+      "more": "Mais"
     },
     "overview": {
       "welcomeBack": "Bem-vindo de volta,",
@@ -581,7 +610,7 @@
       "cta": "Assinar agora"
     },
     "topbar": {
-      "plan": "plano",
+      "plan": "Plano",
       "settings": "Configurações",
       "signOut": "Sair"
     },
