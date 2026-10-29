@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { NotificationPreviewCard } from "@/components/dashboard/notification-preview-card";
-import { compactTemplate, descriptiveTemplate, brokerConfirmedTemplate, type NotificationStyle } from "@/lib/notifications/templates";
+import { compactTemplate, descriptiveTemplate, brokerConfirmedTemplate, discreetTemplate, type NotificationStyle } from "@/lib/notifications/templates";
 import { updateNotificationStyle, type SettingsActionState } from "@/app/(dashboard)/settings/actions";
 import { cn } from "@/lib/utils";
 
@@ -28,18 +28,22 @@ const STYLES: {
     description: "Names your broker and shows a confirmed checkmark once a linked account verifies the payment.",
     badge: "Recommended",
   },
+  { value: "discreet", label: "Discreet", description: "Amount only — no ticker visible on your lock screen." },
 ];
 
 function previewFor(style: NotificationStyle) {
   if (style === "premium") return brokerConfirmedTemplate(PREVIEW_TICKER, PREVIEW_AMOUNT, null);
   if (style === "descriptive") return descriptiveTemplate(PREVIEW_TICKER, PREVIEW_AMOUNT);
+  if (style === "discreet") return discreetTemplate(PREVIEW_AMOUNT);
   return compactTemplate(PREVIEW_TICKER, PREVIEW_AMOUNT);
 }
 
 export function NotificationStylePicker({ notificationStyle }: { notificationStyle: string }) {
   const [state, formAction, pending] = useActionState<SettingsActionState, FormData>(updateNotificationStyle, null);
   const [selected, setSelected] = useState<NotificationStyle>(
-    notificationStyle === "descriptive" || notificationStyle === "premium" ? notificationStyle : "compact",
+    (["compact", "descriptive", "premium", "discreet"] as NotificationStyle[]).includes(notificationStyle as NotificationStyle)
+      ? (notificationStyle as NotificationStyle)
+      : "compact",
   );
 
   return (

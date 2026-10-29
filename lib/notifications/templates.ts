@@ -6,7 +6,7 @@
 // no "primary + follow-up" pair the way this file worked before user
 // choice existed.
 
-export type NotificationStyle = "compact" | "descriptive" | "premium";
+export type NotificationStyle = "compact" | "descriptive" | "premium" | "discreet";
 export type NotificationLocale = "en" | "pt";
 
 export type TemplateContent = { push: { title: string; body: string }; telegram: string };
@@ -91,6 +91,28 @@ export function brokerConfirmedTemplate(
   };
 }
 
+// ─── Discreet ─────────────────────────────────────────────────────────────────
+
+/**
+ * Discreet — amount only, no ticker. The user knows money arrived without
+ * revealing which asset to anyone glancing at their lock screen.
+ */
+export function discreetTemplate(
+  amount: number,
+  locale: NotificationLocale = "en",
+): TemplateContent {
+  if (locale === "pt") {
+    return {
+      push: { title: "Dividendo recebido", body: `+$${amount.toFixed(2)} · Agora na sua conta` },
+      telegram: `Dividendo recebido\n+$${amount.toFixed(2)} · Agora na sua conta`,
+    };
+  }
+  return {
+    push: { title: "Dividend received", body: `+$${amount.toFixed(2)} · Now in your account` },
+    telegram: `Dividend received\n+$${amount.toFixed(2)} · Now in your account`,
+  };
+}
+
 // ─── Entry point ──────────────────────────────────────────────────────────────
 
 /**
@@ -115,6 +137,9 @@ export function buildNotificationContent(
   },
 ): TemplateContent {
   const { ticker, amount, brokerName, brokerConfirmed, locale = "en" } = params;
+  if (style === "discreet") {
+    return discreetTemplate(amount, locale);
+  }
   if (style === "premium") {
     return brokerConfirmed
       ? brokerConfirmedTemplate(ticker, amount, brokerName, locale)
