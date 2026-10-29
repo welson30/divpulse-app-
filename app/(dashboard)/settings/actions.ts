@@ -87,7 +87,7 @@ export async function updateCalendarPrivacyMode(_prevState: SettingsActionState,
 
 export async function updateNotificationStyle(_prevState: SettingsActionState, formData: FormData): Promise<SettingsActionState> {
   const notificationStyle = String(formData.get("notificationStyle") ?? "");
-  if (!["compact", "descriptive", "premium"].includes(notificationStyle)) {
+  if (!["compact", "descriptive", "premium", "discreet"].includes(notificationStyle)) {
     return { error: "Invalid notification style." };
   }
 
