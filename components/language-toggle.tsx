@@ -34,8 +34,10 @@ export function LanguageToggle({ variant = "minimal", authenticated = false }: L
   const [isPending, startTransition] = useTransition();
 
   const other = locale === "en" ? "pt" : "en";
-  const label = other === "pt" ? "PT" : "EN";
-  const ariaLabel = other === "pt" ? "Switch to Português" : "Switch to English";
+  // Show current locale so user knows what they're on; clicking switches to the other
+  const currentLabel = locale === "en" ? "EN" : "PT";
+  const switchLabel = other === "pt" ? "Português" : "English";
+  const ariaLabel = other === "pt" ? "Mudar para Português" : "Switch to English";
 
   function handleSwitch() {
     startTransition(() => {
@@ -60,20 +62,24 @@ export function LanguageToggle({ variant = "minimal", authenticated = false }: L
           <circle cx="12" cy="12" r="10" />
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
-        <span>{label}</span>
+        <span>{isPending ? "…" : switchLabel}</span>
       </button>
     );
   }
 
-  // minimal — just a compact chip for tight navbars
+  // minimal — compact chip showing current locale; clicking switches
   return (
     <button
       onClick={handleSwitch}
       disabled={isPending}
       aria-label={ariaLabel}
-      className="flex h-8 items-center justify-center rounded-[8px] border border-[#22262c] bg-[#0f1117] px-2.5 text-[12px] font-semibold text-[#6c737f] transition-all hover:border-[#4c82f7]/40 hover:text-[#f2f4f7] disabled:opacity-50"
+      className="flex h-8 items-center justify-center gap-1.5 rounded-[8px] border border-[#22262c] bg-[#0f1117] px-2.5 text-[12px] font-semibold text-[#6c737f] transition-all hover:border-[#4c82f7]/40 hover:text-[#f2f4f7] disabled:opacity-50"
     >
-      {isPending ? "…" : label}
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+      </svg>
+      {isPending ? "…" : currentLabel}
     </button>
   );
 }

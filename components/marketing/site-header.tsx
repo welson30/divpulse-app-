@@ -252,6 +252,9 @@ export function SiteHeader() {
                 </Link>
               ))}
               <div className="mt-2 flex flex-col gap-2 border-t border-[#22262c] pt-4 md:hidden">
+                <div className="flex justify-center pb-1">
+                  <LanguageToggle variant="full" />
+                </div>
                 <Link
                   href="/login"
                   className="flex h-12 items-center justify-center rounded-full border border-[#2e343b] bg-[#16191d] text-[16px] font-medium text-[#f2f4f7]"

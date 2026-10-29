@@ -8,6 +8,7 @@ import { NAV_SECTIONS, PRIMARY_TABS } from "@/components/dashboard/sidebar";
 import { SidebarAccountFooter } from "@/components/dashboard/sidebar-account-footer";
 import { openAdvisor } from "@/components/dashboard/open-advisor";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { LanguageToggle } from "@/components/language-toggle";
 
 const PRIMARY_HREFS = new Set(PRIMARY_TABS.map((t) => t.href));
 
@@ -85,6 +86,9 @@ export function MoreSheet({ open, onOpenChange, planLabel, isFree, holdingCount 
         ))}
 
         <div className="mt-2 border-t border-border-subtle pt-3">
+          <div className="mb-3 flex justify-start px-2">
+            <LanguageToggle variant="full" authenticated />
+          </div>
           <SidebarAccountFooter planLabel={planLabel} isFree={isFree} holdingCount={holdingCount} />
         </div>
       </SheetContent>
