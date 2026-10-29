@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IconBot } from "@/components/marketing/icons";
@@ -105,6 +106,7 @@ function getAutoOpen(): boolean {
 const getAutoOpenOnServer = () => false;
 
 export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
+  const t = useTranslations("dashboard.advisor");
   const pathname = usePathname();
   // null = the user hasn't touched it yet, so the auto-open decision
   // stands. Derived rather than set from an effect: setState inside an
@@ -190,13 +192,13 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
           // call becomes a byte stream — so this path is unchanged from
           // before streaming existed.
           const result = await response.json().catch(() => ({}) as { error?: string });
-          setError(result.error ?? "Something went wrong.");
+          setError(result.error ?? t("widgetNoAnswer"));
           return;
         }
 
         const reader = response.body?.getReader();
         if (!reader) {
-          setError("Your browser doesn't support streaming responses.");
+          setError(t("widgetNoStream"));
           return;
         }
 
@@ -227,10 +229,10 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
         }
 
         if (!receivedAny) {
-          setError("The advisor didn't return an answer — try again.");
+          setError(t("widgetNoAnswer"));
         }
       } catch {
-        setError("Couldn't reach the advisor — check your connection and try again.");
+        setError(t("widgetConnError"));
       }
     });
   }
@@ -261,7 +263,7 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
       {open ? (
         <div
           role="dialog"
-          aria-label="AI Advisor"
+          aria-label={t("widgetTitle")}
           className={cn(
             "fixed z-50 flex flex-col overflow-hidden border border-border-subtle bg-surface shadow-2xl",
             "animate-in fade-in slide-in-from-bottom-4 duration-200",
@@ -277,9 +279,9 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
               <IconBot className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-semibold text-text-primary">AI Advisor</div>
+              <div className="text-[13px] font-semibold text-text-primary">{t("widgetTitle")}</div>
               <div className="truncate text-[11px] text-text-secondary">
-                {isPro ? (pageLabel ? `Looking at ${pageLabel}` : "Ask about your portfolio") : "Pro feature"}
+                {isPro ? (pageLabel ? t("widgetLooking", { page: pageLabel }) : t("widgetAskPortfolio")) : t("widgetProFeature")}
               </div>
             </div>
             {isPro && messages.length > 0 ? (
@@ -297,13 +299,13 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                 }}
                 className="rounded-full px-2.5 py-1 text-[11px] font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
               >
-                Clear
+                {t("widgetClear")}
               </button>
             ) : null}
             <button
               type="button"
               onClick={close}
-              aria-label="Close advisor"
+              aria-label={t("widgetClose")}
               className="flex size-8 shrink-0 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
             >
               <X className="size-4" />
@@ -321,8 +323,7 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                           <IconBot className="size-3.5" />
                         </span>
                         <p className="text-[13px] leading-relaxed text-text-secondary">
-                          Ask me anything about your portfolio — your income, what&rsquo;s paying next, how you&rsquo;re allocated, or your
-                          progress toward a goal.
+                          {t("widgetGreeting")}
                         </p>
                       </div>
                       <div className="flex flex-col gap-1.5 pl-8.5">
@@ -373,7 +374,7 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                           <span className="size-1 animate-bounce rounded-full bg-green-500 [animation-delay:-0.15s]" />
                           <span className="size-1 animate-bounce rounded-full bg-green-500" />
                         </span>
-                        Thinking…
+                        {t("widgetThinking")}
                       </span>
                     </div>
                   ) : null}
@@ -398,7 +399,7 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                     ref={inputRef}
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Ask a question…"
+                    placeholder={t("widgetPlaceholder")}
                     maxLength={500}
                     disabled={isPending}
                     // The `!` is load-bearing. globals.css declares a global
@@ -416,7 +417,7 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                     type="submit"
                     disabled={isPending || !question.trim()}
                     className="flex size-8 shrink-0 items-center justify-center rounded-full bg-green-500 text-canvas transition-colors hover:bg-green-500/90 disabled:opacity-40"
-                    aria-label="Send"
+                    aria-label={t("widgetSend")}
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -440,10 +441,9 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                 <Sparkles className="size-6" />
               </span>
               <div>
-                <p className="text-sm font-semibold text-text-primary">Ask anything about your portfolio</p>
+                <p className="text-sm font-semibold text-text-primary">{t("widgetUpsellTitle")}</p>
                 <p className="mt-1 text-[13px] leading-relaxed text-text-secondary">
-                  The AI Advisor knows your holdings, upcoming payments and goals — so you can ask what&rsquo;s paying next or how to
-                  reach your income target. Available on Pro.
+                  {t("widgetUpsellDesc")}
                 </p>
               </div>
               <Link
@@ -451,7 +451,7 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
                 onClick={close}
                 className="mt-1 inline-flex h-10 items-center rounded-full bg-green-500 px-5 text-[13px] font-semibold text-canvas transition-colors hover:bg-green-500/90"
               >
-                Upgrade to Pro
+                {t("widgetUpgrade")}
               </Link>
             </div>
           )}
@@ -469,13 +469,13 @@ export function AiAdvisorWidget({ isPro }: AiAdvisorWidgetProps) {
         {!open && (
           <span className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-[rgba(34,197,94,0.2)] bg-[#0b1a12] px-3 py-1 text-[11px] font-semibold tracking-wide text-green-400 uppercase shadow-lg">
             <span className="size-1.5 rounded-full bg-green-400 animate-pulse" />
-            AI Advisor
+            {t("widgetLabel")}
           </span>
         )}
         <button
           type="button"
           onClick={() => (open ? close() : setToggled(true))}
-          aria-label={open ? "Close AI Advisor" : "Open AI Advisor"}
+          aria-label={open ? t("widgetClose") : t("widgetOpen")}
           aria-expanded={open}
           className={cn(
             "relative flex size-14 items-center justify-center rounded-full bg-green-500 text-white shadow-[0_0_24px_rgba(34,197,94,0.35)]",

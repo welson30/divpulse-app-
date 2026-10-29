@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { signOut } from "@/app/(auth)/actions";
 import { HeaderSearch } from "@/components/dashboard/header-search";
+import { LanguageToggle } from "@/components/language-toggle";
 import { NotificationBell, type RecentNotification } from "@/components/dashboard/notification-bell";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { IconSettings, IconLogOut } from "@/components/marketing/icons";
@@ -61,6 +62,7 @@ export function Topbar({ email, displayName, planLabel, notifications, unreadNot
       <HeaderSearch />
 
       <div className="ml-auto flex items-center gap-2">
+        <LanguageToggle variant="minimal" authenticated />
         <NotificationBell notifications={notifications} initialUnreadCount={unreadNotificationCount} />
 
         <DropdownMenu>

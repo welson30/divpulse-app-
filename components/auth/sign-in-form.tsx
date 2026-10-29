@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { PrimaryCta } from "@/components/marketing/primary-cta";
 import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 import { AppleSignInButton } from "@/components/auth/apple-signin-button";
@@ -17,6 +18,7 @@ type SignInFormProps = {
 };
 
 export function SignInForm({ redirectTo, oauthError }: SignInFormProps) {
+  const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState<AuthActionState, FormData>(
     signInWithPassword,
     null,
@@ -25,10 +27,10 @@ export function SignInForm({ redirectTo, oauthError }: SignInFormProps) {
   return (
     <div className="flex w-full max-w-[430px] flex-col">
       <h1 className="pp-display m-0 text-[clamp(28px,5vw,32px)] font-semibold leading-[1.05] tracking-[-1.22px] text-[#f2f4f7]">
-        Welcome back
+        {t("welcomeBack")}
       </h1>
       <p className="m-0 mt-[11px] text-[15.5px] leading-[25.19px] text-[#99a1ac]">
-        Sign in to keep watching your income arrive.
+        {t("signInTagline")}
       </p>
 
       <div className="mt-[21px] grid grid-cols-2 gap-3">
@@ -42,7 +44,7 @@ export function SignInForm({ redirectTo, oauthError }: SignInFormProps) {
       <div className="mt-4 flex items-center gap-4">
         <span aria-hidden className="h-px flex-1 bg-[#22262c]" />
         <span className="shrink-0 text-[11px] leading-[18px] tracking-[1.76px] text-[#6c737f] uppercase">
-          Or continue with email
+          {t("orContinueWithEmail")}
         </span>
         <span aria-hidden className="h-px flex-1 bg-[#22262c]" />
       </div>
@@ -51,7 +53,7 @@ export function SignInForm({ redirectTo, oauthError }: SignInFormProps) {
         {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
 
         <label className="flex flex-col gap-2.5">
-          <span className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">Email</span>
+          <span className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">{t("email")}</span>
           <span className="relative block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -76,13 +78,13 @@ export function SignInForm({ redirectTo, oauthError }: SignInFormProps) {
         <div className="flex flex-col gap-2.5">
           <div className="flex items-baseline justify-between">
             <label htmlFor="password" className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">
-              Password
+              {t("password")}
             </label>
             <Link
               href="mailto:paidprime1@gmail.com?subject=Password%20reset"
               className="text-[13px] leading-[21px] font-medium text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]"
             >
-              Forgot password?
+              {t("forgotPassword")}
             </Link>
           </div>
           <span className="relative block">
@@ -130,12 +132,12 @@ export function SignInForm({ redirectTo, oauthError }: SignInFormProps) {
               />
             </svg>
           </span>
-          Remember me on this device
+          {t("rememberMe")}
         </label>
 
         {state?.error || oauthError ? (
           <p role="alert" className="m-0 text-[13px] leading-[21px] text-[#f87171]">
-            {state?.error ?? "Google sign-in failed. Try email, or try Google again."}
+            {state?.error ?? t("googleFailed")}
           </p>
         ) : null}
 
@@ -144,17 +146,17 @@ export function SignInForm({ redirectTo, oauthError }: SignInFormProps) {
           disabled={pending}
           className="h-[52px] w-full rounded-[10px] text-[16px] font-medium leading-[26px] shadow-[0px_16px_40px_-16px_#4c82f7]"
         >
-          {pending ? "Please wait…" : "Continue"}
+          {pending ? t("pleaseWait") : t("continueButton")}
         </PrimaryCta>
       </form>
 
       <p className="m-0 mt-[25px] text-center text-[14.5px] leading-[24px] text-[#99a1ac]">
-        New to PaidPrime?{" "}
+        {t("newToPaidPrime")}{" "}
         <Link
           href="/signup"
           className="font-medium text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]"
         >
-          Create an account
+          {t("createAccountButton")}
         </Link>
       </p>
     </div>

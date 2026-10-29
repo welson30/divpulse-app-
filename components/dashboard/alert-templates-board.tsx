@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
@@ -35,35 +36,6 @@ function formatMoney(value: number) {
   return `+$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function cardsFor(preview: TemplatePreview): TemplateCard[] {
-  const amount = formatMoney(preview.amount);
-  const broker = preview.broker?.trim() || "your linked broker";
-  return [
-    {
-      value: "compact",
-      label: "Privacy mode",
-      recommended: true,
-      title: "Dividend received",
-      amount,
-      extra: [preview.ticker],
-    },
-    {
-      value: "descriptive",
-      label: "Standard",
-      title: `Dividend received · ${preview.ticker}`,
-      amount,
-      extra: ["Now in your account"],
-    },
-    {
-      value: "premium",
-      label: "Detailed",
-      title: `Dividend confirmed · ${preview.ticker}`,
-      amount,
-      extra: [`Paid by ${broker}`, "Confirmed only after a linked broker verifies the deposit"],
-    },
-  ];
-}
-
 export function AlertTemplatesBoard({
   notificationStyle,
   preview,
@@ -77,8 +49,35 @@ export function AlertTemplatesBoard({
   telegramConnected: boolean;
   isPro: boolean;
 }) {
+  const t = useTranslations("dashboard.alertTemplates");
   const router = useRouter();
   const [selected, setSelected] = useState<NotificationStyle>(notificationStyle);
+  const amount = formatMoney(preview.amount);
+  const broker = preview.broker?.trim() || "your linked broker";
+  const templates: TemplateCard[] = [
+    {
+      value: "compact",
+      label: t("templatePrivacy"),
+      recommended: true,
+      title: t("dividendReceived"),
+      amount,
+      extra: [preview.ticker],
+    },
+    {
+      value: "descriptive",
+      label: t("templateStandard"),
+      title: `${t("dividendReceived")} · ${preview.ticker}`,
+      amount,
+      extra: [t("nowInAccount")],
+    },
+    {
+      value: "premium",
+      label: t("templateDetailed"),
+      title: `Dividend confirmed · ${preview.ticker}`,
+      amount,
+      extra: [`${t("paidBy")} ${broker}`, t("verifiedNote")],
+    },
+  ];
   const [pushOn, setPushOn] = useState(pushEnabled);
   const [telegramOn, setTelegramOn] = useState(telegramConnected);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +94,6 @@ export function AlertTemplatesBoard({
   const [styleSaving, startStyleTransition] = useTransition();
   const [pushSaving, startPushTransition] = useTransition();
   const [telegramSaving, startTelegramTransition] = useTransition();
-  const templates = cardsFor(preview);
 
   // pushEnabled (the initial prop) is account-wide — computed server-side
   // from whether ANY device has a saved push_subscriptions row, per
@@ -147,7 +145,7 @@ export function AlertTemplatesBoard({
         router.refresh();
       } catch {
         setSelected(previous);
-        setError("Couldn't save the template. Try again.");
+        setError(t("errorSave"));
       }
     });
   }
@@ -168,7 +166,7 @@ export function AlertTemplatesBoard({
           router.refresh();
         } catch {
           setPushOn(true);
-          setError("Couldn't disable push notifications. Try again.");
+          setError(t("errorPushDisable"));
         }
       });
       return;
@@ -204,7 +202,7 @@ export function AlertTemplatesBoard({
     if (telegramSaving) return;
     setError(null);
     if (!isPro) {
-      setError("Telegram alerts are a Pro feature.");
+      setError(t("errorTelegramPro"));
       return;
     }
     if (telegramOn) {
@@ -215,7 +213,7 @@ export function AlertTemplatesBoard({
           router.refresh();
         } catch {
           setTelegramOn(true);
-          setError("Couldn't disconnect Telegram. Try again.");
+          setError(t("errorTelegramDisconnect"));
         }
       });
       return;
@@ -244,7 +242,7 @@ export function AlertTemplatesBoard({
         }
       } catch {
         popup?.close();
-        setError("Couldn't start the Telegram connection. Try again.");
+        setError(t("errorTelegramConnect"));
       }
     });
   }
@@ -252,24 +250,24 @@ export function AlertTemplatesBoard({
   return (
     <div className="flex flex-col gap-8">
       <header className="border-b border-[#22262c] pb-6">
-        <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Alerts</p>
+        <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{t("eyebrow")}</p>
         <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-          Notification templates
+          {t("title")}
         </h1>
         <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-          Control exactly how much detail appears in your dividend alerts across every channel.
+          {t("description")}
         </p>
       </header>
 
       <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
         <div className="border-b border-[#22262c] px-6 py-5">
           <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-            Choose a template
+            {t("chooseTemplate")}
           </h2>
           <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
             {preview.fromLivePayment
-              ? `Preview uses your most recent dividend (${preview.ticker}).`
-              : "Illustrative preview — not a holding of yours."}
+              ? t("previewLive", { ticker: preview.ticker })
+              : t("previewIllustrative")}
           </p>
         </div>
         <div className="grid gap-4 p-6 min-[1100px]:grid-cols-3">
@@ -287,7 +285,7 @@ export function AlertTemplatesBoard({
                   <span className="text-[13px] font-medium text-[#f2f4f7]">{card.label}</span>
                   {card.recommended ? (
                     <span className="rounded-[8px] border border-[rgba(63,191,135,0.3)] bg-[#10261e] px-2 py-[4px] text-[11px] tracking-[1.1px] text-[#3fbf87] uppercase">
-                      Recommended
+                      {t("recommended")}
                     </span>
                   ) : null}
                 </div>
@@ -325,7 +323,7 @@ export function AlertTemplatesBoard({
                   >
                     {active ? <FigmaIcon src="/marketing/dashboard/icon-radio-check.svg" className="size-[11px] text-white" /> : null}
                   </span>
-                  {active ? "Selected" : "Select"}
+                  {active ? t("selected") : t("select")}
                 </span>
               </button>
             );
@@ -337,31 +335,31 @@ export function AlertTemplatesBoard({
         <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
           <div className="border-b border-[#22262c] px-6 py-5">
             <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-              Channels
+              {t("channelsTitle")}
             </h2>
-            <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Choose where alerts are delivered</p>
+            <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{t("channelsSub")}</p>
           </div>
           <ChannelRow
-            label="Push notifications"
+            label={t("pushNotifications")}
             icon="/marketing/dashboard/icon-channel-push-16.svg"
             on={pushOn}
             onToggle={togglePush}
             disabled={pushSaving}
           />
           <ChannelRow
-            label="Telegram bot"
+            label={t("telegramBot")}
             icon="/marketing/dashboard/icon-channel-telegram-16.svg"
             on={telegramOn}
             onToggle={toggleTelegram}
             disabled={telegramSaving}
-            hint={!isPro ? "Pro" : telegramOn ? undefined : "Opens Telegram to connect"}
+            hint={!isPro ? t("proLabel") : telegramOn ? undefined : t("opensInTelegram")}
           />
           <ChannelRow
-            label="Email digest"
+            label={t("emailDigest")}
             icon="/marketing/dashboard/icon-channel-email-16.svg"
             on={false}
             disabled
-            hint="Not available"
+            hint={t("emailNotAvailable")}
           />
         </section>
 
@@ -373,23 +371,23 @@ export function AlertTemplatesBoard({
               </span>
               <div>
                 <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-                  Quiet hours & thresholds
+                  {t("quietTitle")}
                 </h2>
                 <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
-                  Fine-tune when and what triggers an alert
+                  {t("quietSub")}
                 </p>
               </div>
             </div>
           </div>
           <div className="flex flex-col gap-5 p-6">
             <p className="text-[13px] leading-[21.45px] text-[#99a1ac]">
-              Quiet hours and a minimum amount aren&rsquo;t stored yet — alerts send as soon as a dividend is detected.
+              {t("quietText")}
             </p>
             <div className="grid gap-4 min-[520px]:grid-cols-2">
-              <DisabledField label="Quiet hours start" />
-              <DisabledField label="Quiet hours end" />
+              <DisabledField label={t("quietStart")} />
+              <DisabledField label={t("quietEnd")} />
             </div>
-            <DisabledField label="Minimum payment threshold" hint="Only notify above this amount" />
+            <DisabledField label={t("minThreshold")} hint={t("minThresholdHint")} />
           </div>
         </section>
       </div>
@@ -404,11 +402,10 @@ export function AlertTemplatesBoard({
         <DialogContent className="border-[#22262c] bg-[#121417]">
           <DialogHeader>
             <DialogTitle className="font-[family-name:var(--font-funnel-display)] text-[#f2f4f7]">
-              Couldn&rsquo;t enable notifications
+              {t("blockedTitle")}
             </DialogTitle>
             <DialogDescription className="text-[#99a1ac]">
-              Something blocked the request — an ad blocker or privacy extension can interfere with push
-              notifications. Try allowing this site, then try again.
+              {t("blockedDesc")}
             </DialogDescription>
           </DialogHeader>
           <button
@@ -416,7 +413,7 @@ export function AlertTemplatesBoard({
             onClick={() => setPermissionBlocked(false)}
             className="mt-4 h-10 w-full rounded-[10px] bg-[#4c82f7] px-4 text-[13px] font-medium text-white hover:bg-[#3d72e8]"
           >
-            Got it
+            {t("blockedGotIt")}
           </button>
         </DialogContent>
       </Dialog>

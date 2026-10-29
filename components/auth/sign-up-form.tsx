@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PrimaryCta } from "@/components/marketing/primary-cta";
 import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 import { AppleSignInButton } from "@/components/auth/apple-signin-button";
@@ -15,48 +16,40 @@ type SignUpFormProps = {
   oauthError?: boolean;
 };
 
-type Strength = {
-  score: number;
-  label: string;
-  color: string;
-};
-
-function passwordStrength(value: string): Strength {
-  if (!value) {
-    return { score: 0, label: "Enter a password", color: "#22262c" };
-  }
-
+function passwordStrengthScore(value: string): number {
+  if (!value) return 0;
   let score = 0;
   if (value.length >= 8) score += 1;
   if (value.length >= 12) score += 1;
   if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score += 1;
   if (/\d/.test(value) || /[^A-Za-z0-9]/.test(value)) score += 1;
-  score = Math.min(4, Math.max(1, score));
-
-  if (score <= 1) return { score: 1, label: "Weak", color: "#e07a5f" };
-  if (score === 2) return { score: 2, label: "Fair", color: "#e0a45c" };
-  if (score === 3) return { score: 3, label: "Good", color: "#4c82f7" };
-  return { score: 4, label: "Strong", color: "#3fbf87" };
+  return Math.min(4, Math.max(1, score));
 }
+
+const STRENGTH_COLORS = ["#22262c", "#e07a5f", "#e0a45c", "#4c82f7", "#3fbf87"];
 
 const fieldClass =
   "box-border h-[52px] w-full rounded-[14px] border border-[#2e343b] bg-[#0b0c0e] pr-4 pl-11 text-[16px] text-[#f2f4f7] outline-none placeholder:text-[#6c737f] transition-colors focus:border-[#4c82f7]/60";
 
 export function SignUpForm({ oauthError }: SignUpFormProps) {
+  const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState<AuthActionState, FormData>(
     signUpWithPassword,
     null,
   );
   const [password, setPassword] = useState("");
-  const strength = useMemo(() => passwordStrength(password), [password]);
+  const strengthScore = useMemo(() => passwordStrengthScore(password), [password]);
+  const strengthLabels = [t("passwordEnter"), t("passwordWeak"), t("passwordFair"), t("passwordGood"), t("passwordStrong")];
+  const strengthColor = STRENGTH_COLORS[strengthScore] ?? "#22262c";
+  const strengthLabel = strengthLabels[strengthScore] ?? t("passwordEnter");
 
   return (
     <div className="flex w-full max-w-[430px] flex-col">
       <h1 className="pp-display m-0 text-[clamp(28px,5vw,32px)] font-semibold leading-[1.05] tracking-[-1.22px] text-[#f2f4f7]">
-        Create your account
+        {t("createYourAccount")}
       </h1>
       <p className="m-0 mt-[11px] text-[15.5px] leading-[25.19px] text-[#99a1ac]">
-        Two minutes, then never miss a payment again.
+        {t("signUpTagline")}
       </p>
 
       <div className="mt-[21px] grid grid-cols-2 gap-3">
@@ -70,14 +63,14 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
       <div className="mt-4 flex items-center gap-4">
         <span aria-hidden className="h-px flex-1 bg-[#22262c]" />
         <span className="shrink-0 text-[11px] leading-[18px] tracking-[1.76px] text-[#6c737f] uppercase">
-          Or continue with email
+          {t("orContinueWithEmail")}
         </span>
         <span aria-hidden className="h-px flex-1 bg-[#22262c]" />
       </div>
 
       <form action={formAction} className="mt-4 flex flex-col gap-6">
         <label className="flex flex-col gap-2.5">
-          <span className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">Full name</span>
+          <span className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">{t("fullName")}</span>
           <span className="relative block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -100,7 +93,7 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
         </label>
 
         <label className="flex flex-col gap-2.5">
-          <span className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">Email</span>
+          <span className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">{t("email")}</span>
           <span className="relative block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -123,7 +116,7 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
         </label>
 
         <label className="flex flex-col gap-2.5">
-          <span className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">Password</span>
+          <span className="text-[14px] leading-[23px] font-medium text-[#f2f4f7]">{t("password")}</span>
           <span className="relative block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -153,13 +146,13 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
                   key={index}
                   className="h-1 min-w-px flex-1 rounded-full bg-[#22262c] transition-colors duration-200"
                   style={{
-                    backgroundColor: index < strength.score ? strength.color : "#22262c",
+                    backgroundColor: index < strengthScore ? strengthColor : "#22262c",
                   }}
                 />
               ))}
             </div>
             <p className="m-0 text-[11px] leading-[18px] font-normal tracking-[1.1px] text-[#6c737f] uppercase">
-              {strength.label}
+              {strengthLabel}
             </p>
           </div>
         </label>
@@ -188,13 +181,13 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
             </svg>
           </span>
           <span>
-            I agree to the{" "}
+            {t("agreeTerms")}{" "}
             <Link href="#" className="text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]">
-              Terms of Service
+              {t("termsOfService")}
             </Link>{" "}
-            and{" "}
+            {t("and")}{" "}
             <Link href="#" className="text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]">
-              Privacy Policy
+              {t("privacyPolicy")}
             </Link>
             .
           </span>
@@ -202,7 +195,7 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
 
         {state?.error || oauthError ? (
           <p role="alert" className="m-0 text-[13px] leading-[21px] text-[#f87171]">
-            {state?.error ?? "Google sign-in failed. Try email, or try Google again."}
+            {state?.error ?? t("googleFailed")}
           </p>
         ) : null}
 
@@ -211,17 +204,17 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
           disabled={pending}
           className="h-[52px] w-full rounded-[10px] text-[16px] font-medium leading-[26px] shadow-[0px_16px_40px_-16px_#4c82f7]"
         >
-          {pending ? "Please wait…" : "Create account"}
+          {pending ? t("pleaseWait") : t("createAccountButton")}
         </PrimaryCta>
       </form>
 
       <p className="m-0 mt-[25px] text-center text-[14.5px] leading-[24px] text-[#99a1ac]">
-        Already have an account?{" "}
+        {t("haveAccount")}{" "}
         <Link
           href="/login"
           className="font-medium text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]"
         >
-          Sign in
+          {t("signInLink")}
         </Link>
       </p>
     </div>
