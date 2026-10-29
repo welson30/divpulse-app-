@@ -721,7 +721,28 @@
       "actionAddToPortfolio": "Portfólio",
       "navRisk": "Risco NAV",
       "yieldStale": "ver site ↗",
-      "yieldUnreliableWarning": "Dados de yield não confiáveis — confira o site do fundo para a distribuição real"
+      "yieldUnreliableWarning": "Dados de yield não confiáveis — confira o site do fundo para a distribuição real",
+      "calcTitle": "Calculadora de Yield",
+      "calcSubtitle": "Veja quanto cada ETF pagaria a você anualmente",
+      "calcLabel": "Se eu investir",
+      "calcHint": "ver renda na tabela",
+      "calcSearchPlaceholder": "Buscar qualquer ETF ou REIT…"
+    },
+    "collections": {
+      "searchPlaceholder": "Buscar qualquer ativo ou empresa — ex: KO, coca-cola",
+      "searchAriaLabel": "Buscar qualquer ativo ou empresa",
+      "clearSearch": "Limpar busca",
+      "allSectors": "Todos os setores",
+      "filterBySector": "Filtrar por setor",
+      "noMatches": "Nenhum resultado para \"{query}\".",
+      "resultsFor": "{count, plural, one {# resultado para \"{query}\"} other {# resultados para \"{query}\"}}",
+      "colAsset": "Ativo",
+      "colPrice": "Preço",
+      "colToday": "Hoje",
+      "col1M": "1M",
+      "colYield": "Yield",
+      "actionWatch": "Monitorar",
+      "actionWatching": "Monitorando"
     },
     "performance": {
       "annualizedReturn": "Retorno anualizado",

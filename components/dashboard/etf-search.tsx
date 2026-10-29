@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { TickerSearchCombobox } from "@/components/dashboard/ticker-search-combobox";
 import type { TickerSearchResult } from "@/lib/tickers/search";
@@ -11,6 +12,7 @@ import type { TickerSearchResult } from "@/lib/tickers/search";
  * When the user selects a result, navigates to the existing ticker detail page.
  */
 export function EtfSearch() {
+  const t = useTranslations("dashboard.etfExplorer");
   const router = useRouter();
   const [value, setValue] = useState("");
 
@@ -35,7 +37,7 @@ export function EtfSearch() {
         value={value}
         onValueChange={setValue}
         onSelect={handleSelect}
-        placeholder="Search any ETF or REIT ticker…"
+        placeholder={t("calcSearchPlaceholder")}
         className="pl-9"
       />
     </form>

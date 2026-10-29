@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useId } from "react";
+import { useTranslations } from "next-intl";
 import { Calculator, ChevronRight } from "lucide-react";
 
 type Props = {
@@ -15,6 +16,7 @@ function fmt(n: number) {
 }
 
 export function EtfYieldCalculator({ onAmountChange, initialAmount = 10_000 }: Props) {
+  const t = useTranslations("dashboard.etfExplorer");
   const [raw, setRaw] = useState(String(initialAmount));
   const [active, setActive] = useState(initialAmount);
   const inputId = useId();
@@ -41,15 +43,15 @@ export function EtfYieldCalculator({ onAmountChange, initialAmount = 10_000 }: P
           <Calculator className="size-4" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-text-primary">Yield Calculator</p>
-          <p className="text-xs text-text-secondary">See how much each ETF would pay you annually</p>
+          <p className="text-sm font-semibold text-text-primary">{t("calcTitle")}</p>
+          <p className="text-xs text-text-secondary">{t("calcSubtitle")}</p>
         </div>
       </div>
 
       {/* Input row */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <label htmlFor={inputId} className="shrink-0 font-mono text-sm text-text-secondary">
-          If I invest
+          {t("calcLabel")}
         </label>
         <div className="relative flex-1">
           <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center font-mono text-sm text-text-secondary">
@@ -71,7 +73,7 @@ export function EtfYieldCalculator({ onAmountChange, initialAmount = 10_000 }: P
         </div>
         <div className="flex items-center gap-1 font-mono text-sm text-text-secondary">
           <ChevronRight className="size-3.5 shrink-0" />
-          <span>see income in table</span>
+          <span>{t("calcHint")}</span>
         </div>
       </div>
 

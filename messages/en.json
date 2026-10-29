@@ -721,7 +721,28 @@
       "actionAddToPortfolio": "Portfolio",
       "navRisk": "NAV risk",
       "yieldStale": "see site ↗",
-      "yieldUnreliableWarning": "Yield data unreliable — check fund site for real distribution"
+      "yieldUnreliableWarning": "Yield data unreliable — check fund site for real distribution",
+      "calcTitle": "Yield Calculator",
+      "calcSubtitle": "See how much each ETF would pay you annually",
+      "calcLabel": "If I invest",
+      "calcHint": "see income in table",
+      "calcSearchPlaceholder": "Search any ETF or REIT ticker…"
+    },
+    "collections": {
+      "searchPlaceholder": "Search any ticker or company — e.g. KO, coca-cola",
+      "searchAriaLabel": "Search any ticker or company",
+      "clearSearch": "Clear search",
+      "allSectors": "All Sectors",
+      "filterBySector": "Filter by sector",
+      "noMatches": "No matches for \"{query}\".",
+      "resultsFor": "{count, plural, one {# result for \"{query}\"} other {# results for \"{query}\"}}",
+      "colAsset": "Asset",
+      "colPrice": "Price",
+      "colToday": "Today",
+      "col1M": "1M",
+      "colYield": "Yield",
+      "actionWatch": "Watch",
+      "actionWatching": "Watching"
     },
     "performance": {
       "annualizedReturn": "Annualized return",

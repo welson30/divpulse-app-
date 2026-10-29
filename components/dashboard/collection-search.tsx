@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, Search, X } from "lucide-react";
 import { searchCollectionTickers } from "@/app/(dashboard)/collections/actions";
 import { CollectionTable, type CollectionRow } from "@/components/dashboard/collection-table";
@@ -14,6 +15,7 @@ const DEBOUNCE_MS = 300;
  * which already has a per-row Watch button wired to any ticker.
  */
 export function CollectionSearch({ sectorFilter }: { sectorFilter?: React.ReactNode }) {
+  const t = useTranslations("dashboard.collections");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CollectionRow[]>([]);
   const [searched, setSearched] = useState(false);
@@ -58,8 +60,8 @@ export function CollectionSearch({ sectorFilter }: { sectorFilter?: React.ReactN
             ref={inputRef}
             value={query}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder="Search any ticker or company — e.g. KO, coca-cola"
-            aria-label="Search any ticker or company"
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchAriaLabel")}
             className="h-11 w-full rounded-lg border border-input bg-transparent pr-10 pl-10 text-[15px] outline-none transition-colors placeholder:text-text-secondary focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
           <div className="absolute top-1/2 right-3 -translate-y-1/2">
@@ -69,7 +71,7 @@ export function CollectionSearch({ sectorFilter }: { sectorFilter?: React.ReactN
               <button
                 type="button"
                 onClick={clear}
-                aria-label="Clear search"
+                aria-label={t("clearSearch")}
                 className="text-text-secondary transition-colors hover:text-text-primary"
               >
                 <X className="h-4 w-4" />
@@ -82,11 +84,11 @@ export function CollectionSearch({ sectorFilter }: { sectorFilter?: React.ReactN
 
       {searched && !isPending ? (
         results.length === 0 ? (
-          <p className="text-sm text-text-secondary">No matches for “{query.trim()}”.</p>
+          <p className=”text-sm text-text-secondary”>{t(“noMatches”, { query: query.trim() })}</p>
         ) : (
           <div className="flex flex-col gap-sp-2">
-            <p className="text-xs text-text-secondary">
-              {results.length} result{results.length === 1 ? "" : "s"} for “{query.trim()}”
+            <p className=”text-xs text-text-secondary”>
+              {t(“resultsFor”, { count: results.length, query: query.trim() })}
             </p>
             <CollectionTable rows={results} />
           </div>

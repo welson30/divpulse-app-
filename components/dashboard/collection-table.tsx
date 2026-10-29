@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Check, Loader2, Plus } from "lucide-react";
 import { watchTicker } from "@/app/(dashboard)/watchlist/actions";
@@ -35,6 +36,7 @@ const HEAD =
   "border-b border-border-subtle px-sp-3 py-3.5 font-mono text-xs font-medium tracking-[0.06em] text-text-secondary uppercase";
 
 export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
+  const t = useTranslations("dashboard.collections");
   const [, startTransition] = useTransition();
   const [watched, setWatched] = useState<Set<string>>(new Set());
   const [pendingTicker, setPendingTicker] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
               {isWatched ? (
                 <Link
                   href="/watchlist"
-                  aria-label="Watching"
+                  aria-label={t("actionWatching")}
                   className="flex shrink-0 items-center justify-center rounded-full border border-green-500/30 bg-green-500/10 p-1.5 text-green-500 transition-colors hover:bg-green-500/20"
                 >
                   <Check className="size-4" />
@@ -90,7 +92,7 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
                   type="button"
                   disabled={pendingTicker === row.ticker}
                   onClick={() => handleWatch(row.ticker)}
-                  aria-label="Watch"
+                  aria-label={t("actionWatch")}
                   className="flex shrink-0 items-center justify-center rounded-full border border-border-interactive p-1.5 text-text-primary transition-colors hover:border-green-500 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40"
                 >
                   {pendingTicker === row.ticker ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
@@ -106,16 +108,16 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
         <table className="w-full min-w-180 border-collapse">
           <thead>
             <tr>
-              <th className={`${HEAD} text-left`}>Asset</th>
-              <th className={`${HEAD} text-right`}>Price</th>
+              <th className={`${HEAD} text-left`}>{t("colAsset")}</th>
+              <th className={`${HEAD} text-right`}>{t("colPrice")}</th>
               <th className={`${HEAD} text-right`}>
-                <span className="inline-flex items-center gap-1">Today <InfoTip label={TIPS.todayChange} /></span>
+                <span className="inline-flex items-center gap-1">{t("colToday")} <InfoTip label={TIPS.todayChange} /></span>
               </th>
               <th className={`${HEAD} text-center`}>
-                <span className="inline-flex items-center gap-1">1M <InfoTip label={TIPS.sparkline1M} /></span>
+                <span className="inline-flex items-center gap-1">{t("col1M")} <InfoTip label={TIPS.sparkline1M} /></span>
               </th>
               <th className={`${HEAD} text-right`}>
-                <span className="inline-flex items-center gap-1">Yield <InfoTip label={TIPS.dividendYield} /></span>
+                <span className="inline-flex items-center gap-1">{t("colYield")} <InfoTip label={TIPS.dividendYield} /></span>
               </th>
               <th className={`${HEAD} text-right`}>
                 <span className="sr-only">Actions</span>
@@ -160,7 +162,7 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
                         className="inline-flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1.5 font-sans text-xs font-semibold text-green-500 transition-colors hover:bg-green-500/20"
                       >
                         <Check className="size-3.5" />
-                        Watching
+                        {t("actionWatching")}
                       </Link>
                     ) : (
                       <button
@@ -170,7 +172,7 @@ export function CollectionTable({ rows }: { rows: CollectionRow[] }) {
                         className="inline-flex items-center gap-1.5 rounded-full border border-border-interactive px-3 py-1.5 font-sans text-xs font-semibold text-text-primary transition-colors hover:border-green-500 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40"
                       >
                         {pendingTicker === row.ticker ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3.5" />}
-                        Watch
+                        {t("actionWatch")}
                       </button>
                     )}
                   </td>
