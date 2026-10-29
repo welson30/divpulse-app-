@@ -7,7 +7,8 @@ import { ChangePasswordForm } from "@/components/dashboard/change-password-form"
 import { CalendarPrivacyForm } from "@/components/dashboard/calendar-privacy-form";
 import { BillingCard } from "@/components/dashboard/billing-card";
 import { SettingsBillingPanel } from "@/components/dashboard/settings-billing-panel";
-import { SettingsTabs, SETTINGS_TABS, type SettingsTab } from "@/components/dashboard/settings-tabs";
+import { SettingsTabs } from "@/components/dashboard/settings-tabs";
+import { SETTINGS_TABS, type SettingsTab } from "@/components/dashboard/settings-tabs-config";
 import { LanguageSection } from "@/components/dashboard/language-section";
 
 export const metadata: Metadata = {

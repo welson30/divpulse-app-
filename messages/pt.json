@@ -100,10 +100,13 @@
     "channels": {
       "push": "Push",
       "pushHint": "iOS & Android · instantâneo",
+      "pushSubtitle": "Alertas instantâneos direto no seu celular",
       "telegram": "Telegram",
       "telegramHint": "Mensagem privada pelo bot",
+      "telegramSubtitle": "Mensagem privada via seu bot no Telegram",
       "email": "E-mail",
-      "emailHint": "Comprovante formatado"
+      "emailHint": "Comprovante formatado",
+      "emailSubtitle": "Um comprovante formatado na sua caixa de entrada"
     },
     "cardLabel": "Dividendo recebido"
   },
@@ -147,7 +150,8 @@
   "dividendCalendar": {
     "eyebrow": "Calendário de dividendos",
     "title": "Cada data de pagamento, em uma só tela",
-    "description": "Veja a renda esperada no calendário antes de cair na sua conta — associada ao broker de onde vem o pagamento."
+    "description": "Veja a renda esperada no calendário antes de cair na sua conta — associada ao broker de onde vem o pagamento.",
+    "connectedBrokersLabel": "Corretoras conectadas"
   },
   "analytics": {
     "eyebrow": "Análises",
@@ -164,6 +168,7 @@
     "eyebrow": "Lista de observação",
     "title": "Acompanhe candidatos antes de comprar",
     "description": "Siga preço, rendimento e a próxima data ex-dividendo de tickers que você está considerando, sem adicioná-los ao portfólio.",
+    "cardLabel": "Lista de observação",
     "bullets": {
       "track": "Acompanhe candidatos ilimitados junto com posições reais",
       "live": "Movimentação de preço e rendimento em tempo real de uma só vez",

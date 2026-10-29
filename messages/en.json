@@ -100,10 +100,13 @@
     "channels": {
       "push": "Push",
       "pushHint": "iOS & Android · instant",
+      "pushSubtitle": "Instant alerts straight to your phone",
       "telegram": "Telegram",
       "telegramHint": "Private bot message",
+      "telegramSubtitle": "Private message via your Telegram bot",
       "email": "Email",
-      "emailHint": "Formatted receipt"
+      "emailHint": "Formatted receipt",
+      "emailSubtitle": "A formatted receipt in your inbox"
     },
     "cardLabel": "Dividend received"
   },
@@ -147,7 +150,8 @@
   "dividendCalendar": {
     "eyebrow": "Dividend calendar",
     "title": "Every payment date, in one view",
-    "description": "See expected income land on the calendar before it hits your account — matched to the broker it's paid from."
+    "description": "See expected income land on the calendar before it hits your account — matched to the broker it's paid from.",
+    "connectedBrokersLabel": "Connected brokers"
   },
   "analytics": {
     "eyebrow": "Analytics",
@@ -164,6 +168,7 @@
     "eyebrow": "Watchlist",
     "title": "Track candidates before you buy in",
     "description": "Follow price, yield and the next ex-date on tickers you're considering, without adding them to your portfolio.",
+    "cardLabel": "Watchlist",
     "bullets": {
       "track": "Track unlimited candidates alongside real holdings",
       "live": "Live price movement and yield at a glance",
