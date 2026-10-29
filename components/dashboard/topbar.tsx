@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { signOut } from "@/app/(auth)/actions";
 import { HeaderSearch } from "@/components/dashboard/header-search";
 import { NotificationBell, type RecentNotification } from "@/components/dashboard/notification-bell";
@@ -42,6 +43,7 @@ function shortName(email: string, displayName: string | null) {
 }
 
 export function Topbar({ email, displayName, planLabel, notifications, unreadNotificationCount }: TopbarProps) {
+  const tTopbar = useTranslations("dashboard.topbar");
   const initials = getInitials(email, displayName);
   const name = displayName?.trim() || email;
   const compact = shortName(email, displayName);
@@ -87,7 +89,7 @@ export function Topbar({ email, displayName, planLabel, notifications, unreadNot
             </div>
             <div className="px-3 pb-2.5">
               <span className="inline-flex items-center rounded-full bg-[#16233d] px-2 py-0.5 text-[10px] font-medium tracking-[0.04em] text-[#4c82f7] uppercase">
-                {planLabel} plan
+                {planLabel} {tTopbar("plan")}
               </span>
             </div>
             <DropdownMenuSeparator className="mx-0" />
@@ -95,14 +97,14 @@ export function Topbar({ email, displayName, planLabel, notifications, unreadNot
               <DropdownMenuItem asChild>
                 <Link href="/settings">
                   <IconSettings className="size-3.5" />
-                  Settings
+                  {tTopbar("settings")}
                 </Link>
               </DropdownMenuItem>
               <form action={signOut}>
                 <DropdownMenuItem asChild variant="destructive">
                   <button type="submit" className="w-full">
                     <IconLogOut className="size-3.5" />
-                    Sign out
+                    {tTopbar("signOut")}
                   </button>
                 </DropdownMenuItem>
               </form>

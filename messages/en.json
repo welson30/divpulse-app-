@@ -338,15 +338,21 @@
       "more": "More"
     },
     "overview": {
-      "title": "Dashboard",
-      "totalValue": "Total Portfolio Value",
-      "totalIncome": "Annual Dividend Income",
-      "yield": "Portfolio Yield",
-      "nextPayment": "Next Payment",
-      "recentActivity": "Recent Activity",
-      "upcomingPayments": "Upcoming Payments",
-      "noPayments": "No upcoming payments",
-      "viewAll": "View all"
+      "welcomeBack": "Welcome back,",
+      "syncedAgo": "Portfolio synced {ago} · read-only across {count, plural, one {# broker} other {# brokers}}.",
+      "readOnlyBrokers": "Read-only across {count, plural, one {# broker} other {# brokers}}.",
+      "addHoldingPrompt": "Add a holding or connect a broker to start tracking dividend income.",
+      "syncedBadge": "Synced {ago}",
+      "noHoldings": "No holdings yet. Add a ticker to start tracking dividend income.",
+      "addFirstHolding": "Add first holding",
+      "recentActivity": "Recent activity",
+      "recentActivitySub": "Latest confirmed dividend deposits",
+      "noDeposits": "No dividend deposits recorded yet.",
+      "nextDividend": "Next dividend",
+      "nextDividendSub": "Highest confidence upcoming payment",
+      "noNextPayment": "No upcoming payments detected yet for your holdings.",
+      "upcomingPayments": "Upcoming payments",
+      "noUpcoming": "Nothing on the calendar in the next 90 days."
     },
     "portfolio": {
       "title": "Portfolio",
@@ -431,6 +437,40 @@
       "title": "Upgrade to Pro",
       "description": "Unlock unlimited holdings, Telegram alerts, and premium features.",
       "cta": "Upgrade now"
+    },
+    "topbar": {
+      "plan": "plan",
+      "settings": "Settings",
+      "signOut": "Sign out"
+    },
+    "notificationBell": {
+      "aria": "Notifications",
+      "ariaUnread": "Notifications, {count} unread",
+      "title": "Notifications",
+      "empty": "No notifications yet — you'll see dividend payments here as they're detected.",
+      "viewAll": "View all"
+    },
+    "common": {
+      "portfolioValue": "Portfolio value",
+      "monthlyIncome": "Monthly income",
+      "annualIncome": "Annual income",
+      "portfolioYield": "Portfolio yield",
+      "today": "today",
+      "noChangeData": "No change data yet",
+      "trailing12MonthAvg": "Trailing 12-month average",
+      "trailing12Months": "Trailing 12 months",
+      "weightedAverage": "Weighted average",
+      "viewAll": "View all",
+      "all": "All",
+      "holding": "Holding",
+      "broker": "Broker",
+      "time": "Time",
+      "amount": "Amount",
+      "unspecified": "Unspecified",
+      "confirmed": "Confirmed",
+      "estimated": "Est.",
+      "aiAdvisor": "AI Advisor",
+      "footerDisclaimer": "Read-only broker access · Data delayed 15 min"
     }
   },
   "notifications": {

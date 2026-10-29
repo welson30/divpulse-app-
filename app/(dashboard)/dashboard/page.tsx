@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { computeTrailingIncome, computeMonthlyIncomeSeries } from "@/lib/dividend-data/income";
 import { estimateNextPayment, estimateUpcomingPayments } from "@/lib/dividend-data/next-payment";
@@ -67,6 +68,10 @@ const SYNC_BADGE: Record<string, { border: string; bg: string; dot: string; text
 };
 
 export default async function DashboardPage() {
+  const [t, tc] = await Promise.all([
+    getTranslations("dashboard.overview"),
+    getTranslations("dashboard.common"),
+  ]);
   const supabase = await createClient();
   const {
     data: { user },
@@ -105,23 +110,23 @@ export default async function DashboardPage() {
       <div className="relative min-w-0">
         <p className="text-[10px] font-semibold tracking-[2.5px] text-[#2e3848] uppercase">{dateLabel}</p>
         <h1 className="mt-[6px] font-[family-name:var(--font-funnel-display)] text-[26px] font-bold tracking-[-1px] text-[#e8eaf0] min-[900px]:text-[30px] min-[900px]:leading-[1.2]">
-          Welcome back,{" "}
+          {t("welcomeBack")}{" "}
           <span style={{ color: "#3fbf87", filter: "drop-shadow(0 0 12px rgba(63,191,135,0.4))" }}>
             {firstName}
           </span>
         </h1>
         <p className="mt-2 max-w-[580px] text-[13px] leading-[1.65] text-[#3d4554]">
           {syncAgo
-            ? `Portfolio synced ${syncAgo} · read-only across ${brokerCount} ${brokerCount === 1 ? "broker" : "brokers"}.`
+            ? t("syncedAgo", { ago: syncAgo, count: brokerCount })
             : brokerCount > 0
-              ? `Read-only across ${brokerCount} ${brokerCount === 1 ? "broker" : "brokers"}.`
-              : "Add a holding or connect a broker to start tracking dividend income."}
+              ? t("readOnlyBrokers", { count: brokerCount })
+              : t("addHoldingPrompt")}
         </p>
       </div>
       {syncAgo ? (
         <div className={`relative flex items-center gap-1.5 rounded-[8px] border ${syncBadge.border} ${syncBadge.bg} px-[7.8px] py-[3px]`}>
           <span className={`size-1.5 animate-pulse rounded-full ${syncBadge.dot}`} />
-          <span className={`text-[11px] tracking-[1.1px] ${syncBadge.text} uppercase`}>Synced {syncAgo}</span>
+          <span className={`text-[11px] tracking-[1.1px] ${syncBadge.text} uppercase`}>{t("syncedBadge", { ago: syncAgo })}</span>
         </div>
       ) : null}
     </header>
@@ -132,10 +137,10 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-6">
         {header}
         <div className="flex flex-col items-center gap-3 rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center">
-          <p className="max-w-sm text-sm text-[#99a1ac]">No holdings yet. Add a ticker to start tracking dividend income.</p>
+          <p className="max-w-sm text-sm text-[#99a1ac]">{t("noHoldings")}</p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button asChild className="h-10">
-              <Link href="/holdings">Add first holding</Link>
+              <Link href="/holdings">{t("addFirstHolding")}</Link>
             </Button>
             <PlaidConnectDialog isProPlus={isProPlus} connections={brokerConnections ?? []} />
           </div>
@@ -200,30 +205,30 @@ export default async function DashboardPage() {
 
   const kpis = [
     {
-      label: "Portfolio value",
+      label: tc("portfolioValue"),
       value: formatMoney(portfolioValue, true),
       sub:
         portfolioDayChangePct != null
-          ? `${portfolioDayChangePct >= 0 ? "+" : ""}${portfolioDayChangePct.toFixed(2)}% today`
-          : "No change data yet",
+          ? `${portfolioDayChangePct >= 0 ? "+" : ""}${portfolioDayChangePct.toFixed(2)}% ${tc("today")}`
+          : tc("noChangeData"),
       valueClass: "text-[#3fbf87]",
     },
     {
-      label: "Monthly income",
+      label: tc("monthlyIncome"),
       value: formatMoney(income.monthly),
-      sub: "Trailing 12-month average",
+      sub: tc("trailing12MonthAvg"),
       valueClass: "text-[#f2f4f7]",
     },
     {
-      label: "Annual income",
+      label: tc("annualIncome"),
       value: formatMoney(annualIncome, true),
-      sub: "Trailing 12 months",
+      sub: tc("trailing12Months"),
       valueClass: "text-[#f2f4f7]",
     },
     {
-      label: "Portfolio yield",
+      label: tc("portfolioYield"),
       value: `${avgYieldPct.toFixed(2)}%`,
-      sub: "Weighted average",
+      sub: tc("weightedAverage"),
       valueClass: "text-[#f2f4f7]",
     },
   ];
@@ -243,22 +248,22 @@ export default async function DashboardPage() {
             <header className="flex items-start justify-between gap-4 border-b border-[#22262c] px-5 py-5 min-[900px]:px-6">
               <div>
                 <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-                  Recent activity
+                  {t("recentActivity")}
                 </h2>
-                <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Latest confirmed dividend deposits</p>
+                <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{t("recentActivitySub")}</p>
               </div>
               <Link href="/history" className="shrink-0 pt-1.5 text-[13px] text-[#4c82f7] hover:underline">
-                View all
+                {tc("viewAll")}
               </Link>
             </header>
             {recentPayments && recentPayments.length > 0 ? (
               <div className="overflow-x-auto">
                 <div className="min-w-[560px]">
                   <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)_minmax(0,0.9fr)_minmax(7rem,auto)] border-b border-[#22262c] px-6 py-3 text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">
-                    <span>Holding</span>
-                    <span>Broker</span>
-                    <span>Time</span>
-                    <span className="text-right">Amount</span>
+                    <span>{tc("holding")}</span>
+                    <span>{tc("broker")}</span>
+                    <span>{tc("time")}</span>
+                    <span className="text-right">{tc("amount")}</span>
                   </div>
                   {recentPayments.map((payment) => {
                     const holding = holdingById.get(payment.holding_id);
@@ -270,7 +275,7 @@ export default async function DashboardPage() {
                           <span className="block text-[14px] font-medium text-[#f2f4f7]">{ticker}</span>
                           <span className="block truncate text-[12px] text-[#6c737f]">{name}</span>
                         </span>
-                        <span className="self-center text-[13px] text-[#99a1ac]">{holding?.broker_name ?? "Unspecified"}</span>
+                        <span className="self-center text-[13px] text-[#99a1ac]">{holding?.broker_name ?? tc("unspecified")}</span>
                         <span className="self-center text-[13px] whitespace-nowrap text-[#99a1ac]">
                           {formatActivityTime(payment.pay_date, payment.notified_at)}
                         </span>
@@ -294,7 +299,7 @@ export default async function DashboardPage() {
                 </div>
               </div>
             ) : (
-              <p className="px-6 py-10 text-center text-sm text-[#99a1ac]">No dividend deposits recorded yet.</p>
+              <p className="px-6 py-10 text-center text-sm text-[#99a1ac]">{t("noDeposits")}</p>
             )}
           </section>
         </div>
@@ -303,9 +308,9 @@ export default async function DashboardPage() {
           <section className="rounded-[14px] border border-[#22262c] bg-[#121417]">
             <header className="border-b border-[#22262c] px-6 py-5">
               <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-                Next dividend
+                {t("nextDividend")}
               </h2>
-              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Highest confidence upcoming payment</p>
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{t("nextDividendSub")}</p>
             </header>
             {nextPayment && nextHolding && nextAmount != null ? (
               <div className="flex flex-col gap-2 px-6 py-5">
@@ -321,25 +326,25 @@ export default async function DashboardPage() {
                 <div className="h-px bg-[#22262c]" />
                 <div className="flex items-center gap-2 pt-2 text-[13px] text-[#99a1ac]">
                   <FigmaIcon src="/marketing/dashboard/icon-clock.svg" className="size-[14px]" />
-                  {formatPayDate(nextPayment.payDate)} · {nextPayment.source === "confirmed" ? "Confirmed" : "Est."}
+                  {formatPayDate(nextPayment.payDate)} · {nextPayment.source === "confirmed" ? tc("confirmed") : tc("estimated")}
                 </div>
                 <div className="flex items-center gap-2 pt-1 text-[13px] text-[#99a1ac]">
                   <TickerLogo ticker={nextPayment.ticker} logoUrl={infoFor(nextPayment.ticker)?.logoUrl} size="sm" />
-                  {nextHolding.broker_name ?? "Unspecified"}
+                  {nextHolding.broker_name ?? tc("unspecified")}
                 </div>
               </div>
             ) : (
-              <p className="px-6 py-8 text-sm text-[#99a1ac]">No upcoming payments detected yet for your holdings.</p>
+              <p className="px-6 py-8 text-sm text-[#99a1ac]">{t("noNextPayment")}</p>
             )}
           </section>
 
           <section className="rounded-[14px] border border-[#22262c] bg-[#121417]">
             <header className="flex items-center justify-between border-b border-[#22262c] px-6 py-5">
               <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-                Upcoming payments
+                {t("upcomingPayments")}
               </h2>
               <Link href="/upcoming" className="text-[13px] text-[#4c82f7] hover:underline">
-                All
+                {tc("all")}
               </Link>
             </header>
             {upcomingRows.length > 0 ? (
@@ -356,7 +361,7 @@ export default async function DashboardPage() {
                         <div>
                           <div className="text-[13px] font-medium text-[#f2f4f7]">{row.ticker}</div>
                           <div className="text-[11px] text-[#6c737f]">
-                            {formatPayDate(row.payDate)} · {row.source === "confirmed" ? "Confirmed" : "Est."}
+                            {formatPayDate(row.payDate)} · {row.source === "confirmed" ? tc("confirmed") : tc("estimated")}
                           </div>
                         </div>
                       </div>
@@ -366,14 +371,14 @@ export default async function DashboardPage() {
                 })}
               </ul>
             ) : (
-              <p className="px-6 py-8 text-sm text-[#99a1ac]">Nothing on the calendar in the next 90 days.</p>
+              <p className="px-6 py-8 text-sm text-[#99a1ac]">{t("noUpcoming")}</p>
             )}
           </section>
 
           <section className="rounded-[14px] border border-[#22262c] bg-[#16191d] p-6">
             <div className="mb-3 flex items-center gap-2">
               <FigmaIcon src="/marketing/dashboard/icon-sparkle.svg" className="size-4 text-[#4c82f7]" />
-              <p className="text-[11px] tracking-[1.76px] text-[#4c82f7] uppercase">AI Advisor</p>
+              <p className="text-[11px] tracking-[1.76px] text-[#4c82f7] uppercase">{tc("aiAdvisor")}</p>
             </div>
             <p className="mb-4 text-[14px] leading-[22.75px] text-[#f2f4f7]">{advisorInsight}</p>
             <OpenAdvisorButton />
@@ -385,7 +390,7 @@ export default async function DashboardPage() {
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma wordmark */}
         <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={24} height={24} className="h-3.5 w-auto opacity-60" />
         <p className="text-[12px] leading-[19.8px] text-[#6c737f]">
-          Read-only broker access · Data delayed 15 min
+          {tc("footerDisclaimer")}
         </p>
       </footer>
     </div>

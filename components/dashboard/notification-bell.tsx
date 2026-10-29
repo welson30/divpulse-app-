@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { EnableNotificationsButton } from "@/components/notifications/enable-notifications-button";
 import { markNotificationsSeen } from "@/app/(dashboard)/notifications/actions";
@@ -29,6 +30,7 @@ type NotificationBellProps = {
 
 /** The in-app notification center — every dashboard page, via AppShell. */
 export function NotificationBell({ notifications, initialUnreadCount }: NotificationBellProps) {
+  const tBell = useTranslations("dashboard.notificationBell");
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
   const [, startTransition] = useTransition();
 
@@ -51,7 +53,7 @@ export function NotificationBell({ notifications, initialUnreadCount }: Notifica
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
+          aria-label={unreadCount > 0 ? tBell("ariaUnread", { count: unreadCount }) : tBell("aria")}
           className="relative flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#121417] text-[#99a1ac] transition-colors hover:text-[#f2f4f7]"
         >
           <FigmaIcon src="/marketing/dashboard/icon-bell.svg" className="size-[17px]" />
@@ -63,7 +65,7 @@ export function NotificationBell({ notifications, initialUnreadCount }: Notifica
 
       <DropdownMenuContent align="end" className="w-80 p-0">
         <div className="p-3 pb-2">
-          <span className="text-sm font-semibold text-text-primary">Notifications</span>
+          <span className="text-sm font-semibold text-text-primary">{tBell("title")}</span>
         </div>
 
         <div className="px-3 pb-2.5">
@@ -75,7 +77,7 @@ export function NotificationBell({ notifications, initialUnreadCount }: Notifica
         <div className="max-h-80 overflow-y-auto p-1">
           {notifications.length === 0 ? (
             <p className="px-2.5 py-5 text-center text-xs text-text-secondary">
-              No notifications yet — you&rsquo;ll see dividend payments here as they&rsquo;re detected.
+              {tBell("empty")}
             </p>
           ) : (
             notifications.map((n) => {
@@ -117,7 +119,7 @@ export function NotificationBell({ notifications, initialUnreadCount }: Notifica
             <div className="p-1">
               <DropdownMenuItem asChild>
                 <Link href="/notifications" className="justify-center px-2 py-2 text-[12px] text-text-secondary">
-                  View all
+                  {tBell("viewAll")}
                 </Link>
               </DropdownMenuItem>
             </div>

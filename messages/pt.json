@@ -338,15 +338,21 @@
       "more": "Mais"
     },
     "overview": {
-      "title": "Dashboard",
-      "totalValue": "Valor Total do Portfólio",
-      "totalIncome": "Renda Anual de Dividendos",
-      "yield": "Rendimento do Portfólio",
-      "nextPayment": "Próximo Pagamento",
-      "recentActivity": "Atividade Recente",
-      "upcomingPayments": "Próximos Pagamentos",
-      "noPayments": "Nenhum pagamento previsto",
-      "viewAll": "Ver todos"
+      "welcomeBack": "Bem-vindo de volta,",
+      "syncedAgo": "Portfólio sincronizado {ago} · somente leitura em {count, plural, one {# corretora} other {# corretoras}}.",
+      "readOnlyBrokers": "Somente leitura em {count, plural, one {# corretora} other {# corretoras}}.",
+      "addHoldingPrompt": "Adicione um ativo ou conecte uma corretora para rastrear sua renda de dividendos.",
+      "syncedBadge": "Sincronizado {ago}",
+      "noHoldings": "Nenhum ativo ainda. Adicione um ticker para começar a rastrear dividendos.",
+      "addFirstHolding": "Adicionar primeiro ativo",
+      "recentActivity": "Atividade recente",
+      "recentActivitySub": "Últimos depósitos de dividendos confirmados",
+      "noDeposits": "Nenhum depósito de dividendos registrado ainda.",
+      "nextDividend": "Próximo dividendo",
+      "nextDividendSub": "Pagamento previsto com maior confiança",
+      "noNextPayment": "Nenhum pagamento próximo detectado para seus ativos.",
+      "upcomingPayments": "Próximos pagamentos",
+      "noUpcoming": "Nada no calendário nos próximos 90 dias."
     },
     "portfolio": {
       "title": "Portfólio",
@@ -431,6 +437,40 @@
       "title": "Assine o Pro",
       "description": "Desbloqueie ativos ilimitados, alertas no Telegram e recursos premium.",
       "cta": "Assinar agora"
+    },
+    "topbar": {
+      "plan": "plano",
+      "settings": "Configurações",
+      "signOut": "Sair"
+    },
+    "notificationBell": {
+      "aria": "Notificações",
+      "ariaUnread": "Notificações, {count} não lidas",
+      "title": "Notificações",
+      "empty": "Sem notificações — os pagamentos de dividendos aparecerão aqui quando detectados.",
+      "viewAll": "Ver todas"
+    },
+    "common": {
+      "portfolioValue": "Valor do portfólio",
+      "monthlyIncome": "Renda mensal",
+      "annualIncome": "Renda anual",
+      "portfolioYield": "Yield do portfólio",
+      "today": "hoje",
+      "noChangeData": "Sem dados de variação",
+      "trailing12MonthAvg": "Média dos últimos 12 meses",
+      "trailing12Months": "Últimos 12 meses",
+      "weightedAverage": "Média ponderada",
+      "viewAll": "Ver todos",
+      "all": "Todos",
+      "holding": "Ativo",
+      "broker": "Corretora",
+      "time": "Hora",
+      "amount": "Valor",
+      "unspecified": "Não especificado",
+      "confirmed": "Confirmado",
+      "estimated": "Est.",
+      "aiAdvisor": "Consultor IA",
+      "footerDisclaimer": "Acesso somente leitura · Dados com 15 min de atraso"
     }
   },
   "notifications": {
