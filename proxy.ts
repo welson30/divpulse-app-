@@ -1,6 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const LOCALE_COOKIE = "PAIDPRIME_LOCALE";
+const SUPPORTED_LOCALES = ["en", "pt"];
+
+function detectLocale(request: NextRequest): string {
+  const accept = request.headers.get("accept-language") ?? "";
+  const preferred = accept
+    .split(",")
+    .map((part) => part.split(";")[0]!.trim().toLowerCase())
+    .find((lang) => SUPPORTED_LOCALES.some((loc) => lang === loc || lang.startsWith(loc + "-")));
+  return preferred?.startsWith("pt") ? "pt" : "en";
+}
+
 const PROTECTED_PREFIXES = [
   "/onboarding",
   "/dashboard",
@@ -65,6 +77,18 @@ export async function proxy(request: NextRequest) {
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("redirectTo", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // Set locale cookie on first visit (locale detection from Accept-Language)
+  const existingLocale = request.cookies.get(LOCALE_COOKIE)?.value;
+  if (!existingLocale || !SUPPORTED_LOCALES.includes(existingLocale)) {
+    const detected = detectLocale(request);
+    response.cookies.set(LOCALE_COOKIE, detected, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+      httpOnly: false,
+    });
   }
 
   return response;
