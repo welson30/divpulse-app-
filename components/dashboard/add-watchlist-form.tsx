@@ -1,11 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { TickerSearchCombobox } from "@/components/dashboard/ticker-search-combobox";
 import { addWatchlistItem, type WatchlistActionState } from "@/app/(dashboard)/watchlist/actions";
 
 export function AddWatchlistForm({ onSuccess }: { onSuccess?: () => void }) {
+  const t = useTranslations("dashboard.watchlist");
   const [ticker, setTicker] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [state, formAction, pending] = useActionState<WatchlistActionState, FormData>(async (prevState, formData) => {
@@ -29,7 +31,7 @@ export function AddWatchlistForm({ onSuccess }: { onSuccess?: () => void }) {
             value={ticker}
             onValueChange={setTicker}
             onSelect={(result) => setCompanyName(result.name)}
-            placeholder="Add a ticker, e.g. AAPL"
+            placeholder={t("addPlaceholder")}
             required
             className="h-[52px] rounded-[14px] border-[#2e343b] bg-[#0b0c0e] px-[17px] text-[16px] uppercase text-[#f2f4f7] placeholder:normal-case placeholder:text-[#6c737f] focus-visible:border-[#4c82f7] focus-visible:ring-0"
           />
@@ -40,7 +42,7 @@ export function AddWatchlistForm({ onSuccess }: { onSuccess?: () => void }) {
           className="inline-flex h-9 items-center gap-2 rounded-[10px] bg-[#4c82f7] px-[15px] text-[13px] font-medium text-white transition-colors hover:bg-[#3d72e8] disabled:opacity-50"
         >
           <FigmaIcon src="/marketing/dashboard/icon-plus-14.svg" className="size-3.5 text-white" />
-          {pending ? "Adding…" : "Add to watchlist"}
+          {pending ? t("addAdding") : t("addSubmit")}
         </button>
       </div>
       {state?.error ? (

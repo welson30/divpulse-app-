@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { updateProfile, type SettingsActionState } from "@/app/(dashboard)/settings/actions";
 import {
   SettingsPanel,
@@ -17,6 +18,7 @@ type ProfileSettingsFormProps = {
 };
 
 export function ProfileSettingsForm({ email, displayName, defaultBroker, currency }: ProfileSettingsFormProps) {
+  const t = useTranslations("dashboard.settings");
   const [state, formAction, pending] = useActionState<SettingsActionState, FormData>(updateProfile, null);
   const timezone = useMemo(() => {
     try {
@@ -29,53 +31,53 @@ export function ProfileSettingsForm({ email, displayName, defaultBroker, currenc
   return (
     <form action={formAction}>
       <SettingsPanel
-        title="Profile"
-        subtitle="Your personal information"
+        title={t("profileTitle")}
+        subtitle={t("profileSubtitle")}
         footer={
           <div className="flex flex-wrap items-center gap-3">
             <button type="submit" disabled={pending} className={settingsPrimaryBtnClass}>
-              {pending ? "Saving…" : "Save changes"}
+              {pending ? t("profileSaving") : t("profileSave")}
             </button>
             {state && "error" in state ? (
               <p role="alert" className="text-[13px] text-[#d8695f]">
                 {state.error}
               </p>
             ) : null}
-            {state && "success" in state ? <p className="text-[13px] text-[#3fbf87]">Saved.</p> : null}
+            {state && "success" in state ? <p className="text-[13px] text-[#3fbf87]">{t("profileSaved")}</p> : null}
           </div>
         }
       >
         <div className="grid grid-cols-1 gap-4 min-[700px]:grid-cols-2">
-          <Field label="Full name" htmlFor="displayName">
+          <Field label={t("fieldFullName")} htmlFor="displayName">
             <input
               id="displayName"
               name="displayName"
               defaultValue={displayName}
-              placeholder="How should we address you?"
+              placeholder={t("fieldFullNamePlaceholder")}
               maxLength={80}
               className={settingsInputClass}
             />
           </Field>
-          <Field label="Email" htmlFor="email">
+          <Field label={t("fieldEmail")} htmlFor="email">
             <input id="email" value={email} disabled readOnly className={settingsInputClass} />
           </Field>
-          <Field label="Timezone" htmlFor="timezone" hint="Detected from this device. Calendar dates are stored in UTC.">
+          <Field label={t("fieldTimezone")} htmlFor="timezone" hint={t("fieldTimezoneHint")}>
             <input id="timezone" value={timezone} disabled readOnly className={settingsInputClass} />
           </Field>
-          <Field label="Base currency" htmlFor="currency" hint="Amounts are shown in USD. Conversion isn't supported.">
+          <Field label={t("fieldCurrency")} htmlFor="currency" hint={t("fieldCurrencyHint")}>
             <input id="currency" value={currency || "USD"} disabled readOnly className={settingsInputClass} />
           </Field>
           <Field
-            label="Default broker"
+            label={t("fieldDefaultBroker")}
             htmlFor="defaultBroker"
-            hint="Pre-fills the broker field when you add a holding."
+            hint={t("fieldDefaultBrokerHint")}
             className="min-[700px]:col-span-2"
           >
             <input
               id="defaultBroker"
               name="defaultBroker"
               defaultValue={defaultBroker}
-              placeholder="Fidelity"
+              placeholder={t("fieldDefaultBrokerPlaceholder")}
               className={settingsInputClass}
             />
           </Field>

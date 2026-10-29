@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 type PlaidConnection = {
   id: string;
   institution_name: string | null;
@@ -29,15 +31,16 @@ function formatDate(dateStr: string | null) {
  * card happens to be rendered inside of.
  */
 export function PlaidConnectCard({ isProPlus, connections, connect, reconnect, isPending, error }: PlaidConnectCardProps) {
+  const t = useTranslations("dashboard.brokers");
   if (!isProPlus) {
     return (
       <div className="flex items-center justify-between gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-3">
         <div>
-          <div className="text-sm text-text-primary">Broker auto-sync</div>
-          <div className="text-xs text-text-secondary">Connect a US broker and holdings sync automatically — Pro+ feature.</div>
+          <div className="text-sm text-text-primary">{t("autoSyncTitle")}</div>
+          <div className="text-xs text-text-secondary">{t("autoSyncDesc")}</div>
         </div>
         <span className="shrink-0 rounded-full border border-border-subtle px-2.5 py-1 font-mono text-[10px] text-text-secondary">
-          Pro+ only
+          {t("proPlusOnly")}
         </span>
       </div>
     );
@@ -53,18 +56,18 @@ export function PlaidConnectCard({ isProPlus, connections, connect, reconnect, i
               className="flex items-center justify-between gap-2 rounded-card border border-border-subtle bg-surface p-sp-3"
             >
               <div className="min-w-0">
-                <div className="text-sm text-text-primary">{connection.institution_name ?? "Connected broker"}</div>
+                <div className="text-sm text-text-primary">{connection.institution_name ?? t("connectedBroker")}</div>
                 <div className="text-xs text-text-secondary">
                   {connection.needs_reauth ? (
-                    <span className="text-warning">Sign-in expired</span>
+                    <span className="text-warning">{t("signInExpired")}</span>
                   ) : connection.status === "active" ? (
-                    <span className="text-green-500">Synced</span>
+                    <span className="text-green-500">{t("synced")}</span>
                   ) : connection.status === "error" ? (
-                    <span className="text-red-500">Sync error</span>
+                    <span className="text-red-500">{t("syncError")}</span>
                   ) : (
-                    "Disconnected"
+                    t("disconnected")
                   )}{" "}
-                  · last synced {formatDate(connection.last_synced_at)}
+                  {t("lastSynced", { date: formatDate(connection.last_synced_at) })}
                 </div>
               </div>
               {/* The old copy said "reconnect" but offered no way to do it. */}
@@ -75,7 +78,7 @@ export function PlaidConnectCard({ isProPlus, connections, connect, reconnect, i
                   onClick={() => reconnect(connection.id)}
                   className="shrink-0 rounded-control border border-border-subtle px-3 py-1.5 font-sans text-xs font-semibold text-text-primary hover:border-warning disabled:opacity-40"
                 >
-                  {isPending ? "Opening…" : "Reconnect"}
+                  {isPending ? t("reconnectOpening") : t("reconnect")}
                 </button>
               ) : null}
             </div>
@@ -95,7 +98,7 @@ export function PlaidConnectCard({ isProPlus, connections, connect, reconnect, i
         onClick={connect}
         className="self-start rounded-control bg-green-500 px-3.5 py-2 font-sans text-xs font-semibold text-canvas transition-colors hover:bg-green-500/90 disabled:opacity-40"
       >
-        {isPending ? "Connecting…" : connections.length > 0 ? "Connect another broker" : "Connect a broker"}
+        {isPending ? t("connectOpening") : connections.length > 0 ? t("connectAnother") : t("connectFirst")}
       </button>
     </div>
   );

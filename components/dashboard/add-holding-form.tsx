@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ export function AddHoldingForm({
   defaultCompanyName?: string;
   defaultBroker?: string;
 }) {
+  const t = useTranslations("dashboard.holdings");
   const [ticker, setTicker] = useState(defaultTicker ?? "");
   const [companyName, setCompanyName] = useState(defaultCompanyName ?? "");
   const [state, formAction, pending] = useActionState<HoldingActionState, FormData>(async (prevState, formData) => {
@@ -32,46 +34,46 @@ export function AddHoldingForm({
     <form action={formAction} className="flex flex-col gap-sp-3">
       <div className="grid grid-cols-2 gap-sp-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="ticker">Ticker</Label>
+          <Label htmlFor="ticker">{t("addHoldingTicker")}</Label>
           <TickerSearchCombobox
             id="ticker"
             name="ticker"
             value={ticker}
             onValueChange={setTicker}
             onSelect={(result) => setCompanyName(result.name)}
-            placeholder="KO"
+            placeholder={t("addHoldingPlaceholderTicker")}
             required
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="shares">Shares</Label>
-          <Input id="shares" name="shares" type="number" step="any" min="0" placeholder="10" required className="h-11 px-3.5 text-[15px]" />
+          <Label htmlFor="shares">{t("addHoldingShares")}</Label>
+          <Input id="shares" name="shares" type="number" step="any" min="0" placeholder={t("addHoldingPlaceholderShares")} required className="h-11 px-3.5 text-[15px]" />
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="companyName">
-          Company name <span className="font-normal text-text-secondary">(optional)</span>
+          {t("addHoldingCompany")} <span className="font-normal text-text-secondary">{t("addHoldingOptional")}</span>
         </Label>
         <Input
           id="companyName"
           name="companyName"
           value={companyName}
           onChange={(e) => setCompanyName(e.target.value)}
-          placeholder="The Coca-Cola Company"
+          placeholder={t("addHoldingPlaceholderCompany")}
           className="h-11 px-3.5 text-[15px]"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="brokerName">
-          Broker <span className="font-normal text-text-secondary">(optional)</span>
+          {t("addHoldingBroker")} <span className="font-normal text-text-secondary">{t("addHoldingOptional")}</span>
         </Label>
         <Input
           id="brokerName"
           name="brokerName"
           defaultValue={defaultBroker}
-          placeholder="Fidelity"
+          placeholder={t("addHoldingPlaceholderBroker")}
           className="h-11 px-3.5 text-[15px]"
         />
       </div>
@@ -83,7 +85,7 @@ export function AddHoldingForm({
       ) : null}
 
       <Button type="submit" disabled={pending} className="h-11 text-[15px]">
-        {pending ? "Adding…" : "Add holding"}
+        {pending ? t("addHoldingAdding") : t("addHoldingSubmit")}
       </Button>
     </form>
   );
