@@ -157,7 +157,8 @@
       "trends": "Tendências de crescimento de renda, fluxo de caixa e rendimento",
       "comparisons": "Comparações mensais e anuais lado a lado",
       "historical": "Desempenho histórico de 24 meses de uma vez"
-    }
+    },
+    "cardLabel": "Análise do portfólio"
   },
   "watchlist": {
     "eyebrow": "Lista de observação",
@@ -182,7 +183,8 @@
       "monthlyIncome": "Renda mensal",
       "annualIncome": "Renda anual",
       "financialIndependence": "Independência financeira"
-    }
+    },
+    "cardLabel": "Metas de renda passiva"
   },
   "aiAdvisor": {
     "eyebrow": "Assistente IA",
@@ -777,7 +779,25 @@
       "col1M": "1M",
       "colYield": "Yield",
       "actionWatch": "Monitorar",
-      "actionWatching": "Monitorando"
+      "actionWatching": "Monitorando",
+      "eyebrow": "Coleções",
+      "title": "Coleções curadas",
+      "subtitle": "Grupos de ações pagadoras de dividendos, organizados por tema e setor.",
+      "totalCollections": "Total de coleções",
+      "curatedCategories": "categorias curadas",
+      "curatedCategory": "categoria curada",
+      "averageYield": "Yield médio",
+      "acrossTickers": "{count, plural, one {em # ativo} other {em # ativos}}",
+      "topPerformer": "Melhor desempenho",
+      "watchlistItems": "Na lista de monitoramento",
+      "acrossCollections": "{count, plural, one {em # coleção} other {em # coleções}}",
+      "viewAll": "Ver todos",
+      "emptyNone": "Nenhuma coleção ainda.",
+      "emptySector": "Nenhuma coleção nesta categoria.",
+      "newThisMonth": "nova este mês",
+      "noDataYet": "Sem dados ainda",
+      "browseByCategory": "Explorar por categoria",
+      "all": "Todas"
     },
     "etfExplorer": {
       "eyebrow": "Descobrir",

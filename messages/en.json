@@ -157,7 +157,8 @@
       "trends": "Income growth, cash flow and yield trends",
       "comparisons": "Monthly and yearly comparisons side by side",
       "historical": "24-month historical performance at a glance"
-    }
+    },
+    "cardLabel": "Portfolio analytics"
   },
   "watchlist": {
     "eyebrow": "Watchlist",
@@ -182,7 +183,8 @@
       "monthlyIncome": "Monthly income",
       "annualIncome": "Annual income",
       "financialIndependence": "Financial independence"
-    }
+    },
+    "cardLabel": "Passive income goals"
   },
   "aiAdvisor": {
     "eyebrow": "AI Advisor",
@@ -777,7 +779,25 @@
       "col1M": "1M",
       "colYield": "Yield",
       "actionWatch": "Watch",
-      "actionWatching": "Watching"
+      "actionWatching": "Watching",
+      "eyebrow": "Collections",
+      "title": "Curated collections",
+      "subtitle": "Handpicked groups of dividend payers, organized by theme and sector.",
+      "totalCollections": "Total collections",
+      "curatedCategories": "curated categories",
+      "curatedCategory": "curated category",
+      "averageYield": "Avg. yield",
+      "acrossTickers": "{count, plural, one {across # ticker} other {across # tickers}}",
+      "topPerformer": "Top performer",
+      "watchlistItems": "Watchlist items",
+      "acrossCollections": "{count, plural, one {across # collection} other {across # collections}}",
+      "viewAll": "View all",
+      "emptyNone": "No collections yet.",
+      "emptySector": "No collections in this category.",
+      "newThisMonth": "new this month",
+      "noDataYet": "No data yet",
+      "browseByCategory": "Browse by category",
+      "all": "All"
     },
     "etfExplorer": {
       "eyebrow": "Discover",
