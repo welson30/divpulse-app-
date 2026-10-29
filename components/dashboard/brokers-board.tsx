@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { BrokerLogoPlate } from "@/components/dashboard/broker-mark";
 import { usePlaidConnect } from "@/components/dashboard/use-plaid-connect";
@@ -39,10 +40,10 @@ type BrokersBoardProps = {
   connections: BrokerConnectionRow[];
 };
 
-function formatLastSync(iso: string | null) {
-  if (!iso) return "Last sync: Never";
+function formatLastSync(iso: string | null, t: (key: string) => string) {
+  if (!iso) return t("lastSyncNever");
   const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
-  if (mins < 1) return "Last sync: Just now";
+  if (mins < 1) return t("lastSyncNow");
   if (mins === 1) return "Last sync: 1 minute ago";
   if (mins < 60) return `Last sync: ${mins} minutes ago`;
   const hours = Math.round(mins / 60);
@@ -61,6 +62,8 @@ function accountCountLabel(count: number) {
 const CONNECT_KEY = "connect";
 
 export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
+  const t = useTranslations("dashboard.brokers");
+  const tc = useTranslations("dashboard.common");
   const { connect, reconnect, isPending: isConnecting, error: connectError } = usePlaidConnect();
   const [managing, setManaging] = useState<BrokerConnectionRow | null>(null);
   const [syncingId, setSyncingId] = useState<string | null>(null);
@@ -147,7 +150,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
             onClick={() => startReconnect(stale[0]!.id)}
             className="h-9 shrink-0 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
           >
-            {isBusy(`reauth:${stale[0]!.id}`) ? "Opening…" : "Reconnect"}
+            {isBusy(`reauth:${stale[0]!.id}`) ? t("opening") : t("reconnect")}
           </button>
         </section>
       ) : null}
@@ -175,7 +178,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
             onClick={() => startReconnect(noInvestment[0]!.id)}
             className="h-9 shrink-0 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
           >
-            {isBusy(`reauth:${noInvestment[0]!.id}`) ? "Opening…" : "Choose accounts"}
+            {isBusy(`reauth:${noInvestment[0]!.id}`) ? t("opening") : t("chooseAccounts")}
           </button>
         </section>
       ) : null}
@@ -207,7 +210,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] font-medium leading-[23.1px] text-[#f2f4f7]">{name}</p>
                     <p className="text-[12px] leading-[19.8px] text-[#6c737f]">
-                      {syncing ? "Last sync: In progress" : formatLastSync(row.last_synced_at)}
+                      {syncing ? t("lastSyncInProgress") : formatLastSync(row.last_synced_at, t)}
                     </p>
                   </div>
                   <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#2e343b] bg-[#16191d] px-[9px] py-1 text-[11px] tracking-[1.1px] text-[#99a1ac] uppercase">
@@ -249,7 +252,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
           </h2>
           <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
             {isProPlus
-              ? "Search 3,000+ US brokerages and banks."
+              ? t("searchPlaceholder")
               : "Broker auto-sync is Pro+. Upgrade to connect a US brokerage via Plaid."}
           </p>
         </header>
@@ -269,7 +272,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
             onClick={startConnect}
             className="h-10 shrink-0 rounded-[10px] bg-[#4c82f7] px-[18px] text-[13px] font-medium text-white transition-colors hover:bg-[#3d72e8] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {!isProPlus ? "Pro+ only" : isBusy(CONNECT_KEY) ? "Connecting…" : live.length > 0 ? "Connect another" : "Connect a broker"}
+            {!isProPlus ? t("proOnly") : isBusy(CONNECT_KEY) ? t("connecting") : live.length > 0 ? t("connectAnother") : t("connectBroker")}
           </button>
         </div>
         {!isProPlus ? (
@@ -319,7 +322,7 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
         <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">{tc("footerDisclaimer")}</p>
       </footer>
 
       <Dialog open={managing != null} onOpenChange={(open) => !open && setManaging(null)}>
@@ -380,10 +383,10 @@ export function BrokersBoard({ isProPlus, connections }: BrokersBoardProps) {
                 className="h-10 rounded-[10px] bg-[#e0a45c] px-4 text-[13px] font-semibold text-[#0b0c0e] hover:bg-[#e0a45c]/90 disabled:opacity-40"
               >
                 {isBusy(`reauth:${managing.id}`)
-                  ? "Opening…"
+                  ? t("opening")
                   : managing.needs_reauth
-                    ? "Reconnect"
-                    : "Choose accounts"}
+                    ? t("reconnect")
+                    : t("chooseAccounts")}
               </button>
             ) : null}
             <button

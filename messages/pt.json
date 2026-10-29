@@ -537,7 +537,9 @@
       "colValue": "Valor",
       "brokerAllocation": "Alocação por corretora",
       "brokerSubtitle": "Custódia de capital nas corretoras conectadas",
-      "colBroker": "Corretora"
+      "colBroker": "Corretora",
+      "brokerageConnected": "{count} conta de corretora conectada",
+      "brokeragesConnected": "{count} contas de corretoras conectadas"
     },
     "collections": {
       "eyebrow": "Descobrir",
@@ -545,7 +547,21 @@
       "subtitle": "Agrupamentos curados de pagadores de dividendos, com preços ao vivo e yield histórico.",
       "emptyNone": "Nenhuma coleção curada ainda.",
       "emptySector": "Nenhuma coleção neste setor.",
-      "viewAll": "Ver todas →"
+      "viewAll": "Ver todas →",
+      "totalCollections": "Total de Coleções",
+      "averageYield": "Rendimento Médio",
+      "topPerformer": "Melhor Desempenho (1D)",
+      "watchlistItems": "Itens na Lista",
+      "noDataYet": "Sem dados ainda",
+      "newThisMonth": "novos este mês",
+      "curatedCategories": "categorias selecionadas",
+      "curatedCategory": "categoria selecionada",
+      "acrossTickers": "entre {count} ativos",
+      "ticker": "ativo",
+      "tickers": "ativos",
+      "acrossCollections": "entre {count} coleções",
+      "collection": "coleção",
+      "collections_": "coleções"
     },
     "etfExplorer": {
       "eyebrow": "Descobrir",
@@ -555,6 +571,50 @@
       "monthly": "Mensal",
       "weekly": "Semanal",
       "quarterly": "Trimestral"
+    },
+    "performance": {
+      "annualizedReturn": "Retorno anualizado",
+      "maxDrawdown": "Drawdown máximo",
+      "volatility": "Volatilidade (σ)",
+      "sharpeRatio": "Índice Sharpe",
+      "notEnoughHistory": "Histórico de preços insuficiente",
+      "noRiskFreeRate": "Taxa livre de risco indisponível",
+      "noDecline": "Sem queda no histórico disponível",
+      "priceReturnTrailing24": "Retorno de preço, últimos 24 meses",
+      "priceReturnHistory": "Retorno de preço, histórico disponível",
+      "trailing12M": "Últimos 12M",
+      "overAvailableHistory": "Sobre o histórico disponível",
+      "overAvailablePriceHistory": "Sobre o histórico de preços disponível"
+    },
+    "help": {
+      "eyebrow": "Suporte",
+      "searchPlaceholder": "Buscar artigos de ajuda...",
+      "browseByCategory": "Navegar por categoria",
+      "searchResults": "Resultados da busca",
+      "popularArticles": "Artigos populares",
+      "noArticlesMatch": "Nenhum artigo encontrado.",
+      "contactSupport": "Contato com suporte",
+      "contactSubtitle": "E-mail é a melhor forma de nos contatar",
+      "liveChat": "Chat ao vivo",
+      "liveChatUnavailable": "Ainda não disponível",
+      "emailSupport": "Suporte por e-mail",
+      "openTicket": "Abrir um chamado",
+      "title": "Central de ajuda",
+      "subtitle": "Pesquise artigos ou entre em contato com a equipe."
+    },
+    "brokers": {
+      "searchPlaceholder": "Pesquise mais de 3.000 corretoras e bancos dos EUA.",
+      "proOnly": "Apenas Pro+",
+      "connectAnother": "Conectar outra",
+      "connectBroker": "Conectar corretora",
+      "connecting": "Conectando…",
+      "opening": "Abrindo…",
+      "reconnect": "Reconectar",
+      "chooseAccounts": "Escolher contas",
+      "noAccountsLinked": "Nenhuma conta vinculada",
+      "lastSyncNever": "Última sync: Nunca",
+      "lastSyncNow": "Última sync: Agora mesmo",
+      "lastSyncInProgress": "Última sync: Em andamento"
     }
   },
   "notifications": {

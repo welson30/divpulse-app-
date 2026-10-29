@@ -271,7 +271,7 @@ export default async function DiversificationPage() {
         <div className="flex items-center gap-2 border-t border-[#22262c] px-6 py-4">
           <FigmaIcon src="/marketing/dashboard/icon-clock.svg" className="size-[14px] text-[#6c737f]" />
           <p className="text-[12px] leading-[19.8px] text-[#6c737f]">
-            {namedBrokerCount} {namedBrokerCount === 1 ? "brokerage account" : "brokerage accounts"} connected
+            {namedBrokerCount === 1 ? t("brokerageConnected", { count: namedBrokerCount }) : t("brokeragesConnected", { count: namedBrokerCount })}
           </p>
         </div>
       </section>

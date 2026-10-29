@@ -104,31 +104,31 @@ export default async function CollectionsPage({
 
       <div className="grid grid-cols-2 items-start gap-sp-2 lg:grid-cols-4">
         <StatCard
-          label="Total Collections"
+          label={t("totalCollections")}
           value={String(collections.length)}
-          sub={newThisMonth > 0 ? `${newThisMonth} new this month` : `${collections.length} curated ${collections.length === 1 ? "category" : "categories"}`}
+          sub={newThisMonth > 0 ? `${newThisMonth} ${t("newThisMonth")}` : `${collections.length} ${collections.length === 1 ? t("curatedCategory") : t("curatedCategories")}`}
           icon={Layers}
           compact
         />
         <StatCard
-          label="Average Yield"
+          label={t("averageYield")}
           value={avgYieldPct != null ? `${avgYieldPct.toFixed(2)}%` : "—"}
-          sub={`across ${allTickers.length} ${allTickers.length === 1 ? "ticker" : "tickers"}`}
+          sub={`${t("acrossTickers", { count: allTickers.length })}`}
           icon={TrendingUp}
           compact
         />
         <StatCard
-          label="Top Performer (1D)"
+          label={t("topPerformer")}
           value={topTicker ?? "—"}
           changePercent={hasTopPerformer ? topChangePercent : undefined}
-          sub={hasTopPerformer ? undefined : "No data yet"}
+          sub={hasTopPerformer ? undefined : t("noDataYet")}
           icon={TrendingUp}
           compact
         />
         <StatCard
-          label="Watchlist Items"
+          label={t("watchlistItems")}
           value={String(watchlistCount)}
-          sub={`across ${collections.length} ${collections.length === 1 ? "collection" : "collections"}`}
+          sub={`${t("acrossCollections", { count: collections.length })}`}
           icon={Star}
           compact
         />

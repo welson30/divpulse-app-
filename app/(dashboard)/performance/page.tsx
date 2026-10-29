@@ -28,32 +28,27 @@ export const metadata: Metadata = {
   title: "Performance — PaidPrime",
 };
 
-const EMPTY_KPI: PerformanceKpi = {
-  label: "",
-  value: "—",
-  hint: "Not enough price history",
-  tone: "neutral",
-};
-
 function formatSignedPct(value: number): string {
   const sign = value > 0 ? "+" : "";
   return `${sign}${(value * 100).toFixed(1)}%`;
 }
 
-function formatMonthYear(t: number): string {
-  return new Date(t * 1000).toLocaleDateString("en-US", {
+function formatMonthYear(ts: number): string {
+  return new Date(ts * 1000).toLocaleDateString("en-US", {
     month: "short",
     year: "numeric",
     timeZone: "UTC",
   });
 }
 
-function dashKpis(): [PerformanceKpi, PerformanceKpi, PerformanceKpi, PerformanceKpi] {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function dashKpis(t: (key: string) => string): [PerformanceKpi, PerformanceKpi, PerformanceKpi, PerformanceKpi] {
+  const emptyKpi: PerformanceKpi = { label: "", value: "—", hint: t("notEnoughHistory"), tone: "neutral" };
   return [
-    { ...EMPTY_KPI, label: "Annualized return" },
-    { ...EMPTY_KPI, label: "Max drawdown" },
-    { ...EMPTY_KPI, label: "Volatility (σ)" },
-    { ...EMPTY_KPI, label: "Sharpe ratio", hint: "No risk-free rate available" },
+    { ...emptyKpi, label: t("annualizedReturn") },
+    { ...emptyKpi, label: t("maxDrawdown") },
+    { ...emptyKpi, label: t("volatility") },
+    { ...emptyKpi, label: t("sharpeRatio"), hint: t("noRiskFreeRate") },
   ];
 }
 
@@ -67,7 +62,10 @@ async function fetchHistories(tickers: string[]): Promise<Map<string, SparklineP
 }
 
 export default async function PerformancePage() {
-  const tc = await getTranslations("dashboard.common");
+  const [t, tc] = await Promise.all([
+    getTranslations("dashboard.performance"),
+    getTranslations("dashboard.common"),
+  ]);
   const supabase = await createClient();
   const {
     data: { user },
@@ -77,7 +75,7 @@ export default async function PerformancePage() {
     <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
       {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
       <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-      <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+      <p className="text-[12px] leading-[19.8px] text-[#6c737f]">{tc("footerDisclaimer")}</p>
     </footer>
   );
 
@@ -87,10 +85,10 @@ export default async function PerformancePage() {
     return (
       <div className="flex flex-col gap-6">
         <PerformanceBoard
-          kpis={dashKpis()}
+          kpis={dashKpis(t)}
           chartPoints={[]}
           benchmarkPoints={[]}
-          chartSubtitle="Price return, available history"
+          chartSubtitle={t("priceReturnHistory")}
           chartBadge={null}
           yearly={[]}
         />
@@ -148,54 +146,54 @@ export default async function PerformancePage() {
   const chartDays = spanDays(chartPoints);
   const chartSubtitle =
     chartDays != null && chartDays >= 600
-      ? "Price return, trailing 24 months"
-      : "Price return, available history";
+      ? t("priceReturnTrailing24")
+      : t("priceReturnHistory");
 
   const yearly: YearlyReturnRow[] = calendarYearReturns(portfolio, spy);
 
   const volHint =
     spanDays(trailingVolPoints) != null && spanDays(trailingVolPoints)! >= 300
-      ? "Trailing 12M"
-      : "Over available history";
+      ? t("trailing12M")
+      : t("overAvailableHistory");
 
   const annHint =
     days != null && days >= 330 && days <= 400
-      ? "Trailing 12M"
+      ? t("trailing12M")
       : days != null
         ? `Over ${formatMonthYear(portfolio[0]!.t)} – ${formatMonthYear(portfolio[portfolio.length - 1]!.t)}`
-        : "Over available price history";
+        : t("overAvailablePriceHistory");
 
   const kpis: [PerformanceKpi, PerformanceKpi, PerformanceKpi, PerformanceKpi] = [
     {
-      label: "Annualized return",
+      label: t("annualizedReturn"),
       value: ann == null ? "—" : formatSignedPct(ann),
-      hint: ann == null ? "Not enough price history" : annHint,
+      hint: ann == null ? t("notEnoughHistory") : annHint,
       tone: ann == null ? "neutral" : ann >= 0 ? "positive" : "negative",
     },
     {
-      label: "Max drawdown",
+      label: t("maxDrawdown"),
       value: dd == null ? "—" : formatSignedPct(dd.pct),
       hint:
         dd == null
           ? portfolio.length < 2
-            ? "Not enough price history"
-            : "No decline in available history"
+            ? t("notEnoughHistory")
+            : t("noDecline")
           : `${formatMonthYear(dd.peakT)} – ${formatMonthYear(dd.troughT)}`,
       tone: "neutral",
     },
     {
-      label: "Volatility (σ)",
+      label: t("volatility"),
       value: vol == null ? "—" : `${(vol * 100).toFixed(1)}%`,
-      hint: vol == null ? "Not enough price history" : volHint,
+      hint: vol == null ? t("notEnoughHistory") : volHint,
       tone: "neutral",
     },
     {
-      label: "Sharpe ratio",
+      label: t("sharpeRatio"),
       value: sharpe == null ? "—" : sharpe.toFixed(2),
       hint:
         rf != null
           ? `Risk-free rate ${(rf * 100).toFixed(1)}%`
-          : "No risk-free rate available",
+          : t("noRiskFreeRate"),
       tone: "neutral",
     },
   ];

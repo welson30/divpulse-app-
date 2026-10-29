@@ -537,7 +537,9 @@
       "colValue": "Value",
       "brokerAllocation": "Broker allocation",
       "brokerSubtitle": "Capital custody across connected brokerages",
-      "colBroker": "Broker"
+      "colBroker": "Broker",
+      "brokerageConnected": "{count} brokerage account connected",
+      "brokeragesConnected": "{count} brokerage accounts connected"
     },
     "collections": {
       "eyebrow": "Discover",
@@ -545,7 +547,21 @@
       "subtitle": "Curated groupings of dividend payers, with live prices and trailing yield.",
       "emptyNone": "No collections curated yet.",
       "emptySector": "No collections in this sector.",
-      "viewAll": "View all →"
+      "viewAll": "View all →",
+      "totalCollections": "Total Collections",
+      "averageYield": "Average Yield",
+      "topPerformer": "Top Performer (1D)",
+      "watchlistItems": "Watchlist Items",
+      "noDataYet": "No data yet",
+      "newThisMonth": "new this month",
+      "curatedCategories": "curated categories",
+      "curatedCategory": "curated category",
+      "acrossTickers": "across {count} tickers",
+      "ticker": "ticker",
+      "tickers": "tickers",
+      "acrossCollections": "across {count} collections",
+      "collection": "collection",
+      "collections_": "collections"
     },
     "etfExplorer": {
       "eyebrow": "Discover",
@@ -555,6 +571,50 @@
       "monthly": "Monthly",
       "weekly": "Weekly",
       "quarterly": "Quarterly"
+    },
+    "performance": {
+      "annualizedReturn": "Annualized return",
+      "maxDrawdown": "Max drawdown",
+      "volatility": "Volatility (σ)",
+      "sharpeRatio": "Sharpe ratio",
+      "notEnoughHistory": "Not enough price history",
+      "noRiskFreeRate": "No risk-free rate available",
+      "noDecline": "No decline in available history",
+      "priceReturnTrailing24": "Price return, trailing 24 months",
+      "priceReturnHistory": "Price return, available history",
+      "trailing12M": "Trailing 12M",
+      "overAvailableHistory": "Over available history",
+      "overAvailablePriceHistory": "Over available price history"
+    },
+    "help": {
+      "eyebrow": "Support",
+      "searchPlaceholder": "Search help articles...",
+      "browseByCategory": "Browse by category",
+      "searchResults": "Search results",
+      "popularArticles": "Popular articles",
+      "noArticlesMatch": "No articles match that search.",
+      "contactSupport": "Contact support",
+      "contactSubtitle": "Email is the way to reach us",
+      "liveChat": "Live chat",
+      "liveChatUnavailable": "Not available yet",
+      "emailSupport": "Email support",
+      "openTicket": "Open a ticket",
+      "title": "Help center",
+      "subtitle": "Search articles or reach the team directly."
+    },
+    "brokers": {
+      "searchPlaceholder": "Search 3,000+ US brokerages and banks.",
+      "proOnly": "Pro+ only",
+      "connectAnother": "Connect another",
+      "connectBroker": "Connect a broker",
+      "connecting": "Connecting…",
+      "opening": "Opening…",
+      "reconnect": "Reconnect",
+      "chooseAccounts": "Choose accounts",
+      "noAccountsLinked": "No accounts linked",
+      "lastSyncNever": "Last sync: Never",
+      "lastSyncNow": "Last sync: Just now",
+      "lastSyncInProgress": "Last sync: In progress"
     }
   },
   "notifications": {
