@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import { sendPush } from "@/lib/firebase/admin";
 import { sendTelegramMessage } from "@/lib/telegram/send";
-import { buildNotificationContent, type NotificationStyle } from "@/lib/notifications/templates";
+import { buildNotificationContent, type NotificationStyle, type NotificationLocale } from "@/lib/notifications/templates";
 import { loadBrokerDividends, type BrokerDividendIndex } from "@/lib/notifications/plaid-confirmation";
 
 export const maxDuration = 60;
@@ -224,10 +224,11 @@ export async function GET(request: NextRequest) {
 
           const { data: styleRow } = await supabase
             .from("profiles")
-            .select("notification_style")
+            .select("notification_style, language")
             .eq("id", holding.user_id)
             .single();
           const notificationStyle = (styleRow?.notification_style as NotificationStyle) ?? "compact";
+          const locale = (styleRow?.language as NotificationLocale) ?? "en";
 
           // Only ever true for Pro+ users with an active Plaid connection —
           // see lib/notifications/plaid-confirmation.ts. buildNotificationContent
@@ -239,6 +240,7 @@ export async function GET(request: NextRequest) {
             amount,
             brokerName: holding.broker_name,
             brokerConfirmed,
+            locale,
           });
 
           const { data: subscriptions } = await supabase

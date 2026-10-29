@@ -7,16 +7,31 @@
 // choice existed.
 
 export type NotificationStyle = "compact" | "descriptive" | "premium";
+export type NotificationLocale = "en" | "pt";
 
 export type TemplateContent = { push: { title: string; body: string }; telegram: string };
 
+// ─── Compact ──────────────────────────────────────────────────────────────────
+
 /** Compact — ticker and amount only, the shortest read. */
-export function compactTemplate(ticker: string, amount: number): TemplateContent {
+export function compactTemplate(
+  ticker: string,
+  amount: number,
+  locale: NotificationLocale = "en",
+): TemplateContent {
+  if (locale === "pt") {
+    return {
+      push: { title: "Dividendo recebido", body: `${ticker} · +$${amount.toFixed(2)}` },
+      telegram: `Dividendo recebido · ${ticker}\n+$${amount.toFixed(2)}`,
+    };
+  }
   return {
     push: { title: "Dividend received", body: `${ticker} · +$${amount.toFixed(2)}` },
     telegram: `Dividend received · ${ticker}\n+$${amount.toFixed(2)}`,
   };
 }
+
+// ─── Descriptive ──────────────────────────────────────────────────────────────
 
 /**
  * Descriptive — confirms the money has actually landed, without naming a
@@ -24,12 +39,27 @@ export function compactTemplate(ticker: string, amount: number): TemplateContent
  * buildNotificationContent) for any user who hasn't linked a broker, or
  * whose broker hasn't confirmed this specific payment yet.
  */
-export function descriptiveTemplate(ticker: string, amount: number): TemplateContent {
+export function descriptiveTemplate(
+  ticker: string,
+  amount: number,
+  locale: NotificationLocale = "en",
+): TemplateContent {
+  if (locale === "pt") {
+    return {
+      push: {
+        title: "Dividendo recebido",
+        body: `${ticker}\nRecebido +$${amount.toFixed(2)} · já na sua conta.`,
+      },
+      telegram: `Dividendo recebido · ${ticker}\nRecebido +$${amount.toFixed(2)} · já na sua conta.`,
+    };
+  }
   return {
     push: { title: "Dividend received", body: `${ticker}\nReceived +$${amount.toFixed(2)} · now in your account.` },
     telegram: `Dividend received · ${ticker}\nReceived +$${amount.toFixed(2)} · now in your account.`,
   };
 }
+
+// ─── Premium / Broker-confirmed ───────────────────────────────────────────────
 
 /**
  * Premium — only reachable when loadBrokerDividends().confirms() found a
@@ -38,13 +68,30 @@ export function descriptiveTemplate(ticker: string, amount: number): TemplateCon
  * that so a "Premium" pick can't fabricate a confirmation that never
  * happened.
  */
-export function brokerConfirmedTemplate(ticker: string, amount: number, brokerName: string | null): TemplateContent {
+export function brokerConfirmedTemplate(
+  ticker: string,
+  amount: number,
+  brokerName: string | null,
+  locale: NotificationLocale = "en",
+): TemplateContent {
+  if (locale === "pt") {
+    const broker = brokerName?.trim() || "sua corretora vinculada";
+    return {
+      push: {
+        title: "Dividendo confirmado",
+        body: `${ticker} · +$${amount.toFixed(2)}\n${broker} · Pagamento confirmado ✓`,
+      },
+      telegram: `✅ Dividendo confirmado · ${ticker}\n+$${amount.toFixed(2)}\nConfirmado via histórico de transações de ${broker} — o valor já caiu na sua conta.`,
+    };
+  }
   const broker = brokerName?.trim() || "your linked broker";
   return {
     push: { title: "Dividend confirmed", body: `${ticker} · +$${amount.toFixed(2)}\n${broker} · Payment confirmed ✓` },
     telegram: `✅ Dividend confirmed · ${ticker}\n+$${amount.toFixed(2)}\nConfirmed via ${broker}'s transaction history — this has actually landed in your account.`,
   };
 }
+
+// ─── Entry point ──────────────────────────────────────────────────────────────
 
 /**
  * Single entry point the detection job (and the Settings picker's live
@@ -59,14 +106,22 @@ export function brokerConfirmedTemplate(ticker: string, amount: number, brokerNa
  */
 export function buildNotificationContent(
   style: NotificationStyle,
-  params: { ticker: string; amount: number; brokerName: string | null; brokerConfirmed: boolean },
+  params: {
+    ticker: string;
+    amount: number;
+    brokerName: string | null;
+    brokerConfirmed: boolean;
+    locale?: NotificationLocale;
+  },
 ): TemplateContent {
-  const { ticker, amount, brokerName, brokerConfirmed } = params;
+  const { ticker, amount, brokerName, brokerConfirmed, locale = "en" } = params;
   if (style === "premium") {
-    return brokerConfirmed ? brokerConfirmedTemplate(ticker, amount, brokerName) : descriptiveTemplate(ticker, amount);
+    return brokerConfirmed
+      ? brokerConfirmedTemplate(ticker, amount, brokerName, locale)
+      : descriptiveTemplate(ticker, amount, locale);
   }
   if (style === "descriptive") {
-    return descriptiveTemplate(ticker, amount);
+    return descriptiveTemplate(ticker, amount, locale);
   }
-  return compactTemplate(ticker, amount);
+  return compactTemplate(ticker, amount, locale);
 }

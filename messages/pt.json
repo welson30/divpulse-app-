@@ -1,0 +1,214 @@
+{
+  "common": {
+    "getStartedFree": "Começar Grátis",
+    "seeHowItWorks": "Ver Como Funciona",
+    "learnMore": "Saiba mais",
+    "readOnly": "Acesso somente leitura ao broker · Criptografia bancária",
+    "notInvestmentAdvice": "Não é conselho de investimento. A PaidPrime não custodia ativos nem executa operações.",
+    "copyright": "© 2026 PaidPrime. Todos os direitos reservados."
+  },
+  "nav": {
+    "product": "Produto",
+    "dividendAlerts": "Alertas de dividendos",
+    "connections": "Conexões",
+    "pricing": "Preços",
+    "faq": "FAQ",
+    "login": "Entrar",
+    "getStarted": "Começar"
+  },
+  "hero": {
+    "title1": "Seu dinheiro trabalha.",
+    "title2": "A PaidPrime mantém",
+    "title3": "você informado.",
+    "description": "Tudo que você precisa para construir riqueza em uma plataforma inteligente. Acompanhe seu portfólio, monitore renda passiva, receba alertas de dividendos em tempo real e obtenha insights personalizados de IA — para você focar no que realmente importa.",
+    "pills": {
+      "portfolioTracking": "Monitoramento de Portfólio",
+      "dividendAlerts": "Alertas de Dividendos",
+      "passiveIncome": "Renda Passiva",
+      "aiAdvisor": "Assistente IA",
+      "goals": "Metas",
+      "analytics": "Análises"
+    },
+    "stats": {
+      "tickers": "Ações com dividendos",
+      "tickersHint": "Monitoradas no mercado americano",
+      "brokers": "Brokers suportados",
+      "brokersHint": "Sincronização somente leitura",
+      "latency": "Latência de alerta",
+      "latencyHint": "Do pagamento à notificação",
+      "readOnly": "Acesso somente leitura",
+      "readOnlyHint": "A PaidPrime nunca toca no seu dinheiro"
+    }
+  },
+  "footer": {
+    "description": "Alertas de dividendos em tempo real e inteligência de portfólio para investidores de renda. Feito para quem se importa com cada pagamento.",
+    "copyright": "© 2026 PaidPrime. Todos os direitos reservados.",
+    "disclaimer": "Não é aconselhamento de investimento. A PaidPrime não custodia ativos nem executa operações.",
+    "columns": {
+      "product": "Produto",
+      "company": "Empresa",
+      "resources": "Recursos",
+      "legal": "Legal"
+    },
+    "product": {
+      "dashboard": "Painel",
+      "dividendAlerts": "Alertas de dividendos",
+      "analytics": "Análises",
+      "dividendCalendar": "Calendário de dividendos",
+      "aiAdvisor": "Consultor IA",
+      "pricing": "Preços"
+    },
+    "company": {
+      "contact": "Contato"
+    },
+    "resources": {
+      "faq": "FAQ",
+      "helpCenter": "Central de ajuda",
+      "brokerConnections": "Conexões com corretoras"
+    },
+    "legal": {
+      "privacyPolicy": "Política de privacidade"
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "portfolio": "Portfólio",
+      "dividends": "Dividendos",
+      "calendar": "Calendário",
+      "etfExplorer": "Explorador de ETFs",
+      "goals": "Metas",
+      "advisor": "Assistente IA",
+      "analytics": "Análises",
+      "history": "Histórico",
+      "watchlist": "Lista de observação",
+      "notifications": "Notificações",
+      "settings": "Configurações",
+      "help": "Ajuda"
+    },
+    "overview": {
+      "title": "Dashboard",
+      "totalValue": "Valor Total do Portfólio",
+      "totalIncome": "Renda Anual de Dividendos",
+      "yield": "Rendimento do Portfólio",
+      "nextPayment": "Próximo Pagamento",
+      "recentActivity": "Atividade Recente",
+      "upcomingPayments": "Próximos Pagamentos",
+      "noPayments": "Nenhum pagamento previsto",
+      "viewAll": "Ver todos"
+    },
+    "portfolio": {
+      "title": "Portfólio",
+      "holdings": "Posições",
+      "addHolding": "Adicionar ativo",
+      "ticker": "Ticker",
+      "shares": "Ações",
+      "value": "Valor",
+      "yield": "Rendimento",
+      "annualIncome": "Renda anual",
+      "lastDividend": "Último dividendo",
+      "noHoldings": "Nenhum ativo ainda",
+      "noHoldingsDesc": "Adicione seu primeiro ativo para começar a monitorar dividendos."
+    },
+    "dividends": {
+      "title": "Dividendos",
+      "received": "Recebidos",
+      "pending": "Pendentes",
+      "history": "Histórico",
+      "totalReceived": "Total recebido",
+      "thisYear": "Este ano",
+      "thisMonth": "Este mês",
+      "amount": "Valor",
+      "date": "Data",
+      "status": "Status",
+      "ticker": "Ticker"
+    },
+    "calendar": {
+      "title": "Calendário de Dividendos",
+      "exDate": "Data Ex-Dividendo",
+      "payDate": "Data de Pagamento",
+      "amount": "Valor",
+      "noEvents": "Nenhum evento de dividendo este mês"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "enablePush": "Ativar Notificações Push",
+      "pushEnabled": "Push Ativado",
+      "pushDenied": "Notificações push foram bloqueadas",
+      "pushUnsupported": "Notificações push não são suportadas",
+      "style": "Estilo de Notificação",
+      "compact": "Compacto",
+      "descriptive": "Descritivo",
+      "premium": "Premium",
+      "compactDesc": "Apenas ticker e valor",
+      "descriptiveDesc": "Confirmação completa do pagamento",
+      "premiumDesc": "Confirmado pelo broker com detalhes da transação",
+      "testNotification": "Enviar notificação de teste"
+    },
+    "settings": {
+      "title": "Configurações",
+      "profile": "Perfil",
+      "displayName": "Nome de exibição",
+      "language": "Idioma",
+      "english": "English",
+      "portuguese": "Português (BR)",
+      "plan": "Plano",
+      "billing": "Faturamento",
+      "telegram": "Telegram",
+      "security": "Segurança",
+      "dangerZone": "Zona de Perigo",
+      "deleteAccount": "Excluir conta",
+      "saveChanges": "Salvar alterações",
+      "saved": "Salvo"
+    },
+    "goals": {
+      "title": "Metas",
+      "monthlyTarget": "Meta mensal",
+      "annualTarget": "Meta anual",
+      "progress": "Progresso",
+      "addGoal": "Adicionar meta",
+      "noGoals": "Nenhuma meta definida",
+      "noGoalsDesc": "Defina uma meta de renda passiva para acompanhar seu progresso."
+    },
+    "advisor": {
+      "title": "Assistente IA",
+      "placeholder": "Pergunte sobre seu portfólio, dividendos ou estratégia de investimento...",
+      "send": "Enviar"
+    },
+    "upgrade": {
+      "title": "Assine o Pro",
+      "description": "Desbloqueie ativos ilimitados, alertas no Telegram e recursos premium.",
+      "cta": "Assinar agora"
+    }
+  },
+  "notifications": {
+    "compact": {
+      "title": "Dividendo recebido",
+      "body": "{ticker} · +${amount}"
+    },
+    "descriptive": {
+      "title": "Dividendo recebido",
+      "body": "{ticker}\nRecebido +${amount} · já na sua conta."
+    },
+    "confirmed": {
+      "title": "Dividendo confirmado",
+      "body": "{ticker} · +${amount}\n{broker} · Pagamento confirmado ✓"
+    }
+  },
+  "auth": {
+    "login": "Entrar",
+    "signup": "Criar conta",
+    "email": "E-mail",
+    "password": "Senha",
+    "forgotPassword": "Esqueci minha senha",
+    "noAccount": "Não tem uma conta?",
+    "haveAccount": "Já tem uma conta?",
+    "continueWithGoogle": "Continuar com o Google",
+    "orEmail": "ou continuar com e-mail"
+  },
+  "language": {
+    "toggle": "EN",
+    "en": "English",
+    "pt": "Português"
+  }
+}

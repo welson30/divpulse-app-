@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, type CSSProperties } from "react";
+import { useTranslations } from "next-intl";
 import { PrimaryCta } from "@/components/marketing/primary-cta";
+import { LanguageToggle } from "@/components/language-toggle";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -28,6 +30,8 @@ function lerp(a: number, b: number, t: number) {
  * Scroll progress (0→1 over ~100px) smoothly morphs full-bleed → floating oval.
  */
 export function SiteHeader() {
+  const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [desktop, setDesktop] = useState(false);
@@ -150,16 +154,17 @@ export function SiteHeader() {
             </nav>
 
             <div className="hidden items-center gap-2.5 md:flex min-[1200px]:gap-3">
+              <LanguageToggle variant="minimal" />
               <Link
                 href="/login"
                 className="flex items-center border border-[#2e343b] bg-[#16191d] px-4 font-medium text-[#f2f4f7] transition-colors hover:border-[#4c82f7]/40 min-[1200px]:px-5"
                 style={{
                   height: ctaH,
-                  borderRadius: lerp(14, 999, t),
-                  fontSize: lerp(desktop ? 17 : 16, 15, t),
+                  borderRadius: lerp(14, 999, progress),
+                  fontSize: lerp(desktop ? 17 : 16, 15, progress),
                 }}
               >
-                Sign in
+                {tNav("login")}
               </Link>
               <PrimaryCta
                 href="/signup"
@@ -171,7 +176,7 @@ export function SiteHeader() {
                   paddingInline: lerp(desktop ? 28 : 20, 20, t),
                 }}
               >
-                Get Started Free
+                {tCommon("getStartedFree")}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/marketing/header/arrow-right.svg"
@@ -252,14 +257,14 @@ export function SiteHeader() {
                   className="flex h-12 items-center justify-center rounded-full border border-[#2e343b] bg-[#16191d] text-[16px] font-medium text-[#f2f4f7]"
                   onClick={() => setOpen(false)}
                 >
-                  Sign in
+                  {tNav("login")}
                 </Link>
               <PrimaryCta
                 href="/signup"
                 className="h-12 rounded-full text-[16px]"
                 onClick={() => setOpen(false)}
               >
-                Get Started Free
+                {tCommon("getStartedFree")}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/marketing/header/arrow-right.svg"

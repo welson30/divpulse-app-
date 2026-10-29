@@ -1,0 +1,214 @@
+{
+  "common": {
+    "getStartedFree": "Get Started Free",
+    "seeHowItWorks": "See How It Works",
+    "learnMore": "Learn more",
+    "readOnly": "Read-only broker access · Bank-grade encryption",
+    "notInvestmentAdvice": "Not investment advice. PaidPrime does not custody assets or execute trades.",
+    "copyright": "© 2026 PaidPrime. All rights reserved."
+  },
+  "nav": {
+    "product": "Product",
+    "dividendAlerts": "Dividend alerts",
+    "connections": "Connections",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "login": "Log in",
+    "getStarted": "Get started"
+  },
+  "hero": {
+    "title1": "Your money works.",
+    "title2": "PaidPrime keeps",
+    "title3": "you informed.",
+    "description": "Everything you need to build wealth in one intelligent platform. Track your portfolio, monitor passive income, receive real-time dividend alerts, and get personalized AI insights—so you can focus on what matters most.",
+    "pills": {
+      "portfolioTracking": "Portfolio Tracking",
+      "dividendAlerts": "Dividend Alerts",
+      "passiveIncome": "Passive Income",
+      "aiAdvisor": "AI Advisor",
+      "goals": "Goals",
+      "analytics": "Analytics"
+    },
+    "stats": {
+      "tickers": "Dividend-paying tickers",
+      "tickersHint": "Tracked across US markets",
+      "brokers": "Brokers supported",
+      "brokersHint": "Read-only, bank-grade sync",
+      "latency": "Alert latency",
+      "latencyHint": "From payment to notification",
+      "readOnly": "Read-only access",
+      "readOnlyHint": "PaidPrime never touches your funds"
+    }
+  },
+  "footer": {
+    "description": "Real-time dividend alerts and portfolio intelligence for income investors. Built for people who care about every payment.",
+    "copyright": "© 2026 PaidPrime. All rights reserved.",
+    "disclaimer": "Not investment advice. PaidPrime does not custody assets or execute trades.",
+    "columns": {
+      "product": "Product",
+      "company": "Company",
+      "resources": "Resources",
+      "legal": "Legal"
+    },
+    "product": {
+      "dashboard": "Dashboard",
+      "dividendAlerts": "Dividend alerts",
+      "analytics": "Analytics",
+      "dividendCalendar": "Dividend calendar",
+      "aiAdvisor": "AI Advisor",
+      "pricing": "Pricing"
+    },
+    "company": {
+      "contact": "Contact"
+    },
+    "resources": {
+      "faq": "FAQ",
+      "helpCenter": "Help center",
+      "brokerConnections": "Broker connections"
+    },
+    "legal": {
+      "privacyPolicy": "Privacy policy"
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "portfolio": "Portfolio",
+      "dividends": "Dividends",
+      "calendar": "Calendar",
+      "etfExplorer": "ETF Explorer",
+      "goals": "Goals",
+      "advisor": "AI Advisor",
+      "analytics": "Analytics",
+      "history": "History",
+      "watchlist": "Watchlist",
+      "notifications": "Notifications",
+      "settings": "Settings",
+      "help": "Help"
+    },
+    "overview": {
+      "title": "Dashboard",
+      "totalValue": "Total Portfolio Value",
+      "totalIncome": "Annual Dividend Income",
+      "yield": "Portfolio Yield",
+      "nextPayment": "Next Payment",
+      "recentActivity": "Recent Activity",
+      "upcomingPayments": "Upcoming Payments",
+      "noPayments": "No upcoming payments",
+      "viewAll": "View all"
+    },
+    "portfolio": {
+      "title": "Portfolio",
+      "holdings": "Holdings",
+      "addHolding": "Add holding",
+      "ticker": "Ticker",
+      "shares": "Shares",
+      "value": "Value",
+      "yield": "Yield",
+      "annualIncome": "Annual income",
+      "lastDividend": "Last dividend",
+      "noHoldings": "No holdings yet",
+      "noHoldingsDesc": "Add your first holding to start tracking dividends."
+    },
+    "dividends": {
+      "title": "Dividends",
+      "received": "Received",
+      "pending": "Pending",
+      "history": "History",
+      "totalReceived": "Total received",
+      "thisYear": "This year",
+      "thisMonth": "This month",
+      "amount": "Amount",
+      "date": "Date",
+      "status": "Status",
+      "ticker": "Ticker"
+    },
+    "calendar": {
+      "title": "Dividend Calendar",
+      "exDate": "Ex-Dividend Date",
+      "payDate": "Pay Date",
+      "amount": "Amount",
+      "noEvents": "No dividend events this month"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "enablePush": "Enable Push Notifications",
+      "pushEnabled": "Push Enabled",
+      "pushDenied": "Push notifications are blocked",
+      "pushUnsupported": "Push notifications are not supported",
+      "style": "Notification Style",
+      "compact": "Compact",
+      "descriptive": "Descriptive",
+      "premium": "Premium",
+      "compactDesc": "Ticker and amount only",
+      "descriptiveDesc": "Full payment confirmation",
+      "premiumDesc": "Broker-confirmed with transaction details",
+      "testNotification": "Send test notification"
+    },
+    "settings": {
+      "title": "Settings",
+      "profile": "Profile",
+      "displayName": "Display name",
+      "language": "Language",
+      "english": "English",
+      "portuguese": "Português (BR)",
+      "plan": "Plan",
+      "billing": "Billing",
+      "telegram": "Telegram",
+      "security": "Security",
+      "dangerZone": "Danger Zone",
+      "deleteAccount": "Delete account",
+      "saveChanges": "Save changes",
+      "saved": "Saved"
+    },
+    "goals": {
+      "title": "Goals",
+      "monthlyTarget": "Monthly target",
+      "annualTarget": "Annual target",
+      "progress": "Progress",
+      "addGoal": "Add goal",
+      "noGoals": "No goals set",
+      "noGoalsDesc": "Set a passive income goal to track your progress."
+    },
+    "advisor": {
+      "title": "AI Advisor",
+      "placeholder": "Ask about your portfolio, dividends, or investment strategy...",
+      "send": "Send"
+    },
+    "upgrade": {
+      "title": "Upgrade to Pro",
+      "description": "Unlock unlimited holdings, Telegram alerts, and premium features.",
+      "cta": "Upgrade now"
+    }
+  },
+  "notifications": {
+    "compact": {
+      "title": "Dividend received",
+      "body": "{ticker} · +${amount}"
+    },
+    "descriptive": {
+      "title": "Dividend received",
+      "body": "{ticker}\nReceived +${amount} · now in your account."
+    },
+    "confirmed": {
+      "title": "Dividend confirmed",
+      "body": "{ticker} · +${amount}\n{broker} · Payment confirmed ✓"
+    }
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "continueWithGoogle": "Continue with Google",
+    "orEmail": "or continue with email"
+  },
+  "language": {
+    "toggle": "PT",
+    "en": "English",
+    "pt": "Português"
+  }
+}

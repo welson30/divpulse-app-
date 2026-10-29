@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FigmaIcon, navIcon } from "@/components/dashboard/figma-icon";
 import { openAdvisor } from "@/components/dashboard/open-advisor";
+import { LanguageToggle } from "@/components/language-toggle";
 
 export type AppNavLink = {
   href: string;
@@ -213,7 +214,12 @@ export function Sidebar({ className }: SidebarProps) {
         ))}
       </div>
 
-      <div className="shrink-0 border-t border-[#22262c] p-3">
+      <div className="shrink-0 border-t border-[#22262c] p-3 flex flex-col gap-1">
+        {!collapsed && (
+          <div className="px-3 py-1">
+            <LanguageToggle variant="minimal" authenticated />
+          </div>
+        )}
         <button
           type="button"
           onClick={toggleCollapsed}

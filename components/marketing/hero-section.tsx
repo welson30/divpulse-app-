@@ -1,25 +1,17 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { HeroPhone } from "@/components/marketing/hero-phone";
 import { PrimaryCta } from "@/components/marketing/primary-cta";
 import { StatCountUp } from "@/components/marketing/stat-count-up";
 
-const FEATURE_PILLS = [
-  "Portfolio Tracking",
-  "Dividend Alerts",
-  "Passive Income",
-  "AI Advisor",
-  "Goals",
-  "Analytics",
-] as const;
-
-const STATS = [
+const STAT_CONFIG = [
   {
     end: 9000,
     prefix: "",
     suffix: "+",
     commas: true,
-    label: "Dividend-paying tickers",
-    hint: "Tracked across US markets",
+    labelKey: "tickers" as const,
+    hintKey: "tickersHint" as const,
     icon: "/marketing/hero/stat-wallet.svg",
     iconBg: "bg-[#10261e]",
   },
@@ -28,8 +20,8 @@ const STATS = [
     prefix: "",
     suffix: "",
     commas: false,
-    label: "Brokers supported",
-    hint: "Read-only, bank-grade sync",
+    labelKey: "brokers" as const,
+    hintKey: "brokersHint" as const,
     icon: "/marketing/hero/stat-users.svg",
     iconBg: "bg-[#16233d]",
   },
@@ -38,8 +30,8 @@ const STATS = [
     prefix: "< ",
     suffix: "s",
     commas: false,
-    label: "Alert latency",
-    hint: "From payment to notification",
+    labelKey: "latency" as const,
+    hintKey: "latencyHint" as const,
     icon: "/marketing/hero/stat-bell.svg",
     iconBg: "bg-[#16233d]",
   },
@@ -48,8 +40,8 @@ const STATS = [
     prefix: "",
     suffix: "%",
     commas: false,
-    label: "Read-only access",
-    hint: "PaidPrime never touches your funds",
+    labelKey: "readOnly" as const,
+    hintKey: "readOnlyHint" as const,
     icon: "/marketing/hero/stat-shield.svg",
     iconBg: "bg-[#16233d]",
   },
@@ -59,7 +51,9 @@ const STATS = [
  * Figma Homepage section 1:7 (1440×1197) under header 1:2452.
  * Layout + type for desktop/tablet/mobile live in globals.css (.pp-hero-*).
  */
-export function HeroSection() {
+export async function HeroSection() {
+  const t = await getTranslations("hero");
+  const tCommon = await getTranslations("common");
   return (
     <section className="pp-hero-section">
       <div
@@ -86,18 +80,16 @@ export function HeroSection() {
         <div className="pp-hero-row">
           <div className="pp-hero-copy pp-fade-up">
             <h1 className="pp-hero-title pp-display">
-              Your money works.
+              {t("title1")}
               <br />
-              <span className="text-[#4c82f7]">PaidPrime</span> keeps
+              <span className="text-[#4c82f7]">PaidPrime</span> {t("title2").replace("PaidPrime ", "")}
               <br />
-              you informed.
+              {t("title3")}
             </h1>
 
             {/* Natural wrap only — Figma soft-breaks were fighting our font metrics */}
             <p className="pp-hero-desc pp-fade-up-delay">
-              Everything you need to build wealth in one intelligent platform. Track your
-              portfolio, monitor passive income, receive real-time dividend alerts, and get
-              personalized AI insights—so you can focus on what matters most.
+              {t("description")}
             </p>
 
             <div className="pp-fade-up-delay-2 flex flex-wrap items-center gap-3 pt-[9px] sm:gap-4">
@@ -106,7 +98,7 @@ export function HeroSection() {
                 contentClassName="gap-2.5"
                 className="h-12 rounded-[18px] px-6 text-[16px] sm:h-14 sm:px-8 sm:text-[17px] min-[1200px]:h-16 min-[1200px]:px-9 min-[1200px]:text-[19px] shadow-[0px_20px_50px_-18px_#4c82f7]"
               >
-                Get Started Free
+                {tCommon("getStartedFree")}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/marketing/hero/arrow-right.svg"
@@ -128,14 +120,14 @@ export function HeroSection() {
                   height={19}
                   className="size-4 sm:size-[19px]"
                 />
-                See How It Works
+                {tCommon("seeHowItWorks")}
               </Link>
             </div>
 
             <ul className="pp-hero-pills">
-              {FEATURE_PILLS.map((pill) => (
-                <li key={pill} className="pp-hero-pill">
-                  {pill}
+              {(["portfolioTracking","dividendAlerts","passiveIncome","aiAdvisor","goals","analytics"] as const).map((key) => (
+                <li key={key} className="pp-hero-pill">
+                  {t(`pills.${key}`)}
                 </li>
               ))}
             </ul>
@@ -150,7 +142,7 @@ export function HeroSection() {
                 className="size-[18px] shrink-0"
               />
               <p className="text-[13px] leading-6 text-[#6c737f] sm:text-[15px] sm:leading-[24.75px]">
-                Read-only broker access · Bank-grade encryption
+                {tCommon("readOnly")}
               </p>
             </div>
           </div>
@@ -165,8 +157,8 @@ export function HeroSection() {
 
       <div className="pp-hero-stats">
         <div className="pp-hero-stats-grid">
-          {STATS.map((stat) => (
-            <div key={stat.label} className="flex h-full flex-col bg-[#121417] px-6 py-7 sm:px-7 sm:py-8">
+          {STAT_CONFIG.map((stat) => (
+            <div key={stat.labelKey} className="flex h-full flex-col bg-[#121417] px-6 py-7 sm:px-7 sm:py-8">
               <div
                 className={`mb-[5px] flex size-12 items-center justify-center rounded-[14px] border border-[#2e343b] ${stat.iconBg}`}
               >
@@ -181,8 +173,8 @@ export function HeroSection() {
                   commas={stat.commas}
                 />
               </p>
-              <p className="pt-[7px] text-[15px] font-medium leading-6 text-[#f2f4f7]">{stat.label}</p>
-              <p className="text-[13.5px] leading-[22px] text-[#99a1ac]">{stat.hint}</p>
+              <p className="pt-[7px] text-[15px] font-medium leading-6 text-[#f2f4f7]">{t(`stats.${stat.labelKey}`)}</p>
+              <p className="text-[13.5px] leading-[22px] text-[#99a1ac]">{t(`stats.${stat.hintKey}`)}</p>
             </div>
           ))}
         </div>

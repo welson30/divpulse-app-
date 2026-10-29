@@ -1,35 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-
-const PRODUCT_LINKS = [
-  { href: "#product", label: "Dashboard" },
-  { href: "#dividend-alerts", label: "Dividend alerts" },
-  { href: "#analytics", label: "Analytics" },
-  { href: "#dividend-calendar", label: "Dividend calendar" },
-  { href: "#ai-advisor", label: "AI Advisor" },
-  { href: "#pricing", label: "Pricing" },
-] as const;
+import { getTranslations } from "next-intl/server";
 
 // About/Careers/Press kit/Blog dropped — no pages exist for any of them yet.
 // Re-add once there's a real destination; a link to nowhere is worse than no link.
-const COMPANY_LINKS = [
-  { href: "mailto:paidprime1@gmail.com", label: "Contact" },
-] as const;
-
-// Dividend glossary/System status dropped for the same reason. Help center
-// points at email rather than /help — that route is the authenticated
-// in-app help center (app/(dashboard)/help), so a signed-out visitor
-// clicking it from the public footer would just bounce off the login wall.
-const RESOURCE_LINKS = [
-  { href: "#faq", label: "FAQ" },
-  { href: "mailto:paidprime1@gmail.com?subject=PaidPrime%20support", label: "Help center" },
-  { href: "#connections", label: "Broker connections" },
-] as const;
-
 // Terms of service/Security/Disclosures/Cookie settings still have no real
-// page — only add them here once real content exists for each, same rule
-// as everything else dropped above.
-const LEGAL_LINKS = [{ href: "/privacy", label: "Privacy policy" }] as const;
+// page — only add them here once real content exists for each.
 
 function FooterColumn({
   title,
@@ -64,7 +40,32 @@ function FooterColumn({
  * Shell: 1440 → px-60 → 1320 → px-12.
  * Desktop: brand (2fr) + Product / Company / Resources / Legal in one row.
  */
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations("footer");
+
+  const productLinks = [
+    { href: "#product", label: t("product.dashboard") },
+    { href: "#dividend-alerts", label: t("product.dividendAlerts") },
+    { href: "#analytics", label: t("product.analytics") },
+    { href: "#dividend-calendar", label: t("product.dividendCalendar") },
+    { href: "#ai-advisor", label: t("product.aiAdvisor") },
+    { href: "#pricing", label: t("product.pricing") },
+  ] as const;
+
+  const companyLinks = [
+    { href: "mailto:paidprime1@gmail.com", label: t("company.contact") },
+  ] as const;
+
+  const resourceLinks = [
+    { href: "#faq", label: t("resources.faq") },
+    { href: "mailto:paidprime1@gmail.com?subject=PaidPrime%20support", label: t("resources.helpCenter") },
+    { href: "#connections", label: t("resources.brokerConnections") },
+  ] as const;
+
+  const legalLinks = [
+    { href: "/privacy", label: t("legal.privacyPolicy") },
+  ] as const;
+
   return (
     <footer className="relative border-t border-[#22262c] bg-[#0b0c0e]">
       <div
@@ -90,11 +91,7 @@ export function SiteFooter() {
               </Link>
 
               <p className="m-0 max-w-[320px] pt-3.5 text-[15px] leading-[24px] font-normal text-[#99a1ac] min-[1200px]:text-[16px] min-[1200px]:leading-[26px]">
-                Real-time dividend alerts and portfolio
-                <br className="hidden min-[1200px]:block" />{" "}
-                intelligence for income investors. Built for
-                <br className="hidden min-[1200px]:block" />{" "}
-                people who care about every payment.
+                {t("description")}
               </p>
 
               <div className="flex flex-col gap-2 pt-3.5">
@@ -143,19 +140,18 @@ export function SiteFooter() {
               </div>
             </div>
 
-            <FooterColumn title="Product" links={PRODUCT_LINKS} />
-            <FooterColumn title="Company" links={COMPANY_LINKS} />
-            <FooterColumn title="Resources" links={RESOURCE_LINKS} />
-            <FooterColumn title="Legal" links={LEGAL_LINKS} />
+            <FooterColumn title={t("columns.product")} links={productLinks} />
+            <FooterColumn title={t("columns.company")} links={companyLinks} />
+            <FooterColumn title={t("columns.resources")} links={resourceLinks} />
+            <FooterColumn title={t("columns.legal")} links={legalLinks} />
           </div>
 
           <div className="flex flex-col gap-3 border-t border-[#22262c] pt-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between">
             <p className="m-0 text-[14px] leading-[24px] text-[#6c737f] min-[1200px]:text-[15px] min-[1200px]:leading-[24.75px]">
-              © 2026 PaidPrime. All rights reserved.
+              {t("copyright")}
             </p>
             <p className="m-0 text-[14px] leading-[24px] text-[#6c737f] min-[1200px]:text-right min-[1200px]:text-[15px] min-[1200px]:leading-[24.75px]">
-              Not investment advice. PaidPrime does not custody assets or execute
-              trades.
+              {t("disclaimer")}
             </p>
           </div>
         </div>
