@@ -944,7 +944,8 @@
       "errorPushDisable": "Não foi possível desativar as notificações push. Tente novamente.",
       "errorTelegramPro": "Alertas do Telegram são um recurso Pro.",
       "errorTelegramDisconnect": "Não foi possível desconectar o Telegram. Tente novamente.",
-      "errorTelegramConnect": "Não foi possível iniciar a conexão com o Telegram. Tente novamente."
+      "errorTelegramConnect": "Não foi possível iniciar a conexão com o Telegram. Tente novamente.",
+      "templateDiscreet": "Discreto"
     },
     "analytics": {
       "eyebrow": "Visão geral",

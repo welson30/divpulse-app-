@@ -19,7 +19,7 @@ const ILLUSTRATIVE: TemplatePreview = {
 };
 
 function asStyle(value: string | null | undefined): NotificationStyle {
-  if (value === "descriptive" || value === "premium") return value;
+  if (value === "descriptive" || value === "premium" || value === "discreet") return value;
   return "compact";
 }
 

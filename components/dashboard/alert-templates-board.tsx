@@ -77,6 +77,13 @@ export function AlertTemplatesBoard({
       amount,
       extra: [`${t("paidBy")} ${broker}`, t("verifiedNote")],
     },
+    {
+      value: "discreet",
+      label: t("templateDiscreet"),
+      title: t("dividendReceived"),
+      amount,
+      extra: [t("nowInAccount")],
+    },
   ];
   const [pushOn, setPushOn] = useState(pushEnabled);
   const [telegramOn, setTelegramOn] = useState(telegramConnected);
