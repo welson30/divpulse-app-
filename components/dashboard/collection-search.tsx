@@ -84,11 +84,11 @@ export function CollectionSearch({ sectorFilter }: { sectorFilter?: React.ReactN
 
       {searched && !isPending ? (
         results.length === 0 ? (
-          <p className=”text-sm text-text-secondary”>{t(“noMatches”, { query: query.trim() })}</p>
+          <p className="text-sm text-text-secondary">{t("noMatches", { query: query.trim() })}</p>
         ) : (
           <div className="flex flex-col gap-sp-2">
-            <p className=”text-xs text-text-secondary”>
-              {t(“resultsFor”, { count: results.length, query: query.trim() })}
+            <p className="text-xs text-text-secondary">
+              {t("resultsFor", { count: results.length, query: query.trim() })}
             </p>
             <CollectionTable rows={results} />
           </div>

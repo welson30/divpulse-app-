@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { SparklinePoint } from "@/lib/dividend-data/types";
 
@@ -37,6 +38,7 @@ type PortfolioPerformanceCardProps = {
 };
 
 export function PortfolioPerformanceCard({ points, excludedTickers = [] }: PortfolioPerformanceCardProps) {
+  const t = useTranslations("dashboard.performanceCard");
   const [range, setRange] = useState<RangeId>("1Y");
   const visible = useMemo(() => {
     const days = RANGES.find((r) => r.id === range)?.days ?? null;
@@ -48,14 +50,14 @@ export function PortfolioPerformanceCard({ points, excludedTickers = [] }: Portf
       <header className="flex flex-col gap-3 border-b border-[#22262c] px-5 py-5 min-[900px]:flex-row min-[900px]:items-center min-[900px]:justify-between min-[900px]:gap-4 min-[900px]:px-6">
         <div className="min-w-0">
           <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-            Portfolio performance
+            {t("title")}
           </h2>
           <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
-            Total account value across all connected brokers
+            {t("subtitle")}
           </p>
           {excludedTickers.length > 0 ? (
             <p className="mt-1 text-[12px] leading-[19.8px] text-[#6c737f]">
-              Excludes {excludedTickers.join(", ")} — listed too recently to cover this window.
+              {t("excludedTickers", { tickers: excludedTickers.join(", ") })}
             </p>
           ) : null}
         </div>
@@ -85,7 +87,7 @@ export function PortfolioPerformanceCard({ points, excludedTickers = [] }: Portf
       <div className="h-[240px] w-full px-2 pb-4 pt-2 min-[900px]:h-[280px] min-[900px]:px-3">
         {visible.length < 2 ? (
           <div className="flex h-full items-center justify-center text-[13px] text-[#99a1ac]">
-            Not enough price history to plot a trend yet.
+            {t("noHistory")}
           </div>
         ) : (
           <Chart points={visible} />

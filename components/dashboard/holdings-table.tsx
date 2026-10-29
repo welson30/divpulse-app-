@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { RemoveHoldingDialog } from "@/components/dashboard/remove-holding-dialog";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
@@ -99,6 +100,7 @@ export function HoldingsTable({
   holdings: Holding[];
   actions?: React.ReactNode;
 }) {
+  const t = useTranslations("dashboard.holdings");
   const [pendingRemoval, setPendingRemoval] = useState<Holding | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("value");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -124,14 +126,14 @@ export function HoldingsTable({
         <header className="flex items-center justify-between gap-4 border-b border-[#22262c] px-5 py-5 min-[900px]:px-6">
           <div>
             <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-              Holdings
+              {t("sectionTitle")}
             </h2>
-            <p className="mt-1 text-[13px] text-[#99a1ac]">0 positions</p>
+            <p className="mt-1 text-[13px] text-[#99a1ac]">{t("positionCount", { count: 0 })}</p>
           </div>
           {actions}
         </header>
         <p className="px-6 py-12 text-center text-sm text-[#99a1ac]">
-          No holdings yet. Add a ticker to start tracking dividend income.
+          {t("noHoldings")}
         </p>
       </section>
     );
@@ -143,10 +145,10 @@ export function HoldingsTable({
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#22262c] px-5 py-5 min-[900px]:px-6">
           <div>
             <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-              Holdings
+              {t("sectionTitle")}
             </h2>
             <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
-              {holdings.length} {holdings.length === 1 ? "position" : "positions"}
+              {t("positionCount", { count: holdings.length })}
             </p>
           </div>
           {actions}
@@ -176,7 +178,7 @@ export function HoldingsTable({
               <button
                 type="button"
                 onClick={() => setPendingRemoval(holding)}
-                aria-label={`Remove ${holding.ticker}`}
+                aria-label={t("removeAriaLabel", { ticker: holding.ticker })}
                 className="flex size-8 shrink-0 items-center justify-center rounded-[8px] text-[#6c737f] hover:bg-red-500/10 hover:text-red-500"
               >
                 <Trash2 className="size-3.5" />
@@ -189,26 +191,26 @@ export function HoldingsTable({
           <div className="min-w-[880px]">
             <div className={`grid ${TABLE_COLS} border-b border-[#22262c] px-2`}>
               <div className="px-5 py-3">
-                <SortLabel label="Ticker" column="ticker" active={sortKey === "ticker"} dir={sortDir} onSort={handleSort} />
+                <SortLabel label={t("colTicker")} column="ticker" active={sortKey === "ticker"} dir={sortDir} onSort={handleSort} />
               </div>
-              <div className="px-5 py-3 text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">Broker</div>
+              <div className="px-5 py-3 text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">{t("colBroker")}</div>
               <div className="px-5 py-3 text-right text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">
-                Shares
+                {t("colShares")}
               </div>
               <div className="px-5 py-3 text-right text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">
-                Price
+                {t("colPrice")}
               </div>
               <div className="flex justify-end px-5 py-3">
-                <SortLabel label="Value" column="value" active={sortKey === "value"} dir={sortDir} onSort={handleSort} align="right" />
+                <SortLabel label={t("colValue")} column="value" active={sortKey === "value"} dir={sortDir} onSort={handleSort} align="right" />
               </div>
               <div className="flex justify-end px-5 py-3">
-                <SortLabel label="Yield" column="yield" active={sortKey === "yield"} dir={sortDir} onSort={handleSort} align="right" />
+                <SortLabel label={t("colYield")} column="yield" active={sortKey === "yield"} dir={sortDir} onSort={handleSort} align="right" />
               </div>
               <div className="flex justify-end px-5 py-3">
-                <SortLabel label="Annual" column="annual" active={sortKey === "annual"} dir={sortDir} onSort={handleSort} align="right" />
+                <SortLabel label={t("colAnnual")} column="annual" active={sortKey === "annual"} dir={sortDir} onSort={handleSort} align="right" />
               </div>
               <div className="flex justify-end px-5 py-3">
-                <SortLabel label="Weight" column="weight" active={sortKey === "weight"} dir={sortDir} onSort={handleSort} align="right" />
+                <SortLabel label={t("colWeight")} column="weight" active={sortKey === "weight"} dir={sortDir} onSort={handleSort} align="right" />
               </div>
               <div />
             </div>
@@ -266,7 +268,7 @@ export function HoldingsTable({
                     <button
                       type="button"
                       onClick={() => setPendingRemoval(holding)}
-                      aria-label={`Remove ${holding.ticker}`}
+                      aria-label={t("removeAriaLabel", { ticker: holding.ticker })}
                       className="flex size-8 items-center justify-center rounded-[8px] text-[#6c737f] hover:bg-red-500/10 hover:text-red-500"
                     >
                       <Trash2 className="size-3.5" />
@@ -281,7 +283,7 @@ export function HoldingsTable({
         {pageCount > 1 ? (
           <div className="flex items-center justify-between gap-3 border-t border-[#22262c] px-5 py-4 min-[900px]:px-6">
             <p className="text-[13px] text-[#6c737f]">
-              Page {safePage + 1} of {pageCount}
+              {t("paginationPage", { current: safePage + 1, total: pageCount })}
             </p>
             <div className="flex gap-2">
               <button
@@ -290,7 +292,7 @@ export function HoldingsTable({
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 className="inline-flex h-9 items-center rounded-[10px] border border-[#2e343b] bg-[#16191d] px-[13.8px] text-[13px] font-medium text-[#f2f4f7] disabled:opacity-40"
               >
-                Previous
+                {t("previous")}
               </button>
               <button
                 type="button"
@@ -298,7 +300,7 @@ export function HoldingsTable({
                 onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
                 className="inline-flex h-9 items-center rounded-[10px] border border-[#2e343b] bg-[#16191d] px-[13.8px] text-[13px] font-medium text-[#f2f4f7] disabled:opacity-40"
               >
-                Next
+                {t("next")}
               </button>
             </div>
           </div>

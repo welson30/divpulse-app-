@@ -1,17 +1,21 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 
 export const SETTINGS_TABS = [
-  { value: "profile", label: "Profile", icon: "/marketing/dashboard/icon-settings-profile.svg" },
-  { value: "security", label: "Security", icon: "/marketing/dashboard/icon-settings-security.svg" },
-  { value: "subscription", label: "Subscription", icon: "/marketing/dashboard/icon-settings-subscription.svg" },
-  { value: "billing", label: "Billing", icon: "/marketing/dashboard/icon-settings-billing.svg" },
+  { value: "profile", labelKey: "tabProfile", icon: "/marketing/dashboard/icon-settings-profile.svg" },
+  { value: "security", labelKey: "tabSecurity", icon: "/marketing/dashboard/icon-settings-security.svg" },
+  { value: "subscription", labelKey: "tabSubscription", icon: "/marketing/dashboard/icon-settings-subscription.svg" },
+  { value: "billing", labelKey: "tabBilling", icon: "/marketing/dashboard/icon-settings-billing.svg" },
 ] as const;
 
 export type SettingsTab = (typeof SETTINGS_TABS)[number]["value"];
 
 export function SettingsTabs({ current }: { current: SettingsTab }) {
+  const t = useTranslations("dashboard.settings");
   return (
     <nav className="flex w-full shrink-0 flex-row gap-2 overflow-x-auto min-[900px]:w-[220px] min-[900px]:flex-col min-[900px]:gap-2" aria-label="Settings sections">
       {SETTINGS_TABS.map((tab) => {
@@ -26,7 +30,7 @@ export function SettingsTabs({ current }: { current: SettingsTab }) {
             )}
           >
             <FigmaIcon src={tab.icon} className={cn("size-[15px]", isActive ? "text-[#f2f4f7]" : "text-[#99a1ac]")} />
-            {tab.label}
+            {t(tab.labelKey)}
           </Link>
         );
       })}

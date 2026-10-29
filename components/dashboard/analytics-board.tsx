@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
 import type { AnnualIncomePoint } from "@/components/dashboard/dividend-growth-chart";
@@ -84,6 +85,7 @@ export function AnalyticsBoard({
   annual: AnnualIncomePoint[];
   portfolio: SparklinePoint[];
 }) {
+  const t = useTranslations("dashboard.analytics");
   const [range, setRange] = useState<RangeId>("1Y");
   const spec = RANGES.find((r) => r.id === range) ?? RANGES[2]!;
 
@@ -129,17 +131,17 @@ export function AnalyticsBoard({
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-4 border-b border-[#22262c] pb-6 min-[900px]:flex-row min-[900px]:items-end min-[900px]:justify-between">
         <div className="min-w-0">
-          <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Insights</p>
+          <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{t("eyebrow")}</p>
           <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-            Analytics
+            {t("title")}
           </h1>
           <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-            Every trend behind your passive income, in one production-grade grid.
+            {t("subtitle")}
           </p>
         </div>
         <div
           role="group"
-          aria-label="Chart range"
+          aria-label={t("rangeLabel")}
           className="flex shrink-0 items-center rounded-[10px] border border-[#22262c] bg-[#0b0c0e] p-1"
         >
           {RANGES.map((r) => {
@@ -162,44 +164,45 @@ export function AnalyticsBoard({
       </header>
 
       <div className="grid grid-cols-1 gap-6 min-[1100px]:grid-cols-2">
-        <ChartCard title="Income growth" subtitle={`Trailing income · ${range}`} badge={formatGrowth(incomeGrowth)}>
-          <AreaChart data={monthlyVisible} color="#4c82f7" formatAxis={formatMoneyAxis} />
+        <ChartCard title={t("incomeGrowth")} subtitle={String(t("incomeGrowthSub", { range: String(range) }))} badge={formatGrowth(incomeGrowth)}>
+          <AreaChart data={monthlyVisible} color="#4c82f7" formatAxis={formatMoneyAxis} emptyLabel={t("notEnoughHistory")} />
         </ChartCard>
         <ChartCard
-          title="Dividend growth"
-          subtitle="Annual income received, year over year"
-          badge={yoy != null ? `${formatGrowth(yoy)} YoY` : null}
+          title={t("dividendGrowth")}
+          subtitle={t("dividendGrowthSub")}
+          badge={yoy != null ? String(t("yoyBadge", { value: formatGrowth(yoy) ?? "" })) : null}
         >
           <AreaChart
             data={annualVisible.map((p) => ({ month: String(p.year), label: String(p.year), total: p.total }))}
             color="#3fbf87"
             formatAxis={formatMoneyAxis}
+            emptyLabel={t("notEnoughHistory")}
           />
         </ChartCard>
-        <ChartCard title="Monthly income" subtitle="Cash received per month">
-          <BarChart data={monthlyVisible} color="#3fbf87" formatAxis={formatMoneyAxis} />
+        <ChartCard title={t("monthlyIncome")} subtitle={t("monthlyIncomeSub")}>
+          <BarChart data={monthlyVisible} color="#3fbf87" formatAxis={formatMoneyAxis} emptyLabel={t("notEnoughHistory")} />
         </ChartCard>
-        <ChartCard title="Yearly income" subtitle="Annual dividend income totals">
-          <BarChart data={yearlyBars} color="#3fbf87" formatAxis={formatMoneyAxis} />
+        <ChartCard title={t("yearlyIncome")} subtitle={t("yearlyIncomeSub")}>
+          <BarChart data={yearlyBars} color="#3fbf87" formatAxis={formatMoneyAxis} emptyLabel={t("notEnoughHistory")} />
         </ChartCard>
-        <ChartCard title="Yield trend" subtitle="Blended trailing yield (TTM income / portfolio value)">
-          <AreaChart data={yieldVisible} color="#4c82f7" formatAxis={formatPctAxis} />
+        <ChartCard title={t("yieldTrend")} subtitle={t("yieldTrendSub")}>
+          <AreaChart data={yieldVisible} color="#4c82f7" formatAxis={formatPctAxis} emptyLabel={t("notEnoughHistory")} />
         </ChartCard>
-        <ChartCard title="Cash flow" subtitle="Net dividend cash flow by month">
-          <BarChart data={monthlyVisible} color="#3fbf87" formatAxis={formatMoneyAxis} />
+        <ChartCard title={t("cashFlow")} subtitle={t("cashFlowSub")}>
+          <BarChart data={monthlyVisible} color="#3fbf87" formatAxis={formatMoneyAxis} emptyLabel={t("notEnoughHistory")} />
         </ChartCard>
       </div>
 
       <ChartCard
-        title="Historical performance"
+        title={t("historicalPerformance")}
         subtitle={
           portfolioVisible.length >= 2
-            ? "Total portfolio value from available price history"
-            : "Total portfolio value"
+            ? t("historicalPerformanceSub")
+            : t("historicalPerformanceSubFallback")
         }
         wide
       >
-        <AreaChart data={portfolioAsMonthly} color="#4c82f7" formatAxis={formatMoneyAxis} height={280} sparseLabels />
+        <AreaChart data={portfolioAsMonthly} color="#4c82f7" formatAxis={formatMoneyAxis} height={280} sparseLabels emptyLabel={t("notEnoughHistory")} />
       </ChartCard>
     </div>
   );
@@ -251,18 +254,20 @@ function AreaChart({
   formatAxis,
   height = 240,
   sparseLabels = false,
+  emptyLabel,
 }: {
   data: MonthlyIncomePoint[];
   color: string;
   formatAxis: (value: number) => string;
   height?: number;
   sparseLabels?: boolean;
+  emptyLabel?: string;
 }) {
   const max = data.length > 0 ? Math.max(...data.map((d) => d.total)) : 0;
   if (data.length < 2 || max <= 0) {
     return (
       <div className="flex items-center justify-center text-center text-[13px] text-[#99a1ac]" style={{ height }}>
-        Not enough history in this range.
+        {emptyLabel}
       </div>
     );
   }
@@ -315,14 +320,16 @@ function BarChart({
   data,
   color,
   formatAxis,
+  emptyLabel,
 }: {
   data: MonthlyIncomePoint[];
   color: string;
   formatAxis: (value: number) => string;
+  emptyLabel?: string;
 }) {
   const max = data.length > 0 ? Math.max(...data.map((d) => d.total)) : 0;
   if (max <= 0) {
-    return <div className="flex h-[240px] items-center justify-center text-center text-[13px] text-[#99a1ac]">Not enough history in this range.</div>;
+    return <div className="flex h-[240px] items-center justify-center text-center text-[13px] text-[#99a1ac]">{emptyLabel}</div>;
   }
   const niceMax = niceCeiling(max);
   const ticks = [1, 0.75, 0.5, 0.25, 0].map((p) => ({ p, label: formatAxis(niceMax * p) }));

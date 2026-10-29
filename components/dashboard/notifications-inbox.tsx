@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { markAllNotificationsRead } from "@/app/(dashboard)/notifications/actions";
 import { isLinkableTicker } from "@/lib/tickers/validate";
@@ -22,12 +23,7 @@ export type InboxItem = {
 type Tab = "inbox" | "archived";
 type ChannelFilter = "all" | InboxChannel;
 
-const CHANNELS: { id: ChannelFilter; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "push", label: "Push" },
-  { id: "telegram", label: "Telegram" },
-  { id: "email", label: "Email" },
-];
+const CHANNEL_IDS: ChannelFilter[] = ["all", "push", "telegram", "email"];
 
 const CHANNEL_PILL: Record<InboxChannel, { label: string; icon: string; className: string }> = {
   push: {
@@ -71,16 +67,13 @@ function formatMoney(value: number) {
   return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function emptyCopy(total: number, channel: ChannelFilter) {
-  if (total === 0) {
-    return "No notifications yet — you'll see dividend payments here as they're detected.";
-  }
-  if (channel === "email") {
-    return "No email alerts. PaidPrime sends dividend notifications on Push and Telegram.";
-  }
-  if (channel === "all") return "No notifications yet.";
-  const label = CHANNELS.find((c) => c.id === channel)?.label ?? "matching";
-  return `No ${label} notifications.`;
+type TFn = ReturnType<typeof useTranslations>;
+
+function emptyCopy(t: TFn, total: number, channel: ChannelFilter) {
+  if (total === 0) return t("noNotificationsYet");
+  if (channel === "email") return t("noEmailAlerts");
+  if (channel === "all") return t("noNotificationsAll");
+  return t("noChannelNotifications", { channel: t(`filter${channel.charAt(0).toUpperCase() + channel.slice(1)}` as never) });
 }
 
 type GroupId = "today" | "yesterday" | "earlier";
@@ -94,6 +87,7 @@ function groupId(iso: string): GroupId {
 
 export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; lastSeenAt: string }) {
   const router = useRouter();
+  const t = useTranslations("dashboard.notifications");
   const [tab, setTab] = useState<Tab>("inbox");
   const [channel, setChannel] = useState<ChannelFilter>("all");
   const [seenAt, setSeenAt] = useState(lastSeenAt);
@@ -110,13 +104,11 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
   const groups = useMemo(() => {
     const buckets: Record<GroupId, InboxItem[]> = { today: [], yesterday: [], earlier: [] };
     for (const item of filtered) buckets[groupId(item.notifiedAt)].push(item);
-    return (
-      [
-        { id: "today" as const, label: "Today", rows: buckets.today },
-        { id: "yesterday" as const, label: "Yesterday", rows: buckets.yesterday },
-        { id: "earlier" as const, label: "Earlier", rows: buckets.earlier },
-      ] as const
-    ).filter((g) => g.rows.length > 0);
+    return [
+      { id: "today" as const, labelKey: "groupToday" as const, rows: buckets.today },
+      { id: "yesterday" as const, labelKey: "groupYesterday" as const, rows: buckets.yesterday },
+      { id: "earlier" as const, labelKey: "groupEarlier" as const, rows: buckets.earlier },
+    ].filter((g) => g.rows.length > 0);
   }, [filtered]);
 
   function markAllRead() {
@@ -133,12 +125,12 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
     <div className="flex flex-col">
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#22262c] pb-6">
         <div className="min-w-0">
-          <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Alerts</p>
+          <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{t("eyebrow")}</p>
           <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-            Notifications
+            {t("pageTitle")}
           </h1>
           <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-            Dividend payments across every connected channel.
+            {t("pageSubtitle")}
           </p>
         </div>
         <button
@@ -148,7 +140,7 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
           className="inline-flex h-9 items-center gap-2 rounded-[10px] border border-[#2e343b] bg-[#16191d] px-[15px] text-[13px] font-medium text-[#f2f4f7] transition-colors hover:border-[#4c82f7] disabled:cursor-default disabled:opacity-40"
         >
           <FigmaIcon src="/marketing/dashboard/icon-mark-read.svg" className="size-3.5" />
-          Mark all read
+          {t("markAllRead")}
         </button>
       </header>
 
@@ -162,7 +154,7 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
           )}
         >
           <FigmaIcon src="/marketing/dashboard/icon-inbox.svg" className="size-3.5" />
-          Inbox
+          {t("tabInbox")}
           {unreadCount > 0 ? (
             <span className="rounded-[8px] border border-[rgba(76,130,247,0.3)] bg-[#16233d] px-2 py-[4px] text-[11px] font-medium tracking-[1.1px] text-[#4c82f7] uppercase">
               {unreadCount}
@@ -178,18 +170,19 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
           )}
         >
           <FigmaIcon src="/marketing/dashboard/icon-archive.svg" className="size-3.5" />
-          Archived
+          {t("tabArchived")}
         </button>
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
-        {CHANNELS.map((pill) => {
-          const active = channel === pill.id;
+        {CHANNEL_IDS.map((id) => {
+          const active = channel === id;
+          const labelKey = `filter${id.charAt(0).toUpperCase() + id.slice(1)}` as "filterAll" | "filterPush" | "filterTelegram" | "filterEmail";
           return (
             <button
-              key={pill.id}
+              key={id}
               type="button"
-              onClick={() => setChannel(pill.id)}
+              onClick={() => setChannel(id)}
               className={cn(
                 "rounded-full border px-[15px] py-[7px] text-[12px] font-medium transition-colors",
                 active
@@ -197,7 +190,7 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
                   : "border-[#2e343b] text-[#99a1ac] hover:border-[#4c82f7] hover:text-[#f2f4f7]",
               )}
             >
-              {pill.label}
+              {t(labelKey)}
             </button>
           );
         })}
@@ -205,31 +198,29 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
 
       <div className="mt-6 flex flex-col gap-6">
         {tab === "archived" ? (
-          <EmptyCard>
-            Nothing archived. Notifications stay in Inbox after you mark them read.
-          </EmptyCard>
+          <EmptyCard>{t("archivedEmpty")}</EmptyCard>
         ) : groups.length === 0 ? (
-          <EmptyCard>{emptyCopy(items.length, channel)}</EmptyCard>
+          <EmptyCard>{emptyCopy(t, items.length, channel)}</EmptyCard>
         ) : (
           groups.map((group) => (
             <section key={group.id} className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
               <div className="flex items-center justify-between border-b border-[#22262c] px-6 py-5">
                 <div>
                   <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-                    {group.label}
+                    {t(group.labelKey)}
                   </h2>
                   <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
-                    {group.rows.length} {group.rows.length === 1 ? "notification" : "notifications"}
+                    {t("notificationCount", { count: group.rows.length })}
                   </p>
                 </div>
               </div>
               <ul>
                 {group.rows.map((item, index) => {
                   const unread = new Date(item.notifiedAt).getTime() > seenMs;
-                  const title = `Dividend received — ${item.ticker}`;
+                  const title = t("dividendReceived", { ticker: item.ticker });
                   const detail = item.broker
-                    ? `+${formatMoney(item.amount)} credited at ${item.broker}`
-                    : `+${formatMoney(item.amount)} credited`;
+                    ? t("creditedAt", { amount: formatMoney(item.amount), broker: item.broker })
+                    : t("credited", { amount: formatMoney(item.amount) });
                   const when = group.id === "earlier" ? formatEarlier(item.notifiedAt) : formatTime(item.notifiedAt);
                   return (
                     <li
@@ -269,6 +260,7 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
                         <div className="flex flex-wrap justify-end gap-1.5">
                           {item.channels.map((ch) => {
                             const pill = CHANNEL_PILL[ch];
+                            const chKey = `channel${ch.charAt(0).toUpperCase() + ch.slice(1)}` as "channelPush" | "channelTelegram" | "channelEmail";
                             return (
                               <span
                                 key={ch}
@@ -278,7 +270,7 @@ export function NotificationsInbox({ items, lastSeenAt }: { items: InboxItem[]; 
                                 )}
                               >
                                 <FigmaIcon src={pill.icon} className="size-[11px]" />
-                                {pill.label}
+                                {t(chKey)}
                               </span>
                             );
                           })}

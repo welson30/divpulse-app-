@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { SettingsPanel, settingsPrimaryBtnClass, settingsSecondaryBtnClass } from "@/components/dashboard/settings-panel";
 
 export function SettingsBillingPanel({ hasStripeCustomer }: { hasStripeCustomer: boolean }) {
+  const t = useTranslations("dashboard.settings");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -13,7 +15,7 @@ export function SettingsBillingPanel({ hasStripeCustomer }: { hasStripeCustomer:
       const response = await fetch("/api/stripe/portal", { method: "POST" });
       const result = (await response.json()) as { error?: string; url?: string };
       if (!response.ok || !result.url) {
-        setError(result.error ?? "Couldn't open billing management.");
+        setError(result.error ?? t("billingError"));
         return;
       }
       window.location.href = result.url;
@@ -21,19 +23,17 @@ export function SettingsBillingPanel({ hasStripeCustomer }: { hasStripeCustomer:
   }
 
   return (
-    <SettingsPanel title="Billing" subtitle="Invoices, payment method, and a copy of your data">
+    <SettingsPanel title={t("billingTitle")} subtitle={t("billingSubtitle")}>
       <div className="flex flex-col gap-4">
         <p className="text-[13px] leading-[21.45px] text-[#99a1ac]">
-          {hasStripeCustomer
-            ? "Card details and invoices live in the Stripe customer portal."
-            : "No billing account yet — subscribe first, then invoices and payment methods show up here."}
+          {hasStripeCustomer ? t("billingHasCustomer") : t("billingNoCustomer")}
         </p>
         <div className="flex flex-wrap gap-2">
           <button type="button" disabled={isPending || !hasStripeCustomer} onClick={openPortal} className={settingsPrimaryBtnClass}>
-            {isPending ? "Opening…" : "Manage billing"}
+            {isPending ? t("billingManageOpening") : t("billingManage")}
           </button>
           <a href="/api/account/export" className={settingsSecondaryBtnClass}>
-            Download my data
+            {t("billingDownload")}
           </a>
         </div>
         {error ? (

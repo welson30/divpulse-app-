@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { ChevronRight, Download, KeyRound } from "lucide-react";
 
 /**
@@ -7,7 +8,8 @@ import { ChevronRight, Download, KeyRound } from "lucide-react";
  * its own product decision (data retention, Stripe cancellation, support
  * burden) before it belongs in the UI at all, not just a styling pass.
  */
-export function SettingsQuickActions() {
+export async function SettingsQuickActions() {
+  const t = await getTranslations("dashboard.settings");
   return (
     <div className="flex flex-col gap-1">
       <Link
@@ -18,8 +20,8 @@ export function SettingsQuickActions() {
           <KeyRound className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-text-primary">Change password</div>
-          <div className="text-xs text-text-secondary">Update your account password</div>
+          <div className="text-sm font-medium text-text-primary">{t("changePassword")}</div>
+          <div className="text-xs text-text-secondary">{t("changePasswordDesc")}</div>
         </div>
         <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
       </Link>
@@ -35,8 +37,8 @@ export function SettingsQuickActions() {
           <Download className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-text-primary">Download my data</div>
-          <div className="text-xs text-text-secondary">Export your holdings, watchlist, and account data</div>
+          <div className="text-sm font-medium text-text-primary">{t("downloadData")}</div>
+          <div className="text-xs text-text-secondary">{t("downloadDataDesc")}</div>
         </div>
         <ChevronRight className="size-4 shrink-0 text-text-tertiary" aria-hidden />
       </a>

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { useAdvisorChat } from "@/components/dashboard/advisor/use-advisor-chat";
 
@@ -22,12 +23,7 @@ export type AdvisorRiskRow = {
   tone: "warning" | "neutral" | "positive";
 };
 
-const PROMPTS = [
-  "What's my monthly dividend income?",
-  "Which holding pays me the most?",
-  "Am I too concentrated in one sector?",
-  "What's my next dividend payment?",
-];
+const PROMPT_KEYS = ["prompt1", "prompt2", "prompt3", "prompt4"] as const;
 
 type AdvisorBoardProps = {
   isPro: boolean;
@@ -37,7 +33,8 @@ type AdvisorBoardProps = {
 };
 
 export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoardProps) {
-  const chat = useAdvisorChat("AI Advisor");
+  const t = useTranslations("dashboard.advisor");
+  const chat = useAdvisorChat(t("pageLabel"));
 
   useEffect(() => {
     chat.scrollRef.current?.scrollTo({ top: chat.scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -46,12 +43,12 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
   return (
     <div className="flex flex-col gap-10">
       <header className="border-b border-[#22262c] pb-6">
-        <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">AI Advisor</p>
+        <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{t("pageLabel")}</p>
         <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-          Portfolio advisor
+          {t("pageTitle")}
         </h1>
         <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-          A focused workspace for portfolio Q&amp;A — grounded in your holdings, income history and risk profile.
+          {t("pageDesc")}
         </p>
       </header>
 
@@ -59,10 +56,10 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
         <section className="flex min-h-[640px] flex-col overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
           <header className="border-b border-[#22262c] px-6 py-5">
             <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-              Conversation
+              {t("convTitle")}
             </h2>
             <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
-              Session grounded in your live portfolio data
+              {t("convSubtitle")}
             </p>
           </header>
 
@@ -70,28 +67,26 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
             {!isPro ? (
               <div className="flex flex-col items-start gap-3 py-8">
                 <p className="text-[14px] leading-[22.75px] text-[#99a1ac]">
-                  The AI Advisor is a Pro feature. It answers from your holdings, trailing income, upcoming payments
-                  and goals.
+                  {t("proGateText")}
                 </p>
                 <Link
                   href="/settings"
                   className="inline-flex h-9 items-center rounded-[10px] bg-[#4c82f7] px-4 text-[13px] font-medium text-white hover:bg-[#3d72e8]"
                 >
-                  Upgrade to Pro
+                  {t("proGateBtn")}
                 </Link>
               </div>
             ) : chat.messages.length === 0 && !chat.isPending ? (
               <p className="py-8 text-[14px] leading-[22.75px] text-[#99a1ac]">
-                Ask about your income, holdings, upcoming payments, or goals. Answers stay inside what this app
-                actually records.
+                {t("emptyState")}
               </p>
             ) : (
               <div className="flex flex-col">
                 {groupTurns(chat.messages).map((turn) => (
                   <div key={turn.user.id} className="border-b border-[#22262c] py-6 last:border-b-0">
-                    <p className="text-[11px] tracking-[1.76px] text-[#6c737f] uppercase">Query</p>
+                    <p className="text-[11px] tracking-[1.76px] text-[#6c737f] uppercase">{t("queryLabel")}</p>
                     <p className="mt-[7px] text-[14px] leading-[22.75px] text-[#f2f4f7]">{turn.user.content}</p>
-                    <p className="mt-2 text-[11px] tracking-[1.76px] text-[#4c82f7] uppercase">Response</p>
+                    <p className="mt-2 text-[11px] tracking-[1.76px] text-[#4c82f7] uppercase">{t("responseLabel")}</p>
                     {turn.assistant ? (
                       <p className="mt-1 text-[13px] leading-[21.13px] whitespace-pre-wrap text-[#99a1ac]">
                         {turn.assistant.content}
@@ -119,17 +114,20 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
 
           <div className="border-t border-[#22262c] px-6 py-6">
             <div className="mb-3 flex flex-wrap gap-2">
-              {PROMPTS.map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  disabled={!isPro || chat.isPending}
-                  onClick={() => chat.submit(prompt)}
-                  className="rounded-full border border-[#2e343b] px-3 py-[7px] text-[12px] leading-[19.8px] text-[#99a1ac] hover:border-[#4c82f7] hover:text-[#f2f4f7] disabled:opacity-40"
-                >
-                  {prompt}
-                </button>
-              ))}
+              {PROMPT_KEYS.map((key) => {
+                const prompt = t(key);
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    disabled={!isPro || chat.isPending}
+                    onClick={() => chat.submit(prompt)}
+                    className="rounded-full border border-[#2e343b] px-3 py-[7px] text-[12px] leading-[19.8px] text-[#99a1ac] hover:border-[#4c82f7] hover:text-[#f2f4f7] disabled:opacity-40"
+                  >
+                    {prompt}
+                  </button>
+                );
+              })}
             </div>
             <form
               className="flex items-center gap-2"
@@ -141,7 +139,7 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
               <input
                 value={chat.question}
                 onChange={(e) => chat.setQuestion(e.target.value)}
-                placeholder="Ask about your portfolio, income or risk..."
+                placeholder={t("inputPlaceholder")}
                 maxLength={500}
                 disabled={!isPro || chat.isPending}
                 className="h-[52px] min-w-0 flex-1 rounded-[14px] border border-[#2e343b] bg-[#0b0c0e] px-[17px] text-[16px] text-[#f2f4f7] outline-none placeholder:text-[#6c737f] focus-visible:border-[#4c82f7] disabled:opacity-50"
@@ -149,7 +147,7 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
               <button
                 type="submit"
                 disabled={!isPro || chat.isPending || !chat.question.trim()}
-                aria-label="Send"
+                aria-label={t("sendAriaLabel")}
                 className="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-[#4c82f7] text-white hover:bg-[#3d72e8] disabled:opacity-40"
               >
                 <FigmaIcon src="/marketing/dashboard/icon-send.svg" className="size-4 text-white" />
@@ -159,10 +157,10 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
         </section>
 
         <div className="flex flex-col gap-6">
-          <SideCard title="Portfolio insights" subtitle="From your recorded income">
+          <SideCard title={t("insightsTitle")} subtitle={t("insightsSubtitle")}>
             {insights.length === 0 ? (
               <p className="text-[13px] leading-[21.45px] text-[#99a1ac]">
-                Add holdings with dividend history to see income insights here.
+                {t("insightsEmpty")}
               </p>
             ) : (
               <ul className="flex flex-col gap-4">
@@ -187,18 +185,18 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
             )}
           </SideCard>
 
-          <SideCard title="Dividend suggestions" subtitle="From your watchlist and collections — not a recommendation">
+          <SideCard title={t("suggestionsTitle")} subtitle={t("suggestionsSubtitle")}>
             {suggestions.length === 0 ? (
               <p className="text-[13px] leading-[21.45px] text-[#99a1ac]">
-                Add names to your{" "}
+                {t("suggestionsEmptyPre")}{" "}
                 <Link href="/watchlist" className="text-[#4c82f7] hover:underline">
-                  watchlist
+                  {t("suggestionsWatchlist")}
                 </Link>{" "}
-                or browse{" "}
+                {t("suggestionsOr")}{" "}
                 <Link href="/collections" className="text-[#4c82f7] hover:underline">
-                  collections
+                  {t("suggestionsCollections")}
                 </Link>
-                . We don&apos;t pick tickers for you.
+                . {t("suggestionsEmptyPost")}
               </p>
             ) : (
               <ul>
@@ -212,7 +210,7 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
                       href={row.href}
                       className="inline-flex items-center gap-0.5 text-[12px] leading-[19.8px] text-[#3fbf87] hover:underline"
                     >
-                      View
+                      {t("viewLink")}
                       <FigmaIcon src="/marketing/dashboard/icon-consider.svg" className="size-3 text-[#3fbf87]" />
                     </Link>
                   </li>
@@ -222,8 +220,8 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
           </SideCard>
 
           <SideCard
-            title="Risk analysis"
-            subtitle="Concentration and stability signals"
+            title={t("riskTitle")}
+            subtitle={t("riskSubtitle")}
             icon={
               <span className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#16191d]">
                 <FigmaIcon src="/marketing/dashboard/icon-risk.svg" className="size-[14px] text-[#99a1ac]" />
@@ -232,7 +230,7 @@ export function AdvisorBoard({ isPro, insights, suggestions, risks }: AdvisorBoa
           >
             {risks.length === 0 ? (
               <p className="text-[13px] leading-[21.45px] text-[#99a1ac]">
-                Add holdings to see concentration and payout history.
+                {t("riskEmpty")}
               </p>
             ) : (
               <ul className="flex flex-col gap-4">
@@ -313,9 +311,11 @@ function ToneBadge({ tone }: { tone: AdvisorRiskRow["tone"] }) {
       : tone === "positive"
         ? "border-[rgba(63,191,135,0.3)] bg-[#10261e] text-[#3fbf87]"
         : "border-[#2e343b] bg-[#16191d] text-[#99a1ac]";
+  const t = useTranslations("dashboard.advisor");
+  const label = tone === "warning" ? t("toneWarning") : tone === "positive" ? t("tonePositive") : t("toneNeutral");
   return (
     <span className={`shrink-0 rounded-[8px] border px-2 py-[4px] text-[11px] tracking-[1.1px] uppercase ${cls}`}>
-      {tone}
+      {label}
     </span>
   );
 }

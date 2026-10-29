@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { MonthlyIncomePoint } from "@/components/dashboard/monthly-income-chart";
 
@@ -23,8 +24,8 @@ function formatAxis(value: number): string {
 export function PassiveIncomeChart({
   data,
   className,
-  title = "Passive income",
-  subtitle = "Dividends received per month, trailing 12 months",
+  title,
+  subtitle,
   chartClassName,
 }: {
   data: MonthlyIncomePoint[];
@@ -33,6 +34,9 @@ export function PassiveIncomeChart({
   subtitle?: string;
   chartClassName?: string;
 }) {
+  const t = useTranslations("dashboard.passiveIncome");
+  const resolvedTitle = title ?? t("title");
+  const resolvedSubtitle = subtitle ?? t("subtitle");
   const [hoveredMonth, setHoveredMonth] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -54,9 +58,9 @@ export function PassiveIncomeChart({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#e8eaf0]">
-              {title}
+              {resolvedTitle}
             </h2>
-            <p className="mt-1 text-[12px] leading-[1.65] text-[#3d4554]">{subtitle}</p>
+            <p className="mt-1 text-[12px] leading-[1.65] text-[#3d4554]">{resolvedSubtitle}</p>
           </div>
           {/* Live average badge */}
           {avgTotal > 0 && (
@@ -90,7 +94,7 @@ export function PassiveIncomeChart({
       <div className="px-4 pb-5 pt-3 min-[900px]:px-6">
         {max <= 0 ? (
           <div className={cn("flex h-[220px] items-center justify-center text-center text-[13px] text-[#3d4554] min-[900px]:h-[260px]", chartClassName)}>
-            Payouts appear here as your holdings pay them.
+            {t("emptyState")}
           </div>
         ) : (
           <div className={cn("flex h-[220px] gap-2 min-[900px]:h-[260px]", chartClassName)}>

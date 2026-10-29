@@ -307,35 +307,10 @@
       "help": "Ajuda"
     },
     "sidebar": {
-      "collapse": "Recolher",
-      "sections": {
-        "overview": "Visão geral",
-        "income": "Renda",
-        "explore": "Explorar",
-        "signals": "Sinais",
-        "insight": "Insights",
-        "account": "Conta"
-      },
-      "links": {
-        "dashboard": "Dashboard",
-        "portfolio": "Portfólio",
-        "allocation": "Alocação",
-        "dividends": "Dividendos",
-        "calendar": "Calendário",
-        "upcomingPayments": "Próximos pagamentos",
-        "paymentHistory": "Histórico de pagamentos",
-        "etfExplorer": "Explorador de ETFs",
-        "collections": "Coleções",
-        "notifications": "Notificações",
-        "alertTemplates": "Templates de alerta",
-        "watchlist": "Lista de observação",
-        "analytics": "Análises",
-        "aiAdvisor": "Assistente IA",
-        "brokerConnections": "Conexões com corretoras",
-        "settings": "Configurações",
-        "helpCenter": "Central de ajuda"
-      },
-      "more": "Mais"
+      "currentPlan": "Plano atual",
+      "holdingsCount": "{count}/5 ativos",
+      "upgradePro": "Assinar Pro",
+      "signOut": "Sair"
     },
     "overview": {
       "welcomeBack": "Bem-vindo de volta,",
@@ -517,7 +492,23 @@
       "fieldCurrencyHint": "Valores são exibidos em USD. Conversão não é suportada.",
       "fieldDefaultBroker": "Corretora padrão",
       "fieldDefaultBrokerHint": "Preenche automaticamente o campo corretora ao adicionar um ativo.",
-      "fieldDefaultBrokerPlaceholder": "XP Investimentos"
+      "fieldDefaultBrokerPlaceholder": "XP Investimentos",
+      "tabProfile": "Perfil",
+      "tabSecurity": "Segurança",
+      "tabSubscription": "Assinatura",
+      "tabBilling": "Cobrança",
+      "changePassword": "Alterar senha",
+      "changePasswordDesc": "Atualize a senha da sua conta",
+      "downloadData": "Baixar meus dados",
+      "downloadDataDesc": "Exporte suas posições, lista de monitoramento e dados da conta",
+      "billingTitle": "Cobrança",
+      "billingSubtitle": "Faturas, forma de pagamento e uma cópia dos seus dados",
+      "billingHasCustomer": "Detalhes do cartão e faturas estão no portal de clientes do Stripe.",
+      "billingNoCustomer": "Nenhuma conta de cobrança ainda — assine primeiro, depois as faturas e formas de pagamento aparecem aqui.",
+      "billingManageOpening": "Abrindo…",
+      "billingManage": "Gerenciar cobrança",
+      "billingDownload": "Baixar meus dados",
+      "billingError": "Não foi possível abrir o gerenciamento de cobrança."
     },
     "goals": {
       "title": "Metas",
@@ -549,7 +540,40 @@
       "widgetUpgrade": "Fazer upgrade para Pro",
       "widgetNoAnswer": "O consultor não retornou uma resposta — tente novamente.",
       "widgetNoStream": "Seu navegador não suporta respostas em streaming.",
-      "widgetConnError": "Não foi possível alcançar o consultor — verifique sua conexão e tente novamente."
+      "widgetConnError": "Não foi possível alcançar o consultor — verifique sua conexão e tente novamente.",
+      "pageLabel": "Consultor IA",
+      "pageTitle": "Consultor de portfólio",
+      "pageDesc": "Um espaço focado para perguntas sobre portfólio — baseado nas suas posições, histórico de renda e perfil de risco.",
+      "convTitle": "Conversa",
+      "convSubtitle": "Sessão baseada nos dados ao vivo do seu portfólio",
+      "proGateText": "O Consultor IA é um recurso Pro. Ele responde com base nas suas posições, renda recente, pagamentos futuros e objetivos.",
+      "proGateBtn": "Fazer upgrade para Pro",
+      "emptyState": "Pergunte sobre sua renda, posições, próximos pagamentos ou objetivos. As respostas ficam dentro do que o app registra.",
+      "queryLabel": "Pergunta",
+      "responseLabel": "Resposta",
+      "inputPlaceholder": "Pergunte sobre seu portfólio, renda ou risco...",
+      "sendAriaLabel": "Enviar",
+      "insightsTitle": "Insights do portfólio",
+      "insightsSubtitle": "Baseado na sua renda registrada",
+      "insightsEmpty": "Adicione posições com histórico de dividendos para ver insights aqui.",
+      "suggestionsTitle": "Sugestões de dividendos",
+      "suggestionsSubtitle": "Da sua lista e coleções — não é uma recomendação",
+      "suggestionsEmptyPre": "Adicione ativos à sua",
+      "suggestionsWatchlist": "lista de monitoramento",
+      "suggestionsOr": "ou explore as",
+      "suggestionsCollections": "coleções",
+      "suggestionsEmptyPost": "Não selecionamos tickers para você.",
+      "viewLink": "Ver",
+      "riskTitle": "Análise de risco",
+      "riskSubtitle": "Sinais de concentração e estabilidade",
+      "riskEmpty": "Adicione posições para ver concentração e histórico de pagamentos.",
+      "toneWarning": "atenção",
+      "toneNeutral": "neutro",
+      "tonePositive": "positivo",
+      "prompt1": "Qual é a minha renda mensal de dividendos?",
+      "prompt2": "Qual posição me paga mais?",
+      "prompt3": "Estou muito concentrado em um setor?",
+      "prompt4": "Qual é o meu próximo pagamento de dividendo?"
     },
     "upgrade": {
       "title": "Assine o Pro",
@@ -624,7 +648,10 @@
       "addHoldingPlaceholderCompany": "The Coca-Cola Company",
       "addHoldingPlaceholderBroker": "XP Investimentos",
       "addHoldingAdding": "Adicionando…",
-      "addHoldingSubmit": "Adicionar ativo"
+      "addHoldingSubmit": "Adicionar ativo",
+      "dialogTrigger": "Adicionar ativo",
+      "dialogTitle": "Adicionar um ativo",
+      "dialogDesc": "Registre uma posição manualmente — ticker, cotas e onde está custodiado."
     },
     "history": {
       "eyebrow": "Histórico",
@@ -683,7 +710,10 @@
       "exDatePrefix": "Ex",
       "addPlaceholder": "Adicionar ticker, ex: AAPL",
       "addAdding": "Adicionando…",
-      "addSubmit": "Adicionar à lista"
+      "addSubmit": "Adicionar à lista",
+      "dialogTrigger": "Adicionar à lista",
+      "dialogTitle": "Adicionar à lista de monitoramento",
+      "dialogDesc": "Monitore um ticker que você ainda não possui."
     },
     "diversification": {
       "eyebrow": "Alocação",
@@ -909,6 +939,18 @@
       "historicalPerformanceSubFallback": "Valor total do portfólio",
       "notEnoughHistory": "Histórico insuficiente neste período.",
       "yoyBadge": "{value} a.a."
+    },
+    "subscription": {
+      "title": "Assinatura",
+      "subtitle": "Seu plano atual",
+      "freePlanDesc": "Até 5 ativos monitorados, apenas entrada manual",
+      "proPlanDesc": "Monitoramento manual ilimitado",
+      "proPlusPlanDesc": "Monitoramento ilimitado, importação de CSV e sincronização automática com corretora",
+      "periodEnd": "Período atual termina em {date}",
+      "upgradeOpening": "Abrindo…",
+      "upgradePro": "Assinar Pro — R$59/ano",
+      "upgradeProPlus": "Assinar Pro+ — R$119/ano",
+      "checkoutError": "Algo deu errado ao iniciar o checkout."
     }
   },
   "notifications": {

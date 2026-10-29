@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BrokerMark } from "@/components/dashboard/broker-mark";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { isLinkableTicker } from "@/lib/tickers/validate";
@@ -19,26 +20,18 @@ export type UpcomingCard = {
   status: UpcomingStatus;
 };
 
-const FILTERS: { id: "all" | UpcomingStatus; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "confirmed", label: "Confirmed" },
-  { id: "expected", label: "Expected" },
-  { id: "pending", label: "Pending" },
-];
+const FILTER_IDS: Array<"all" | UpcomingStatus> = ["all", "confirmed", "expected", "pending"];
 
-const BADGE: Record<UpcomingStatus, { label: string; className: string; icon: string }> = {
+const BADGE_STYLE: Record<UpcomingStatus, { className: string; icon: string }> = {
   confirmed: {
-    label: "Confirmed",
     className: "border-[rgba(63,191,135,0.3)] bg-[#10261e] text-[#3fbf87]",
     icon: "/marketing/dashboard/icon-check-11.svg",
   },
   expected: {
-    label: "Expected",
     className: "border-[rgba(76,130,247,0.3)] bg-[#16233d] text-[#4c82f7]",
     icon: "/marketing/dashboard/icon-expected-11.svg",
   },
   pending: {
-    label: "Pending",
     className: "border-[rgba(224,164,92,0.3)] bg-[#241c10] text-[#e0a45c]",
     icon: "/marketing/dashboard/icon-pending-11.svg",
   },
@@ -57,6 +50,7 @@ function formatShortDate(iso: string) {
 }
 
 export function UpcomingBoard({ cards }: { cards: UpcomingCard[] }) {
+  const t = useTranslations("dashboard.upcoming");
   const [filter, setFilter] = useState<"all" | UpcomingStatus>("all");
   const counts = useMemo(() => {
     const next = { all: cards.length, confirmed: 0, expected: 0, pending: 0 };
@@ -67,18 +61,18 @@ export function UpcomingBoard({ cards }: { cards: UpcomingCard[] }) {
   const visible = filter === "all" ? cards : cards.filter((c) => c.status === filter);
   const total = visible.reduce((sum, c) => sum + c.amount, 0);
   const hasEstimate = visible.some((c) => c.status === "expected");
-  const filterLabel = filter === "all" ? "all" : filter;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap gap-2">
-        {FILTERS.map((tab) => {
-          const active = filter === tab.id;
+        {FILTER_IDS.map((id) => {
+          const active = filter === id;
+          const labelKey = `filter${id.charAt(0).toUpperCase() + id.slice(1)}` as "filterAll" | "filterConfirmed" | "filterExpected" | "filterPending";
           return (
             <button
-              key={tab.id}
+              key={id}
               type="button"
-              onClick={() => setFilter(tab.id)}
+              onClick={() => setFilter(id)}
               className={cn(
                 "flex items-center gap-2 rounded-full border px-4 py-[7px] text-[13px] font-medium",
                 active
@@ -86,8 +80,8 @@ export function UpcomingBoard({ cards }: { cards: UpcomingCard[] }) {
                   : "border-[#2e343b] bg-transparent text-[#99a1ac] hover:border-[#4c82f7]/40",
               )}
             >
-              {tab.label}
-              <span className="text-[11px] tracking-[-0.22px] text-[#6c737f]">{counts[tab.id]}</span>
+              {t(labelKey)}
+              <span className="text-[11px] tracking-[-0.22px] text-[#6c737f]">{counts[id]}</span>
             </button>
           );
         })}
@@ -96,23 +90,24 @@ export function UpcomingBoard({ cards }: { cards: UpcomingCard[] }) {
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-5">
         <div className="flex items-center gap-2 text-[13px] leading-[21.45px] text-[#99a1ac]">
           <FigmaIcon src="/marketing/dashboard/icon-cal-16.svg" className="size-4 text-[#99a1ac]" />
-          {visible.length} {visible.length === 1 ? "payment" : "payments"} · {filterLabel}
+          {t("paymentCount", { count: visible.length })}
         </div>
         <p className="text-[22px] font-medium leading-[36.3px] tracking-[-0.44px] text-[#f2f4f7]">
           {hasEstimate ? "~" : ""}
           {formatMoney(total)}
-          <span className="ml-2 text-[12px] font-normal tracking-normal text-[#6c737f]">total expected</span>
+          <span className="ml-2 text-[12px] font-normal tracking-normal text-[#6c737f]">{t("totalExpected")}</span>
         </p>
       </div>
 
       {visible.length === 0 ? (
         <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-sm text-[#99a1ac]">
-          No {filter === "all" ? "" : `${filter} `}payments in the next 90 days.
+          {filter === "all" ? t("noPaymentsAll") : t("noPayments", { filter: t(`filter${filter.charAt(0).toUpperCase() + filter.slice(1)}` as never) })}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 min-[760px]:grid-cols-2 min-[1100px]:grid-cols-3">
           {visible.map((card) => {
-            const badge = BADGE[card.status];
+            const badge = BADGE_STYLE[card.status];
+            const badgeLabelKey = `badge${card.status.charAt(0).toUpperCase() + card.status.slice(1)}` as "badgeConfirmed" | "badgeExpected" | "badgePending";
             const title = (
               <>
                 <span className="block text-[16px] font-semibold leading-[26.4px] text-[#f2f4f7]">{card.ticker}</span>
@@ -141,13 +136,13 @@ export function UpcomingBoard({ cards }: { cards: UpcomingCard[] }) {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-[12px] tracking-[1.44px] text-[#6c737f] uppercase">Ex-date</p>
+                    <p className="text-[12px] tracking-[1.44px] text-[#6c737f] uppercase">{t("exDate")}</p>
                     <p className="mt-0.5 text-[13px] leading-[21.45px] text-[#99a1ac]">
                       {card.exDate ? formatShortDate(card.exDate) : "—"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[12px] tracking-[1.44px] text-[#6c737f] uppercase">Pay date</p>
+                    <p className="text-[12px] tracking-[1.44px] text-[#6c737f] uppercase">{t("payDate")}</p>
                     <p className="mt-0.5 text-[13px] leading-[21.45px] text-[#99a1ac]">{formatShortDate(card.payDate)}</p>
                   </div>
                 </div>
@@ -160,7 +155,7 @@ export function UpcomingBoard({ cards }: { cards: UpcomingCard[] }) {
                     )}
                   >
                     <FigmaIcon src={badge.icon} className="size-[11px]" />
-                    {badge.label}
+                    {t(badgeLabelKey)}
                   </span>
                 </div>
               </article>

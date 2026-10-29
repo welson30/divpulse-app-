@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 export type CalendarPayment = {
@@ -14,7 +15,7 @@ export type CalendarPayment = {
   identityHidden: boolean;
 };
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAY_KEYS = ["daySun", "dayMon", "dayTue", "dayWed", "dayThu", "dayFri", "daySat"] as const;
 
 function formatAmount(value: number, estimated: boolean) {
   const body = `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -36,6 +37,7 @@ export function CalendarGrid({
   selectedDay: number;
   onSelectDay: (day: number) => void;
 }) {
+  const t = useTranslations("dashboard.calendar");
   const daysInMonth = new Date(year, month, 0).getDate();
   const leadingBlanks = new Date(year, month - 1, 1).getDay();
   const totalCells = leadingBlanks + daysInMonth;
@@ -51,12 +53,12 @@ export function CalendarGrid({
   return (
     <div className="overflow-hidden rounded-[10px]">
       <div className="grid grid-cols-7 gap-px bg-[#22262c]">
-        {WEEKDAYS.map((d) => (
+        {WEEKDAY_KEYS.map((key) => (
           <div
-            key={d}
+            key={key}
             className="bg-[#121417] py-2 text-center text-[10px] tracking-[1.2px] text-[#6c737f] uppercase"
           >
-            {d}
+            {t(key)}
           </div>
         ))}
       </div>

@@ -307,35 +307,10 @@
       "help": "Help"
     },
     "sidebar": {
-      "collapse": "Collapse",
-      "sections": {
-        "overview": "Overview",
-        "income": "Income",
-        "explore": "Explore",
-        "signals": "Signals",
-        "insight": "Insight",
-        "account": "Account"
-      },
-      "links": {
-        "dashboard": "Dashboard",
-        "portfolio": "Portfolio",
-        "allocation": "Allocation",
-        "dividends": "Dividends",
-        "calendar": "Calendar",
-        "upcomingPayments": "Upcoming payments",
-        "paymentHistory": "Payment history",
-        "etfExplorer": "ETF Explorer",
-        "collections": "Collections",
-        "notifications": "Notifications",
-        "alertTemplates": "Alert templates",
-        "watchlist": "Watchlist",
-        "analytics": "Analytics",
-        "aiAdvisor": "AI Advisor",
-        "brokerConnections": "Broker connections",
-        "settings": "Settings",
-        "helpCenter": "Help center"
-      },
-      "more": "More"
+      "currentPlan": "Current plan",
+      "holdingsCount": "{count}/5 holdings",
+      "upgradePro": "Upgrade to Pro",
+      "signOut": "Sign out"
     },
     "overview": {
       "welcomeBack": "Welcome back,",
@@ -517,7 +492,23 @@
       "fieldCurrencyHint": "Amounts are shown in USD. Conversion isn't supported.",
       "fieldDefaultBroker": "Default broker",
       "fieldDefaultBrokerHint": "Pre-fills the broker field when you add a holding.",
-      "fieldDefaultBrokerPlaceholder": "Fidelity"
+      "fieldDefaultBrokerPlaceholder": "Fidelity",
+      "tabProfile": "Profile",
+      "tabSecurity": "Security",
+      "tabSubscription": "Subscription",
+      "tabBilling": "Billing",
+      "changePassword": "Change password",
+      "changePasswordDesc": "Update your account password",
+      "downloadData": "Download my data",
+      "downloadDataDesc": "Export your holdings, watchlist, and account data",
+      "billingTitle": "Billing",
+      "billingSubtitle": "Invoices, payment method, and a copy of your data",
+      "billingHasCustomer": "Card details and invoices live in the Stripe customer portal.",
+      "billingNoCustomer": "No billing account yet — subscribe first, then invoices and payment methods show up here.",
+      "billingManageOpening": "Opening…",
+      "billingManage": "Manage billing",
+      "billingDownload": "Download my data",
+      "billingError": "Couldn't open billing management."
     },
     "goals": {
       "title": "Goals",
@@ -549,7 +540,40 @@
       "widgetUpgrade": "Upgrade to Pro",
       "widgetNoAnswer": "The advisor didn't return an answer — try again.",
       "widgetNoStream": "Your browser doesn't support streaming responses.",
-      "widgetConnError": "Couldn't reach the advisor — check your connection and try again."
+      "widgetConnError": "Couldn't reach the advisor — check your connection and try again.",
+      "pageLabel": "AI Advisor",
+      "pageTitle": "Portfolio advisor",
+      "pageDesc": "A focused workspace for portfolio Q&A — grounded in your holdings, income history and risk profile.",
+      "convTitle": "Conversation",
+      "convSubtitle": "Session grounded in your live portfolio data",
+      "proGateText": "The AI Advisor is a Pro feature. It answers from your holdings, trailing income, upcoming payments and goals.",
+      "proGateBtn": "Upgrade to Pro",
+      "emptyState": "Ask about your income, holdings, upcoming payments, or goals. Answers stay inside what this app actually records.",
+      "queryLabel": "Query",
+      "responseLabel": "Response",
+      "inputPlaceholder": "Ask about your portfolio, income or risk...",
+      "sendAriaLabel": "Send",
+      "insightsTitle": "Portfolio insights",
+      "insightsSubtitle": "From your recorded income",
+      "insightsEmpty": "Add holdings with dividend history to see income insights here.",
+      "suggestionsTitle": "Dividend suggestions",
+      "suggestionsSubtitle": "From your watchlist and collections — not a recommendation",
+      "suggestionsEmptyPre": "Add names to your",
+      "suggestionsWatchlist": "watchlist",
+      "suggestionsOr": "or browse",
+      "suggestionsCollections": "collections",
+      "suggestionsEmptyPost": "We don't pick tickers for you.",
+      "viewLink": "View",
+      "riskTitle": "Risk analysis",
+      "riskSubtitle": "Concentration and stability signals",
+      "riskEmpty": "Add holdings to see concentration and payout history.",
+      "toneWarning": "warning",
+      "toneNeutral": "neutral",
+      "tonePositive": "positive",
+      "prompt1": "What's my monthly dividend income?",
+      "prompt2": "Which holding pays me the most?",
+      "prompt3": "Am I too concentrated in one sector?",
+      "prompt4": "What's my next dividend payment?"
     },
     "upgrade": {
       "title": "Upgrade to Pro",
@@ -624,7 +648,10 @@
       "addHoldingPlaceholderCompany": "The Coca-Cola Company",
       "addHoldingPlaceholderBroker": "Fidelity",
       "addHoldingAdding": "Adding…",
-      "addHoldingSubmit": "Add holding"
+      "addHoldingSubmit": "Add holding",
+      "dialogTrigger": "Add holding",
+      "dialogTitle": "Add a holding",
+      "dialogDesc": "Track a position manually — ticker, shares, and where it's held."
     },
     "history": {
       "eyebrow": "History",
@@ -683,7 +710,10 @@
       "exDatePrefix": "Ex",
       "addPlaceholder": "Add a ticker, e.g. AAPL",
       "addAdding": "Adding…",
-      "addSubmit": "Add to watchlist"
+      "addSubmit": "Add to watchlist",
+      "dialogTrigger": "Add to watchlist",
+      "dialogTitle": "Add to watchlist",
+      "dialogDesc": "Track a ticker you don't hold yet."
     },
     "diversification": {
       "eyebrow": "Allocation",
@@ -909,6 +939,18 @@
       "historicalPerformanceSubFallback": "Total portfolio value",
       "notEnoughHistory": "Not enough history in this range.",
       "yoyBadge": "{value} YoY"
+    },
+    "subscription": {
+      "title": "Subscription",
+      "subtitle": "Your current plan",
+      "freePlanDesc": "Up to 5 tracked assets, manual entry only",
+      "proPlanDesc": "Unlimited manual tracking",
+      "proPlusPlanDesc": "Unlimited tracking, CSV import, and broker auto-sync",
+      "periodEnd": "Current period ends {date}",
+      "upgradeOpening": "Opening…",
+      "upgradePro": "Upgrade to Pro — $59/yr",
+      "upgradeProPlus": "Upgrade to Pro+ — $119/yr",
+      "checkoutError": "Something went wrong starting checkout."
     }
   },
   "notifications": {

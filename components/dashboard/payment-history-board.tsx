@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BrokerMark } from "@/components/dashboard/broker-mark";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { isLinkableTicker } from "@/lib/tickers/validate";
@@ -43,6 +44,7 @@ function csvCell(value: string | number | null | undefined) {
 }
 
 export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
+  const t = useTranslations("dashboard.history");
   const years = useMemo(() => {
     const set = new Set(rows.map((r) => r.payDate.slice(0, 4)));
     return [...set].sort((a, b) => b.localeCompare(a));
@@ -110,12 +112,12 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-4 border-b border-[#22262c] pb-6 min-[900px]:flex-row min-[900px]:items-end min-[900px]:justify-between">
         <div className="min-w-0">
-          <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">History</p>
+          <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{t("eyebrow")}</p>
           <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-            Payment history
+            {t("pageTitle")}
           </h1>
           <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-            Full record of confirmed dividend deposits across every connected broker.
+            {t("pageSubtitle")}
           </p>
         </div>
         <button
@@ -125,7 +127,7 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
           className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-[10px] border border-[#2e343b] bg-[#16191d] px-[13.8px] text-[13px] font-medium text-[#f2f4f7] hover:border-[#4c82f7]/40 disabled:opacity-40"
         >
           <FigmaIcon src="/marketing/dashboard/icon-export.svg" className="size-[14px]" />
-          Export CSV
+          {t("exportCsv")}
         </button>
       </header>
 
@@ -142,7 +144,7 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
               year === "all" ? "bg-[#16191d] text-[#f2f4f7]" : "text-[#6c737f] hover:text-[#f2f4f7]",
             )}
           >
-            All
+            {t("all")}
           </button>
           {years.map((y) => (
             <button
@@ -162,7 +164,7 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
           ))}
         </div>
         <label className="relative">
-          <span className="sr-only">Filter by broker</span>
+          <span className="sr-only">{t("filterByBroker")}</span>
           <select
             value={broker}
             onChange={(e) => {
@@ -171,7 +173,7 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
             }}
             className="h-9 appearance-none rounded-[10px] border border-[#2e343b] bg-[#0b0c0e] py-px pl-[16.8px] pr-9 text-[13px] text-[#f2f4f7] outline-none"
           >
-            <option value="all">All brokers</option>
+            <option value="all">{t("allBrokers")}</option>
             {brokers.map((name) => (
               <option key={name} value={name}>
                 {name}
@@ -189,10 +191,10 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
         <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
           <header className="border-b border-[#22262c] px-6 py-5">
             <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-              Payments
+              {t("sectionTitle")}
             </h2>
             <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">
-              {filtered.length} {filtered.length === 1 ? "record" : "records"} · {formatMoney(total)} total
+              {t("recordCount", { count: filtered.length, total: formatMoney(total) })}
             </p>
           </header>
           <div className="overflow-x-auto">
@@ -200,14 +202,14 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
               <div
                 className={`grid ${COLS} border-b border-[#22262c] px-6 py-3 text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase`}
               >
-                <span>Holding</span>
-                <span>Broker</span>
-                <span>Pay date</span>
-                <span className="text-right">Amount</span>
-                <span className="text-right">Running</span>
+                <span>{t("colHolding")}</span>
+                <span>{t("colBroker")}</span>
+                <span>{t("colPayDate")}</span>
+                <span className="text-right">{t("colAmount")}</span>
+                <span className="text-right">{t("colRunning")}</span>
               </div>
               {pageRows.length === 0 ? (
-                <p className="px-6 py-10 text-center text-[13px] text-[#99a1ac]">No payments in this filter.</p>
+                <p className="px-6 py-10 text-center text-[13px] text-[#99a1ac]">{t("noPayments")}</p>
               ) : (
                 pageRows.map((row, i) => {
                   const holding = (
@@ -247,7 +249,7 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
           {pageCount > 1 ? (
             <div className="flex items-center justify-between gap-3 border-t border-[#22262c] px-6 py-4">
               <p className="text-[13px] text-[#6c737f]">
-                Page {safePage + 1} of {pageCount}
+                {t("paginationPage", { current: safePage + 1, total: pageCount })}
               </p>
               <div className="flex gap-2">
                 <button
@@ -256,7 +258,7 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   className="inline-flex h-9 items-center rounded-[10px] border border-[#2e343b] bg-[#16191d] px-[13.8px] text-[13px] font-medium text-[#f2f4f7] disabled:opacity-40"
                 >
-                  Previous
+                  {t("previous")}
                 </button>
                 <button
                   type="button"
@@ -264,7 +266,7 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
                   onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
                   className="inline-flex h-9 items-center rounded-[10px] border border-[#2e343b] bg-[#16191d] px-[13.8px] text-[13px] font-medium text-[#f2f4f7] disabled:opacity-40"
                 >
-                  Next
+                  {t("next")}
                 </button>
               </div>
             </div>
@@ -275,13 +277,13 @@ export function PaymentHistoryBoard({ rows }: { rows: HistoryRow[] }) {
           <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
             <header className="border-b border-[#22262c] px-6 py-5">
               <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-                Yearly totals
+                {t("yearlyTitle")}
               </h2>
-              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Confirmed dividend income</p>
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{t("yearlySubtitle")}</p>
             </header>
             <div className="px-6 py-2">
               {yearly.length === 0 ? (
-                <p className="py-4 text-[13px] text-[#99a1ac]">No yearly totals yet.</p>
+                <p className="py-4 text-[13px] text-[#99a1ac]">{t("noYearlyTotals")}</p>
               ) : (
                 yearly.map(([y, amount], i) => (
                   <div
