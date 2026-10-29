@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Check, Loader2, Plus, TrendingUp, BarChart2, AlertTriangle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { watchTicker } from "@/app/(dashboard)/watchlist/actions";
@@ -46,21 +47,21 @@ function annualIncome(invest: number, yieldPct: number | null): string | null {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(annual);
 }
 
-const FREQ_STYLES: Record<PayFrequency, { label: string; bg: string; text: string; dot: string }> = {
+const FREQ_STYLES: Record<PayFrequency, { key: "monthly" | "weekly" | "quarterly"; bg: string; text: string; dot: string }> = {
   Monthly: {
-    label: "Monthly",
+    key: "monthly",
     bg: "bg-blue-500/10",
     text: "text-blue-400",
     dot: "bg-blue-400",
   },
   Quarterly: {
-    label: "Quarterly",
+    key: "quarterly",
     bg: "bg-violet-500/10",
     text: "text-violet-400",
     dot: "bg-violet-400",
   },
   Weekly: {
-    label: "Weekly",
+    key: "weekly",
     bg: "bg-amber-500/10",
     text: "text-amber-400",
     dot: "bg-amber-400",
@@ -68,13 +69,14 @@ const FREQ_STYLES: Record<PayFrequency, { label: string; bg: string; text: strin
 };
 
 function FreqBadge({ freq }: { freq: PayFrequency }) {
+  const t = useTranslations("dashboard.etfExplorer");
   const s = FREQ_STYLES[freq];
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wide uppercase ${s.bg} ${s.text}`}
     >
       <span className={`size-1.5 rounded-full ${s.dot}`} />
-      {s.label}
+      {t(s.key)}
     </span>
   );
 }
@@ -96,6 +98,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
   const [, startTransition] = useTransition();
   const [watched, setWatched] = useState<Set<string>>(new Set());
   const [pendingTicker, setPendingTicker] = useState<string | null>(null);
+  const t = useTranslations("dashboard.etfExplorer");
   const [yieldSort, setYieldSort] = useState<SortDir>(null);
 
   const sortedRows = yieldSort
@@ -188,7 +191,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
               )}
               {investAmount > 0 && hasStaleYieldMobile && (
                 <div className="rounded-lg bg-amber-500/5 border border-amber-500/10 px-3 py-1.5 text-xs text-amber-400/80">
-                  <span className="font-mono">Yield data unreliable — check fund site for real distribution</span>
+                  <span className="font-mono">{t("yieldUnreliableWarning")}</span>
                 </div>
               )}
               <div className="flex items-center justify-end gap-2">
@@ -197,23 +200,23 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                   className="inline-flex items-center gap-1 rounded-full border border-border-interactive px-2.5 py-1 font-sans text-[11px] font-semibold text-text-primary transition-colors hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
                 >
                   <Plus className="size-3" />
-                  Portfolio
+                  {t("actionAddToPortfolio")}
                 </Link>
                 {isWatched ? (
                   <Link
                     href="/watchlist"
-                    aria-label="Watching"
+                    aria-label={t("actionWatching")}
                     className="inline-flex items-center gap-1 rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-1 font-sans text-[11px] font-semibold text-green-500 transition-colors hover:bg-green-500/20"
                   >
                     <Check className="size-3" />
-                    Watching
+                    {t("actionWatching")}
                   </Link>
                 ) : (
                   <button
                     type="button"
                     disabled={pendingTicker === row.ticker}
                     onClick={() => handleWatch(row.ticker)}
-                    aria-label="Watch"
+                    aria-label={t("actionWatch")}
                     className="inline-flex items-center gap-1 rounded-full border border-border-interactive px-2.5 py-1 font-sans text-[11px] font-semibold text-text-primary transition-colors hover:border-green-500 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40"
                   >
                     {pendingTicker === row.ticker ? (
@@ -221,7 +224,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                     ) : (
                       <TrendingUp className="size-3" />
                     )}
-                    Watch
+                    {t("actionWatch")}
                   </button>
                 )}
               </div>
@@ -239,19 +242,19 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                 <th className={`${HEAD} w-14 text-center`}>
                   <span className="inline-flex flex-col items-center gap-0.5">
                     <BarChart2 className="size-3 text-blue-400" />
-                    <span className="text-[9px]">Compare</span>
+                    <span className="text-[9px]">{t("colCompare")}</span>
                   </span>
                 </th>
               )}
-              <th className={`${HEAD} text-left`}>Asset</th>
+              <th className={`${HEAD} text-left`}>{t("colAsset")}</th>
               <th className={`${HEAD} text-right`}>
                 <span className="inline-flex items-center gap-1">
-                  Price <InfoTip label={TIPS.todayChange} />
+                  {t("colPrice")} <InfoTip label={TIPS.todayChange} />
                 </span>
               </th>
               <th className={`${HEAD} text-center w-20`}>
                 <span className="inline-flex items-center gap-1">
-                  1M <InfoTip label={TIPS.sparkline1M} />
+                  {t("col1M")} <InfoTip label={TIPS.sparkline1M} />
                 </span>
               </th>
               <th className={`${HEAD} text-right`}>
@@ -261,7 +264,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                   className="inline-flex items-center gap-1 hover:text-text-primary transition-colors"
                   title="Sort by yield"
                 >
-                  Yield
+                  {t("colYield")}
                   {yieldSort === null && <ArrowUpDown className="size-3 opacity-40" />}
                   {yieldSort === "desc" && <ArrowDown className="size-3 text-green-400" />}
                   {yieldSort === "asc" && <ArrowUp className="size-3 text-green-400" />}
@@ -271,7 +274,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
               {investAmount > 0 && (
                 <th className={`${HEAD} text-right`}>
                   <span className="inline-flex items-center gap-1">
-                    ${investAmount.toLocaleString()} → /yr
+                    {t("colIncomeEst", { amount: investAmount.toLocaleString() })}
                     <InfoTip label="Estimated annual income based on current yield. Weekly ETF yields may show lower than actual — data providers sometimes underreport new funds." />
                   </span>
                 </th>
@@ -325,7 +328,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                               className="inline-flex cursor-help items-center gap-0.5 rounded-full bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-amber-400 uppercase tracking-wide"
                             >
                               <AlertTriangle className="size-2.5" />
-                              NAV risk
+                              {t("navRisk")}
                             </span>
                           )}
                         </div>
@@ -370,7 +373,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                           title="Yield data unreliable for this ETF — check fund site for real distribution."
                           className="cursor-help text-amber-400/60 text-xs"
                         >
-                          see site ↗
+                          {t("yieldStale")}
                         </span>
                       ) : income ? (
                         <span className="text-green-400">{income}</span>
@@ -387,7 +390,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                         className="inline-flex items-center gap-1 rounded-full border border-border-interactive px-2.5 py-1 font-sans text-xs font-semibold text-text-primary transition-colors hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-400"
                       >
                         <Plus className="size-3" />
-                        Add
+                        {t("actionAdd")}
                       </Link>
                       {isWatched ? (
                         <Link
@@ -395,7 +398,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                           className="inline-flex items-center gap-1 rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-1 font-sans text-xs font-semibold text-green-500 transition-colors hover:bg-green-500/20"
                         >
                           <Check className="size-3.5" />
-                          Watching
+                          {t("actionWatching")}
                         </Link>
                       ) : (
                         <button
@@ -409,7 +412,7 @@ export function EtfTable({ rows, investAmount = 10000, compareMode, selectedTick
                           ) : (
                             <TrendingUp className="size-3.5" />
                           )}
-                          Watch
+                          {t("actionWatch")}
                         </button>
                       )}
                     </div>

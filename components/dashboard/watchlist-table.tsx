@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { removeWatchlistItem } from "@/app/(dashboard)/watchlist/actions";
 import { Sparkline } from "@/components/dashboard/sparkline";
@@ -50,6 +51,7 @@ function trendChange(points: SparklinePoint[]) {
 }
 
 export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
+  const t = useTranslations("dashboard.watchlist");
   const [, startTransition] = useTransition();
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -67,18 +69,18 @@ export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
   if (items.length === 0) {
     return (
       <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-[13px] leading-[21.45px] text-[#99a1ac]">
-        Nothing watched yet. Add a ticker you&rsquo;re considering — no need to own it first.
+        {t("emptyState")}
       </div>
     );
   }
 
-  const countLabel = `${items.length} ${items.length === 1 ? "symbol" : "symbols"}`;
+  const countLabel = t("symbolCount", { count: items.length });
 
   return (
     <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
       <div className="border-b border-[#22262c] px-6 py-5">
         <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-          Watched tickers
+          {t("tableTitle")}
         </h2>
         <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{countLabel}</p>
       </div>
@@ -96,9 +98,16 @@ export function WatchlistTable({ items }: { items: WatchlistItem[] }) {
 
       <div className="hidden overflow-x-auto lg:block">
         <div className={cn("grid min-w-[820px] border-b border-[#22262c]", COLS)}>
-          {["Company", "Price", "Yield", "Next ex-date", "30-day trend", ""].map((label) => (
+          {([
+            [t("colCompany"), "company"],
+            [t("colPrice"), "price"],
+            [t("colYield"), "yield"],
+            [t("colNextExDate"), "nexex"],
+            [t("colTrend"), "trend"],
+            ["", "actions"],
+          ] as [string, string][]).map(([label, key]) => (
             <div
-              key={label || "actions"}
+              key={key}
               className="px-4 py-3 text-[11px] font-medium tracking-[1.54px] text-[#6c737f] uppercase first:px-6"
             >
               {label}
@@ -179,6 +188,7 @@ function WatchlistMobileRow({
   pending: boolean;
   onRemove: () => void;
 }) {
+  const t = useTranslations("dashboard.watchlist");
   const yieldLabel = formatYield(item.yieldPct);
   const tickerNode = isLinkableTicker(item.ticker) ? (
     <Link href={`/tickers/${item.ticker}`} className="hover:underline">
@@ -200,7 +210,7 @@ function WatchlistMobileRow({
               {yieldLabel}
             </span>
           ) : null}
-          <span>Ex {formatExDate(item.nextExDate)}</span>
+          <span>{t("exDatePrefix")} {formatExDate(item.nextExDate)}</span>
         </div>
       </div>
       <Sparkline

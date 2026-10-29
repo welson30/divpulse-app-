@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { BarChart2, X, ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
 import { EtfTable, type EtfRow } from "@/components/dashboard/etf-table";
@@ -16,6 +17,7 @@ type Props = {
 const DEFAULT_VISIBLE = 6;
 
 export function EtfExplorerClient({ lists }: Props) {
+  const t = useTranslations("dashboard.etfExplorer");
   const [investAmount, setInvestAmount] = useState(10_000);
   const [selected, setSelected] = useState<string[]>([]);
   // Track how many rows to show per list ID
@@ -57,16 +59,16 @@ export function EtfExplorerClient({ lists }: Props) {
         <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3">
           <BarChart2 className="size-4 shrink-0 text-blue-400" />
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-sm font-medium text-text-primary">Compare ETFs side by side</span>
+            <span className="text-sm font-medium text-text-primary">{t("compareHint")}</span>
             <span className="text-xs text-text-secondary">
-              — check the boxes in the table to select up to 3 ETFs, then click Compare.
+              {t("compareHintSub")}
             </span>
           </div>
           <Link
             href="/etf-explorer/compare?tickers=JEPI,SCHD,O"
             className="shrink-0 font-mono text-xs text-blue-400 underline underline-offset-2 hover:text-blue-300"
           >
-            Demo →
+            {t("compareDemo")}
           </Link>
         </div>
       )}
@@ -77,7 +79,7 @@ export function EtfExplorerClient({ lists }: Props) {
           <div className="flex items-center gap-2">
             <BarChart2 className="size-4 text-blue-400" />
             <span className="text-sm font-semibold text-text-primary">
-              {selected.length} ETF{selected.length > 1 ? "s" : ""} selected
+              {t("compareSelected", { count: selected.length })}
             </span>
             <div className="flex gap-1">
               {selected.map((t: string) => (
@@ -104,18 +106,18 @@ export function EtfExplorerClient({ lists }: Props) {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-blue-500 px-4 py-2 font-sans text-xs font-semibold text-white transition-colors hover:bg-blue-400"
               >
                 <BarChart2 className="size-3.5" />
-                Compare selected
+                {t("compareButton")}
               </Link>
             )}
             {selected.length < 2 && (
-              <span className="font-mono text-xs text-text-secondary">Select {2 - selected.length} more</span>
+              <span className="font-mono text-xs text-text-secondary">{t("compareSelectMore", { count: 2 - selected.length })}</span>
             )}
             <button
               type="button"
               onClick={() => setSelected([])}
               className="font-mono text-xs text-text-secondary hover:text-text-primary"
             >
-              Clear
+              {t("compareClear")}
             </button>
           </div>
         </div>
@@ -132,7 +134,7 @@ export function EtfExplorerClient({ lists }: Props) {
                   {list.isGrowth ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wide uppercase text-emerald-400">
                       <TrendingUp className="size-2.5" />
-                      Growth
+                      {t("growthBadge")}
                     </span>
                   ) : (
                     <FreqTag freq={list.frequency} />
@@ -141,7 +143,7 @@ export function EtfExplorerClient({ lists }: Props) {
                 <p className="text-sm text-text-secondary">{list.description}</p>
                 {list.isGrowth && (
                   <p className="text-xs text-emerald-400/70 font-mono">
-                    💡 Start here — build your core before adding income ETFs
+                    {t("growthTip")}
                   </p>
                 )}
               </div>
@@ -170,7 +172,7 @@ export function EtfExplorerClient({ lists }: Props) {
                         className="inline-flex items-center gap-1.5 rounded-full border border-border-interactive px-4 py-1.5 font-mono text-xs font-medium text-text-secondary transition-colors hover:border-blue-500 hover:text-blue-400"
                       >
                         <ChevronDown className="size-3.5" />
-                        Show {Math.min(remaining, 10)} more ETFs
+                        {t("showMore", { count: Math.min(remaining, 10) })}
                         <span className="text-text-secondary opacity-60">
                           ({visible}/{list.rows.length})
                         </span>
@@ -182,7 +184,7 @@ export function EtfExplorerClient({ lists }: Props) {
                         className="inline-flex items-center gap-1.5 rounded-full border border-border-interactive px-4 py-1.5 font-mono text-xs font-medium text-text-secondary transition-colors hover:border-border-interactive hover:text-text-primary"
                       >
                         <ChevronUp className="size-3.5" />
-                        Show less
+                        {t("showLess")}
                       </button>
                     ) : null}
                     <div className="h-px flex-1 bg-border-subtle" />
@@ -191,7 +193,7 @@ export function EtfExplorerClient({ lists }: Props) {
                         href={`/etf-explorer/list/${list.id}`}
                         className="font-mono text-xs text-text-secondary underline-offset-2 hover:text-blue-400 hover:underline"
                       >
-                        Full list →
+                        {t("fullList")}
                       </Link>
                     )}
                   </div>
@@ -207,16 +209,22 @@ export function EtfExplorerClient({ lists }: Props) {
 }
 
 function FreqTag({ freq }: { freq: string }) {
+  const t = useTranslations("dashboard.etfExplorer");
   const styles: Record<string, string> = {
     Monthly: "bg-blue-500/10 text-blue-400",
     Quarterly: "bg-violet-500/10 text-violet-400",
     Weekly: "bg-amber-500/10 text-amber-400",
   };
+  const labelKey: Record<string, "monthly" | "weekly" | "quarterly"> = {
+    Monthly: "monthly",
+    Weekly: "weekly",
+    Quarterly: "quarterly",
+  };
   return (
     <span
       className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wide uppercase ${styles[freq] ?? "bg-surface-hover text-text-secondary"}`}
     >
-      {freq}
+      {labelKey[freq] ? t(labelKey[freq]) : freq}
     </span>
   );
 }
