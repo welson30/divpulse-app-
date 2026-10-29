@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
-import { SETTINGS_TABS } from "@/components/dashboard/settings-tabs-config";
+import { SETTINGS_TABS, type SettingsTab } from "@/components/dashboard/settings-tabs-config";
 
 export { SETTINGS_TABS } from "@/components/dashboard/settings-tabs-config";
 export type { SettingsTab } from "@/components/dashboard/settings-tabs-config";
