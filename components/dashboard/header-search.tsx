@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { FigmaIcon } from "@/components/dashboard/figma-icon";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { TickerLogo } from "@/components/dashboard/ticker-logo";
@@ -11,10 +12,6 @@ import { searchTickers, type TickerSearchResult } from "@/lib/tickers/search";
 import { listCollectionsForSearch, type CollectionSearchResult } from "@/app/(dashboard)/collections/actions";
 import { cn } from "@/lib/utils";
 
-type NavLink = { href: string; label: string; Icon: React.ComponentType<{ className?: string }> };
-const PAGES: NavLink[] = NAV_SECTIONS.flatMap((section) => section.links).filter(
-  (link): link is NavLink => !link.action && !link.href.startsWith("mailto:"),
-);
 const DEBOUNCE_MS = 250;
 
 /**
@@ -26,8 +23,22 @@ const DEBOUNCE_MS = 250;
  * keystroke.
  */
 export function HeaderSearch() {
+  const t = useTranslations("dashboard.sidebar");
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  // Built inside the component so translated display labels are live.
+  // English `link.label` is kept for search filtering (locale-independent).
+  const PAGES = NAV_SECTIONS.flatMap((section) => section.links)
+    .filter((link) => !link.action && !link.href.startsWith("mailto:"))
+    .map((link) => ({
+      href: link.href,
+      /** English label — used for search filtering */
+      label: link.label,
+      /** Translated display label */
+      displayLabel: t(`links.${link.linkKey}` as Parameters<typeof t>[0]),
+      Icon: link.Icon,
+    }));
   const [query, setQuery] = useState("");
   const [tickerResults, setTickerResults] = useState<TickerSearchResult[]>([]);
   const [collections, setCollections] = useState<CollectionSearchResult[] | null>(null);
@@ -155,13 +166,13 @@ export function HeaderSearch() {
                     </div>
                     {matchedPages.map((page) => (
                       <button
-                        key={`${page.label}-${page.href}`}
+                        key={page.href}
                         type="button"
                         onClick={() => go(page.href)}
                         className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-surface-hover"
                       >
                         <page.Icon className="size-4 shrink-0 text-text-secondary" aria-hidden />
-                        <span className="text-sm text-text-primary">{page.label}</span>
+                        <span className="text-sm text-text-primary">{page.displayLabel}</span>
                       </button>
                     ))}
                   </div>

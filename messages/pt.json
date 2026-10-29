@@ -40,6 +40,226 @@
       "readOnlyHint": "A PaidPrime nunca toca no seu dinheiro"
     }
   },
+  "product": {
+    "eyebrow": "Produto",
+    "title": "Seu painel de investimentos completo",
+    "description": "Todos os números que você precisa para monitorar renda passiva, do valor do portfólio ao seu próximo pagamento confirmado.",
+    "features": {
+      "portfolioPerformance": "Desempenho do Portfólio",
+      "passiveIncomeTracking": "Monitoramento de Renda Passiva",
+      "portfolioAllocation": "Alocação do Portfólio",
+      "sectorAllocation": "Alocação por Setor",
+      "financialFreedomGoals": "Metas de Liberdade Financeira",
+      "smartWatchlists": "Listas de Observação Inteligentes",
+      "aiAdvisor": "Assistente IA",
+      "dividendCalendar": "Calendário de Dividendos",
+      "realTimeAlerts": "Alertas em Tempo Real"
+    }
+  },
+  "productTabs": {
+    "forYou": "Para Você",
+    "holdings": "Posições",
+    "dividends": "Dividendos",
+    "calendar": "Calendário",
+    "collections": "Coleções",
+    "diversification": "Diversificação",
+    "payments": "Pagamentos"
+  },
+  "portfolioOverview": {
+    "eyebrow": "Visão geral do portfólio",
+    "title": "Acompanhe valor e renda lado a lado",
+    "description": "Veja seu portfólio crescer enquanto confirma a renda passiva acumulando por baixo.",
+    "bullets": {
+      "liveValue": "Valor, renda e rendimento em tempo real de uma vez só",
+      "monthlyTrend": "Tendência de renda mensal, rastreada automaticamente",
+      "perHolding": "Detalhamento por ativo com renda anualizada"
+    },
+    "cardLabel": "Alocação"
+  },
+  "diversification": {
+    "eyebrow": "Diversificação",
+    "title": "Veja exatamente de onde vem sua renda",
+    "description": "Uma visão única da alocação entre estratégias, para o risco de concentração nunca te pegar de surpresa.",
+    "bullets": {
+      "breakdown": "Detalhamento em tempo real por estratégia",
+      "concentration": "Identifique concentração antes que vire problema",
+      "rebalance": "Rebalanceie com confiança, não com achismos"
+    },
+    "cardLabel": "Alocação",
+    "segments": {
+      "coveredCallEtfs": "ETFs de covered call",
+      "dividendGrowth": "Crescimento de dividendos",
+      "reits": "REITs",
+      "broadMarket": "Mercado amplo"
+    }
+  },
+  "dividendAlerts": {
+    "eyebrow": "Alertas de dividendos em tempo real",
+    "title": "Seu broker nunca te avisa no momento em que você recebe. A PaidPrime avisa.",
+    "description": "Receba notificações push instantâneas, alertas no Telegram ou por e-mail no momento em que um pagamento de dividendo é detectado — para você ser sempre o primeiro a saber.",
+    "channels": {
+      "push": "Push",
+      "pushHint": "iOS & Android · instantâneo",
+      "telegram": "Telegram",
+      "telegramHint": "Mensagem privada pelo bot",
+      "email": "E-mail",
+      "emailHint": "Comprovante formatado"
+    },
+    "cardLabel": "Dividendo recebido"
+  },
+  "brokerConnections": {
+    "eyebrow": "Conexões com corretoras",
+    "title": "Sincroniza automaticamente com seu broker",
+    "description": "Conecte as contas que você já usa em modo somente leitura. A PaidPrime reconcilia posições e monitora eventos de distribuição em todas as fontes.",
+    "trustItems": {
+      "readOnly": "Acesso somente leitura",
+      "encryption": "Criptografia bancária",
+      "sync": "Sincronização sub-minuto"
+    }
+  },
+  "notificationTemplates": {
+    "eyebrow": "Templates de notificação",
+    "title": "Escolha seu nível de privacidade nas notificações",
+    "description": "Três templates, uma configuração. Troque a qualquer momento nas preferências da sua conta.",
+    "templates": {
+      "privacyMode": "Modo Privado",
+      "privacyModeDesc": "Apenas o valor — sem ticker ou broker visível. Recomendado para telas compartilhadas.",
+      "tickerVisible": "Ticker Visível",
+      "tickerVisibleDesc": "Veja qual ativo pagou você sem expor detalhes completos da conta.",
+      "fullDetail": "Detalhes Completos",
+      "fullDetailDesc": "Ticker, logo do broker e confirmação de pagamento em um único olhar."
+    }
+  },
+  "upcomingPayments": {
+    "eyebrow": "Próximos pagamentos",
+    "title": "Saiba o que está chegando antes de chegar",
+    "description": "Cada distribuição esperada, associada a um ticker, um broker e uma data, para nada chegar de surpresa.",
+    "bullets": {
+      "confirmed": "Pagamentos confirmados e esperados, claramente identificados",
+      "dates": "Datas exatas, vinculadas ao seu broker",
+      "total": "Renda total esperada, sempre atualizada"
+    },
+    "cardTotalLabel": "Total esperado",
+    "statusExpected": "Esperado",
+    "statusConfirmed": "Confirmado",
+    "statusPending": "Pendente"
+  },
+  "dividendCalendar": {
+    "eyebrow": "Calendário de dividendos",
+    "title": "Cada data de pagamento, em uma só tela",
+    "description": "Veja a renda esperada no calendário antes de cair na sua conta — associada ao broker de onde vem o pagamento."
+  },
+  "analytics": {
+    "eyebrow": "Análises",
+    "title": "Todos os ângulos da sua renda, em um só painel",
+    "description": "Gráficos de nível profissional de crescimento, fluxo de caixa, rendimento e desempenho histórico.",
+    "bullets": {
+      "trends": "Tendências de crescimento de renda, fluxo de caixa e rendimento",
+      "comparisons": "Comparações mensais e anuais lado a lado",
+      "historical": "Desempenho histórico de 24 meses de uma vez"
+    }
+  },
+  "watchlist": {
+    "eyebrow": "Lista de observação",
+    "title": "Acompanhe candidatos antes de comprar",
+    "description": "Siga preço, rendimento e a próxima data ex-dividendo de tickers que você está considerando, sem adicioná-los ao portfólio.",
+    "bullets": {
+      "track": "Acompanhe candidatos ilimitados junto com posições reais",
+      "live": "Movimentação de preço e rendimento em tempo real de uma só vez",
+      "promote": "Promova para seu portfólio com um toque"
+    }
+  },
+  "goals": {
+    "eyebrow": "Metas",
+    "title": "Defina o alvo, acompanhe o progresso",
+    "description": "Renda mensal, renda anual e independência financeira total — rastreadas automaticamente conforme os pagamentos chegam.",
+    "bullets": {
+      "targets": "Defina metas personalizadas de renda e patrimônio",
+      "progress": "Progresso atualizado automaticamente a cada pagamento",
+      "freedom": "Veja exatamente o quanto falta para a liberdade financeira"
+    },
+    "goalLabels": {
+      "monthlyIncome": "Renda mensal",
+      "annualIncome": "Renda anual",
+      "financialIndependence": "Independência financeira"
+    }
+  },
+  "aiAdvisor": {
+    "eyebrow": "Assistente IA",
+    "title": "Um segundo par de olhos em cada posição",
+    "description": "Faça perguntas em linguagem comum e obtenha respostas baseadas nas suas posições reais, não em comentários genéricos de mercado.",
+    "bullets": {
+      "askAnything": "Pergunte qualquer coisa sobre sua renda em linguagem simples",
+      "insights": "Insights gerados todas as noites a partir das contas vinculadas",
+      "flags": "Identifica risco de concentração e alocação antecipadamente"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Preços",
+    "title": "Planos que crescem com seu portfólio",
+    "description": "Comece grátis com cinco ativos. Faça upgrade quando precisar de monitoramento ilimitado, o Assistente IA e alertas no Telegram, ou importação CSV e sincronização automática com broker.",
+    "mostPopular": "Mais popular",
+    "plans": {
+      "free": {
+        "name": "Grátis",
+        "description": "Monitore até 5 ativos e nunca perca um pagamento.",
+        "cta": "Começar Grátis"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Monitoramento manual ilimitado para investidores ativos em dividendos.",
+        "cta": "Assinar Pro"
+      },
+      "proPlus": {
+        "name": "Pro+",
+        "description": "Monitoramento ilimitado, importação CSV e sincronização automática com broker.",
+        "cta": "Assinar Pro+"
+      }
+    },
+    "features": {
+      "trackedHoldings": "Ativos monitorados",
+      "realTimeAlerts": "Alertas de pagamento em tempo real",
+      "dividendCalendar": "Calendário de dividendos",
+      "watchlist": "Lista de observação",
+      "analytics": "Análises",
+      "financialGoals": "Metas financeiras",
+      "aiAdvisor": "Assistente IA",
+      "telegramAlerts": "Alertas no Telegram",
+      "csvImport": "Importação CSV",
+      "brokerSync": "Sincronização automática com broker"
+    },
+    "values": {
+      "fiveHoldings": "5 ativos",
+      "unlimited": "Ilimitado"
+    },
+    "footerNote": "A sincronização com broker é somente leitura e exclusiva do Pro+ — a PaidPrime nunca executa operações nem move fundos. Armazenamento criptografado e cancelamento a qualquer momento em todos os planos."
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Perguntas frequentes",
+    "items": {
+      "q1": "Como a PaidPrime sabe quando fui pago?",
+      "a1": "A PaidPrime rastreia as datas de declaração, ex-dividendo, registro e pagamento de cada ativo que você adiciona, e então reconcilia essas informações com o dinheiro que chega nas suas contas conectadas ou monitoradas manualmente antes de enviar um alerta.",
+      "q2": "Preciso dar acesso de negociação à PaidPrime?",
+      "a2": "Não. As conexões com brokers são somente leitura — a PaidPrime pode ver posições e distribuições, mas nunca executa operações ou move fundos. O monitoramento manual e a importação CSV não precisam de login no broker.",
+      "q3": "E se meu broker ainda não for suportado?",
+      "a3": "Adicione posições manualmente ou importe um CSV exportado do seu broker. Você ainda terá monitoramento de pagamentos, datas no calendário e alertas enquanto expandimos as conexões diretas.",
+      "q4": "Posso mudar meu canal de notificação?",
+      "a4": "Sim. Troque entre push, Telegram e e-mail a qualquer momento nas preferências da sua conta — qualquer combinação que quiser.",
+      "q5": "Existe um plano gratuito?",
+      "a5": "Sim. O plano Grátis inclui até 5 ativos monitorados, alertas de pagamento em tempo real, o calendário de dividendos e uma lista de observação com 3 tickers. Sem necessidade de cartão.",
+      "q6": "Como ativo as notificações push?",
+      "a6": "As notificações push são ativadas automaticamente quando você faz login pela primeira vez. Seu navegador pedirá permissão — clique em \"Permitir\". No iPhone, abra a PaidPrime no Safari, toque no ícone Compartilhar e depois em \"Adicionar à Tela de Início\" para ativar as notificações. No Android, use o Chrome e toque em \"Adicionar à Tela de Início\" quando solicitado.",
+      "q7": "Posso usar a PaidPrime como um app no celular?",
+      "a7": "Sim! A PaidPrime é um PWA (Progressive Web App), o que significa que instala no seu celular como um app nativo — sem precisar da App Store. No iPhone: abra no Safari → Compartilhar → \"Adicionar à Tela de Início\". No Android: abra no Chrome → menu → \"Adicionar à Tela de Início\". Uma vez instalado, abre em tela cheia e suporta notificações push.",
+      "q8": "Meus dados financeiros estão seguros?",
+      "a8": "Sim. A PaidPrime apenas lê seus dados de portfólio — nunca temos acesso para negociar em seu nome ou mover dinheiro. As conexões com brokers (Pro+) usam o Plaid, a mesma tecnologia segura usada pelos principais apps financeiros. Todos os dados são criptografados em trânsito e em repouso.",
+      "q9": "Como conecto minha conta no broker?",
+      "a9": "A sincronização com broker está disponível no plano Pro+. Vá em Configurações → Contas Conectadas → Conectar Broker. Usamos o Plaid para vincular sua conta com segurança e acesso somente leitura. Brokers suportados incluem Fidelity, Schwab, Robinhood, IBKR e mais. Para brokers não suportados pelo Plaid, você pode importar seu portfólio via CSV.",
+      "q10": "O que acontece se eu cancelar meu plano?",
+      "a10": "Você pode cancelar a qualquer momento em Configurações → Assinatura. Seu plano fica ativo até o fim do período de cobrança atual. Depois disso, sua conta migra para o plano Grátis e você mantém acesso aos dados do seu portfólio. Nenhum dado é excluído."
+    }
+  },
   "footer": {
     "description": "Alertas de dividendos em tempo real e inteligência de portfólio para investidores de renda. Feito para quem se importa com cada pagamento.",
     "copyright": "© 2026 PaidPrime. Todos os direitos reservados.",
@@ -85,6 +305,37 @@
       "notifications": "Notificações",
       "settings": "Configurações",
       "help": "Ajuda"
+    },
+    "sidebar": {
+      "collapse": "Recolher",
+      "sections": {
+        "overview": "Visão geral",
+        "income": "Renda",
+        "explore": "Explorar",
+        "signals": "Sinais",
+        "insight": "Insights",
+        "account": "Conta"
+      },
+      "links": {
+        "dashboard": "Dashboard",
+        "portfolio": "Portfólio",
+        "allocation": "Alocação",
+        "dividends": "Dividendos",
+        "calendar": "Calendário",
+        "upcomingPayments": "Próximos pagamentos",
+        "paymentHistory": "Histórico de pagamentos",
+        "etfExplorer": "Explorador de ETFs",
+        "collections": "Coleções",
+        "notifications": "Notificações",
+        "alertTemplates": "Templates de alerta",
+        "watchlist": "Lista de observação",
+        "analytics": "Análises",
+        "aiAdvisor": "Assistente IA",
+        "brokerConnections": "Conexões com corretoras",
+        "settings": "Configurações",
+        "helpCenter": "Central de ajuda"
+      },
+      "more": "Mais"
     },
     "overview": {
       "title": "Dashboard",
@@ -159,7 +410,8 @@
       "dangerZone": "Zona de Perigo",
       "deleteAccount": "Excluir conta",
       "saveChanges": "Salvar alterações",
-      "saved": "Salvo"
+      "saved": "Salvo",
+      "languageDescription": "Escolha o idioma do seu painel."
     },
     "goals": {
       "title": "Metas",

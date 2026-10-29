@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { PRIMARY_TABS } from "@/components/dashboard/sidebar";
 import { MoreSheet } from "@/components/dashboard/more-sheet";
@@ -18,6 +19,7 @@ type BottomNavProps = {
 const TAB_ICON_WRAP = "flex items-center justify-center rounded-lg px-2.5 py-1";
 
 export function BottomNav({ planLabel, isFree, holdingCount, className }: BottomNavProps) {
+  const t = useTranslations("dashboard.sidebar");
   const pathname = usePathname();
   const [sheetOpen, setSheetOpen] = useState(false);
   const isMoreActive = !PRIMARY_TABS.some((tab) => tab.href === pathname);
@@ -46,7 +48,7 @@ export function BottomNav({ planLabel, isFree, holdingCount, className }: Bottom
                 <span className={cn(TAB_ICON_WRAP, isActive && "bg-[#16191d]")}>
                   <link.Icon className="size-5" />
                 </span>
-                {link.label}
+                {t(`links.${link.linkKey}` as Parameters<typeof t>[0])}
               </Link>
             );
           })}
@@ -62,7 +64,7 @@ export function BottomNav({ planLabel, isFree, holdingCount, className }: Bottom
             <span className={cn(TAB_ICON_WRAP, isMoreActive && "bg-[#16191d]")}>
               <IconMore className="size-5" />
             </span>
-            More
+            {t("more" as Parameters<typeof t>[0])}
           </button>
         </div>
       </nav>

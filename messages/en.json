@@ -40,6 +40,226 @@
       "readOnlyHint": "PaidPrime never touches your funds"
     }
   },
+  "product": {
+    "eyebrow": "Product",
+    "title": "Your complete investment dashboard",
+    "description": "Every number you need to track passive income, from portfolio value to your next confirmed payment.",
+    "features": {
+      "portfolioPerformance": "Portfolio Performance",
+      "passiveIncomeTracking": "Passive Income Tracking",
+      "portfolioAllocation": "Portfolio Allocation",
+      "sectorAllocation": "Sector Allocation",
+      "financialFreedomGoals": "Financial Freedom Goals",
+      "smartWatchlists": "Smart Watchlists",
+      "aiAdvisor": "AI Advisor",
+      "dividendCalendar": "Dividend Calendar",
+      "realTimeAlerts": "Real-Time Alerts"
+    }
+  },
+  "productTabs": {
+    "forYou": "For You",
+    "holdings": "Holdings",
+    "dividends": "Dividends",
+    "calendar": "Calendar",
+    "collections": "Collections",
+    "diversification": "Diversification",
+    "payments": "Payments"
+  },
+  "portfolioOverview": {
+    "eyebrow": "Portfolio overview",
+    "title": "Track value and income side by side",
+    "description": "Watch your portfolio grow while confirming the passive income compounding underneath it.",
+    "bullets": {
+      "liveValue": "Live value, income and yield in one glance",
+      "monthlyTrend": "Monthly income trend, automatically tracked",
+      "perHolding": "Per-holding breakdown with annualized income"
+    },
+    "cardLabel": "Allocation"
+  },
+  "diversification": {
+    "eyebrow": "Diversification",
+    "title": "See exactly where your income comes from",
+    "description": "A single view of allocation across strategies, so concentration risk never sneaks up on you.",
+    "bullets": {
+      "breakdown": "Live breakdown by strategy sleeve",
+      "concentration": "Spot concentration before it's a problem",
+      "rebalance": "Rebalance with confidence, not guesswork"
+    },
+    "cardLabel": "Allocation",
+    "segments": {
+      "coveredCallEtfs": "Covered call ETFs",
+      "dividendGrowth": "Dividend growth",
+      "reits": "REITs",
+      "broadMarket": "Broad market"
+    }
+  },
+  "dividendAlerts": {
+    "eyebrow": "Real-time dividend alerts",
+    "title": "Your broker never tells you the moment you get paid. PaidPrime does.",
+    "description": "Receive instant push notifications, Telegram, or email alerts the moment a dividend payment is detected—so you're always the first to know.",
+    "channels": {
+      "push": "Push",
+      "pushHint": "iOS & Android · instant",
+      "telegram": "Telegram",
+      "telegramHint": "Private bot message",
+      "email": "Email",
+      "emailHint": "Formatted receipt"
+    },
+    "cardLabel": "Dividend received"
+  },
+  "brokerConnections": {
+    "eyebrow": "Broker connections",
+    "title": "Automatically syncs with your broker",
+    "description": "Connect the accounts you already use in read-only mode. PaidPrime reconciles positions and watches for distribution events across every source.",
+    "trustItems": {
+      "readOnly": "Read-only access",
+      "encryption": "Bank-grade encryption",
+      "sync": "Sub-minute sync"
+    }
+  },
+  "notificationTemplates": {
+    "eyebrow": "Notification templates",
+    "title": "Choose your notification privacy level",
+    "description": "Three templates, one setting. Switch anytime from your account preferences.",
+    "templates": {
+      "privacyMode": "Privacy Mode",
+      "privacyModeDesc": "Amount only — no ticker or broker shown. Recommended for shared screens.",
+      "tickerVisible": "Ticker Visible",
+      "tickerVisibleDesc": "See which holding paid you without exposing full account details.",
+      "fullDetail": "Full Detail",
+      "fullDetailDesc": "Ticker, broker logo and payment confirmation in a single glance."
+    }
+  },
+  "upcomingPayments": {
+    "eyebrow": "Upcoming payments",
+    "title": "Know what's coming before it lands",
+    "description": "Every expected distribution, matched to a ticker, a broker and a date, so nothing arrives as a surprise.",
+    "bullets": {
+      "confirmed": "Confirmed and expected payments, clearly labeled",
+      "dates": "Exact dates, matched to your linked broker",
+      "total": "Total expected income, always up to date"
+    },
+    "cardTotalLabel": "Total expected",
+    "statusExpected": "Expected",
+    "statusConfirmed": "Confirmed",
+    "statusPending": "Pending"
+  },
+  "dividendCalendar": {
+    "eyebrow": "Dividend calendar",
+    "title": "Every payment date, in one view",
+    "description": "See expected income land on the calendar before it hits your account — matched to the broker it's paid from."
+  },
+  "analytics": {
+    "eyebrow": "Analytics",
+    "title": "Every angle on your income, in one grid",
+    "description": "Production-grade charting across growth, cash flow, yield and historical performance.",
+    "bullets": {
+      "trends": "Income growth, cash flow and yield trends",
+      "comparisons": "Monthly and yearly comparisons side by side",
+      "historical": "24-month historical performance at a glance"
+    }
+  },
+  "watchlist": {
+    "eyebrow": "Watchlist",
+    "title": "Track candidates before you buy in",
+    "description": "Follow price, yield and the next ex-date on tickers you're considering, without adding them to your portfolio.",
+    "bullets": {
+      "track": "Track unlimited candidates alongside real holdings",
+      "live": "Live price movement and yield at a glance",
+      "promote": "Promote to your portfolio in one tap"
+    }
+  },
+  "goals": {
+    "eyebrow": "Goals",
+    "title": "Set the target, watch the progress",
+    "description": "Monthly income, annual income and full financial independence — tracked automatically as payments land.",
+    "bullets": {
+      "targets": "Set custom income and net-worth targets",
+      "progress": "Progress updates automatically with each payment",
+      "freedom": "See exactly how far you are from financial freedom"
+    },
+    "goalLabels": {
+      "monthlyIncome": "Monthly income",
+      "annualIncome": "Annual income",
+      "financialIndependence": "Financial independence"
+    }
+  },
+  "aiAdvisor": {
+    "eyebrow": "AI Advisor",
+    "title": "A second set of eyes on every position",
+    "description": "Ask questions in plain language and get answers grounded in your actual holdings, not generic market commentary.",
+    "bullets": {
+      "askAnything": "Ask anything about your income in plain language",
+      "insights": "Insights generated nightly from linked accounts",
+      "flags": "Flags concentration and allocation risk early"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Pricing",
+    "title": "Plans that scale with your portfolio",
+    "description": "Start free with five holdings. Upgrade when you need unlimited tracking, the AI Advisor and Telegram alerts, or CSV import and broker auto-sync.",
+    "mostPopular": "Most popular",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "Track up to 5 holdings and never miss a payment.",
+        "cta": "Get Started Free"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Unlimited manual tracking for active dividend investors.",
+        "cta": "Start with Pro"
+      },
+      "proPlus": {
+        "name": "Pro+",
+        "description": "Unlimited tracking, CSV import, and broker auto-sync.",
+        "cta": "Start with Pro+"
+      }
+    },
+    "features": {
+      "trackedHoldings": "Tracked holdings",
+      "realTimeAlerts": "Real-time payment alerts",
+      "dividendCalendar": "Dividend calendar",
+      "watchlist": "Watchlist",
+      "analytics": "Analytics",
+      "financialGoals": "Financial goals",
+      "aiAdvisor": "AI Advisor",
+      "telegramAlerts": "Telegram alerts",
+      "csvImport": "CSV import",
+      "brokerSync": "Broker auto-sync"
+    },
+    "values": {
+      "fiveHoldings": "5 holdings",
+      "unlimited": "Unlimited"
+    },
+    "footerNote": "Broker auto-sync is read-only and Pro+ only — PaidPrime can never place trades or move funds. Encrypted storage and cancel-anytime billing on every plan."
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Frequently asked questions",
+    "items": {
+      "q1": "How does PaidPrime know when I've been paid?",
+      "a1": "PaidPrime tracks declared, ex-dividend, record and payment dates for every holding you add, then reconciles those against the cash landing in your connected or manually tracked accounts before sending an alert.",
+      "q2": "Do I need to give PaidPrime trading access?",
+      "a2": "No. Broker connections are read-only — PaidPrime can see holdings and distributions, never place trades or move funds. Manual tracking and CSV import need no broker login at all.",
+      "q3": "What if my broker isn't supported yet?",
+      "a3": "Add holdings manually or import a CSV export from your broker. You still get payment tracking, calendar dates and alerts while we expand direct connections.",
+      "q4": "Can I change my notification channel?",
+      "a4": "Yes. Switch between push, Telegram and email anytime from your account preferences — any combination you want.",
+      "q5": "Is there a free plan?",
+      "a5": "Yes. Free includes up to 5 tracked holdings, real-time payment alerts, the dividend calendar and a 3-ticker watchlist. No card required.",
+      "q6": "How do I enable push notifications?",
+      "a6": "Push notifications are enabled automatically when you first sign in. Your browser will ask for permission — just click \"Allow.\" On iPhone, open PaidPrime in Safari, tap the Share icon, then \"Add to Home Screen\" to enable notifications. On Android, use Chrome and tap \"Add to Home Screen\" when prompted.",
+      "q7": "Can I use PaidPrime like an app on my phone?",
+      "a7": "Yes! PaidPrime is a PWA (Progressive Web App), which means it installs on your phone just like a native app — no App Store needed. On iPhone: open in Safari → Share → \"Add to Home Screen.\" On Android: open in Chrome → menu → \"Add to Home Screen.\" Once installed, it opens fullscreen and supports push notifications.",
+      "q8": "Is my financial data safe?",
+      "a8": "Yes. PaidPrime only reads your portfolio data — we never have access to trade on your behalf or move money. Broker connections (Pro+) use Plaid, the same secure technology used by major financial apps. All data is encrypted in transit and at rest.",
+      "q9": "How do I connect my broker account?",
+      "a9": "Broker sync is available on the Pro+ plan. Go to Settings → Connected Accounts → Connect Broker. We use Plaid to securely link your account with read-only access. Supported brokers include Fidelity, Schwab, Robinhood, IBKR, and more. For brokers not supported by Plaid, you can import your portfolio via CSV.",
+      "q10": "What happens if I cancel my plan?",
+      "a10": "You can cancel anytime from Settings → Subscription. Your plan stays active until the end of the current billing period. After that, your account moves to the Free plan and you keep access to your portfolio data. No data is deleted."
+    }
+  },
   "footer": {
     "description": "Real-time dividend alerts and portfolio intelligence for income investors. Built for people who care about every payment.",
     "copyright": "© 2026 PaidPrime. All rights reserved.",
@@ -85,6 +305,37 @@
       "notifications": "Notifications",
       "settings": "Settings",
       "help": "Help"
+    },
+    "sidebar": {
+      "collapse": "Collapse",
+      "sections": {
+        "overview": "Overview",
+        "income": "Income",
+        "explore": "Explore",
+        "signals": "Signals",
+        "insight": "Insight",
+        "account": "Account"
+      },
+      "links": {
+        "dashboard": "Dashboard",
+        "portfolio": "Portfolio",
+        "allocation": "Allocation",
+        "dividends": "Dividends",
+        "calendar": "Calendar",
+        "upcomingPayments": "Upcoming payments",
+        "paymentHistory": "Payment history",
+        "etfExplorer": "ETF Explorer",
+        "collections": "Collections",
+        "notifications": "Notifications",
+        "alertTemplates": "Alert templates",
+        "watchlist": "Watchlist",
+        "analytics": "Analytics",
+        "aiAdvisor": "AI Advisor",
+        "brokerConnections": "Broker connections",
+        "settings": "Settings",
+        "helpCenter": "Help center"
+      },
+      "more": "More"
     },
     "overview": {
       "title": "Dashboard",
@@ -159,7 +410,8 @@
       "dangerZone": "Danger Zone",
       "deleteAccount": "Delete account",
       "saveChanges": "Save changes",
-      "saved": "Saved"
+      "saved": "Saved",
+      "languageDescription": "Choose the language for your dashboard."
     },
     "goals": {
       "title": "Goals",

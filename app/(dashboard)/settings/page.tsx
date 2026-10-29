@@ -7,6 +7,7 @@ import { CalendarPrivacyForm } from "@/components/dashboard/calendar-privacy-for
 import { BillingCard } from "@/components/dashboard/billing-card";
 import { SettingsBillingPanel } from "@/components/dashboard/settings-billing-panel";
 import { SettingsTabs, SETTINGS_TABS, type SettingsTab } from "@/components/dashboard/settings-tabs";
+import { LanguageSection } from "@/components/dashboard/language-section";
 
 export const metadata: Metadata = {
   title: "Settings — PaidPrime",
@@ -80,6 +81,7 @@ export default async function SettingsPage({
                 currency={profile?.currency ?? "USD"}
               />
               <CalendarPrivacyForm calendarPrivacyMode={profile?.calendar_privacy_mode ?? "full"} />
+              <LanguageSection />
             </>
           ) : null}
 
