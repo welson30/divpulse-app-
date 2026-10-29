@@ -1,18 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 
 const BULLETS = [
-  {
-    label: "Confirmed and expected payments, clearly labeled",
-    icon: "/marketing/upcoming/icon-confirmed.svg",
-  },
-  {
-    label: "Exact dates, matched to your linked broker",
-    icon: "/marketing/upcoming/icon-dates.svg",
-  },
-  {
-    label: "Total expected income, always up to date",
-    icon: "/marketing/upcoming/icon-total.svg",
-  },
+  { key: "confirmed", icon: "/marketing/upcoming/icon-confirmed.svg" },
+  { key: "dates", icon: "/marketing/upcoming/icon-dates.svg" },
+  { key: "total", icon: "/marketing/upcoming/icon-total.svg" },
 ] as const;
 
 const PAYMENTS = [
@@ -23,9 +15,8 @@ const PAYMENTS = [
     broker: "Fidelity",
     brokerSrc: "/marketing/upcoming/chip-fidelity.png",
     amount: "+$61.20",
-    status: "Expected",
-    statusClass:
-      "border-[rgba(76,130,247,0.3)] bg-[#16233d] text-[#4c82f7]",
+    statusKey: "statusExpected",
+    statusClass: "border-[rgba(76,130,247,0.3)] bg-[#16233d] text-[#4c82f7]",
   },
   {
     ticker: "O",
@@ -34,9 +25,8 @@ const PAYMENTS = [
     broker: "Charles Schwab",
     brokerSrc: "/marketing/upcoming/chip-schwab.png",
     amount: "+$18.44",
-    status: "Confirmed",
-    statusClass:
-      "border-[rgba(63,191,135,0.3)] bg-[#10261e] text-[#3fbf87]",
+    statusKey: "statusConfirmed",
+    statusClass: "border-[rgba(63,191,135,0.3)] bg-[#10261e] text-[#3fbf87]",
   },
   {
     ticker: "ADC",
@@ -45,9 +35,8 @@ const PAYMENTS = [
     broker: "E*TRADE",
     brokerSrc: "/marketing/upcoming/chip-etrade.png",
     amount: "+$27.05",
-    status: "Pending",
-    statusClass:
-      "border-[rgba(224,164,92,0.3)] bg-[#241c10] text-[#e0a45c]",
+    statusKey: "statusPending",
+    statusClass: "border-[rgba(224,164,92,0.3)] bg-[#241c10] text-[#e0a45c]",
   },
 ] as const;
 
@@ -56,7 +45,8 @@ const PAYMENTS = [
  * Copy left, card right (tilted −1.4°). Shell: 1440 → px-60 → 1320 → px-12.
  * Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
-export function UpcomingPaymentsSection() {
+export async function UpcomingPaymentsSection() {
+  const t = await getTranslations("upcomingPayments");
   return (
     <section
       id="upcoming-payments"
@@ -70,26 +60,23 @@ export function UpcomingPaymentsSection() {
             <div className="flex min-w-0 flex-1 flex-col items-start gap-4 min-[1200px]:gap-[15.1px]">
               <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
                 <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-                Upcoming payments
+                {t("eyebrow")}
               </div>
 
               <h2
                 id="upcoming-heading"
                 className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
               >
-                Know what&apos;s coming{" "}
-                <br className="hidden min-[1200px]:block" />
-                before it lands
+                {t("title")}
               </h2>
 
               <p className="m-0 max-w-[560px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[24px] min-[1200px]:leading-[38px]">
-                Every expected distribution, matched to a ticker, a broker and a date, so
-                nothing arrives as a surprise.
+                {t("description")}
               </p>
 
               <ul className="m-0 flex w-full list-none flex-col gap-3 p-0 pt-2 min-[1200px]:pt-[8.9px]">
                 {BULLETS.map((bullet) => (
-                  <li key={bullet.label} className="flex items-start gap-3">
+                  <li key={bullet.key} className="flex items-start gap-3">
                     <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border border-[#2e343b] bg-[#16191d]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -101,7 +88,7 @@ export function UpcomingPaymentsSection() {
                       />
                     </div>
                     <span className="pt-0.5 text-[14px] leading-[23.1px] font-normal text-[#99a1ac]">
-                      {bullet.label}
+                      {t(`bullets.${bullet.key}`)}
                     </span>
                   </li>
                 ))}
@@ -118,7 +105,7 @@ export function UpcomingPaymentsSection() {
                 <div className="relative flex w-full flex-col gap-1.5 rounded-[18px] border border-[#2e343b] bg-[#121417] p-5 shadow-[0px_30px_70px_-30px_rgba(0,0,0,0.85)]">
                   <div className="flex items-center justify-between">
                     <p className="m-0 text-[10.5px] leading-[17.33px] font-normal tracking-[1.47px] text-[#6c737f] uppercase">
-                      Total expected
+                      {t("cardTotalLabel")}
                     </p>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -175,7 +162,7 @@ export function UpcomingPaymentsSection() {
                           <span
                             className={`rounded-lg border px-2 py-[3px] text-[11px] leading-[18.15px] tracking-[1.1px] uppercase ${row.statusClass}`}
                           >
-                            {row.status}
+                            {t(row.statusKey)}
                           </span>
                         </div>
                       </li>

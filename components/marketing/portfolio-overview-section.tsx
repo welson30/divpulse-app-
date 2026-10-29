@@ -1,18 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 
 const BULLETS = [
-  {
-    label: "Live value, income and yield in one glance",
-    icon: "/marketing/portfolio/icon-value.svg",
-  },
-  {
-    label: "Monthly income trend, automatically tracked",
-    icon: "/marketing/portfolio/icon-trend.svg",
-  },
-  {
-    label: "Per-holding breakdown with annualized income",
-    icon: "/marketing/portfolio/icon-holdings.svg",
-  },
+  { key: "liveValue", icon: "/marketing/portfolio/icon-value.svg" },
+  { key: "monthlyTrend", icon: "/marketing/portfolio/icon-trend.svg" },
+  { key: "perHolding", icon: "/marketing/portfolio/icon-holdings.svg" },
 ] as const;
 
 const HOLDINGS = [
@@ -26,7 +18,8 @@ const HOLDINGS = [
  * Card left (tilted +1.4°), copy right. Shell: 1440 → px-60 → 1320 → px-12.
  * Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
-export function PortfolioOverviewSection() {
+export async function PortfolioOverviewSection() {
+  const t = await getTranslations("portfolioOverview");
   return (
     <section
       id="portfolio-overview"
@@ -45,7 +38,7 @@ export function PortfolioOverviewSection() {
               <div className="relative w-full max-w-[420px] rotate-[1.4deg]">
                 <div className="relative flex w-full flex-col gap-[11.8px] rounded-[18px] border border-[#2e343b] bg-[#121417] px-5 pt-[18.8px] pb-[19.6px] shadow-[0px_30px_70px_-30px_rgba(0,0,0,0.85)]">
                   <p className="m-0 text-[10.5px] leading-[17.33px] font-normal tracking-[1.47px] text-[#6c737f] uppercase">
-                    Portfolio overview
+                    {t("cardLabel")}
                   </p>
 
                   <div className="flex gap-2">
@@ -112,26 +105,23 @@ export function PortfolioOverviewSection() {
             <div className="flex min-w-0 flex-1 flex-col items-start gap-4 min-[1200px]:gap-[15.1px]">
               <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
                 <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-                Portfolio overview
+                {t("eyebrow")}
               </div>
 
               <h2
                 id="portfolio-heading"
                 className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
               >
-                Track value and{" "}
-                <br className="hidden min-[1200px]:block" />
-                income side by side
+                {t("title")}
               </h2>
 
               <p className="m-0 max-w-[560px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[24px] min-[1200px]:leading-[38px]">
-                Watch your portfolio grow while confirming the passive income compounding
-                underneath it.
+                {t("description")}
               </p>
 
               <ul className="m-0 flex w-full list-none flex-col gap-3 p-0 pt-2 min-[1200px]:pt-[8.9px]">
                 {BULLETS.map((bullet) => (
-                  <li key={bullet.label} className="flex items-start gap-3">
+                  <li key={bullet.key} className="flex items-start gap-3">
                     <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border border-[#2e343b] bg-[#16191d]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -143,7 +133,7 @@ export function PortfolioOverviewSection() {
                       />
                     </div>
                     <span className="pt-0.5 text-[14px] leading-[23.1px] font-normal text-[#99a1ac]">
-                      {bullet.label}
+                      {t(`bullets.${bullet.key}`)}
                     </span>
                   </li>
                 ))}

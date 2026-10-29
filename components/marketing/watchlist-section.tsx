@@ -1,18 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 
 const BULLETS = [
-  {
-    label: "Track unlimited candidates alongside real holdings",
-    icon: "/marketing/watchlist/icon-track.svg",
-  },
-  {
-    label: "Live price movement and yield at a glance",
-    icon: "/marketing/watchlist/icon-live.svg",
-  },
-  {
-    label: "Promote to your portfolio in one tap",
-    icon: "/marketing/watchlist/icon-promote.svg",
-  },
+  { key: "track", icon: "/marketing/watchlist/icon-track.svg" },
+  { key: "live", icon: "/marketing/watchlist/icon-live.svg" },
+  { key: "promote", icon: "/marketing/watchlist/icon-promote.svg" },
 ] as const;
 
 const ROWS = [
@@ -47,7 +39,8 @@ const ROWS = [
  * Card left (tilted +1.3°), copy right. Shell: 1440 → px-60 → 1320 → px-12.
  * Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
-export function WatchlistSection() {
+export async function WatchlistSection() {
+  const t = await getTranslations("watchlist");
   return (
     <section
       id="watchlist"
@@ -67,7 +60,7 @@ export function WatchlistSection() {
                 <div className="relative flex w-full flex-col gap-3 rounded-[18px] border border-[#2e343b] bg-[#121417] p-5 shadow-[0px_30px_70px_-30px_rgba(0,0,0,0.85)]">
                   <div className="flex items-center justify-between">
                     <p className="m-0 text-[10.5px] leading-[17.33px] font-normal tracking-[1.47px] text-[#6c737f] uppercase">
-                      Watchlist
+                      {t("cardLabel")}
                     </p>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -129,26 +122,23 @@ export function WatchlistSection() {
             <div className="flex min-w-0 flex-1 flex-col items-start gap-4 min-[1200px]:gap-[15.1px]">
               <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
                 <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-                Watchlist
+                {t("eyebrow")}
               </div>
 
               <h2
                 id="watchlist-heading"
                 className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
               >
-                Track candidates{" "}
-                <br className="hidden min-[1200px]:block" />
-                before you buy in
+                {t("title")}
               </h2>
 
               <p className="m-0 max-w-[560px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[24px] min-[1200px]:leading-[38px]">
-                Follow price, yield and the next ex-date on tickers you&apos;re considering,
-                without adding them to your portfolio.
+                {t("description")}
               </p>
 
               <ul className="m-0 flex w-full list-none flex-col gap-3 p-0 pt-2 min-[1200px]:pt-[8.9px]">
                 {BULLETS.map((bullet) => (
-                  <li key={bullet.label} className="flex items-start gap-3">
+                  <li key={bullet.key} className="flex items-start gap-3">
                     <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border border-[#2e343b] bg-[#16191d]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -160,7 +150,7 @@ export function WatchlistSection() {
                       />
                     </div>
                     <span className="pt-0.5 text-[14px] leading-[23.1px] font-normal text-[#99a1ac]">
-                      {bullet.label}
+                      {t(`bullets.${bullet.key}`)}
                     </span>
                   </li>
                 ))}

@@ -1,47 +1,57 @@
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 
 const FEATURES = [
   {
+    key: "portfolioPerformance",
     label: "Portfolio Performance",
     icon: "/marketing/product/icon-portfolio-performance.svg",
     active: true,
   },
   {
+    key: "passiveIncomeTracking",
     label: "Passive Income Tracking",
     icon: "/marketing/product/icon-passive-income.svg",
     active: false,
   },
   {
+    key: "portfolioAllocation",
     label: "Portfolio Allocation",
     icon: "/marketing/product/icon-portfolio-allocation.svg",
     active: false,
   },
   {
+    key: "sectorAllocation",
     label: "Sector Allocation",
     icon: "/marketing/product/icon-sector-allocation.svg",
     active: false,
   },
   {
+    key: "financialFreedomGoals",
     label: "Financial Freedom Goals",
     icon: "/marketing/product/icon-freedom-goals.svg",
     active: false,
   },
   {
+    key: "smartWatchlists",
     label: "Smart Watchlists",
     icon: "/marketing/product/icon-watchlists.svg",
     active: false,
   },
   {
+    key: "aiAdvisor",
     label: "AI Advisor",
     icon: "/marketing/product/icon-ai-advisor.svg",
     active: false,
   },
   {
+    key: "dividendCalendar",
     label: "Dividend Calendar",
     icon: "/marketing/product/icon-calendar.svg",
     active: false,
   },
   {
+    key: "realTimeAlerts",
     label: "Real-Time Alerts",
     icon: "/marketing/product/icon-alerts.svg",
     active: false,
@@ -53,7 +63,8 @@ const FEATURES = [
  * Shell matches header/templates: 1440 → px-60 → 1320 → px-12 (content at 108).
  * Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
-export function ProductSection() {
+export async function ProductSection() {
+  const t = await getTranslations("product");
   return (
     <section
       id="product"
@@ -65,21 +76,18 @@ export function ProductSection() {
           <Reveal className="flex w-full max-w-[720px] flex-col items-start gap-4 min-[1200px]:gap-[15.1px]">
             <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
               <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-              Product
+              {t("eyebrow")}
             </div>
 
             <h2
               id="product-heading"
               className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
             >
-              Your complete investment{" "}
-              <br className="hidden min-[1200px]:block" />
-              dashboard
+              {t("title")}
             </h2>
 
             <p className="m-0 max-w-[640px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[24px] min-[1200px]:leading-[38px]">
-              Every number you need to track passive income, from portfolio value to your
-              next confirmed payment.
+              {t("description")}
             </p>
           </Reveal>
 
@@ -103,7 +111,7 @@ export function ProductSection() {
             <ul className="m-0 flex w-full list-none flex-col overflow-hidden rounded-[18px] border border-[#2e343b] p-0 min-[1200px]:w-[358px] min-[1200px]:shrink-0 min-[1200px]:self-stretch">
               {FEATURES.map((feature, index) => (
                 <li
-                  key={feature.label}
+                  key={feature.key}
                   className={`flex min-h-0 flex-1 items-center gap-3 bg-[#121417] px-4 py-3.5 min-[1200px]:py-0 ${
                     index < FEATURES.length - 1 ? "border-b border-[#22262c]" : ""
                   }`}
@@ -125,7 +133,7 @@ export function ProductSection() {
                     />
                   </div>
                   <span className="text-[15px] leading-[22.28px] font-medium text-[#f2f4f7] min-[1200px]:text-[16px]">
-                    {feature.label}
+                    {t(`features.${feature.key}`)}
                   </span>
                 </li>
               ))}

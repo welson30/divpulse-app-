@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { FigmaIcon, navIcon } from "@/components/dashboard/figma-icon";
 import { openAdvisor } from "@/components/dashboard/open-advisor";
@@ -10,7 +11,10 @@ import { LanguageToggle } from "@/components/language-toggle";
 
 export type AppNavLink = {
   href: string;
+  /** English label — used for title attributes and search filtering */
   label: string;
+  /** Stable camelCase key matching dashboard.sidebar.links.* in messages */
+  linkKey: string;
   Icon: React.ComponentType<{ className?: string }>;
   action?: "advisor";
 };
@@ -29,63 +33,69 @@ const IconSettings = navIcon("/marketing/dashboard/nav-settings.svg");
 const IconHelp = navIcon("/marketing/dashboard/nav-help.svg");
 const IconEtf = navIcon("/marketing/dashboard/icon-trend.svg");
 
-export const NAV_SECTIONS: { label: string; links: AppNavLink[] }[] = [
+export const NAV_SECTIONS: { label: string; sectionKey: string; links: AppNavLink[] }[] = [
   {
     label: "Overview",
+    sectionKey: "overview",
     links: [
-      { href: "/dashboard", label: "Dashboard", Icon: IconDashboard },
-      { href: "/holdings", label: "Portfolio", Icon: IconPortfolio },
-      { href: "/diversification", label: "Allocation", Icon: IconPortfolio },
+      { href: "/dashboard", label: "Dashboard", linkKey: "dashboard", Icon: IconDashboard },
+      { href: "/holdings", label: "Portfolio", linkKey: "portfolio", Icon: IconPortfolio },
+      { href: "/diversification", label: "Allocation", linkKey: "allocation", Icon: IconPortfolio },
     ],
   },
   {
     label: "Income",
+    sectionKey: "income",
     links: [
-      { href: "/dividends", label: "Dividends", Icon: IconDividends },
-      { href: "/calendar", label: "Calendar", Icon: IconCalendar },
-      { href: "/upcoming", label: "Upcoming payments", Icon: IconCalendar },
-      { href: "/history", label: "Payment history", Icon: IconDividends },
+      { href: "/dividends", label: "Dividends", linkKey: "dividends", Icon: IconDividends },
+      { href: "/calendar", label: "Calendar", linkKey: "calendar", Icon: IconCalendar },
+      { href: "/upcoming", label: "Upcoming payments", linkKey: "upcomingPayments", Icon: IconCalendar },
+      { href: "/history", label: "Payment history", linkKey: "paymentHistory", Icon: IconDividends },
     ],
   },
   {
     label: "Explore",
+    sectionKey: "explore",
     links: [
-      { href: "/etf-explorer", label: "ETF Explorer", Icon: IconEtf },
-      { href: "/collections", label: "Collections", Icon: IconWatchlist },
+      { href: "/etf-explorer", label: "ETF Explorer", linkKey: "etfExplorer", Icon: IconEtf },
+      { href: "/collections", label: "Collections", linkKey: "collections", Icon: IconWatchlist },
     ],
   },
   {
     label: "Signals",
+    sectionKey: "signals",
     links: [
-      { href: "/notifications", label: "Notifications", Icon: IconNotifications },
-      { href: "/alert-templates", label: "Alert templates", Icon: IconNotifications },
-      { href: "/watchlist", label: "Watchlist", Icon: IconWatchlist },
+      { href: "/notifications", label: "Notifications", linkKey: "notifications", Icon: IconNotifications },
+      { href: "/alert-templates", label: "Alert templates", linkKey: "alertTemplates", Icon: IconNotifications },
+      { href: "/watchlist", label: "Watchlist", linkKey: "watchlist", Icon: IconWatchlist },
     ],
   },
   {
     label: "Insight",
+    sectionKey: "insight",
     links: [
-      { href: "/analytics", label: "Analytics", Icon: IconAnalytics },
-      // { href: "/performance", label: "Performance", Icon: IconAnalytics }, // hidden – re-enable when ready
-      // { href: "/goals", label: "Goals", Icon: IconGoals }, // hidden – re-enable when ready
-      { href: "/advisor", label: "AI Advisor", Icon: IconAdvisor },
+      { href: "/analytics", label: "Analytics", linkKey: "analytics", Icon: IconAnalytics },
+      // { href: "/performance", label: "Performance", linkKey: "performance", Icon: IconAnalytics }, // hidden – re-enable when ready
+      // { href: "/goals", label: "Goals", linkKey: "goals", Icon: IconGoals }, // hidden – re-enable when ready
+      { href: "/advisor", label: "AI Advisor", linkKey: "aiAdvisor", Icon: IconAdvisor },
     ],
   },
   {
     label: "Account",
+    sectionKey: "account",
     links: [
-      { href: "/brokers", label: "Broker connections", Icon: IconBrokers },
-      { href: "/settings", label: "Settings", Icon: IconSettings },
-      { href: "/help", label: "Help center", Icon: IconHelp },
+      { href: "/brokers", label: "Broker connections", linkKey: "brokerConnections", Icon: IconBrokers },
+      { href: "/settings", label: "Settings", linkKey: "settings", Icon: IconSettings },
+      { href: "/help", label: "Help center", linkKey: "helpCenter", Icon: IconHelp },
     ],
   },
 ];
 
 export const PRIMARY_TABS: AppNavLink[] = [
-  { href: "/dashboard", label: "Dashboard", Icon: IconDashboard },
-  { href: "/holdings", label: "Portfolio", Icon: IconPortfolio },
-  { href: "/dividends", label: "Dividends", Icon: IconDividends },
-  { href: "/calendar", label: "Calendar", Icon: IconCalendar },
+  { href: "/dashboard", label: "Dashboard", linkKey: "dashboard", Icon: IconDashboard },
+  { href: "/holdings", label: "Portfolio", linkKey: "portfolio", Icon: IconPortfolio },
+  { href: "/dividends", label: "Dividends", linkKey: "dividends", Icon: IconDividends },
+  { href: "/calendar", label: "Calendar", linkKey: "calendar", Icon: IconCalendar },
 ];
 
 const PRIMARY_HREFS = new Set(PRIMARY_TABS.map((t) => t.href));
@@ -113,6 +123,7 @@ type SidebarProps = {
 };
 
 export function Sidebar({ className }: SidebarProps) {
+  const t = useTranslations("dashboard.sidebar");
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
@@ -165,13 +176,16 @@ export function Sidebar({ className }: SidebarProps) {
 
       <div className={cn("flex flex-1 flex-col gap-6 px-3 py-5", collapsed && "px-2")}>
         {NAV_SECTIONS.map((section) => (
-          <div key={section.label} className="flex flex-col gap-2">
+          <div key={section.sectionKey} className="flex flex-col gap-2">
             {collapsed ? null : (
-              <div className="px-3 text-[10px] tracking-[2px] text-[#6c737f] uppercase">{section.label}</div>
+              <div className="px-3 text-[10px] tracking-[2px] text-[#6c737f] uppercase">
+                {t(`sections.${section.sectionKey}` as Parameters<typeof t>[0])}
+              </div>
             )}
             <div className="flex flex-col gap-0.5">
               {section.links.map((link) => {
                 const active = isLinkActive(pathname, tab, link.href, link.action);
+                const translatedLabel = t(`links.${link.linkKey}` as Parameters<typeof t>[0]);
                 const className = cn(
                   "flex items-center gap-3 rounded-[10px] px-3 py-2 text-[14px] leading-[23.1px] transition-colors",
                   collapsed && "justify-center px-0",
@@ -180,15 +194,15 @@ export function Sidebar({ className }: SidebarProps) {
                 const inner = (
                   <>
                     <link.Icon className="size-[17px]" />
-                    {collapsed ? null : link.label}
+                    {collapsed ? null : translatedLabel}
                   </>
                 );
                 if (link.action === "advisor") {
                   return (
                     <button
-                      key={link.label}
+                      key={link.linkKey}
                       type="button"
-                      title={link.label}
+                      title={translatedLabel}
                       onClick={openAdvisor}
                       className={className}
                     >
@@ -198,13 +212,13 @@ export function Sidebar({ className }: SidebarProps) {
                 }
                 if (link.href.startsWith("mailto:")) {
                   return (
-                    <a key={link.label} href={link.href} title={link.label} className={className}>
+                    <a key={link.linkKey} href={link.href} title={translatedLabel} className={className}>
                       {inner}
                     </a>
                   );
                 }
                 return (
-                  <Link key={`${link.label}-${link.href}`} href={link.href} title={link.label} className={className}>
+                  <Link key={`${link.linkKey}-${link.href}`} href={link.href} title={translatedLabel} className={className}>
                     {inner}
                   </Link>
                 );
@@ -232,7 +246,7 @@ export function Sidebar({ className }: SidebarProps) {
             src="/marketing/dashboard/nav-collapse.svg"
             className={cn("size-4", collapsed && "rotate-180")}
           />
-          {collapsed ? null : "Collapse"}
+          {collapsed ? null : t("collapse")}
         </button>
       </div>
     </nav>

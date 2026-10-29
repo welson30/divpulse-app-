@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"] as const;
@@ -74,7 +75,8 @@ const CELLS = (() => {
  * Figma Homepage section 1:1153 — Dividend calendar (1440 × 1147.45).
  * Shell: 1440 → px-60 → 1320 → px-12. Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
-export function DividendCalendarSection() {
+export async function DividendCalendarSection() {
+  const t = await getTranslations("dividendCalendar");
   return (
     <section
       id="dividend-calendar"
@@ -86,21 +88,18 @@ export function DividendCalendarSection() {
           <Reveal className="mx-auto flex w-full max-w-[720px] flex-col items-center gap-4 text-center min-[1200px]:gap-[15.1px]">
             <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
               <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-              Dividend calendar
+              {t("eyebrow")}
             </div>
 
             <h2
               id="calendar-heading"
               className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
             >
-              Every payment date, in{" "}
-              <br className="hidden min-[1200px]:block" />
-              one view
+              {t("title")}
             </h2>
 
             <p className="m-0 max-w-[680px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[24px] min-[1200px]:leading-[38px]">
-              See expected income land on the calendar before it hits your account — matched
-              to the broker it&apos;s paid from.
+              {t("description")}
             </p>
           </Reveal>
 
@@ -187,7 +186,7 @@ export function DividendCalendarSection() {
             {/* Connected brokers */}
             <div className="flex flex-col gap-3 border-t border-[#22262c] px-4 pt-[15px] pb-4 sm:px-6">
               <p className="m-0 text-[10.5px] leading-[17.33px] tracking-[1.47px] text-[#6c737f] uppercase">
-                Connected brokers
+                {t("connectedBrokersLabel")}
               </p>
               <ul className="m-0 flex list-none flex-wrap items-center gap-x-2.5 gap-y-2 p-0">
                 {CONNECTED_BROKERS.map((broker) => (

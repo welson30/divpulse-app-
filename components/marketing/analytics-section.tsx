@@ -1,18 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 
 const BULLETS = [
-  {
-    label: "Income growth, cash flow and yield trends",
-    icon: "/marketing/analytics/icon-growth.svg",
-  },
-  {
-    label: "Monthly and yearly comparisons side by side",
-    icon: "/marketing/analytics/icon-compare.svg",
-  },
-  {
-    label: "24-month historical performance at a glance",
-    icon: "/marketing/analytics/icon-history.svg",
-  },
+  { key: "trends", icon: "/marketing/analytics/icon-growth.svg" },
+  { key: "comparisons", icon: "/marketing/analytics/icon-compare.svg" },
+  { key: "historical", icon: "/marketing/analytics/icon-history.svg" },
 ] as const;
 
 /** Relative bar heights matching Figma monthly income chart */
@@ -23,7 +15,8 @@ const MONTHLY_BARS = [48, 44, 55, 51, 50, 64, 51, 46, 62, 52, 49, 68] as const;
  * Card left (tilted +1.4°), copy right. Shell: 1440 → px-60 → 1320 → px-12.
  * Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
-export function AnalyticsSection() {
+export async function AnalyticsSection() {
+  const t = await getTranslations("analytics");
   return (
     <section
       id="analytics"
@@ -42,7 +35,7 @@ export function AnalyticsSection() {
               <div className="relative w-full max-w-[420px] rotate-[1.4deg]">
                 <div className="relative flex w-full flex-col gap-3 rounded-[18px] border border-[#2e343b] bg-[#121417] px-5 pt-[18.8px] pb-5 shadow-[0px_30px_70px_-30px_rgba(0,0,0,0.85)]">
                   <p className="m-0 text-[10.5px] leading-[17.33px] font-normal tracking-[1.47px] text-[#6c737f] uppercase">
-                    Analytics grid
+                    {t("cardLabel")}
                   </p>
 
                   <div className="grid grid-cols-2 gap-2">
@@ -135,26 +128,23 @@ export function AnalyticsSection() {
             <div className="flex min-w-0 flex-1 flex-col items-start gap-4 min-[1200px]:gap-[15.1px]">
               <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
                 <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-                Analytics
+                {t("eyebrow")}
               </div>
 
               <h2
                 id="analytics-heading"
                 className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
               >
-                Every angle on your{" "}
-                <br className="hidden min-[1200px]:block" />
-                income, in one grid
+                {t("title")}
               </h2>
 
               <p className="m-0 max-w-[560px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[24px] min-[1200px]:leading-[38px]">
-                Production-grade charting across growth, cash flow, yield and historical
-                performance.
+                {t("description")}
               </p>
 
               <ul className="m-0 flex w-full list-none flex-col gap-3 p-0 pt-2 min-[1200px]:pt-[8.9px]">
                 {BULLETS.map((bullet) => (
-                  <li key={bullet.label} className="flex items-start gap-3">
+                  <li key={bullet.key} className="flex items-start gap-3">
                     <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border border-[#2e343b] bg-[#16191d]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -166,7 +156,7 @@ export function AnalyticsSection() {
                       />
                     </div>
                     <span className="pt-0.5 text-[14px] leading-[23.1px] font-normal text-[#99a1ac]">
-                      {bullet.label}
+                      {t(`bullets.${bullet.key}`)}
                     </span>
                   </li>
                 ))}

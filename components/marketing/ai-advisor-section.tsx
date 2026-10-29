@@ -1,18 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 
 const BULLETS = [
-  {
-    label: "Ask anything about your income in plain language",
-    icon: "/marketing/ai-advisor/icon-ask.svg",
-  },
-  {
-    label: "Insights generated nightly from linked accounts",
-    icon: "/marketing/ai-advisor/icon-insights.svg",
-  },
-  {
-    label: "Flags concentration and allocation risk early",
-    icon: "/marketing/ai-advisor/icon-flags.svg",
-  },
+  { key: "askAnything", icon: "/marketing/ai-advisor/icon-ask.svg" },
+  { key: "insights", icon: "/marketing/ai-advisor/icon-insights.svg" },
+  { key: "flags", icon: "/marketing/ai-advisor/icon-flags.svg" },
 ] as const;
 
 /**
@@ -20,7 +12,8 @@ const BULLETS = [
  * Copy left, card right (tilted −1.3°). Shell: 1440 → px-60 → 1320 → px-12.
  * Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
-export function AiAdvisorSection() {
+export async function AiAdvisorSection() {
+  const t = await getTranslations("aiAdvisor");
   return (
     <section
       id="ai-advisor"
@@ -34,26 +27,23 @@ export function AiAdvisorSection() {
             <div className="flex min-w-0 flex-1 flex-col items-start gap-4 min-[1200px]:gap-[15.1px]">
               <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
                 <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-                AI Advisor
+                {t("eyebrow")}
               </div>
 
               <h2
                 id="ai-advisor-heading"
                 className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
               >
-                A second set of eyes{" "}
-                <br className="hidden min-[1200px]:block" />
-                on every position
+                {t("title")}
               </h2>
 
               <p className="m-0 max-w-[560px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[24px] min-[1200px]:leading-[38px]">
-                Ask questions in plain language and get answers grounded in your actual
-                holdings, not generic market commentary.
+                {t("description")}
               </p>
 
               <ul className="m-0 flex w-full list-none flex-col gap-3 p-0 pt-2 min-[1200px]:pt-[8.9px]">
                 {BULLETS.map((bullet) => (
-                  <li key={bullet.label} className="flex items-start gap-3">
+                  <li key={bullet.key} className="flex items-start gap-3">
                     <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border border-[#2e343b] bg-[#16191d]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -65,7 +55,7 @@ export function AiAdvisorSection() {
                       />
                     </div>
                     <span className="pt-0.5 text-[14px] leading-[23.1px] font-normal text-[#99a1ac]">
-                      {bullet.label}
+                      {t(`bullets.${bullet.key}`)}
                     </span>
                   </li>
                 ))}

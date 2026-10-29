@@ -1,39 +1,16 @@
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/marketing/reveal";
 
 const BULLETS = [
-  {
-    label: "Set custom income and net-worth targets",
-    icon: "/marketing/goals/icon-targets.svg",
-  },
-  {
-    label: "Progress updates automatically with each payment",
-    icon: "/marketing/goals/icon-progress.svg",
-  },
-  {
-    label: "See exactly how far you are from financial freedom",
-    icon: "/marketing/goals/icon-freedom.svg",
-  },
+  { key: "targets", icon: "/marketing/goals/icon-targets.svg" },
+  { key: "progress", icon: "/marketing/goals/icon-progress.svg" },
+  { key: "freedom", icon: "/marketing/goals/icon-freedom.svg" },
 ] as const;
 
 const GOALS = [
-  {
-    label: "Monthly income",
-    range: "$680 / $1,000",
-    percent: 68,
-    color: "#4c82f7",
-  },
-  {
-    label: "Annual income",
-    range: "$4,220 / $5,350",
-    percent: 79,
-    color: "#3fbf87",
-  },
-  {
-    label: "Financial independence",
-    range: "$142,880 / $420,000",
-    percent: 34,
-    color: "#e0a45c",
-  },
+  { key: "monthlyIncome", range: "$680 / $1,000", percent: 68, color: "#4c82f7" },
+  { key: "annualIncome", range: "$4,220 / $5,350", percent: 79, color: "#3fbf87" },
+  { key: "financialIndependence", range: "$142,880 / $420,000", percent: 34, color: "#e0a45c" },
 ] as const;
 
 const RING_R = 29.5;
@@ -81,7 +58,8 @@ function GoalRing({
  * Copy left, card right (tilted −1.5°). Shell: 1440 → px-60 → 1320 → px-12.
  * Desktop ≥1200 = Figma; tablet/mobile = judgment.
  */
-export function GoalsSection() {
+export async function GoalsSection() {
+  const t = await getTranslations("goals");
   return (
     <section
       id="goals"
@@ -95,26 +73,23 @@ export function GoalsSection() {
             <div className="flex min-w-0 flex-1 flex-col items-start gap-4 min-[1200px]:gap-[15.1px]">
               <div className="inline-flex items-center gap-2.5 rounded-full border border-[#2e343b] bg-[#16191d] px-[15.8px] pt-[7.2px] pb-[7.8px] text-[13px] font-medium leading-[21.45px] tracking-[2.08px] text-[#4c82f7] uppercase">
                 <span className="size-1.5 shrink-0 rounded-full bg-[#4c82f7]" aria-hidden />
-                Goals
+                {t("eyebrow")}
               </div>
 
               <h2
                 id="goals-heading"
                 className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
               >
-                Set the target, watch{" "}
-                <br className="hidden min-[1200px]:block" />
-                the progress
+                {t("title")}
               </h2>
 
               <p className="m-0 max-w-[560px] text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:text-[24px] min-[1200px]:leading-[38px]">
-                Monthly income, annual income and full financial independence — tracked
-                automatically as payments land.
+                {t("description")}
               </p>
 
               <ul className="m-0 flex w-full list-none flex-col gap-3 p-0 pt-2 min-[1200px]:pt-[8.89px]">
                 {BULLETS.map((bullet) => (
-                  <li key={bullet.label} className="flex items-start gap-3">
+                  <li key={bullet.key} className="flex items-start gap-3">
                     <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border border-[#2e343b] bg-[#16191d]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -126,7 +101,7 @@ export function GoalsSection() {
                       />
                     </div>
                     <span className="pt-0.5 text-[14px] leading-[23.1px] font-normal text-[#99a1ac]">
-                      {bullet.label}
+                      {t(`bullets.${bullet.key}`)}
                     </span>
                   </li>
                 ))}
@@ -142,18 +117,18 @@ export function GoalsSection() {
               <div className="relative w-full max-w-[420px] rotate-[-1.5deg]">
                 <div className="relative flex w-full flex-col gap-3 rounded-[18px] border border-[#2e343b] bg-[#121417] px-5 pt-[18.8px] pb-5 shadow-[0px_30px_70px_-30px_rgba(0,0,0,0.85)]">
                   <p className="m-0 text-[10.5px] leading-[17.33px] font-normal tracking-[1.47px] text-[#6c737f] uppercase">
-                    Goals
+                    {t("cardLabel")}
                   </p>
 
                   <div className="flex gap-2">
                     {GOALS.map((goal) => (
                       <div
-                        key={goal.label}
+                        key={goal.key}
                         className="flex min-w-0 flex-1 flex-col items-center rounded-[10px] border border-[#22262c] bg-[#16191d] px-1.5 pt-3 pb-2.5"
                       >
                         <GoalRing percent={goal.percent} color={goal.color} />
                         <p className="m-0 mt-2 text-center text-[10px] leading-[12.5px] font-medium text-[#f2f4f7]">
-                          {goal.label}
+                          {t(`goalLabels.${goal.key}`)}
                         </p>
                         <p className="m-0 mt-0.5 text-center text-[9px] leading-[11.25px] tracking-[-0.18px] text-[#99a1ac]">
                           {goal.range}

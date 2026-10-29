@@ -1,20 +1,22 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { ReceiptCard } from "@/components/marketing/receipt-card";
 import { DividendCalendarChart, DiversificationRing } from "@/components/marketing/mini-charts";
 import { HoldingsPreviewTable } from "@/components/marketing/holdings-preview-table";
 import { IconAlerts, IconBell, IconCheck } from "@/components/marketing/icons";
 import { cn } from "@/lib/utils";
 
+// tKey maps the hyphenated URL-style key to the camelCase translation key
 const LIVE_TABS = [
-  { key: "for-you", label: "For You" },
-  { key: "holdings", label: "Holdings" },
-  { key: "dividends", label: "Dividends" },
-  { key: "calendar", label: "Calendar" },
-  { key: "collections", label: "Collections" },
-  { key: "diversification", label: "Diversification" },
-  { key: "payments", label: "Payments" },
+  { key: "for-you", tKey: "forYou" },
+  { key: "holdings", tKey: "holdings" },
+  { key: "dividends", tKey: "dividends" },
+  { key: "calendar", tKey: "calendar" },
+  { key: "collections", tKey: "collections" },
+  { key: "diversification", tKey: "diversification" },
+  { key: "payments", tKey: "payments" },
 ] as const;
 
 type TabKey = (typeof LIVE_TABS)[number]["key"];
@@ -36,6 +38,7 @@ const WATCHLIST = [
  * and clickable, each with real content sourced from the prototype/PRD.
  */
 export function ProductTabs() {
+  const t = useTranslations("productTabs");
   const [active, setActive] = useState<TabKey>("for-you");
 
   return (
@@ -90,7 +93,7 @@ export function ProductTabs() {
                 isActive ? "text-text-primary" : "text-text-secondary hover:text-text-primary",
               )}
             >
-              {tab.label}
+              {t(tab.tKey)}
               <span
                 aria-hidden
                 className={cn(
