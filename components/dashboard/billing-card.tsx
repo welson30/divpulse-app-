@@ -8,14 +8,16 @@ type BillingCardProps = {
   plan: "free" | "pro" | "pro_plus";
   planLabel: string;
   periodEnd: string | null;
+  hasStripeCustomer: boolean;
 };
 
-export function BillingCard({ plan, planLabel, periodEnd }: BillingCardProps) {
+export function BillingCard({ plan, planLabel, periodEnd, hasStripeCustomer }: BillingCardProps) {
   const t = useTranslations("dashboard.subscription");
   const locale = useLocale();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const isFree = plan === "free";
+  const isPro = plan === "pro";
 
   function startCheckout(targetPlan: "pro" | "pro_plus") {
     startTransition(async () => {
@@ -25,6 +27,19 @@ export function BillingCard({ plan, planLabel, periodEnd }: BillingCardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: targetPlan }),
       });
+      const result = (await response.json()) as { error?: string; url?: string };
+      if (!response.ok || !result.url) {
+        setError(result.error ?? t("checkoutError"));
+        return;
+      }
+      window.location.href = result.url;
+    });
+  }
+
+  function openPortalForUpgrade() {
+    startTransition(async () => {
+      setError(null);
+      const response = await fetch("/api/stripe/portal", { method: "POST" });
       const result = (await response.json()) as { error?: string; url?: string };
       if (!response.ok || !result.url) {
         setError(result.error ?? t("checkoutError"));
@@ -64,6 +79,17 @@ export function BillingCard({ plan, planLabel, periodEnd }: BillingCardProps) {
               disabled={isPending}
               onClick={() => startCheckout("pro_plus")}
               className={settingsSecondaryBtnClass}
+            >
+              {isPending ? t("upgradeOpening") : t("upgradeProPlus")}
+            </button>
+          </div>
+        ) : isPro ? (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={isPending || !hasStripeCustomer}
+              onClick={openPortalForUpgrade}
+              className={settingsPrimaryBtnClass}
             >
               {isPending ? t("upgradeOpening") : t("upgradeProPlus")}
             </button>

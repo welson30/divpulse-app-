@@ -95,7 +95,7 @@ export default async function SettingsPage({
           {tab === "security" ? <ChangePasswordForm /> : null}
 
           {tab === "subscription" ? (
-            <BillingCard plan={plan} planLabel={planLabel} periodEnd={subscription?.current_period_end ?? null} />
+            <BillingCard plan={plan} planLabel={planLabel} periodEnd={subscription?.current_period_end ?? null} hasStripeCustomer={Boolean(subscription?.stripe_customer_id)} />
           ) : null}
 
           {tab === "billing" ? (
