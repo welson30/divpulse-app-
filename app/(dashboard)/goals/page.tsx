@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { computeTrailingIncome } from "@/lib/dividend-data/income";
 import { enrichTickers } from "@/lib/tickers/enrich";
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GoalsPage() {
+  const tc = await getTranslations("dashboard.common");
   const supabase = await createClient();
   const {
     data: { user },
@@ -67,7 +69,7 @@ export default async function GoalsPage() {
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
         <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">{tc("footerDisclaimer")}</p>
       </footer>
     </div>
   );

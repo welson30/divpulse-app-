@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import {
@@ -66,6 +67,7 @@ async function fetchHistories(tickers: string[]): Promise<Map<string, SparklineP
 }
 
 export default async function PerformancePage() {
+  const tc = await getTranslations("dashboard.common");
   const supabase = await createClient();
   const {
     data: { user },

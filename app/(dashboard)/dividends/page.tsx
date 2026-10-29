@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { isLinkableTicker } from "@/lib/tickers/validate";
@@ -27,6 +28,10 @@ function formatMoney(value: number, compact = false) {
 
 export default async function DividendsPage() {
   const supabase = await createClient();
+  const [t, tc] = await Promise.all([
+    getTranslations("dashboard.dividends"),
+    getTranslations("dashboard.common"),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -45,12 +50,12 @@ export default async function DividendsPage() {
         <div className="absolute bottom-0 left-1/3 size-48 rounded-full bg-[#a78bfa] opacity-[0.03] blur-2xl" />
       </div>
       <div className="relative z-[1]">
-        <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">Dividends</p>
+        <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">{t("eyebrow")}</p>
         <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#e8eaf0] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-          Dividend income
+          {t("title")}
         </h1>
         <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#3d4554]">
-          Trailing twelve months, forward projection and per-holding contribution.
+          {t("subtitle")}
         </p>
       </div>
     </header>
@@ -60,7 +65,7 @@ export default async function DividendsPage() {
     <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1c2028] pt-5">
       {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
       <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-      <p className="text-[12px] leading-[19.8px] text-[#3d4554]">Read-only broker access · Data delayed 15 min</p>
+      <p className="text-[12px] leading-[19.8px] text-[#3d4554]">{tc("footerDisclaimer")}</p>
     </footer>
   );
 
@@ -69,7 +74,7 @@ export default async function DividendsPage() {
       <div className="flex flex-col gap-6">
         {header}
         <div className="rounded-[18px] border border-[#1c2028] bg-[#0b0e12] px-6 py-12 text-center text-sm text-[#3d4554]">
-          Add a holding to start tracking dividend income.
+          {t("addHoldingPrompt")}
         </div>
         {footer}
       </div>
@@ -142,30 +147,30 @@ export default async function DividendsPage() {
 
   const kpis = [
     {
-      label: "TTM income",
+      label: t("ttmIncome"),
       value: formatMoney(income.annual, true),
-      sub: "Recorded last 12 months",
+      sub: t("ttmIncomeSub"),
       valueClass: "text-[#f2f4f7]",
     },
     {
-      label: "Forward income",
+      label: t("forwardIncome"),
       value: formatMoney(cadenceLive.forwardAnnual, true),
-      sub: "Estimated next 12mo",
+      sub: t("forwardIncomeSub"),
       valueClass: "text-[#f2f4f7]",
     },
     {
-      label: "Average yield",
+      label: t("avgYield"),
       value: avgYieldPct != null ? `${avgYieldPct.toFixed(2)}%` : "—",
-      sub: "Trailing income / value",
+      sub: t("avgYieldSub"),
       valueClass: "text-[#f2f4f7]",
     },
     {
-      label: growthSpan != null ? `${growthSpan}yr growth rate` : "Growth rate",
+      label: growthSpan != null ? t("growthRateYears", { years: growthSpan }) : t("growthRate"),
       value: growthPct != null ? `${growthPct >= 0 ? "+" : ""}${Math.round(growthPct)}%` : "—",
       sub:
         firstYear && lastYear && firstYear.year !== lastYear.year
-          ? `${firstYear.year} → ${lastYear.year} annual income`
-          : "Need two complete years",
+          ? t("growthRateSub", { from: firstYear.year, to: lastYear.year })
+          : t("growthRateNeedYears"),
       valueClass: growthPct != null && growthPct < 0 ? "text-[#d8695f]" : "text-[#3fbf87]",
     },
   ];
@@ -180,8 +185,8 @@ export default async function DividendsPage() {
         <div className="flex min-w-0 flex-col gap-6">
           <PassiveIncomeChart
             data={monthlySeries}
-            title="Monthly income"
-            subtitle="Dividends received per month, trailing 12 months"
+            title={tc("monthlyIncome")}
+            subtitle={t("monthlyChartSub")}
             chartClassName="h-[240px] min-[900px]:h-[240px]"
           />
           <DividendGrowthChart data={chartYears.length > 0 ? chartYears : annualSeries} />
@@ -189,22 +194,22 @@ export default async function DividendsPage() {
           <section className="overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
             <header className="border-b border-[#1c2028] px-5 py-5 min-[900px]:px-6">
               <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#e8eaf0]">
-                Income by holding
+                {t("incomeByHolding")}
               </h2>
               <p className="mt-1 text-[13px] leading-[21.45px] text-[#3d4554]">
-                Ranked by trailing annual contribution
+                {t("incomeByHoldingSub")}
               </p>
             </header>
             <div className="overflow-x-auto">
               <div className="min-w-[560px]">
                 <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(5.5rem,0.6fr)_minmax(6.5rem,0.7fr)_minmax(6rem,0.7fr)] border-b border-[#1c2028] px-6 py-3 text-[11px] font-bold tracking-[1.54px] text-[#3d4554] uppercase">
-                  <span>Holding</span>
-                  <span className="text-right">Yield</span>
-                  <span className="text-right">Monthly</span>
-                  <span className="text-right">Annual</span>
+                  <span>{tc("holding")}</span>
+                  <span className="text-right">{t("yield")}</span>
+                  <span className="text-right">{t("monthly")}</span>
+                  <span className="text-right">{t("annual")}</span>
                 </div>
                 {rows.length === 0 ? (
-                  <p className="px-6 py-8 text-[13px] text-[#3d4554]">No holdings to rank yet.</p>
+                  <p className="px-6 py-8 text-[13px] text-[#3d4554]">{t("noHoldingsToRank")}</p>
                 ) : (
                   rows.map((row, i) => {
                     const holding = (
@@ -249,9 +254,9 @@ export default async function DividendsPage() {
           <section className="overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
             <header className="border-b border-[#1c2028] px-6 py-5">
               <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#e8eaf0]">
-                Payout frequency mix
+                {t("payoutMix")}
               </h2>
-              <p className="mt-1 text-[13px] leading-[21.45px] text-[#3d4554]">Share of annual income by cadence</p>
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#3d4554]">{t("payoutMixSub")}</p>
             </header>
             <div className="flex flex-col gap-5 p-6">
               {cadenceLive.mix.map((row) => (
@@ -281,13 +286,12 @@ export default async function DividendsPage() {
             <div className="relative z-[1]">
               <div className="flex items-center gap-2">
                 <FigmaIcon src="/marketing/dashboard/icon-trend.svg" className="size-4 text-[#60a5fa]" />
-                <p className="text-[11px] tracking-[1.76px] text-[#60a5fa] uppercase">Income trend</p>
+                <p className="text-[11px] tracking-[1.76px] text-[#60a5fa] uppercase">{t("incomeTrend")}</p>
               </div>
               <p className="mt-3 text-[14px] leading-[22.75px] text-[#c8ccd8]">{trendBody}</p>
               <div className="mt-4 h-px bg-[#1c2028]" />
               <p className="mt-3 text-[12px] leading-[19.8px] text-[#3d4554]">
-                Figures use current share counts. Reinvested distributions are excluded. Forward income is estimated from
-                recent payout cadence.
+                {t("trendDisclaimer")}
               </p>
             </div>
           </section>

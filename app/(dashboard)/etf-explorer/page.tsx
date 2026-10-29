@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { getYieldPct } from "@/lib/tickers/yield";
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function EtfExplorerPage() {
+  const t = await getTranslations("dashboard.etfExplorer");
   // Collect all tickers across all curated lists and enrich in one batch.
   const allTickers = [...new Set(CURATED_LISTS.flatMap((l) => l.tickers))];
   const enriched = await enrichTickers(allTickers, "1mo");
@@ -56,12 +58,11 @@ export default async function EtfExplorerPage() {
         <div className="relative flex flex-col gap-4">
           <div>
             <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[rgba(96,165,250,0.2)] bg-[rgba(96,165,250,0.08)] px-2.5 py-0.5 font-mono text-[10px] font-semibold tracking-widest text-[#60a5fa] uppercase">
-              Discover
+              {t("eyebrow")}
             </span>
-            <h1 className="font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#e8eaf0] min-[900px]:text-[32px]">ETF Explorer</h1>
+            <h1 className="font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#e8eaf0] min-[900px]:text-[32px]">{t("title")}</h1>
             <p className="mt-1.5 max-w-xl text-[14px] leading-[22.75px] text-[#3d4554]">
-              Curated dividend ETFs and REITs — browse by payment frequency, compare side-by-side, or calculate your
-              expected annual income.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -72,10 +73,10 @@ export default async function EtfExplorerPage() {
 
           {/* Frequency legend */}
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-mono text-[12px] text-[#3d4554]">Pay frequency:</span>
-            <FreqPill color="bg-[#60a5fa]" label="Monthly" />
-            <FreqPill color="bg-[#f59e0b]" label="Weekly" />
-            <FreqPill color="bg-[#a78bfa]" label="Quarterly" />
+            <span className="font-mono text-[12px] text-[#3d4554]">{t("payFrequency")}</span>
+            <FreqPill color="bg-[#60a5fa]" label={t("monthly")} />
+            <FreqPill color="bg-[#f59e0b]" label={t("weekly")} />
+            <FreqPill color="bg-[#a78bfa]" label={t("quarterly")} />
           </div>
         </div>
       </div>

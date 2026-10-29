@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { estimateUpcomingPayments } from "@/lib/dividend-data/next-payment";
@@ -11,6 +12,11 @@ export const metadata: Metadata = {
 const LOOKAHEAD_DAYS = 90;
 
 export default async function UpcomingPage() {
+  const [t, tc] = await Promise.all([
+    getTranslations("dashboard.upcoming"),
+    getTranslations("dashboard.common"),
+  ]);
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -23,12 +29,12 @@ export default async function UpcomingPage() {
 
   const header = (
     <header className="border-b border-[#22262c] pb-6">
-      <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Upcoming</p>
+      <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{t("eyebrow")}</p>
       <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-        Upcoming payments
+        {t("title")}
       </h1>
       <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-        Every scheduled and projected dividend payment across your connected brokers.
+        {t("subtitle")}
       </p>
     </header>
   );
@@ -46,7 +52,7 @@ export default async function UpcomingPage() {
       <div className="flex flex-col gap-6">
         {header}
         <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-sm text-[#99a1ac]">
-          Add a holding to see upcoming dividend payments.
+          {t("addHoldingPrompt")}
         </div>
         {footer}
       </div>

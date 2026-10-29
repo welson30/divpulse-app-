@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { AnimatedKpiTiles } from "@/components/dashboard/animated-kpi-tiles";
 import { enrichTickers } from "@/lib/tickers/enrich";
@@ -24,6 +25,10 @@ function formatMoney(value: number, compact = false) {
 
 export default async function HoldingsPage() {
   const supabase = await createClient();
+  const [t, tc] = await Promise.all([
+    getTranslations("dashboard.holdings"),
+    getTranslations("dashboard.common"),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -118,12 +123,12 @@ export default async function HoldingsPage() {
         </div>
         <div className="relative z-[1] flex flex-col gap-4 px-5 py-6 min-[900px]:flex-row min-[900px]:items-end min-[900px]:justify-between min-[900px]:px-6">
           <div className="min-w-0">
-            <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">Portfolio</p>
+            <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">{t("eyebrow")}</p>
             <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#e8eaf0] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-              Portfolio overview
+              {t("title")}
             </h1>
             <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#3d4554]">
-              Consolidated positions across all connected brokerage accounts.
+              {t("subtitle")}
             </p>
           </div>
           <ExportHoldingsButton holdings={rows} />
@@ -132,27 +137,27 @@ export default async function HoldingsPage() {
 
       <AnimatedKpiTiles kpis={[
         {
-          label: "Portfolio value",
+          label: tc("portfolioValue"),
           value: formatMoney(totalValue, true),
-          sub: "Current market value",
+          sub: t("currentMarketValue"),
           valueClass: "text-[#e8eaf0]",
         },
         {
-          label: "Portfolio yield",
+          label: tc("portfolioYield"),
           value: portfolioYieldPct != null ? `${portfolioYieldPct.toFixed(2)}%` : "—",
-          sub: portfolioYieldPct != null ? "Trailing 12mo income ÷ value" : "Waiting on live prices",
+          sub: portfolioYieldPct != null ? t("trailing12moYield") : t("waitingLivePrices"),
           valueClass: "text-[#e8eaf0]",
         },
         {
-          label: "Today's change",
+          label: t("todaysChange"),
           value: dayChange == null ? "—" : `${dayChange >= 0 ? "+" : ""}${formatMoney(dayChange, true)}`,
-          sub: dayChangePct == null ? "No change data yet" : `${dayChangePct >= 0 ? "+" : ""}${dayChangePct.toFixed(2)}% vs yesterday`,
+          sub: dayChangePct == null ? tc("noChangeData") : `${dayChangePct >= 0 ? "+" : ""}${dayChangePct.toFixed(2)}${t("vsYesterday")}`,
           valueClass: dayChange == null ? "text-[#e8eaf0]" : dayChange >= 0 ? "text-[#3fbf87]" : "text-red-400",
         },
         {
-          label: "Annual income",
+          label: tc("annualIncome"),
           value: formatMoney(income.annual, true),
-          sub: "Trailing 12 months",
+          sub: tc("trailing12Months"),
           valueClass: "text-[#e8eaf0]",
         },
       ]} />
@@ -168,7 +173,7 @@ export default async function HoldingsPage() {
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1c2028] pt-5">
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
         <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-        <p className="text-[12px] leading-[19.8px] text-[#3d4554]">Read-only broker access · Data delayed 15 min</p>
+        <p className="text-[12px] leading-[19.8px] text-[#3d4554]">{tc("footerDisclaimer")}</p>
       </footer>
     </div>
   );

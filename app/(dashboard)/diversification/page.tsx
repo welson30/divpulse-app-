@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDividendDataProvider } from "@/lib/dividend-data";
 import { AllocationDonut } from "@/components/dashboard/allocation-donut";
@@ -51,6 +52,10 @@ function toRows(map: Map<string, number>, total: number): NamedValue[] {
 }
 
 export default async function DiversificationPage() {
+  const [t, tc] = await Promise.all([
+    getTranslations("dashboard.diversification"),
+    getTranslations("dashboard.common"),
+  ]);
   const supabase = await createClient();
   const {
     data: { user },
@@ -63,12 +68,12 @@ export default async function DiversificationPage() {
 
   const header = (
     <header className="border-b border-[#22262c] pb-6">
-      <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Allocation</p>
+      <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{t("eyebrow")}</p>
       <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-        Portfolio allocation
+        {t("title")}
       </h1>
       <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-        How your capital is spread across sectors, asset classes and brokers.
+        {t("subtitle")}
       </p>
     </header>
   );
@@ -78,7 +83,7 @@ export default async function DiversificationPage() {
       <div className="flex flex-col gap-6">
         {header}
         <div className="rounded-[14px] border border-[#22262c] bg-[#121417] px-6 py-12 text-center text-sm text-[#99a1ac]">
-          Add a holding to see how your portfolio is spread out.
+          {t("addHoldingPrompt")}
         </div>
       </div>
     );
@@ -150,9 +155,9 @@ export default async function DiversificationPage() {
         <section className="rounded-[14px] border border-[#22262c] bg-[#121417]">
           <header className="border-b border-[#22262c] px-6 py-5">
             <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-              Sector allocation
+              {t("sectorAllocation")}
             </h2>
-            <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Hover a slice or a legend row</p>
+            <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{t("sectorHoverHint")}</p>
           </header>
           <div className="px-6 py-8">
             <AllocationDonut segments={sectorRows} />
@@ -163,9 +168,9 @@ export default async function DiversificationPage() {
           <section className="rounded-[14px] border border-[#22262c] bg-[#121417]">
             <header className="border-b border-[#22262c] px-6 py-5">
               <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-                Asset class breakdown
+                {t("assetClassBreakdown")}
               </h2>
-              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Weight by instrument type</p>
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{t("assetWeightHint")}</p>
             </header>
             <div className="flex flex-col gap-5 p-6">
               {assetRows.map((row) => {
@@ -194,16 +199,16 @@ export default async function DiversificationPage() {
           <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
             <header className="border-b border-[#22262c] px-6 py-5">
               <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-                Sector allocation
+                {t("sectorAllocation")}
               </h2>
-              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Detail by holdings weight</p>
+              <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{t("sectorDetailHint")}</p>
             </header>
             <div className="overflow-x-auto">
               <div className="min-w-[520px]">
                 <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(5rem,0.6fr)_minmax(6rem,0.7fr)] border-b border-[#22262c] px-6 py-3 text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">
-                  <span>Sector</span>
-                  <span className="text-right">Weight</span>
-                  <span className="text-right">Value</span>
+                  <span>{t("colSector")}</span>
+                  <span className="text-right">{t("colWeight")}</span>
+                  <span className="text-right">{t("colValue")}</span>
                 </div>
                 {sectorRows.map((row, i) => (
                   <div
@@ -229,16 +234,16 @@ export default async function DiversificationPage() {
       <section className="overflow-hidden rounded-[14px] border border-[#22262c] bg-[#121417]">
         <header className="border-b border-[#22262c] px-6 py-5">
           <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#f2f4f7]">
-            Broker allocation
+            {t("brokerAllocation")}
           </h2>
-          <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">Capital custody across connected brokerages</p>
+          <p className="mt-1 text-[13px] leading-[21.45px] text-[#99a1ac]">{t("brokerSubtitle")}</p>
         </header>
         <div className="overflow-x-auto">
           <div className="min-w-[620px]">
             <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(7rem,0.7fr)_minmax(9rem,0.9fr)] border-b border-[#22262c] px-6 py-3 text-[11px] font-bold tracking-[1.54px] text-[#6c737f] uppercase">
-              <span>Broker</span>
-              <span className="text-right">Value</span>
-              <span className="text-right">Weight</span>
+              <span>{t("colBroker")}</span>
+              <span className="text-right">{t("colValue")}</span>
+              <span className="text-right">{t("colWeight")}</span>
             </div>
             {brokerRows.map((row, i) => (
               <div
@@ -281,7 +286,7 @@ export default async function DiversificationPage() {
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
         <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">{tc("footerDisclaimer")}</p>
       </footer>
     </div>
   );

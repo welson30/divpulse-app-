@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { PaymentHistoryBoard, type HistoryRow } from "@/components/dashboard/payment-history-board";
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 const MAX_EVENT_ROWS = 5000;
 
 export default async function HistoryPage() {
+  const tc = await getTranslations("dashboard.common");
   const supabase = await createClient();
   const {
     data: { user },

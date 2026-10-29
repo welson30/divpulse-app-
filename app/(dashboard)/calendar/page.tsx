@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { estimateUpcomingPayments, getTickerFrequencies } from "@/lib/dividend-data/next-payment";
@@ -10,21 +11,6 @@ import type { CalendarPayment } from "@/components/dashboard/calendar-grid";
 export const metadata: Metadata = {
   title: "Calendar — PaidPrime",
 };
-
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 function clampMonth(raw: string | undefined, fallback: number) {
   const n = Number(raw);
@@ -40,26 +26,28 @@ function formatMoney(value: number) {
   return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function formatSyncAgo(iso: string | null) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function formatSyncAgo(iso: string | null, t: (...args: any[]) => string): string | null {
   if (!iso) return null;
   const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins} min ago`;
+  if (mins < 1) return t("syncJustNow");
+  if (mins < 60) return t("syncMinAgo", { n: mins });
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("syncHoursAgo", { n: hours });
   const days = Math.round(hours / 24);
-  return days === 1 ? "1 day ago" : `${days} days ago`;
+  return t("syncDaysAgo", { n: days });
 }
 
-function connectionBadge(status: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function connectionBadge(status: string, t: (...args: any[]) => string) {
   if (status === "error") {
     return {
-      label: "Attention",
+      label: t("badgeAttention"),
       className: "border-[rgba(216,105,95,0.3)] bg-[#261615] text-[#d8695f]",
     };
   }
   return {
-    label: "Synced",
+    label: t("badgeSynced"),
     className: "border-[rgba(63,191,135,0.3)] bg-[#10261e] text-[#3fbf87]",
   };
 }
@@ -69,6 +57,12 @@ export default async function CalendarPage({
 }: {
   searchParams: Promise<{ month?: string; year?: string }>;
 }) {
+  const [t, tc, locale] = await Promise.all([
+    getTranslations("dashboard.calendar"),
+    getTranslations("dashboard.common"),
+    getLocale(),
+  ]);
+
   const { month: monthParam, year: yearParam } = await searchParams;
 
   const now = new Date();
@@ -128,12 +122,12 @@ export default async function CalendarPage({
         <div className="absolute bottom-0 left-1/3 size-48 rounded-full bg-[#a78bfa] opacity-[0.03] blur-2xl" />
       </div>
       <div className="relative z-[1]">
-        <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">Calendar</p>
+        <p className="text-[11px] tracking-[2.2px] text-[#3d4554] uppercase">{t("eyebrow")}</p>
         <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#e8eaf0] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-          Payment calendar
+          {t("title")}
         </h1>
         <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#3d4554]">
-          Expected and confirmed dividend payments mapped to the calendar.
+          {t("subtitle")}
         </p>
       </div>
     </header>
@@ -143,7 +137,7 @@ export default async function CalendarPage({
     <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1c2028] pt-5">
       {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
       <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-      <p className="text-[12px] leading-[19.8px] text-[#3d4554]">Read-only broker access · Data delayed 15 min</p>
+      <p className="text-[12px] leading-[19.8px] text-[#3d4554]">{tc("footerDisclaimer")}</p>
     </footer>
   );
 
@@ -151,15 +145,15 @@ export default async function CalendarPage({
     <section className="overflow-hidden rounded-[18px] border border-[#1c2028] bg-[#0b0e12] shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
       <header className="border-b border-[#1c2028] px-6 py-5">
         <h2 className="font-[family-name:var(--font-funnel-display)] text-[15px] font-semibold tracking-[-0.15px] text-[#e8eaf0]">
-          Broker integrations
+          {t("brokerIntegrations")}
         </h2>
-        <p className="mt-1 text-[13px] leading-[21.45px] text-[#3d4554]">Sync status across accounts</p>
+        <p className="mt-1 text-[13px] leading-[21.45px] text-[#3d4554]">{t("brokerSyncSub")}</p>
       </header>
       {brokerConnections && brokerConnections.length > 0 ? (
         <div className="px-6 py-2">
           {brokerConnections.map((row, i) => {
-            const badge = connectionBadge(row.status);
-            const ago = formatSyncAgo(row.last_synced_at);
+            const badge = connectionBadge(row.status, t);
+            const ago = formatSyncAgo(row.last_synced_at, t);
             return (
               <div
                 key={row.id}
@@ -180,15 +174,15 @@ export default async function CalendarPage({
         </div>
       ) : (
         <p className="px-6 py-5 text-[13px] leading-[21.45px] text-[#3d4554]">
-          No brokers connected.{" "}
+          {t("noBrokers")}{" "}
           <Link href="/brokers" className="text-[#60a5fa] hover:underline">
-            Connect a brokerage
+            {t("connectBrokerage")}
           </Link>
         </p>
       )}
       <div className="border-t border-[#1c2028] px-6 py-4">
         <p className="text-[12px] leading-[19.8px] text-[#3d4554]">
-          All connections are read-only; PaidPrime never has withdrawal access.
+          {t("readOnlyNote")}
         </p>
       </div>
     </section>
@@ -200,7 +194,7 @@ export default async function CalendarPage({
         {header}
         <div className="grid grid-cols-1 items-start gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_320px]">
           <div className="rounded-[18px] border border-[#1c2028] bg-[#0b0e12] px-6 py-12 text-center text-sm text-[#3d4554]">
-            Add a holding to see its dividend calendar.
+            {t("addHoldingPrompt")}
           </div>
           {brokers}
         </div>
@@ -272,11 +266,14 @@ export default async function CalendarPage({
   const monthTotal = payments.reduce((sum, p) => sum + (p.amount ?? 0), 0);
   const hasEstimate = payments.some((p) => p.kind === "estimated");
   const isPastMonth = year < realYear || (year === realYear && month < realMonth);
+  const rawMonthName = new Date(year, month - 1, 1).toLocaleDateString(locale, { month: "long", year: "numeric" });
+  const monthLabelStr = rawMonthName.charAt(0).toUpperCase() + rawMonthName.slice(1);
+
   const expectedLabel = hideAmount
-    ? `${payments.length} ${payments.length === 1 ? "payment" : "payments"} this month`
+    ? t("paymentsCount", { n: payments.length })
     : isPastMonth && !hasEstimate
-      ? `${formatMoney(monthTotal)} recorded this month`
-      : `${hasEstimate ? "~" : ""}${formatMoney(monthTotal)} expected this month`;
+      ? t("recordedThisMonth", { amount: formatMoney(monthTotal) })
+      : t("expectedThisMonth", { amount: `${hasEstimate ? "~" : ""}${formatMoney(monthTotal)}` });
 
   return (
     <div className="flex flex-col gap-6">
@@ -284,7 +281,7 @@ export default async function CalendarPage({
       <PaymentCalendar
         month={month}
         year={year}
-        monthLabel={`${MONTH_NAMES[month - 1]} ${year}`}
+        monthLabel={monthLabelStr}
         expectedLabel={expectedLabel}
         todayDay={todayDay}
         payments={payments}

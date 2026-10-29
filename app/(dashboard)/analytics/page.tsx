@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { enrichTickers } from "@/lib/tickers/enrich";
 import { computeMonthlyIncomeSeries, computeAnnualIncomeSeries } from "@/lib/dividend-data/income";
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AnalyticsPage() {
+  const tc = await getTranslations("dashboard.common");
   const supabase = await createClient();
   const {
     data: { user },

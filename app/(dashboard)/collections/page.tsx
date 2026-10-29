@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Layers, Star, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -22,6 +23,7 @@ export default async function CollectionsPage({
   searchParams: Promise<{ sector?: string }>;
 }) {
   const { sector } = await searchParams;
+  const t = await getTranslations("dashboard.collections");
   const supabase = await createClient();
 
   const { data: collections } = await supabase
@@ -33,12 +35,12 @@ export default async function CollectionsPage({
     return (
       <div className="flex flex-col gap-sp-4">
         <div>
-          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Discover</span>
-          <h1 className="text-h1 font-display font-semibold text-text-primary">Collections</h1>
+          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">{t("eyebrow")}</span>
+          <h1 className="text-h1 font-display font-semibold text-text-primary">{t("title")}</h1>
         </div>
         <CollectionSearch />
         <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-6 text-center">
-          <p className="text-sm text-text-secondary">No collections curated yet.</p>
+          <p className="text-sm text-text-secondary">{t("emptyNone")}</p>
         </div>
       </div>
     );
@@ -92,10 +94,10 @@ export default async function CollectionsPage({
       <div className="relative">
         <GreetingBackdrop />
         <div className="relative z-10">
-          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">Discover</span>
-          <h1 className="text-h1 font-display font-semibold text-text-primary">Collections</h1>
+          <span className="mb-1 block font-mono text-xs tracking-[0.06em] text-text-secondary uppercase">{t("eyebrow")}</span>
+          <h1 className="text-h1 font-display font-semibold text-text-primary">{t("title")}</h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Curated groupings of dividend payers, with live prices and trailing yield.
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -136,7 +138,7 @@ export default async function CollectionsPage({
 
       {visibleCollections.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-card border border-border-subtle bg-surface-2 p-sp-6 text-center">
-          <p className="text-sm text-text-secondary">No collections in this sector.</p>
+          <p className="text-sm text-text-secondary">{t("emptySector")}</p>
         </div>
       ) : (
         visibleCollections.map((collection) => {
@@ -176,7 +178,7 @@ export default async function CollectionsPage({
                   href={`/collections/${collection.id}`}
                   className="shrink-0 font-mono text-xs text-green-500 hover:underline"
                 >
-                  View all →
+                  {t("viewAll")}
                 </Link>
               </div>
               <CollectionTable rows={rows} />

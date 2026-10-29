@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileSettingsForm } from "@/components/dashboard/profile-settings-form";
 import { ChangePasswordForm } from "@/components/dashboard/change-password-form";
@@ -35,6 +36,11 @@ export default async function SettingsPage({
       ? "subscription"
       : "profile";
 
+  const [t, tc] = await Promise.all([
+    getTranslations("dashboard.settings"),
+    getTranslations("dashboard.common"),
+  ]);
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -59,12 +65,12 @@ export default async function SettingsPage({
   return (
     <div className="flex flex-col gap-10">
       <header className="border-b border-[#22262c] pb-6">
-        <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">Account</p>
+        <p className="text-[11px] tracking-[2.2px] text-[#6c737f] uppercase">{t("eyebrow")}</p>
         <h1 className="mt-[7px] font-[family-name:var(--font-funnel-display)] text-[28px] font-semibold tracking-[-0.96px] text-[#f2f4f7] min-[900px]:text-[32px] min-[900px]:leading-[52.8px]">
-          Settings
+          {t("title")}
         </h1>
         <p className="mt-1 max-w-[672px] text-[14px] leading-[22.75px] text-[#99a1ac]">
-          Manage your profile, security, plan and billing details.
+          {t("subtitle")}
         </p>
       </header>
 
@@ -100,7 +106,7 @@ export default async function SettingsPage({
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#22262c] pt-5">
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma mark */}
         <img src="/marketing/dashboard/logo.svg" alt="PaidPrime" width={14} height={14} className="size-3.5 opacity-60" />
-        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">Read-only broker access · Data delayed 15 min</p>
+        <p className="text-[12px] leading-[19.8px] text-[#6c737f]">{tc("footerDisclaimer")}</p>
       </footer>
     </div>
   );

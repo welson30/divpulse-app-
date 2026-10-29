@@ -368,24 +368,51 @@
       "noHoldingsDesc": "Add your first holding to start tracking dividends."
     },
     "dividends": {
-      "title": "Dividends",
-      "received": "Received",
-      "pending": "Pending",
-      "history": "History",
-      "totalReceived": "Total received",
-      "thisYear": "This year",
-      "thisMonth": "This month",
-      "amount": "Amount",
-      "date": "Date",
-      "status": "Status",
-      "ticker": "Ticker"
+      "eyebrow": "Dividends",
+      "title": "Dividend income",
+      "subtitle": "Trailing twelve months, forward projection and per-holding contribution.",
+      "addHoldingPrompt": "Add a holding to start tracking dividend income.",
+      "ttmIncome": "TTM income",
+      "ttmIncomeSub": "Recorded last 12 months",
+      "forwardIncome": "Forward income",
+      "forwardIncomeSub": "Estimated next 12mo",
+      "avgYield": "Average yield",
+      "avgYieldSub": "Trailing income / value",
+      "growthRate": "Growth rate",
+      "growthRateYears": "{years}yr growth rate",
+      "growthRateSub": "{from} → {to} annual income",
+      "growthRateNeedYears": "Need two complete years",
+      "monthlyChartSub": "Dividends received per month, trailing 12 months",
+      "incomeByHolding": "Income by holding",
+      "incomeByHoldingSub": "Ranked by trailing annual contribution",
+      "yield": "Yield",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "noHoldingsToRank": "No holdings to rank yet.",
+      "payoutMix": "Payout frequency mix",
+      "payoutMixSub": "Share of annual income by cadence",
+      "incomeTrend": "Income trend",
+      "trendDisclaimer": "Figures use current share counts. Reinvested distributions are excluded. Forward income is estimated from recent payout cadence."
     },
     "calendar": {
-      "title": "Dividend Calendar",
-      "exDate": "Ex-Dividend Date",
-      "payDate": "Pay Date",
-      "amount": "Amount",
-      "noEvents": "No dividend events this month"
+      "eyebrow": "Calendar",
+      "title": "Payment calendar",
+      "subtitle": "Expected and confirmed dividend payments mapped to the calendar.",
+      "syncJustNow": "Just now",
+      "syncMinAgo": "{n} min ago",
+      "syncHoursAgo": "{n}h ago",
+      "syncDaysAgo": "{n, plural, one {1 day ago} other {# days ago}}",
+      "badgeAttention": "Attention",
+      "badgeSynced": "Synced",
+      "brokerIntegrations": "Broker integrations",
+      "brokerSyncSub": "Sync status across accounts",
+      "noBrokers": "No brokers connected.",
+      "connectBrokerage": "Connect a brokerage",
+      "readOnlyNote": "All connections are read-only; PaidPrime never has withdrawal access.",
+      "addHoldingPrompt": "Add a holding to see its dividend calendar.",
+      "paymentsCount": "{n, plural, one {# payment this month} other {# payments this month}}",
+      "recordedThisMonth": "{amount} recorded this month",
+      "expectedThisMonth": "{amount} expected this month"
     },
     "notifications": {
       "title": "Notifications",
@@ -417,7 +444,9 @@
       "deleteAccount": "Delete account",
       "saveChanges": "Save changes",
       "saved": "Saved",
-      "languageDescription": "Choose the language for your dashboard."
+      "languageDescription": "Choose the language for your dashboard.",
+      "eyebrow": "Account",
+      "subtitle": "Manage your profile, security, plan and billing details."
     },
     "goals": {
       "title": "Goals",
@@ -471,6 +500,61 @@
       "estimated": "Est.",
       "aiAdvisor": "AI Advisor",
       "footerDisclaimer": "Read-only broker access · Data delayed 15 min"
+    },
+    "holdings": {
+      "eyebrow": "Portfolio",
+      "title": "Portfolio overview",
+      "subtitle": "Consolidated positions across all connected brokerage accounts.",
+      "currentMarketValue": "Current market value",
+      "trailing12moYield": "Trailing 12mo income ÷ value",
+      "waitingLivePrices": "Waiting on live prices",
+      "todaysChange": "Today's change",
+      "vsYesterday": "% vs yesterday"
+    },
+    "upcoming": {
+      "eyebrow": "Upcoming",
+      "title": "Upcoming payments",
+      "subtitle": "Every scheduled and projected dividend payment across your connected brokers.",
+      "addHoldingPrompt": "Add a holding to see upcoming dividend payments."
+    },
+    "watchlist": {
+      "eyebrow": "Markets",
+      "title": "Watchlist",
+      "subtitle": "Monitor price action, yield and upcoming ex-dividend dates before you buy."
+    },
+    "diversification": {
+      "eyebrow": "Allocation",
+      "title": "Portfolio allocation",
+      "subtitle": "How your capital is spread across sectors, asset classes and brokers.",
+      "addHoldingPrompt": "Add a holding to see how your portfolio is spread out.",
+      "sectorAllocation": "Sector allocation",
+      "sectorHoverHint": "Hover a slice or a legend row",
+      "assetClassBreakdown": "Asset class breakdown",
+      "assetWeightHint": "Weight by instrument type",
+      "sectorDetailHint": "Detail by holdings weight",
+      "colSector": "Sector",
+      "colWeight": "Weight",
+      "colValue": "Value",
+      "brokerAllocation": "Broker allocation",
+      "brokerSubtitle": "Capital custody across connected brokerages",
+      "colBroker": "Broker"
+    },
+    "collections": {
+      "eyebrow": "Discover",
+      "title": "Collections",
+      "subtitle": "Curated groupings of dividend payers, with live prices and trailing yield.",
+      "emptyNone": "No collections curated yet.",
+      "emptySector": "No collections in this sector.",
+      "viewAll": "View all →"
+    },
+    "etfExplorer": {
+      "eyebrow": "Discover",
+      "title": "ETF Explorer",
+      "subtitle": "Curated dividend ETFs and REITs — browse by payment frequency, compare side-by-side, or calculate your expected annual income.",
+      "payFrequency": "Pay frequency:",
+      "monthly": "Monthly",
+      "weekly": "Weekly",
+      "quarterly": "Quarterly"
     }
   },
   "notifications": {

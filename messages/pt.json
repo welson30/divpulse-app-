@@ -368,24 +368,51 @@
       "noHoldingsDesc": "Adicione seu primeiro ativo para começar a monitorar dividendos."
     },
     "dividends": {
-      "title": "Dividendos",
-      "received": "Recebidos",
-      "pending": "Pendentes",
-      "history": "Histórico",
-      "totalReceived": "Total recebido",
-      "thisYear": "Este ano",
-      "thisMonth": "Este mês",
-      "amount": "Valor",
-      "date": "Data",
-      "status": "Status",
-      "ticker": "Ticker"
+      "eyebrow": "Dividendos",
+      "title": "Renda de dividendos",
+      "subtitle": "Últimos doze meses, projeção futura e contribuição por ativo.",
+      "addHoldingPrompt": "Adicione um ativo para começar a rastrear renda de dividendos.",
+      "ttmIncome": "Renda TTM",
+      "ttmIncomeSub": "Registrado nos últimos 12 meses",
+      "forwardIncome": "Renda futura",
+      "forwardIncomeSub": "Estimativa próximos 12 meses",
+      "avgYield": "Yield médio",
+      "avgYieldSub": "Renda acumulada / valor",
+      "growthRate": "Taxa de crescimento",
+      "growthRateYears": "Crescimento {years} anos",
+      "growthRateSub": "{from} → {to} renda anual",
+      "growthRateNeedYears": "Necessário dois anos completos",
+      "monthlyChartSub": "Dividendos recebidos por mês, últimos 12 meses",
+      "incomeByHolding": "Renda por ativo",
+      "incomeByHoldingSub": "Classificado por contribuição anual acumulada",
+      "yield": "Yield",
+      "monthly": "Mensal",
+      "annual": "Anual",
+      "noHoldingsToRank": "Sem ativos para classificar.",
+      "payoutMix": "Mix de frequência de pagamento",
+      "payoutMixSub": "Participação da renda anual por cadência",
+      "incomeTrend": "Tendência de renda",
+      "trendDisclaimer": "Valores usam quantidades atuais de ações. Distribuições reinvestidas são excluídas. Renda futura é estimada a partir da cadência de pagamentos recente."
     },
     "calendar": {
-      "title": "Calendário de Dividendos",
-      "exDate": "Data Ex-Dividendo",
-      "payDate": "Data de Pagamento",
-      "amount": "Valor",
-      "noEvents": "Nenhum evento de dividendo este mês"
+      "eyebrow": "Calendário",
+      "title": "Calendário de pagamentos",
+      "subtitle": "Pagamentos de dividendos esperados e confirmados mapeados no calendário.",
+      "syncJustNow": "Agora mesmo",
+      "syncMinAgo": "{n} min atrás",
+      "syncHoursAgo": "{n}h atrás",
+      "syncDaysAgo": "{n, plural, one {1 dia atrás} other {# dias atrás}}",
+      "badgeAttention": "Atenção",
+      "badgeSynced": "Sincronizado",
+      "brokerIntegrations": "Integrações com corretoras",
+      "brokerSyncSub": "Status de sincronização das contas",
+      "noBrokers": "Nenhuma corretora conectada.",
+      "connectBrokerage": "Conectar corretora",
+      "readOnlyNote": "Todas as conexões são somente leitura; o PaidPrime nunca tem acesso a saques.",
+      "addHoldingPrompt": "Adicione um ativo para ver seu calendário de dividendos.",
+      "paymentsCount": "{n, plural, one {# pagamento este mês} other {# pagamentos este mês}}",
+      "recordedThisMonth": "{amount} registrados este mês",
+      "expectedThisMonth": "{amount} esperados este mês"
     },
     "notifications": {
       "title": "Notificações",
@@ -417,7 +444,9 @@
       "deleteAccount": "Excluir conta",
       "saveChanges": "Salvar alterações",
       "saved": "Salvo",
-      "languageDescription": "Escolha o idioma do seu painel."
+      "languageDescription": "Escolha o idioma do seu painel.",
+      "eyebrow": "Conta",
+      "subtitle": "Gerencie seu perfil, segurança, plano e detalhes de faturamento."
     },
     "goals": {
       "title": "Metas",
@@ -471,6 +500,61 @@
       "estimated": "Est.",
       "aiAdvisor": "Consultor IA",
       "footerDisclaimer": "Acesso somente leitura · Dados com 15 min de atraso"
+    },
+    "holdings": {
+      "eyebrow": "Portfólio",
+      "title": "Visão geral do portfólio",
+      "subtitle": "Posições consolidadas em todas as corretoras conectadas.",
+      "currentMarketValue": "Valor de mercado atual",
+      "trailing12moYield": "Renda 12 meses ÷ valor",
+      "waitingLivePrices": "Aguardando preços ao vivo",
+      "todaysChange": "Variação de hoje",
+      "vsYesterday": "% vs ontem"
+    },
+    "upcoming": {
+      "eyebrow": "Próximos",
+      "title": "Próximos pagamentos",
+      "subtitle": "Todos os pagamentos de dividendos agendados e projetados em suas corretoras conectadas.",
+      "addHoldingPrompt": "Adicione um ativo para ver os próximos pagamentos de dividendos."
+    },
+    "watchlist": {
+      "eyebrow": "Mercados",
+      "title": "Lista de acompanhamento",
+      "subtitle": "Monitore a ação do preço, yield e próximas datas ex-dividendo antes de comprar."
+    },
+    "diversification": {
+      "eyebrow": "Alocação",
+      "title": "Alocação do portfólio",
+      "subtitle": "Como seu capital está distribuído entre setores, classes de ativos e corretoras.",
+      "addHoldingPrompt": "Adicione um ativo para ver como seu portfólio está distribuído.",
+      "sectorAllocation": "Alocação por setor",
+      "sectorHoverHint": "Passe o mouse sobre uma fatia ou uma linha da legenda",
+      "assetClassBreakdown": "Distribuição por classe de ativo",
+      "assetWeightHint": "Peso por tipo de instrumento",
+      "sectorDetailHint": "Detalhe por peso dos ativos",
+      "colSector": "Setor",
+      "colWeight": "Peso",
+      "colValue": "Valor",
+      "brokerAllocation": "Alocação por corretora",
+      "brokerSubtitle": "Custódia de capital nas corretoras conectadas",
+      "colBroker": "Corretora"
+    },
+    "collections": {
+      "eyebrow": "Descobrir",
+      "title": "Coleções",
+      "subtitle": "Agrupamentos curados de pagadores de dividendos, com preços ao vivo e yield histórico.",
+      "emptyNone": "Nenhuma coleção curada ainda.",
+      "emptySector": "Nenhuma coleção neste setor.",
+      "viewAll": "Ver todas →"
+    },
+    "etfExplorer": {
+      "eyebrow": "Descobrir",
+      "title": "Explorador de ETFs",
+      "subtitle": "ETFs e REITs de dividendos curados — navegue por frequência de pagamento, compare lado a lado ou calcule sua renda anual esperada.",
+      "payFrequency": "Frequência de pagamento:",
+      "monthly": "Mensal",
+      "weekly": "Semanal",
+      "quarterly": "Trimestral"
     }
   },
   "notifications": {
