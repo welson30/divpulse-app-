@@ -65,10 +65,17 @@ export async function POST(request: NextRequest) {
 
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
-      const subscription = event.data.object as Stripe.Subscription;
-      const userId = subscription.metadata?.supabase_user_id ?? (await lookupUserIdByCustomer(supabase, subscription.customer));
+      const eventSub = event.data.object as Stripe.Subscription;
+      const userId = eventSub.metadata?.supabase_user_id ?? (await lookupUserIdByCustomer(supabase, eventSub.customer));
       if (!userId) break;
 
+      // Re-fetch the subscription from Stripe so we always have the latest
+      // price IDs — Portal upgrades (Pro→Pro+) emit updated before the item
+      // swap is fully reflected in the event payload, which caused plan to
+      // stay at the old value. A fresh retrieve is the authoritative source.
+      const subscription = await stripe.subscriptions.retrieve(eventSub.id, {
+        expand: ["items.data.price"],
+      });
       await syncSubscription(supabase, userId, subscription);
       break;
     }
