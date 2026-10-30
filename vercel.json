@@ -1,1 +1,8 @@
-{}
+{
+  "crons": [
+    {
+      "path": "/api/jobs/detect-dividends",
+      "schedule": "0 15 * * *"
+    }
+  ]
+}
