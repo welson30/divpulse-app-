@@ -3,6 +3,10 @@
     {
       "path": "/api/jobs/detect-dividends",
       "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/jobs/sync-plaid-holdings",
+      "schedule": "30 14 * * *"
     }
   ]
 }
