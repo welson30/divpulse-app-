@@ -222,13 +222,25 @@ export async function GET(request: NextRequest) {
           const { data: planRow } = await supabase.from("profiles").select("plan").eq("id", holding.user_id).single();
           const isPro = planRow?.plan === "pro" || planRow?.plan === "pro_plus";
 
+          // notification_style and language are queried separately for the same
+          // reason plan is split from notification_style above: PostgREST
+          // returns an error for the *entire* row when any requested column
+          // doesn't exist yet. Splitting them means a not-yet-applied
+          // migration (e.g. adding the language column) only loses that
+          // feature's default, never breaks the notification_style next to it.
           const { data: styleRow } = await supabase
             .from("profiles")
-            .select("notification_style, language")
+            .select("notification_style")
             .eq("id", holding.user_id)
             .single();
           const notificationStyle = (styleRow?.notification_style as NotificationStyle) ?? "compact";
-          const locale = (styleRow?.language as NotificationLocale) ?? "en";
+
+          const { data: langRow } = await supabase
+            .from("profiles")
+            .select("language")
+            .eq("id", holding.user_id)
+            .single();
+          const locale = (langRow?.language as NotificationLocale) ?? "en";
 
           // Only ever true for Pro+ users with an active Plaid connection —
           // see lib/notifications/plaid-confirmation.ts. buildNotificationContent
