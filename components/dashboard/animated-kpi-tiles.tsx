@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 
 type KPI = { label: string; value: string; sub: string; valueClass: string };
 
-// One accent color per tile slot — green · blue · violet · gold
+// All tile slots use the same green accent for a consistent, professional look
 const ACCENTS = [
-  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)",  bg: "rgba(63,191,135,0.07)",  shadow: "0 0 32px rgba(63,191,135,0.15)"  },
-  { hex: "#60a5fa", glow: "rgba(96,165,250,0.55)",  bg: "rgba(96,165,250,0.07)",  shadow: "0 0 32px rgba(96,165,250,0.15)"  },
-  { hex: "#a78bfa", glow: "rgba(167,139,250,0.55)", bg: "rgba(167,139,250,0.07)", shadow: "0 0 32px rgba(167,139,250,0.15)" },
-  { hex: "#f59e0b", glow: "rgba(245,158,11,0.55)",  bg: "rgba(245,158,11,0.07)",  shadow: "0 0 32px rgba(245,158,11,0.15)"  },
+  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)", bg: "rgba(63,191,135,0.07)", shadow: "0 0 32px rgba(63,191,135,0.15)" },
+  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)", bg: "rgba(63,191,135,0.07)", shadow: "0 0 32px rgba(63,191,135,0.15)" },
+  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)", bg: "rgba(63,191,135,0.07)", shadow: "0 0 32px rgba(63,191,135,0.15)" },
+  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)", bg: "rgba(63,191,135,0.07)", shadow: "0 0 32px rgba(63,191,135,0.15)" },
 ];
 
 function extractNumber(value: string): number | null {

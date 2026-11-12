@@ -217,19 +217,19 @@ export default async function DashboardPage() {
       label: tc("monthlyIncome"),
       value: formatMoney(income.monthly),
       sub: tc("trailing12MonthAvg"),
-      valueClass: "text-[#f2f4f7]",
+      valueClass: "text-[#3fbf87]",
     },
     {
       label: tc("annualIncome"),
       value: formatMoney(annualIncome, true),
       sub: tc("trailing12Months"),
-      valueClass: "text-[#f2f4f7]",
+      valueClass: "text-[#3fbf87]",
     },
     {
       label: tc("portfolioYield"),
       value: `${avgYieldPct.toFixed(2)}%`,
       sub: tc("weightedAverage"),
-      valueClass: "text-[#f2f4f7]",
+      valueClass: "text-[#3fbf87]",
     },
   ];
 
