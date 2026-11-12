@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 
 // Self-hosted via next/font (build-time fetch + preload) in place of the
 // blocking Google Fonts @import used in Design-System/colors_and_type.css —
@@ -104,6 +105,7 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
+        <MetaPixel />
       </body>
     </html>
   );

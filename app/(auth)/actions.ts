@@ -46,7 +46,7 @@ export async function signUpWithPassword(_prevState: AuthActionState, formData: 
   }
 
   if (data.session) {
-    redirect("/onboarding");
+    redirect("/onboarding?new=1");
   }
 
   redirect("/signup/check-email");
