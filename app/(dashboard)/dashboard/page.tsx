@@ -211,7 +211,7 @@ export default async function DashboardPage() {
         portfolioDayChangePct != null
           ? `${portfolioDayChangePct >= 0 ? "+" : ""}${portfolioDayChangePct.toFixed(2)}% ${tc("today")}`
           : tc("noChangeData"),
-      valueClass: "text-[#3fbf87]",
+      valueClass: "text-[#e8eaf0]",
       subClass:
         portfolioDayChangePct == null
           ? "text-[#3d4554]"

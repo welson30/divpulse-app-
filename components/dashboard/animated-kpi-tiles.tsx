@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 
 type KPI = { label: string; value: string; sub: string; valueClass: string; subClass?: string };
 
-// All tile slots use the same green accent for a consistent, professional look
+// Portfolio Value is white (capital invested — neutral); income/yield tiles are green (earnings)
 const ACCENTS = [
-  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)", bg: "rgba(63,191,135,0.07)", shadow: "0 0 32px rgba(63,191,135,0.15)" },
-  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)", bg: "rgba(63,191,135,0.07)", shadow: "0 0 32px rgba(63,191,135,0.15)" },
-  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)", bg: "rgba(63,191,135,0.07)", shadow: "0 0 32px rgba(63,191,135,0.15)" },
-  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)", bg: "rgba(63,191,135,0.07)", shadow: "0 0 32px rgba(63,191,135,0.15)" },
+  { hex: "#e8eaf0", glow: "rgba(232,234,240,0.35)", bg: "rgba(232,234,240,0.04)", shadow: "0 0 32px rgba(232,234,240,0.08)" },
+  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)",  bg: "rgba(63,191,135,0.07)",  shadow: "0 0 32px rgba(63,191,135,0.15)"  },
+  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)",  bg: "rgba(63,191,135,0.07)",  shadow: "0 0 32px rgba(63,191,135,0.15)"  },
+  { hex: "#3fbf87", glow: "rgba(63,191,135,0.55)",  bg: "rgba(63,191,135,0.07)",  shadow: "0 0 32px rgba(63,191,135,0.15)"  },
 ];
 
 function extractNumber(value: string): number | null {
