@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { SignInAside } from "@/components/auth/sign-in-aside";
 import { OnboardingWelcome } from "@/components/auth/onboarding-welcome";
 import { createClient } from "@/lib/supabase/server";
+import { TrackRegistration } from "@/components/analytics/meta-pixel";
 
 export const metadata: Metadata = {
   title: "Welcome — PaidPrime",
@@ -39,6 +40,7 @@ export default async function OnboardingPage() {
 
   return (
     <div className="pp-landing grid min-h-dvh bg-[#0b0c0e] min-[1024px]:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+      <TrackRegistration />
       <SignInAside />
 
       <main className="relative flex flex-col items-center justify-center px-5 py-10 sm:px-8 sm:py-14 min-[1024px]:px-10">
