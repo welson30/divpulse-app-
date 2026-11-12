@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type KPI = { label: string; value: string; sub: string; valueClass: string };
+type KPI = { label: string; value: string; sub: string; valueClass: string; subClass?: string };
 
 // All tile slots use the same green accent for a consistent, professional look
 const ACCENTS = [
@@ -23,7 +23,8 @@ function reformat(original: string, progress: number): string {
   if (raw === null) return original;
   const current = raw * progress;
   if (original.startsWith("$")) {
-    if (original.endsWith("k") || raw >= 1000) return `$${(current / 1000).toFixed(1)}k`;
+    // Only abbreviate to "k" if the original value already ends in "k" — never force it
+    if (original.endsWith("k")) return `$${(current / 1000).toFixed(1)}k`;
     if (original.includes(".")) {
       const decimals = original.split(".")[1]?.replace(/[^0-9]/g, "").length ?? 2;
       return `$${current.toFixed(Math.min(decimals, 2))}`;
@@ -117,7 +118,7 @@ export function AnimatedKpiTiles({ kpis }: { kpis: KPI[] }) {
             <AnimatedValue value={kpi.value} hex={accent.hex} glow={accent.glow} />
 
             {/* Sub */}
-            <p className="relative z-[1] text-[11px] leading-[1.6] tracking-[-0.1px] text-[#3d4554]">
+            <p className={`relative z-[1] text-[11px] leading-[1.6] tracking-[-0.1px] ${kpi.subClass ?? "text-[#3d4554]"}`}>
               {kpi.sub}
             </p>
 

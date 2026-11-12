@@ -212,6 +212,12 @@ export default async function DashboardPage() {
           ? `${portfolioDayChangePct >= 0 ? "+" : ""}${portfolioDayChangePct.toFixed(2)}% ${tc("today")}`
           : tc("noChangeData"),
       valueClass: "text-[#3fbf87]",
+      subClass:
+        portfolioDayChangePct == null
+          ? "text-[#3d4554]"
+          : portfolioDayChangePct >= 0
+            ? "text-[#3fbf87]"
+            : "text-[#d8695f]",
     },
     {
       label: tc("monthlyIncome"),
