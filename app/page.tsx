@@ -19,7 +19,7 @@ import { WaitlistSection } from "@/components/marketing/waitlist-section";
 import { WatchlistSection } from "@/components/marketing/watchlist-section";
 
 export const metadata: Metadata = {
-  title: "PaidPrime — Know the moment you're paid",
+  title: "PaidPrime — Get a heads-up every payday",
 };
 
 /**

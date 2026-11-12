@@ -53,13 +53,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "PaidPrime — Know the moment you're paid",
+  title: "PaidPrime — Get a heads-up every payday",
   description:
-    "Real-time dividend alerts by push, Telegram, and email — the moment a payment lands, before your broker's app tells you. Track holdings, payment calendars, and income goals. Free for 5 assets.",
+    "Dividend alerts by push, Telegram and email on payday, plus upcoming payments, income goals and a running total across every account. Free for 5 holdings.",
   openGraph: {
-    title: "PaidPrime — Know the moment you're paid",
+    title: "PaidPrime — Get a heads-up every payday",
     description:
-      "Real-time dividend alerts by push, Telegram, and email — before your broker's app tells you.",
+      "Dividend alerts on payday, upcoming payments and a running total across every account.",
     url: siteUrl,
     siteName: "PaidPrime",
     type: "website",

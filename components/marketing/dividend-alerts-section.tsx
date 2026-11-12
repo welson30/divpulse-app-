@@ -7,12 +7,12 @@ const CHANNELS = [
     titleKey: "push",
     subtitleKey: "pushHint",
     title: "Push",
-    subtitle: "iOS & Android · instant",
+    subtitle: "iOS & Android · on payday",
     icon: "/marketing/alerts/push.svg",
     amount: 61.2,
     ticker: "JEPI",
     name: "JPMorgan Equity Premium",
-    footer: "Paid by Fidelity · 9:02 AM",
+    footer: "Payday · 10:02 AM",
   },
   {
     title: "Telegram",
@@ -21,7 +21,7 @@ const CHANNELS = [
     amount: 18.44,
     ticker: "O",
     name: "Realty Income",
-    footer: "Paid by Schwab · 9:04 AM",
+    footer: "Payday · 10:02 AM",
   },
   {
     title: "Email",
@@ -30,7 +30,7 @@ const CHANNELS = [
     amount: 94.1,
     ticker: "SCHD",
     name: "Schwab US Dividend Equity",
-    footer: "Paid by Schwab · 8:41 AM",
+    footer: "Payday · 10:02 AM",
   },
 ] as const;
 

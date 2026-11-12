@@ -18,17 +18,17 @@ export function WaitlistSection() {
             id="cta-heading"
             className="pp-display m-0 w-full text-[clamp(30px,6vw,60.5px)] font-semibold leading-[1.08] tracking-[-0.04em] text-[#f2f4f7] min-[1200px]:text-[60.5px] min-[1200px]:leading-[63.5px] min-[1200px]:tracking-[-2.298px]"
           >
-            Know the moment you get
+            Get a heads-up
             <br className="hidden min-[1200px]:block" />{" "}
-            paid.
+            every payday.
           </h2>
 
           <p className="m-0 max-w-[480px] pt-1 text-[17px] leading-[1.55] font-normal text-[#99a1ac] sm:text-[20px] min-[1200px]:max-w-[520px] min-[1200px]:text-[21.6px] min-[1200px]:leading-[34.56px]">
-            Join the waitlist and get real-time dividend alerts, a
+            Start free with 5 holdings: payday alerts, a
             <br className="hidden min-[1200px]:block" />{" "}
-            dividend calendar and AI-driven insights the day
+            dividend calendar and a running total of your
             <br className="hidden min-[1200px]:block" />{" "}
-            PaidPrime opens up your invite.
+            dividend income.
           </p>
 
           <form
