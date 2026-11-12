@@ -26,9 +26,9 @@ const STAT_CONFIG = [
     iconBg: "bg-[#16233d]",
   },
   {
-    end: 60,
-    prefix: "< ",
-    suffix: "s",
+    end: 5,
+    prefix: "",
+    suffix: "",
     commas: false,
     labelKey: "latency" as const,
     hintKey: "latencyHint" as const,

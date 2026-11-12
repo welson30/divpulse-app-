@@ -20,7 +20,7 @@
     "title1": "Seu dinheiro trabalha.",
     "title2": "A PaidPrime mantém",
     "title3": "você informado.",
-    "description": "Tudo que você precisa para construir riqueza em uma plataforma inteligente. Acompanhe seu portfólio, monitore renda passiva, receba alertas de dividendos em tempo real e obtenha insights personalizados de IA — para você focar no que realmente importa.",
+    "description": "Tudo que você precisa para construir riqueza em uma plataforma inteligente. Acompanhe seu portfólio, monitore renda passiva, receba um aviso em todo dia de pagamento e obtenha insights personalizados de IA — para você focar no que realmente importa.",
     "pills": {
       "portfolioTracking": "Monitoramento de Portfólio",
       "dividendAlerts": "Alertas de Dividendos",
@@ -34,8 +34,8 @@
       "tickersHint": "Monitoradas no mercado americano",
       "brokers": "Brokers suportados",
       "brokersHint": "Sincronização somente leitura",
-      "latency": "Latência de alerta",
-      "latencyHint": "Do pagamento à notificação",
+      "latency": "Ativos grátis",
+      "latencyHint": "Sem cartão",
       "readOnly": "Acesso somente leitura",
       "readOnlyHint": "A PaidPrime nunca toca no seu dinheiro"
     }
@@ -53,7 +53,7 @@
       "smartWatchlists": "Listas de Observação Inteligentes",
       "aiAdvisor": "Assistente IA",
       "dividendCalendar": "Calendário de Dividendos",
-      "realTimeAlerts": "Alertas em Tempo Real"
+      "realTimeAlerts": "Alertas no Dia do Pagamento"
     }
   },
   "productTabs": {
@@ -94,13 +94,13 @@
     }
   },
   "dividendAlerts": {
-    "eyebrow": "Alertas de dividendos em tempo real",
-    "title": "Seu broker nunca te avisa no momento em que você recebe. A PaidPrime avisa.",
-    "description": "Receba notificações push instantâneas, alertas no Telegram ou por e-mail no momento em que um pagamento de dividendo é detectado — para você ser sempre o primeiro a saber.",
+    "eyebrow": "Alertas no dia do pagamento",
+    "title": "Sua corretora registra o pagamento. A PaidPrime te avisa em todo dia de pagamento.",
+    "description": "Receba uma notificação push, mensagem no Telegram ou e-mail no dia em que o dividendo é pago, e acompanhe o total da sua renda com dividendos em todas as contas.",
     "channels": {
       "push": "Push",
-      "pushHint": "iOS & Android · instantâneo",
-      "pushSubtitle": "Alertas instantâneos direto no seu celular",
+      "pushHint": "iOS & Android · no dia do pagamento",
+      "pushSubtitle": "Avisos no dia do pagamento direto no seu celular",
       "telegram": "Telegram",
       "telegramHint": "Mensagem privada pelo bot",
       "telegramSubtitle": "Mensagem privada via seu bot no Telegram",
@@ -225,7 +225,7 @@
     },
     "features": {
       "trackedHoldings": "Ativos monitorados",
-      "realTimeAlerts": "Alertas de pagamento em tempo real",
+      "realTimeAlerts": "Alertas no dia do pagamento",
       "dividendCalendar": "Calendário de dividendos",
       "watchlist": "Lista de observação",
       "analytics": "Análises",
@@ -254,7 +254,7 @@
       "q4": "Posso mudar meu canal de notificação?",
       "a4": "Sim. Troque entre push, Telegram e e-mail a qualquer momento nas preferências da sua conta — qualquer combinação que quiser.",
       "q5": "Existe um plano gratuito?",
-      "a5": "Sim. O plano Grátis inclui até 5 ativos monitorados, alertas de pagamento em tempo real, o calendário de dividendos e uma lista de observação com 3 tickers. Sem necessidade de cartão.",
+      "a5": "Sim. O plano Grátis inclui até 5 ativos monitorados, alertas no dia do pagamento, o calendário de dividendos e uma lista de observação com 3 tickers. Sem necessidade de cartão.",
       "q6": "Como ativo as notificações push?",
       "a6": "As notificações push são ativadas automaticamente quando você faz login pela primeira vez. Seu navegador pedirá permissão — clique em \"Permitir\". No iPhone, abra a PaidPrime no Safari, toque no ícone Compartilhar e depois em \"Adicionar à Tela de Início\" para ativar as notificações. No Android, use o Chrome e toque em \"Adicionar à Tela de Início\" quando solicitado.",
       "q7": "Posso usar a PaidPrime como um app no celular?",
@@ -268,7 +268,7 @@
     }
   },
   "footer": {
-    "description": "Alertas de dividendos em tempo real e inteligência de portfólio para investidores de renda. Feito para quem se importa com cada pagamento.",
+    "description": "Alertas de dividendos no dia do pagamento e inteligência de portfólio para investidores de renda. Feito para quem se importa com cada pagamento.",
     "copyright": "© 2026 PaidPrime. Todos os direitos reservados.",
     "disclaimer": "Não é aconselhamento de investimento. A PaidPrime não custodia ativos nem executa operações.",
     "columns": {

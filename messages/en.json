@@ -20,7 +20,7 @@
     "title1": "Your money works.",
     "title2": "PaidPrime keeps",
     "title3": "you informed.",
-    "description": "Everything you need to build wealth in one intelligent platform. Track your portfolio, monitor passive income, receive real-time dividend alerts, and get personalized AI insights—so you can focus on what matters most.",
+    "description": "Everything you need to build wealth in one intelligent platform. Track your portfolio, monitor passive income, get a heads-up every payday, and get personalized AI insights—so you can focus on what matters most.",
     "pills": {
       "portfolioTracking": "Portfolio Tracking",
       "dividendAlerts": "Dividend Alerts",
@@ -34,8 +34,8 @@
       "tickersHint": "Tracked across US markets",
       "brokers": "Brokers supported",
       "brokersHint": "Read-only, bank-grade sync",
-      "latency": "Alert latency",
-      "latencyHint": "From payment to notification",
+      "latency": "Holdings free",
+      "latencyHint": "No card required",
       "readOnly": "Read-only access",
       "readOnlyHint": "PaidPrime never touches your funds"
     }
@@ -53,7 +53,7 @@
       "smartWatchlists": "Smart Watchlists",
       "aiAdvisor": "AI Advisor",
       "dividendCalendar": "Dividend Calendar",
-      "realTimeAlerts": "Real-Time Alerts"
+      "realTimeAlerts": "Payday Alerts"
     }
   },
   "productTabs": {
@@ -94,13 +94,13 @@
     }
   },
   "dividendAlerts": {
-    "eyebrow": "Real-time dividend alerts",
-    "title": "Your broker never tells you the moment you get paid. PaidPrime does.",
-    "description": "Receive instant push notifications, Telegram, or email alerts the moment a dividend payment is detected—so you're always the first to know.",
+    "eyebrow": "Payday dividend alerts",
+    "title": "Your broker records the payment. PaidPrime gives you a heads-up every payday.",
+    "description": "Get a push notification, Telegram message or email on the day a dividend is paid, plus a running total of your dividend income across every account.",
     "channels": {
       "push": "Push",
-      "pushHint": "iOS & Android · instant",
-      "pushSubtitle": "Instant alerts straight to your phone",
+      "pushHint": "iOS & Android · on payday",
+      "pushSubtitle": "Payday alerts straight to your phone",
       "telegram": "Telegram",
       "telegramHint": "Private bot message",
       "telegramSubtitle": "Private message via your Telegram bot",
@@ -117,7 +117,7 @@
     "trustItems": {
       "readOnly": "Read-only access",
       "encryption": "Bank-grade encryption",
-      "sync": "Sub-minute sync"
+      "sync": "Daily sync"
     }
   },
   "notificationTemplates": {
@@ -225,7 +225,7 @@
     },
     "features": {
       "trackedHoldings": "Tracked holdings",
-      "realTimeAlerts": "Real-time payment alerts",
+      "realTimeAlerts": "Payday dividend alerts",
       "dividendCalendar": "Dividend calendar",
       "watchlist": "Watchlist",
       "analytics": "Analytics",
@@ -254,7 +254,7 @@
       "q4": "Can I change my notification channel?",
       "a4": "Yes. Switch between push, Telegram and email anytime from your account preferences — any combination you want.",
       "q5": "Is there a free plan?",
-      "a5": "Yes. Free includes up to 5 tracked holdings, real-time payment alerts, the dividend calendar and a 3-ticker watchlist. No card required.",
+      "a5": "Yes. Free includes up to 5 tracked holdings, payday alerts, the dividend calendar and a 3-ticker watchlist. No card required.",
       "q6": "How do I enable push notifications?",
       "a6": "Push notifications are enabled automatically when you first sign in. Your browser will ask for permission — just click \"Allow.\" On iPhone, open PaidPrime in Safari, tap the Share icon, then \"Add to Home Screen\" to enable notifications. On Android, use Chrome and tap \"Add to Home Screen\" when prompted.",
       "q7": "Can I use PaidPrime like an app on my phone?",
@@ -268,7 +268,7 @@
     }
   },
   "footer": {
-    "description": "Real-time dividend alerts and portfolio intelligence for income investors. Built for people who care about every payment.",
+    "description": "Payday dividend alerts and portfolio intelligence for income investors. Built for people who care about every payment.",
     "copyright": "© 2026 PaidPrime. All rights reserved.",
     "disclaimer": "Not investment advice. PaidPrime does not custody assets or execute trades.",
     "columns": {
@@ -511,7 +511,7 @@
       "telegramProOnly": "Pro only",
       "telegramConnected": "Connected",
       "telegramDisconnect": "Disconnect",
-      "telegramDescConnect": "Get a Telegram message the moment a dividend is detected.",
+      "telegramDescConnect": "Get a Telegram message on the day a dividend is paid.",
       "telegramOpening": "Opening…",
       "telegramConnect": "Connect Telegram",
       "profileTitle": "Profile",
