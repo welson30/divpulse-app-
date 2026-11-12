@@ -125,16 +125,14 @@ export async function SiteFooter() {
               {/* Social links */}
               <div className="flex items-center gap-3 pt-1">
                 <a
-                  href="https://www.instagram.com/paid.prime"
+                  href="https://www.facebook.com/profile.php?id=61595620273954"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="PaidPrime on Instagram"
-                  className="group flex size-9 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#0f1117] text-[#6c737f] transition-all hover:border-[rgba(168,85,247,0.4)] hover:bg-[rgba(168,85,247,0.08)] hover:text-[#c084fc]"
+                  aria-label="PaidPrime on Facebook"
+                  className="group flex size-9 items-center justify-center rounded-[10px] border border-[#22262c] bg-[#0f1117] text-[#6c737f] transition-all hover:border-[rgba(76,130,247,0.4)] hover:bg-[rgba(76,130,247,0.08)] hover:text-[#7aa2f7]"
                 >
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                    <circle cx="12" cy="12" r="5" />
-                    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.8c0-.9.3-1.6 1.6-1.6h1.7V4.3c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.1v2.5H7.7V14h2.7v8h3.1z" />
                   </svg>
                 </a>
               </div>
