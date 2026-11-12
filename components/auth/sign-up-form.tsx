@@ -182,11 +182,11 @@ export function SignUpForm({ oauthError }: SignUpFormProps) {
           </span>
           <span>
             {t("agreeTerms")}{" "}
-            <Link href="#" className="text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]">
+            <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]">
               {t("termsOfService")}
             </Link>{" "}
             {t("and")}{" "}
-            <Link href="#" className="text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]">
+            <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#f2f4f7] underline decoration-[#2e343b] underline-offset-2 hover:decoration-[#4c82f7]">
               {t("privacyPolicy")}
             </Link>
             .
